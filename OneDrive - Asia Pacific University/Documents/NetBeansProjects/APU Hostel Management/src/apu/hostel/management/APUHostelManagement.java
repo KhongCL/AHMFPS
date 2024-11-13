@@ -1,50 +1,132 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Main.java to edit this template
- */
 package apu.hostel.management;
+
 import java.util.Scanner;
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
 
-/**
- *
- * @author KCL
- */
 public class APUHostelManagement {
 
     public static void main(String[] args) {
+        
         Scanner scanner = new Scanner(System.in);
-        System.out.println("Welcome to APU Hostel Management Fees Payment System (AHMFPS)");
-        System.out.println("Please login to continue:");
+        SwingUtilities.invokeLater(() -> {
+            JFrame welcomeFrame = new JFrame("Welcome to APU Hostel Management");
+            welcomeFrame.setSize(400, 200);
+            welcomeFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            welcomeFrame.setLocationRelativeTo(null);
 
-        System.out.print("Enter username: ");
-        String username = scanner.nextLine();
-        System.out.print("Enter password: ");
-        String password = scanner.nextLine();
+            JPanel panel = new JPanel();
+            welcomeFrame.add(panel);
+            placeWelcomeComponents(panel, welcomeFrame);
 
-        User user = null;
-        try {
-            user = User.loadFromFile(username, password);
-        } catch (IOException e) {
-            System.out.println("Error reading user data: " + e.getMessage());
-        }
+            welcomeFrame.setVisible(true);
+        });
+    }
 
-        if (user == null) {
-            System.out.println("Invalid login credentials");
-            return;
-        }
+    private static void placeWelcomeComponents(JPanel panel, JFrame welcomeFrame) {
+        panel.setLayout(null);
 
-        while (true) {
-            user.displayMenu();
-            System.out.println("Enter your choice:");
-            int choice = scanner.nextInt();
-            scanner.nextLine(); // Consume newline
+        JLabel welcomeLabel = new JLabel("Welcome to APU Hostel Management");
+        welcomeLabel.setBounds(50, 20, 300, 25);
+        panel.add(welcomeLabel);
 
-            // Implement menu handling logic here based on user role and choice
-        }
+        JButton managerButton = new JButton("Manager");
+        managerButton.setBounds(50, 60, 100, 25);
+        panel.add(managerButton);
+
+        JButton residentButton = new JButton("Resident");
+        residentButton.setBounds(150, 60, 100, 25);
+        panel.add(residentButton);
+
+        JButton staffButton = new JButton("Staff");
+        staffButton.setBounds(250, 60, 100, 25);
+        panel.add(staffButton);
+
+        managerButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                welcomeFrame.dispose();
+                showLoginFrame("Manager");
+            }
+        });
+
+        residentButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                welcomeFrame.dispose();
+                showLoginFrame("Resident");
+            }
+        });
+
+        staffButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                welcomeFrame.dispose();
+                showLoginFrame("Staff");
+            }
+        });
+    }
+
+    private static void showLoginFrame(String userType) {
+        JFrame loginFrame = new JFrame(userType + " Login");
+        loginFrame.setSize(300, 150);
+        loginFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        loginFrame.setLocationRelativeTo(null);
+
+        JPanel panel = new JPanel();
+        loginFrame.add(panel);
+        placeLoginComponents(panel, loginFrame, userType);
+
+        loginFrame.setVisible(true);
+    }
+
+    private static void placeLoginComponents(JPanel panel, JFrame loginFrame, String userType) {
+        panel.setLayout(null);
+
+        JLabel userLabel = new JLabel("Username:");
+        userLabel.setBounds(10, 20, 80, 25);
+        panel.add(userLabel);
+
+        JTextField userText = new JTextField(20);
+        userText.setBounds(100, 20, 165, 25);
+        panel.add(userText);
+
+        JLabel passwordLabel = new JLabel("Password:");
+        passwordLabel.setBounds(10, 50, 80, 25);
+        panel.add(passwordLabel);
+
+        JPasswordField passwordText = new JPasswordField(20);
+        passwordText.setBounds(100, 50, 165, 25);
+        panel.add(passwordText);
+
+        JButton loginButton = new JButton("Login");
+        loginButton.setBounds(10, 80, 80, 25);
+        panel.add(loginButton);
+
+        loginButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String username = userText.getText();
+                String password = new String(passwordText.getPassword());
+
+                User user = null;
+                try {
+                    user = User.loadFromFile(username, password);
+                } catch (IOException ex) {
+                    JOptionPane.showMessageDialog(loginFrame, "Error reading user data: " + ex.getMessage());
+                }
+
+                if (user == null) {
+                    JOptionPane.showMessageDialog(loginFrame, "Invalid login credentials");
+                } else {
+                    loginFrame.dispose();
+                    new ResidentMenu(user).setVisible(true);
+                }
+            }
+        });
     }
 
     // User class
@@ -446,14 +528,6 @@ public class APUHostelManagement {
             panel.add(loginButton);
         }
 
-        public static void main(String[] args) {
-            SwingUtilities.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    new LoginScreen().setVisible(true);
-                    System.out.println("Testing 123");
-                }
-            });
-        }
+        
     }
 }
