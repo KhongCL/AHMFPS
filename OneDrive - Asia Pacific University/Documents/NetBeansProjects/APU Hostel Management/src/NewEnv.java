@@ -92,6 +92,7 @@ public class NewEnv {
             return null;
         }
     }
+    
 
     // Manager class
     public static class Manager extends User {
@@ -438,6 +439,7 @@ public class NewEnv {
                 @Override
                 public void run() {
                     new LoginScreen().setVisible(true);
+                    System.out.println("Testing 123");
                 }
             });
         }
