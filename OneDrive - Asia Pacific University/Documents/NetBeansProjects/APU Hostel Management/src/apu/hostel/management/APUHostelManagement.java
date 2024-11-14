@@ -272,8 +272,20 @@ public class APUHostelManagement {
                 break;
             case 2:
                 System.out.println("You have chosen Staff.");
-                // Proceed with Staff-specific logic
-                break;
+                System.out.println("1. Register");
+                System.out.println("2. Login");
+                System.out.print("Enter your choice (1-2): ");
+                int staffChoice = scanner.nextInt();
+                scanner.nextLine(); // Consume newline
+                if (staffChoice == 1) {
+                    registerStaff();
+                } else if (staffChoice == 2) {
+                    loginStaff();
+                } else {
+                    System.out.println("Invalid choice. Please try again.");
+                    displayWelcomePage(); // Recursively call to retry
+                }
+                    break;
             case 3:
                 System.out.println("You have chosen Resident.");
                 // Proceed with Resident-specific logic
@@ -319,6 +331,46 @@ public class APUHostelManagement {
             } else {
                 System.out.println("Invalid username or password.");
                 loginManager(); // Retry login
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Method to handle Staff registration
+    public static void registerStaff() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Enter username: ");
+        String username = scanner.nextLine();
+        System.out.print("Enter password: ");
+        String password = scanner.nextLine();
+
+        try {
+            User staff = new Staff(username, password);
+            staff.saveToFile();
+            System.out.println("Staff registered successfully.");
+            displayWelcomePage();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Method to handle Staff login
+    public static void loginStaff() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Enter username: ");
+        String username = scanner.nextLine();
+        System.out.print("Enter password: ");
+        String password = scanner.nextLine();
+
+        try {
+            User user = User.loadFromFile(username, password);
+            if (user != null && user.getRole().equals("Staff")) {
+                System.out.println("Login successful.");
+                user.displayMenu();
+            } else {
+                System.out.println("Invalid username or password.");
+                loginStaff(); // Retry login
             }
         } catch (IOException e) {
             e.printStackTrace();
