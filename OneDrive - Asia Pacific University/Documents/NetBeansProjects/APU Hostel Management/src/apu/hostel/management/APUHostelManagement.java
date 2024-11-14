@@ -66,6 +66,45 @@ public class APUHostelManagement {
         @Override
         public void displayMenu() {
             // Manager-specific menu implementation
+            // Manager-specific menu implementation
+            System.out.println("Manager Menu:");
+            System.out.println("1. Approve User Registration");
+            System.out.println("2. Search User");
+            System.out.println("3. Update User");
+            System.out.println("4. Delete User");
+            System.out.println("5. Fix/Update Rate");
+            System.out.println("6. Logout");
+            System.out.print("Enter your choice: ");
+
+            Scanner scanner = new Scanner(System.in);
+            int choice = scanner.nextInt();
+            scanner.nextLine(); // Consume newline
+
+            switch (choice) {
+                case 1:
+                    // Approve User Registration logic
+                    break;
+                case 2:
+                    // Search User logic
+                    break;
+                case 3:
+                    // Update User logic
+                    break;
+                case 4:
+                    // Delete User logic
+                    break;
+                case 5:
+                    // Fix/Update Rate logic
+                    break;
+                case 6:
+                    System.out.println("Logging out...");
+                    APUHostelManagement.displayWelcomePage();
+                    break;
+                default:
+                    System.out.println("Invalid choice. Please try again.");
+                    displayMenu(); // Recursively call to retry
+                    break;
+            }
         }
 
         public void approveUserRegistration(User user) {
@@ -172,6 +211,7 @@ public class APUHostelManagement {
     }
 
     // Main method to test the backend functionality
+    /* 
     public static void main(String[] args) {
         try {
             // Register a new Staff user
@@ -196,5 +236,97 @@ public class APUHostelManagement {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }*/
+
+
+
+    // Method to display the welcome page
+    public static void displayWelcomePage() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Welcome to APU Hostel Management Fees Payment System (AHMFPS)");
+        System.out.println("Please choose your role:");
+        System.out.println("1. Manager");
+        System.out.println("2. Staff");
+        System.out.println("3. Resident");
+        System.out.print("Enter your choice (1-3): ");
+
+        int choice = scanner.nextInt();
+        scanner.nextLine(); // Consume newline
+
+        switch (choice) {
+            case 1:
+                System.out.println("You have chosen Manager.");
+                System.out.println("1. Register");
+                System.out.println("2. Login");
+                System.out.print("Enter your choice (1-2): ");
+                int managerChoice = scanner.nextInt();
+                scanner.nextLine(); // Consume newline
+                if (managerChoice == 1) {
+                    registerManager();
+                } else if (managerChoice == 2) {
+                    loginManager();
+                } else {
+                    System.out.println("Invalid choice. Please try again.");
+                    displayWelcomePage(); // Recursively call to retry
+                }
+                break;
+            case 2:
+                System.out.println("You have chosen Staff.");
+                // Proceed with Staff-specific logic
+                break;
+            case 3:
+                System.out.println("You have chosen Resident.");
+                // Proceed with Resident-specific logic
+                break;
+            default:
+                System.out.println("Invalid choice. Please try again.");
+                displayWelcomePage(); // Recursively call to retry
+                break;
+        }
+    }
+
+    // Method to handle Manager registration
+    public static void registerManager() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Enter username: ");
+        String username = scanner.nextLine();
+        System.out.print("Enter password: ");
+        String password = scanner.nextLine();
+
+        try {
+            User manager = new Manager(username, password);
+            manager.saveToFile();
+            System.out.println("Manager registered successfully.");
+            displayWelcomePage();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Method to handle Manager login
+    public static void loginManager() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Enter username: ");
+        String username = scanner.nextLine();
+        System.out.print("Enter password: ");
+        String password = scanner.nextLine();
+
+        try {
+            User user = User.loadFromFile(username, password);
+            if (user != null && user.getRole().equals("Manager")) {
+                System.out.println("Login successful.");
+                user.displayMenu();
+            } else {
+                System.out.println("Invalid username or password.");
+                loginManager(); // Retry login
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Main method to launch the application
+    public static void main(String[] args) {
+        displayWelcomePage();
     }
 }
