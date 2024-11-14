@@ -51,7 +51,7 @@ public class APUHostelManagement {
                 String line;
                 while ((line = reader.readLine()) != null) {
                     String[] parts = line.split(",");
-                    if (parts[0].equals(username) && parts[1].equals(password)) {
+                    if (parts.length == 4 && parts[0].equals(username) && parts[1].equals(password)) {
                         User user = null;
                         switch (parts[2]) {
                             case "Manager":
