@@ -1,5 +1,6 @@
 package apu.hostel.management;
 import java.io.*;
+import java.util.*;
 
 public class APUHostelManagement {
     // User abstract class
@@ -66,6 +67,26 @@ public class APUHostelManagement {
         public void displayMenu() {
             // Manager-specific menu implementation
         }
+
+        public void approveUserRegistration(User user) {
+            // Approve user registration logic
+        }
+
+        public void searchUser(String username) {
+            // Search user logic
+        }
+
+        public void updateUser(User user) {
+            // Update user logic
+        }
+
+        public void deleteUser(String username) {
+            // Delete user logic
+        }
+
+        public void fixOrUpdateRate(double rate) {
+            // Fix or update rate logic
+        }
     }
 
     // Staff class
@@ -77,6 +98,22 @@ public class APUHostelManagement {
         @Override
         public void displayMenu() {
             // Staff-specific menu implementation
+        }
+
+        public void registerUser(User user) {
+            // Register user logic
+        }
+
+        public void updateUser(User user) {
+            // Update user logic
+        }
+
+        public void makePayment(Resident resident, double amount) {
+            // Make payment logic
+        }
+
+        public void generateReceipt(Resident resident, double amount) {
+            // Generate receipt logic
         }
     }
 
@@ -90,57 +127,69 @@ public class APUHostelManagement {
         public void displayMenu() {
             // Resident-specific menu implementation
         }
+
+        public void updateDetails() {
+            // Update details logic
+        }
+
+        public void viewPaymentRecords() {
+            // View payment records logic
+        }
     }
 
-    // Implement core functionality for user registration, login, and authentication
-    public static User registerUser(String username, String password, String role) throws IOException {
-        if (!role.equals("Manager")) {
-            User user = null;
-            if (role.equals("Staff")) {
-                user = new Staff(username, password);
-            } else if (role.equals("Resident")) {
-                user = new Resident(username, password);
-            }
+    // Payment class
+    public static class Payment {
+        private String username;
+        private double amount;
+        private Date date;
 
-            if (user != null) {
-                user.saveToFile();
-                System.out.println("Registration successful");
-                return user;
-            }
-        } else {
-            System.out.println("Managers cannot register");
+        public Payment(String username, double amount, Date date) {
+            this.username = username;
+            this.amount = amount;
+            this.date = date;
         }
-        return null;
-    }
 
-    public static User loginUser(String username, String password) throws IOException {
-        User user = User.loadFromFile(username, password);
-        if (user != null) {
-            System.out.println("Login successful");
-            return user;
-        } else {
-            System.out.println("Invalid username or password");
+        public void saveToFile() throws IOException {
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter("payments.txt", true))) {
+                writer.write(username + "," + amount + "," + date);
+                writer.newLine();
+            }
         }
-        return null;
+
+        public static List<Payment> loadFromFile(String username) throws IOException {
+            List<Payment> payments = new ArrayList<>();
+            try (BufferedReader reader = new BufferedReader(new FileReader("payments.txt"))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    String[] parts = line.split(",");
+                    if (parts[0].equals(username)) {
+                        payments.add(new Payment(parts[0], Double.parseDouble(parts[1]), new Date(parts[2])));
+                    }
+                }
+            }
+            return payments;
+        }
     }
 
     // Main method to test the backend functionality
     public static void main(String[] args) {
         try {
             // Register a new Staff user
-            User staff = registerUser("staff1", "password1", "Staff");
+            User staff = new Staff("staff1", "password1");
+            staff.saveToFile();
 
             // Register a new Resident user
-            User resident = registerUser("resident1", "password1", "Resident");
+            User resident = new Resident("resident1", "password1");
+            resident.saveToFile();
 
             // Attempt to login as the Staff user
-            User loggedInUser = loginUser("staff1", "password1");
+            User loggedInUser = User.loadFromFile("staff1", "password1");
             if (loggedInUser != null) {
                 loggedInUser.displayMenu();
             }
 
             // Attempt to login as the Resident user
-            loggedInUser = loginUser("resident1", "password1");
+            loggedInUser = User.loadFromFile("resident1", "password1");
             if (loggedInUser != null) {
                 loggedInUser.displayMenu();
             }
