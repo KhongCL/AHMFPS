@@ -1,12 +1,12 @@
 package apu.hostel.management;
-//show changes
+
 import java.util.Scanner;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
-//hello show difference in git and netbeans
+
 public class APUHostelManagement {
 
     public static void main(String[] args) {
@@ -37,6 +37,21 @@ public class APUHostelManagement {
         managerButton.setBounds(50, 60, 100, 25);
         panel.add(managerButton);
 
+        // Add Home button
+        JButton homeButton = new JButton("Home");
+        homeButton.setBounds(50, 100, 150, 25);
+        panel.add(homeButton);
+
+        // Add action listener for Home button
+        homeButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Define the action to be performed when Home button is clicked
+                JOptionPane.showMessageDialog(welcomeFrame, "Home button clicked!");
+            }
+
+        });
+
         JButton residentButton = new JButton("Resident");
         residentButton.setBounds(150, 60, 100, 25);
         panel.add(residentButton);
@@ -51,6 +66,8 @@ public class APUHostelManagement {
                 welcomeFrame.dispose();
                 showLoginFrame("Manager");
             }
+
+            
         });
 
         residentButton.addActionListener(new ActionListener() {
@@ -129,8 +146,8 @@ public class APUHostelManagement {
         });
     }
 
-    // User class
-    public static abstract class User {
+    // User abstract class
+    public abstract static class User {
         protected String username;
         protected String password;
         protected String role;
@@ -183,6 +200,19 @@ public class APUHostelManagement {
         }
     }
     
+    //User Menu class
+    public static class UserMenu extends JFrame {
+        public UserMenu(User user) {
+            setTitle("User Menu");
+            setSize(400, 300);
+            setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            setLocationRelativeTo(null);
+
+            // Add components to the UserMenu
+            JLabel welcomeLabel = new JLabel("Welcome, " + user.username);
+            add(welcomeLabel);
+        }
+    }
 
     // Manager class
     public static class Manager extends User {
@@ -256,6 +286,8 @@ public class APUHostelManagement {
 
             JPanel panel = new JPanel();
             add(panel);
+            JLabel welcomeLabel = new JLabel("Welcome, " + user.username);
+            add(welcomeLabel);
             placeComponents(panel);
         }
 
@@ -455,10 +487,12 @@ public class APUHostelManagement {
         private JPasswordField passwordField;
         private JComboBox<String> roleComboBox;
         private JButton loginButton;
+        private JButton registerButton;
+        private JButton homeButton;
 
         public LoginScreen() {
-            setTitle("Login");
-            setSize(300, 200);
+            setTitle("Login/Register");
+            setSize(300, 250);
             setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             setLocationRelativeTo(null);
 
@@ -480,17 +514,55 @@ public class APUHostelManagement {
                         new ManagerMenu(user).setVisible(true);
                     } else if (role.equals("Staff")) {
                         user = new Staff(username, password);
-                        new StaffMenu(user).setVisible(true);
+                        new UserMenu(user).setVisible(true);
                     } else if (role.equals("Resident")) {
                         user = new Resident(username, password);
-                        new ResidentMenu(user).setVisible(true);
+                        new UserMenu(user).setVisible(true);
                     }
 
                     if (user != null) {
                         dispose();
-                    } else {
-                        JOptionPane.showMessageDialog(LoginScreen.this, "Invalid login credentials", "Error", JOptionPane.ERROR_MESSAGE);
                     }
+                }
+            });
+
+            registerButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    String username = usernameField.getText();
+                    String password = new String(passwordField.getPassword());
+                    String role = (String) roleComboBox.getSelectedItem();
+
+                    // Implement registration logic here
+                    if (!role.equals("Manager")) {
+                        // Staff and Resident registration logic
+                        User user = null;
+                        if (role.equals("Staff")) {
+                            user = new Staff(username, password);
+                        } else if (role.equals("Resident")) {
+                            user = new Resident(username, password);
+                        }
+
+                        if (user != null) {
+                            try {
+                                user.saveToFile();
+                                JOptionPane.showMessageDialog(LoginScreen.this, "Registration successful", "Success", JOptionPane.INFORMATION_MESSAGE);
+                            } catch (IOException ex) {
+                                JOptionPane.showMessageDialog(LoginScreen.this, "Error saving user", "Error", JOptionPane.ERROR_MESSAGE);
+                            }
+                        }
+                    } else {
+                        JOptionPane.showMessageDialog(LoginScreen.this, "Managers cannot register", "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+            });
+
+
+            homeButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    dispose();
+                    // Logic to show the home page
                 }
             });
         }
@@ -526,11 +598,14 @@ public class APUHostelManagement {
             loginButton = new JButton("Login");
             loginButton.setBounds(10, 110, 80, 25);
             panel.add(loginButton);
-        }
 
-        
+            registerButton = new JButton("Register");
+            registerButton.setBounds(100, 110, 100, 25);
+            panel.add(registerButton);
+
+            homeButton = new JButton("Home");
+            homeButton.setBounds(10, 140, 80, 25);
+            panel.add(homeButton);
+        }
     }
 }
-//revision
-
-
