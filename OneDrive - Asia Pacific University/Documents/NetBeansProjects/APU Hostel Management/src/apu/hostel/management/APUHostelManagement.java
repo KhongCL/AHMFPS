@@ -8,11 +8,13 @@ public class APUHostelManagement {
         protected String username;
         protected String password;
         protected String role;
+        protected boolean approved;
 
         public User(String username, String password, String role) {
             this.username = username;
             this.password = password;
             this.role = role;
+            this.approved = false; // Default to not approved
         }
 
         public String getUsername() {
@@ -27,11 +29,19 @@ public class APUHostelManagement {
             return role;
         }
 
+        public boolean isApproved() {
+            return approved;
+        }
+
+        public void setApproved(boolean approved) {
+            this.approved = approved;
+        }
+
         public abstract void displayMenu();
 
         public void saveToFile() throws IOException {
             try (BufferedWriter writer = new BufferedWriter(new FileWriter("users.txt", true))) {
-                writer.write(username + "," + password + "," + role);
+                writer.write(username + "," + password + "," + role + "," + approved);
                 writer.newLine();
             }
         }
@@ -42,18 +52,62 @@ public class APUHostelManagement {
                 while ((line = reader.readLine()) != null) {
                     String[] parts = line.split(",");
                     if (parts[0].equals(username) && parts[1].equals(password)) {
+                        User user = null;
                         switch (parts[2]) {
                             case "Manager":
-                                return new Manager(parts[0], parts[1]);
+                                user = new Manager(parts[0], parts[1]);
+                                break;
                             case "Staff":
-                                return new Staff(parts[0], parts[1]);
+                                user = new Staff(parts[0], parts[1]);
+                                break;
                             case "Resident":
-                                return new Resident(parts[0], parts[1]);
+                                user = new Resident(parts[0], parts[1]);
+                                break;
                         }
+                        if (user != null) {
+                            user.setApproved(Boolean.parseBoolean(parts[3]));
+                        }
+                        return user;
                     }
                 }
             }
             return null;
+        }
+
+        public static List<User> loadAllUsers() throws IOException {
+            List<User> users = new ArrayList<>();
+            try (BufferedReader reader = new BufferedReader(new FileReader("users.txt"))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    String[] parts = line.split(",");
+                    User user = null;
+                    switch (parts[2]) {
+                        case "Manager":
+                            user = new Manager(parts[0], parts[1]);
+                            break;
+                        case "Staff":
+                            user = new Staff(parts[0], parts[1]);
+                            break;
+                        case "Resident":
+                            user = new Resident(parts[0], parts[1]);
+                            break;
+                    }
+                    if (user != null) {
+                        user.setApproved(Boolean.parseBoolean(parts[3]));
+                        users.add(user);
+                    }
+                }
+            }
+            return users;
+        }
+
+        public static void saveAllUsers(List<User> users) throws IOException {
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter("users.txt"))) {
+                for (User user : users) {
+                    writer.write(user.getUsername() + "," + user.getPassword() + "," + user.getRole() + "," + user.isApproved());
+                    writer.newLine();
+                }
+            }
         }
     }
 
@@ -288,13 +342,26 @@ public class APUHostelManagement {
                     break;
             case 3:
                 System.out.println("You have chosen Resident.");
-                // Proceed with Resident-specific logic
+                System.out.println("1. Register");
+                System.out.println("2. Login");
+                System.out.print("Enter your choice (1-2): ");
+                int residentChoice = scanner.nextInt();
+                scanner.nextLine(); // Consume newline
+                if (residentChoice == 1) {
+                    registerResident();
+                } else if (residentChoice == 2) {
+                    loginResident();
+                } else {
+                    System.out.println("Invalid choice. Please try again.");
+                    displayWelcomePage(); // Recursively call to retry
+                }
                 break;
             default:
                 System.out.println("Invalid choice. Please try again.");
                 displayWelcomePage(); // Recursively call to retry
                 break;
         }
+            
     }
 
     // Method to handle Manager registration
@@ -371,6 +438,46 @@ public class APUHostelManagement {
             } else {
                 System.out.println("Invalid username or password.");
                 loginStaff(); // Retry login
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Method to handle Resident registration
+    public static void registerResident() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Enter username: ");
+        String username = scanner.nextLine();
+        System.out.print("Enter password: ");
+        String password = scanner.nextLine();
+
+        try {
+            User resident = new Resident(username, password);
+            resident.saveToFile();
+            System.out.println("Resident registered successfully.");
+            displayWelcomePage();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Method to handle Resident login
+    public static void loginResident() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Enter username: ");
+        String username = scanner.nextLine();
+        System.out.print("Enter password: ");
+        String password = scanner.nextLine();
+
+        try {
+            User user = User.loadFromFile(username, password);
+            if (user != null && user.getRole().equals("Resident")) {
+                System.out.println("Login successful.");
+                user.displayMenu();
+            } else {
+                System.out.println("Invalid username or password.");
+                loginResident(); // Retry login
             }
         } catch (IOException e) {
             e.printStackTrace();
