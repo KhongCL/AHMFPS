@@ -2,6 +2,11 @@ package apu.hostel.management;
 import java.io.*;
 import java.util.*;
 
+import apu.hostel.management.APUHostelManagement.User;
+
+
+
+
 public class APUHostelManagement {
     // User abstract class
     public abstract static class User {
@@ -9,12 +14,14 @@ public class APUHostelManagement {
         protected String password;
         protected String role;
         protected boolean approved;
+        
 
         public User(String username, String password, String role) {
             this.username = username;
             this.password = password;
             this.role = role;
-            this.approved = false; // Default to not approved
+            this.approved = false;
+            
         }
 
         public String getUsername() {
@@ -29,21 +36,44 @@ public class APUHostelManagement {
             return role;
         }
 
-        public boolean isApproved() {
-            return approved;
-        }
 
-        public void setApproved(boolean approved) {
-            this.approved = approved;
-        }
 
         public abstract void displayMenu();
 
-        public void saveToFile() throws IOException {
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter("users.txt", true))) {
+        public void saveToFile(String filename) throws IOException {
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename, true))) {
                 writer.write(username + "," + password + "," + role + "," + approved);
                 writer.newLine();
             }
+        }
+
+        public static List<User> readFromFile(String filename) throws IOException {
+            List<User> users = new ArrayList<>();
+            try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    String[] parts = line.split(",");
+                    if (parts.length == 4) {
+                        User user = null;
+                        switch (parts[2]) {
+                            case "Manager":
+                                user = new Manager(parts[0], parts[1]);
+                                break;
+                            case "Staff":
+                                user = new Staff(parts[0], parts[1]);
+                                break;
+                            case "Resident":
+                                user = new Resident(parts[0], parts[1]);
+                                break;
+                        }
+                        if (user != null) {
+                            user.setApproved(Boolean.parseBoolean(parts[3]));
+                            users.add(user);
+                        }
+                    }
+                }
+            }
+            return users;
         }
 
         public static User loadFromFile(String username, String password) throws IOException {
@@ -80,25 +110,31 @@ public class APUHostelManagement {
                 String line;
                 while ((line = reader.readLine()) != null) {
                     String[] parts = line.split(",");
-                    User user = null;
-                    switch (parts[2]) {
-                        case "Manager":
-                            user = new Manager(parts[0], parts[1]);
-                            break;
-                        case "Staff":
-                            user = new Staff(parts[0], parts[1]);
-                            break;
-                        case "Resident":
-                            user = new Resident(parts[0], parts[1]);
-                            break;
-                    }
-                    if (user != null) {
-                        user.setApproved(Boolean.parseBoolean(parts[3]));
-                        users.add(user);
+                    if (parts.length == 4) {
+                        User user = null;
+                        switch (parts[2]) {
+                            case "Manager":
+                                user = new Manager(parts[0], parts[1]);
+                                break;
+                            case "Staff":
+                                user = new Staff(parts[0], parts[1]);
+                                break;
+                            case "Resident":
+                                user = new Resident(parts[0], parts[1]);
+                                break;
+                        }
+                        if (user != null) {
+                            user.setApproved(Boolean.parseBoolean(parts[3]));
+                            users.add(user);
+                        }
                     }
                 }
             }
             return users;
+        }
+
+        public void setApproved(boolean approved) {
+            this.approved = approved;
         }
 
         public static void saveAllUsers(List<User> users) throws IOException {
@@ -120,7 +156,7 @@ public class APUHostelManagement {
         @Override
         public void displayMenu() {
             // Manager-specific menu implementation
-            // Manager-specific menu implementation
+           
             System.out.println("Manager Menu:");
             System.out.println("1. Approve User Registration");
             System.out.println("2. Search User");
@@ -137,6 +173,7 @@ public class APUHostelManagement {
             switch (choice) {
                 case 1:
                     // Approve User Registration logic
+                    approveUserRegistration();
                     break;
                 case 2:
                     // Search User logic
@@ -161,8 +198,46 @@ public class APUHostelManagement {
             }
         }
 
-        public void approveUserRegistration(User user) {
-            // Approve user registration logic
+        private void approveUserRegistration() {
+            try {
+                List<User> unapprovedUsers = User.readFromFile("unapproved_users.txt");
+                if (unapprovedUsers.isEmpty()) {
+                    System.out.println("No users to approve.");
+                    return;
+                }
+
+                for (int i = 0; i < unapprovedUsers.size(); i++) {
+                    User user = unapprovedUsers.get(i);
+                    System.out.println((i + 1) + ". " + user.username + " (" + user.role + ")");
+                }
+
+                System.out.print("Enter the number of the user to approve: ");
+                Scanner scanner = new Scanner(System.in);
+                int userIndex = scanner.nextInt() - 1;
+                scanner.nextLine(); // Consume newline
+
+                if (userIndex >= 0 && userIndex < unapprovedUsers.size()) {
+                    User userToApprove = unapprovedUsers.get(userIndex);
+                    userToApprove.saveToFile("approved_users.txt");
+                    unapprovedUsers.remove(userIndex);
+                    saveUnapprovedUsers(unapprovedUsers);
+                    System.out.println("User approved successfully.");
+                } else {
+                    System.out.println("Invalid user number.");
+                }
+            } catch (IOException e) {
+                System.out.println("An error occurred while approving the user.");
+                e.printStackTrace();
+            }
+        }
+
+        private void saveUnapprovedUsers(List<User> users) throws IOException {
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter("unapproved_users.txt"))) {
+                for (User user : users) {
+                    writer.write(user.username + "," + user.password + "," + user.role);
+                    writer.newLine();
+                }
+            }
         }
 
         public void searchUser(String username) {
@@ -180,6 +255,8 @@ public class APUHostelManagement {
         public void fixOrUpdateRate(double rate) {
             // Fix or update rate logic
         }
+
+        
     }
 
     // Staff class
@@ -488,4 +565,3 @@ public class APUHostelManagement {
     public static void main(String[] args) {
         displayWelcomePage();
     }
-}
