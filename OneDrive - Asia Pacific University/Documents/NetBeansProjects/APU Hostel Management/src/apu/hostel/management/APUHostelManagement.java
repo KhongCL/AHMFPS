@@ -2,10 +2,6 @@ package apu.hostel.management;
 import java.io.*;
 import java.util.*;
 
-import apu.hostel.management.APUHostelManagement.User;
-
-
-
 
 public class APUHostelManagement {
     // User abstract class
@@ -36,7 +32,13 @@ public class APUHostelManagement {
             return role;
         }
 
+        public boolean isApproved() {
+            return approved;
+        }
 
+        public void setApproved(boolean approved) {
+            this.approved = approved;
+        }
 
         public abstract void displayMenu();
 
@@ -76,8 +78,8 @@ public class APUHostelManagement {
             return users;
         }
 
-        public static User loadFromFile(String username, String password) throws IOException {
-            try (BufferedReader reader = new BufferedReader(new FileReader("users.txt"))) {
+        public static User findUser(String username, String password, String filename) throws IOException {
+            try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
                     String[] parts = line.split(",");
@@ -105,37 +107,9 @@ public class APUHostelManagement {
         }
 
         public static List<User> loadAllUsers() throws IOException {
-            List<User> users = new ArrayList<>();
-            try (BufferedReader reader = new BufferedReader(new FileReader("users.txt"))) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    String[] parts = line.split(",");
-                    if (parts.length == 4) {
-                        User user = null;
-                        switch (parts[2]) {
-                            case "Manager":
-                                user = new Manager(parts[0], parts[1]);
-                                break;
-                            case "Staff":
-                                user = new Staff(parts[0], parts[1]);
-                                break;
-                            case "Resident":
-                                user = new Resident(parts[0], parts[1]);
-                                break;
-                        }
-                        if (user != null) {
-                            user.setApproved(Boolean.parseBoolean(parts[3]));
-                            users.add(user);
-                        }
-                    }
-                }
-            }
-            return users;
+            return readFromFile("users.txt");
         }
 
-        public void setApproved(boolean approved) {
-            this.approved = approved;
-        }
 
         public static void saveAllUsers(List<User> users) throws IOException {
             try (BufferedWriter writer = new BufferedWriter(new FileWriter("users.txt"))) {
@@ -189,7 +163,7 @@ public class APUHostelManagement {
                     break;
                 case 6:
                     System.out.println("Logging out...");
-                    APUHostelManagement.displayWelcomePage();
+                    
                     break;
                 default:
                     System.out.println("Invalid choice. Please try again.");
@@ -200,15 +174,24 @@ public class APUHostelManagement {
 
         private void approveUserRegistration() {
             try {
-                List<User> unapprovedUsers = User.readFromFile("unapproved_users.txt");
-                if (unapprovedUsers.isEmpty()) {
+                List<User> unapprovedStaffs = User.readFromFile("unapproved_staffs.txt");
+                List<User> unapprovedResidents = User.readFromFile("unapproved_residents.txt");
+
+                if (unapprovedStaffs.isEmpty() && unapprovedResidents.isEmpty()) {
                     System.out.println("No users to approve.");
                     return;
                 }
 
-                for (int i = 0; i < unapprovedUsers.size(); i++) {
-                    User user = unapprovedUsers.get(i);
+                System.out.println("Unapproved Staffs:");
+                for (int i = 0; i < unapprovedStaffs.size(); i++) {
+                    User user = unapprovedStaffs.get(i);
                     System.out.println((i + 1) + ". " + user.username + " (" + user.role + ")");
+                }
+
+                System.out.println("Unapproved Residents:");
+                for (int i = 0; i < unapprovedResidents.size(); i++) {
+                    User user = unapprovedResidents.get(i);
+                    System.out.println((i + 1 + unapprovedStaffs.size()) + ". " + user.username + " (" + user.role + ")");
                 }
 
                 System.out.print("Enter the number of the user to approve: ");
@@ -216,12 +199,18 @@ public class APUHostelManagement {
                 int userIndex = scanner.nextInt() - 1;
                 scanner.nextLine(); // Consume newline
 
-                if (userIndex >= 0 && userIndex < unapprovedUsers.size()) {
-                    User userToApprove = unapprovedUsers.get(userIndex);
-                    userToApprove.saveToFile("approved_users.txt");
-                    unapprovedUsers.remove(userIndex);
-                    saveUnapprovedUsers(unapprovedUsers);
-                    System.out.println("User approved successfully.");
+                if (userIndex >= 0 && userIndex < unapprovedStaffs.size()) {
+                    User userToApprove = unapprovedStaffs.get(userIndex);
+                    userToApprove.saveToFile("approved_staffs.txt");
+                    unapprovedStaffs.remove(userIndex);
+                    saveUnapprovedUsers(unapprovedStaffs, "unapproved_staffs.txt");
+                    System.out.println("Staff approved successfully.");
+                } else if (userIndex >= unapprovedStaffs.size() && userIndex < unapprovedStaffs.size() + unapprovedResidents.size()) {
+                    User userToApprove = unapprovedResidents.get(userIndex - unapprovedStaffs.size());
+                    userToApprove.saveToFile("approved_residents.txt");
+                    unapprovedResidents.remove(userIndex - unapprovedStaffs.size());
+                    saveUnapprovedUsers(unapprovedResidents, "unapproved_residents.txt");
+                    System.out.println("Resident approved successfully.");
                 } else {
                     System.out.println("Invalid user number.");
                 }
@@ -231,14 +220,15 @@ public class APUHostelManagement {
             }
         }
 
-        private void saveUnapprovedUsers(List<User> users) throws IOException {
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter("unapproved_users.txt"))) {
+        private void saveUnapprovedUsers(List<User> users, String filename) throws IOException {
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
                 for (User user : users) {
-                    writer.write(user.username + "," + user.password + "," + user.role);
+                    writer.write(user.username + "," + user.password + "," + user.role + "," + user.approved);
                     writer.newLine();
                 }
             }
         }
+        
 
         public void searchUser(String username) {
             // Search user logic
@@ -267,7 +257,37 @@ public class APUHostelManagement {
 
         @Override
         public void displayMenu() {
-            // Staff-specific menu implementation
+            System.out.println("Staff Menu:");
+            System.out.println("1. Register Individual Login Account");
+            System.out.println("2. Update Individual Login Account");
+            System.out.println("3. Make Payment for Resident");
+            System.out.println("4. Generate Receipt");
+            System.out.println("5. Logout");
+            System.out.print("Enter your choice: ");
+    
+            Scanner scanner = new Scanner(System.in);
+            int choice = scanner.nextInt();
+            scanner.nextLine(); // Consume newline
+    
+            switch (choice) {
+                case 1:
+                    // Register Individual Login Account logic
+                    break;
+                case 2:
+                    // Update Individual Login Account logic
+                    break;
+                case 3:
+                    // Make Payment for Resident logic
+                    break;
+                case 4:
+                    // Generate Receipt logic
+                    break;
+                case 5:
+                    // Logout logic
+                    break;
+                default:
+                    System.out.println("Invalid choice. Please try again.");
+            }
         }
 
         public void registerUser(User user) {
@@ -296,6 +316,34 @@ public class APUHostelManagement {
         @Override
         public void displayMenu() {
             // Resident-specific menu implementation
+            System.out.println("Resident Menu:");
+            System.out.println("1. Register Individual Login Account");
+            System.out.println("2. Update Individual Login Account");
+            System.out.println("3. View Payment Records");
+            System.out.println("4. Logout");
+            System.out.print("Enter your choice: ");
+
+            Scanner scanner = new Scanner(System.in);
+            int choice = scanner.nextInt();
+            scanner.nextLine(); // Consume newline
+
+            switch (choice) {
+                case 1:
+                    // Register Individual Login Account logic
+                    break;
+                case 2:
+                    // Update Individual Login Account logic
+                    break;
+                case 3:
+                    // View Payment Records logic
+                    break;
+                case 4:
+                    // Logout logic
+                    break;
+                default:
+                    System.out.println("Invalid choice. Please try again.");
+            }
+            
         }
 
         public void updateDetails() {
@@ -326,7 +374,7 @@ public class APUHostelManagement {
             }
         }
 
-        public static List<Payment> loadFromFile(String username) throws IOException {
+        public static List<Payment> readFromFile(String username) throws IOException {
             List<Payment> payments = new ArrayList<>();
             try (BufferedReader reader = new BufferedReader(new FileReader("payments.txt"))) {
                 String line;
@@ -354,13 +402,13 @@ public class APUHostelManagement {
             resident.saveToFile();
 
             // Attempt to login as the Staff user
-            User loggedInUser = User.loadFromFile("staff1", "password1");
+            User loggedInUser = User.readFromFile("staff1", "password1");
             if (loggedInUser != null) {
                 loggedInUser.displayMenu();
             }
 
             // Attempt to login as the Resident user
-            loggedInUser = User.loadFromFile("resident1", "password1");
+            loggedInUser = User.readFromFile("resident1", "password1");
             if (loggedInUser != null) {
                 loggedInUser.displayMenu();
             }
@@ -451,7 +499,7 @@ public class APUHostelManagement {
 
         try {
             User manager = new Manager(username, password);
-            manager.saveToFile();
+            manager.saveToFile("managers.txt");
             System.out.println("Manager registered successfully.");
             displayWelcomePage();
         } catch (IOException e) {
@@ -468,7 +516,7 @@ public class APUHostelManagement {
         String password = scanner.nextLine();
 
         try {
-            User user = User.loadFromFile(username, password);
+            User user = User.findUser(username, password, "managers.txt");
             if (user != null && user.getRole().equals("Manager")) {
                 System.out.println("Login successful.");
                 user.displayMenu();
@@ -491,7 +539,7 @@ public class APUHostelManagement {
 
         try {
             User staff = new Staff(username, password);
-            staff.saveToFile();
+            staff.saveToFile("unapproved_staffs.txt");
             System.out.println("Staff registered successfully.");
             displayWelcomePage();
         } catch (IOException e) {
@@ -508,7 +556,7 @@ public class APUHostelManagement {
         String password = scanner.nextLine();
 
         try {
-            User user = User.loadFromFile(username, password);
+            User user = User.findUser(username, password, "approved_staffs.txt");
             if (user != null && user.getRole().equals("Staff")) {
                 System.out.println("Login successful.");
                 user.displayMenu();
@@ -531,7 +579,7 @@ public class APUHostelManagement {
 
         try {
             User resident = new Resident(username, password);
-            resident.saveToFile();
+            resident.saveToFile("unapproved_residents.txt");
             System.out.println("Resident registered successfully.");
             displayWelcomePage();
         } catch (IOException e) {
@@ -548,7 +596,7 @@ public class APUHostelManagement {
         String password = scanner.nextLine();
 
         try {
-            User user = User.loadFromFile(username, password);
+            User user = User.findUser(username, password, "approved_residents.txt");
             if (user != null && user.getRole().equals("Resident")) {
                 System.out.println("Login successful.");
                 user.displayMenu();
@@ -560,8 +608,8 @@ public class APUHostelManagement {
             e.printStackTrace();
         }
     }
-
-    // Main method to launch the application
+        // Main method to launch the application
     public static void main(String[] args) {
         displayWelcomePage();
     }
+}
