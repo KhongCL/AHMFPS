@@ -119,6 +119,16 @@ public class APUHostelManagement {
         public static List<User> loadAllUsers() throws IOException {
             return readFromFile("users.txt");
         }
+
+        public static boolean isUnique(String icPassportNumber, String username, String contactNumber) throws IOException {
+            List<User> users = loadAllUsers();
+            for (User user : users) {
+                if (user.getIcPassportNumber().equals(icPassportNumber) || user.getUsername().equals(username) || user.getContactNumber().equals(contactNumber)) {
+                    return false;
+                }
+            }
+            return true;
+        }
     }
 
     // Manager class
@@ -626,8 +636,6 @@ public class APUHostelManagement {
         String password = scanner.nextLine();
         System.out.print("Enter contact number: ");
         String contactNumber = scanner.nextLine();
-        System.out.print("Enter date of registration: ");
-        String dateOfRegistration = scanner.nextLine();
 
         try {
             String userID = generateUserID("U");
@@ -675,6 +683,10 @@ public class APUHostelManagement {
         String contactNumber = scanner.nextLine();
 
         try {
+            if (!User.isUnique(icPassportNumber, username, contactNumber)) {
+                System.out.println("Error: IC/Passport Number, Username, or Contact Number already exists.");
+                return;
+            }
             String dateOfRegistration = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
             Staff staff = new Staff(icPassportNumber, username, password, contactNumber, dateOfRegistration);
             staff.saveToFile("unapproved_staffs.txt");
@@ -695,12 +707,18 @@ public class APUHostelManagement {
 
         try {
             User user = User.findUser(username, password, "approved_staffs.txt");
-            if (user != null && user.getRole().equals("Staff")) {
+            if (user != null && user instanceof Staff) {
                 System.out.println("Login successful.");
                 user.displayMenu();
             } else {
                 System.out.println("Invalid username or password.");
-                loginStaff(); // Retry login
+                System.out.print("Do you want to try again? (yes/no): ");
+                String choice = scanner.nextLine();
+                if (choice.equalsIgnoreCase("yes")) {
+                    loginStaff(); // Retry login
+                } else {
+                    System.out.println("Exiting login process.");
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -721,6 +739,10 @@ public class APUHostelManagement {
         
 
         try {
+            if (!User.isUnique(icPassportNumber, username, contactNumber)) {
+                System.out.println("Error: IC/Passport Number, Username, or Contact Number already exists.");
+                return;
+            }
             String dateOfRegistration = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
             Resident resident = new Resident(icPassportNumber, username, password, contactNumber, dateOfRegistration);
             resident.saveToFile("unapproved_residents.txt");
@@ -746,7 +768,13 @@ public class APUHostelManagement {
                 user.displayMenu();
             } else {
                 System.out.println("Invalid username or password.");
-                loginResident(); // Retry login
+                System.out.print("Do you want to try again? (yes/no): ");
+                String choice = scanner.nextLine();
+                if (choice.equalsIgnoreCase("yes")) {
+                    loginResident(); // Retry login
+                } else {
+                    System.out.println("Exiting login process.");
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();
