@@ -192,13 +192,13 @@ public class APUHostelManagement {
                 System.out.println("Unapproved Staffs:");
                 for (int i = 0; i < unapprovedStaffs.size(); i++) {
                     User user = unapprovedStaffs.get(i);
-                    System.out.println((i + 1) + ". " + user.getUsername() + " (" + user.getUserID() + ")");
+                    System.out.println((i + 1) + ". " + user.getUsername() + " (" + user.getIcPassportNumber() + ")");
                 }
 
                 System.out.println("Unapproved Residents:");
                 for (int i = 0; i < unapprovedResidents.size(); i++) {
                     User user = unapprovedResidents.get(i);
-                    System.out.println((i + 1 + unapprovedStaffs.size()) + ". " + user.getUsername() + " (" + user.getUserID() + ")");
+                    System.out.println((i + 1 + unapprovedStaffs.size()) + ". " + user.getUsername() + " (" + user.getIcPassportNumber() + ")");
                 }
 
                 System.out.print("Enter the number of the user to approve: ");
@@ -207,14 +207,22 @@ public class APUHostelManagement {
                 scanner.nextLine(); // Consume newline
 
                 if (userIndex >= 0 && userIndex < unapprovedStaffs.size()) {
-                    User userToApprove = unapprovedStaffs.get(userIndex);
-                    userToApprove.saveToFile("approved_staffs.txt");
+                    Staff staffToApprove = (Staff) unapprovedStaffs.get(userIndex);
+                    String userID = generateUserID("U");
+                    staffToApprove.userID = userID;
+                    staffToApprove.staffID = "S" + userID.substring(1);
+                    staffToApprove.saveToFile("users.txt");
+                    staffToApprove.saveToFile("approved_staffs.txt");
                     unapprovedStaffs.remove(userIndex);
                     saveUnapprovedUsers(unapprovedStaffs, "unapproved_staffs.txt");
                     System.out.println("Staff approved successfully.");
                 } else if (userIndex >= unapprovedStaffs.size() && userIndex < unapprovedStaffs.size() + unapprovedResidents.size()) {
-                    User userToApprove = unapprovedResidents.get(userIndex - unapprovedStaffs.size());
-                    userToApprove.saveToFile("approved_residents.txt");
+                    Resident residentToApprove = (Resident) unapprovedResidents.get(userIndex - unapprovedStaffs.size());
+                    String userID = generateUserID("U");
+                    residentToApprove.userID = userID;
+                    residentToApprove.residentID = "R" + userID.substring(1);
+                    residentToApprove.saveToFile("users.txt");
+                    residentToApprove.saveToFile("approved_residents.txt");
                     unapprovedResidents.remove(userIndex - unapprovedStaffs.size());
                     saveUnapprovedUsers(unapprovedResidents, "unapproved_residents.txt");
                     System.out.println("Resident approved successfully.");
@@ -230,13 +238,7 @@ public class APUHostelManagement {
         private void saveUnapprovedUsers(List<User> users, String filename) throws IOException {
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
                 for (User user : users) {
-                    if (user instanceof Staff) {
-                        Staff staff = (Staff) user;
-                        writer.write(staff.getStaffID() + "," + staff.getUserID() + "," + staff.getDateOfApproval());
-                    } else if (user instanceof Resident) {
-                        Resident resident = (Resident) user;
-                        writer.write(resident.getResidentID() + "," + resident.getUserID() + "," + resident.getDateOfApproval());
-                    }
+                    writer.write(user.getIcPassportNumber() + "," + user.getUsername() + "," + user.getPassword() + "," + user.getContactNumber() + "," + user.getDateOfRegistration() + "," + user.getRole());
                     writer.newLine();
                 }
             }
@@ -267,9 +269,8 @@ public class APUHostelManagement {
         private String staffID;
         private String dateOfApproval;
 
-        public Staff(String userID, String icPassportNumber, String username, String password, String contactNumber) {
-            super(userID, icPassportNumber, username, password, contactNumber, LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")), "Staff");
-            this.staffID = "S" + userID.substring(1);
+        public Staff(String icPassportNumber, String username, String password, String contactNumber, String dateOfRegistration) {
+            super(null, icPassportNumber, username, password, contactNumber, dateOfRegistration, "Staff");
         }
 
         public String getStaffID() {
@@ -337,9 +338,8 @@ public class APUHostelManagement {
         private String residentID;
         private String dateOfApproval;
 
-        public Resident(String userID, String icPassportNumber, String username, String password, String contactNumber) {
-            super(userID, icPassportNumber, username, password, contactNumber, LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")), "Resident");
-            this.residentID = "R" + userID.substring(1);
+        public Resident(String icPassportNumber, String username, String password, String contactNumber, String dateOfRegistration) {
+            super(null, icPassportNumber, username, password, contactNumber, dateOfRegistration, "Resident");
         }
 
         public String getResidentID() {
@@ -675,8 +675,8 @@ public class APUHostelManagement {
         String contactNumber = scanner.nextLine();
 
         try {
-            String userID = generateUserID("U");
-            User staff = new Staff(userID, icPassportNumber, username, password, contactNumber);
+            String dateOfRegistration = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+            Staff staff = new Staff(icPassportNumber, username, password, contactNumber, dateOfRegistration);
             staff.saveToFile("unapproved_staffs.txt");
             System.out.println("Staff registered successfully.");
             displayWelcomePage();
@@ -721,9 +721,8 @@ public class APUHostelManagement {
         
 
         try {
-            String userID = generateUserID("U");
-            String residentID = generateUserID("R");
-            Resident resident = new Resident(userID, icPassportNumber, username, password, contactNumber);
+            String dateOfRegistration = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+            Resident resident = new Resident(icPassportNumber, username, password, contactNumber, dateOfRegistration);
             resident.saveToFile("unapproved_residents.txt");
             System.out.println("Resident registered successfully.");
             displayWelcomePage();
@@ -757,7 +756,7 @@ public class APUHostelManagement {
     // Method to generate unique IDs with a prefix
     private static String generateUserID(String prefix) {
         int id = 1;
-        String filename = prefix.equals("R") ? "unapproved_residents.txt" : "users.txt";
+        String filename = "users.txt";
         File file = new File(filename);
         if (!file.exists()) {
             try {
