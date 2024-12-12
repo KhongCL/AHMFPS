@@ -86,10 +86,10 @@ public class APUHostelManagement {
                                 user = new Manager(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5]);
                                 break;
                             case "Staff":
-                                user = new Staff(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5]);
+                                user = new Staff(parts[0], parts[1], parts[2], parts[3], parts[4]);
                                 break;
                             case "Resident":
-                                user = new Resident(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5]);
+                                user = new Resident(parts[0], parts[1], parts[2], parts[3], parts[4]);
                                 break;
                         }
                         if (user != null) {
@@ -114,10 +114,10 @@ public class APUHostelManagement {
                                 user = new Manager(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5]);
                                 break;
                             case "Staff":
-                                user = new Staff(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5]);
+                                user = new Staff(parts[0], parts[1], parts[2], parts[3], parts[4]);
                                 break;
                             case "Resident":
-                                user = new Resident(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5]);
+                                user = new Resident(parts[0], parts[1], parts[2], parts[3], parts[4]);
                                 break;
                         }
                         if (user != null) {
