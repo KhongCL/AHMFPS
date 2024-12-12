@@ -76,10 +76,10 @@ public class APUHostelManagement {
                                 user = new Manager(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5]);
                                 break;
                             case "Staff":
-                                user = new Staff(parts[0], parts[1], parts[2], parts[3], parts[4]);
+                                user = new Staff(parts[1], parts[2], parts[3], parts[4], parts[5]);
                                 break;
                             case "Resident":
-                                user = new Resident(parts[0], parts[1], parts[2], parts[3], parts[4]);
+                                user = new Resident(parts[1], parts[2], parts[3], parts[4], parts[5]);
                                 break;
                         }
                         if (user != null) {
@@ -103,10 +103,10 @@ public class APUHostelManagement {
                                 user = new Manager(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5]);
                                 break;
                             case "Staff":
-                                user = new Staff(parts[0], parts[1], parts[2], parts[3], parts[4]);
+                                user = new Staff(parts[1], parts[2], parts[3], parts[4], parts[5]);
                                 break;
                             case "Resident":
-                                user = new Resident(parts[0], parts[1], parts[2], parts[3], parts[4]);
+                                user = new Resident(parts[1], parts[2], parts[3], parts[4], parts[5]);
                                 break;
                         }
                         return user;
@@ -130,6 +130,7 @@ public class APUHostelManagement {
             }
             return true;
         }
+    }
 
     // Manager class
     public static class Manager extends User {
@@ -180,6 +181,7 @@ public class APUHostelManagement {
                     break;
                 case 6:
                     System.out.println("Logging out...");
+                    displayWelcomePage();
                     
                     break;
                 default:
@@ -730,6 +732,7 @@ public class APUHostelManagement {
                     loginStaff(); // Retry login
                 } else {
                     System.out.println("Exiting login process.");
+                    displayWelcomePage();
                 }
             }
         } catch (IOException e) {
@@ -786,6 +789,7 @@ public class APUHostelManagement {
                     loginResident(); // Retry login
                 } else {
                     System.out.println("Exiting login process.");
+                    displayWelcomePage();
                 }
             }
         } catch (IOException e) {
@@ -828,3 +832,4 @@ public class APUHostelManagement {
         displayWelcomePage();
     }
 }
+
