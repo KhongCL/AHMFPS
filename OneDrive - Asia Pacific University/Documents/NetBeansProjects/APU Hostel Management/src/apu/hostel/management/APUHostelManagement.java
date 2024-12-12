@@ -1,8 +1,8 @@
 package apu.hostel.management;
 import java.io.*;
 import java.util.*;
-import java.time.LocalDate;
-
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class APUHostelManagement {
     // User abstract class
@@ -222,12 +222,14 @@ public class APUHostelManagement {
 
                 if (userIndex >= 0 && userIndex < unapprovedStaffs.size()) {
                     User userToApprove = unapprovedStaffs.get(userIndex);
+                    userToApprove.setApproved(true);
                     userToApprove.saveToFile("approved_staffs.txt");
                     unapprovedStaffs.remove(userIndex);
                     saveUnapprovedUsers(unapprovedStaffs, "unapproved_staffs.txt");
                     System.out.println("Staff approved successfully.");
                 } else if (userIndex >= unapprovedStaffs.size() && userIndex < unapprovedStaffs.size() + unapprovedResidents.size()) {
                     User userToApprove = unapprovedResidents.get(userIndex - unapprovedStaffs.size());
+                    userToApprove.setApproved(true);
                     userToApprove.saveToFile("approved_residents.txt");
                     unapprovedResidents.remove(userIndex - unapprovedStaffs.size());
                     saveUnapprovedUsers(unapprovedResidents, "unapproved_residents.txt");
@@ -255,7 +257,7 @@ public class APUHostelManagement {
             // Search user logic
         }
 
-        public void updateUser(User user) {
+        public void updateUser(String username) {
             // Update user logic
         }
 
@@ -275,8 +277,8 @@ public class APUHostelManagement {
         private String staffID;
         private String dateOfApproval;
 
-        public Staff(String userID, String icPassportNumber, String username, String password, String contactNumber, String dateOfRegistration) {
-            super(userID, icPassportNumber, username, password, contactNumber, dateOfRegistration, "Staff");
+        public Staff(String userID, String icPassportNumber, String username, String password, String contactNumber) {
+            super(userID, icPassportNumber, username, password, contactNumber, LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")), "Staff");
             this.staffID = "S" + userID.substring(1);
         }
 
@@ -295,11 +297,10 @@ public class APUHostelManagement {
         @Override
         public void displayMenu() {
             System.out.println("Staff Menu:");
-            System.out.println("1. Register Individual Login Account");
-            System.out.println("2. Update Individual Login Account");
-            System.out.println("3. Make Payment for Resident");
-            System.out.println("4. Generate Receipt");
-            System.out.println("5. Logout");
+            System.out.println("1. Update Individual Login Account");
+            System.out.println("2. Make Payment for Resident");
+            System.out.println("3. Generate Receipt");
+            System.out.println("4. Logout");
             System.out.print("Enter your choice: ");
     
             Scanner scanner = new Scanner(System.in);
@@ -318,9 +319,6 @@ public class APUHostelManagement {
                     break;
                 case 4:
                     // Generate Receipt logic
-                    break;
-                case 5:
-                    // Logout logic
                     break;
                 default:
                     System.out.println("Invalid choice. Please try again.");
@@ -349,8 +347,8 @@ public class APUHostelManagement {
         private String residentID;
         private String dateOfApproval;
 
-        public Resident(String userID, String icPassportNumber, String username, String password, String contactNumber, String dateOfRegistration) {
-            super(userID, icPassportNumber, username, password, contactNumber, dateOfRegistration, "Resident");
+        public Resident(String userID, String icPassportNumber, String username, String password, String contactNumber) {
+            super(userID, icPassportNumber, username, password, contactNumber, LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")), "Resident");
             this.residentID = "R" + userID.substring(1);
         }
 
@@ -370,10 +368,9 @@ public class APUHostelManagement {
         public void displayMenu() {
             // Resident-specific menu implementation
             System.out.println("Resident Menu:");
-            System.out.println("1. Register Individual Login Account");
-            System.out.println("2. Update Individual Login Account");
-            System.out.println("3. View Payment Records");
-            System.out.println("4. Logout");
+            System.out.println("1. Update Individual Login Account");
+            System.out.println("2. View Payment Records");
+            System.out.println("3. Logout");
             System.out.print("Enter your choice: ");
 
             Scanner scanner = new Scanner(System.in);
@@ -389,9 +386,6 @@ public class APUHostelManagement {
                     break;
                 case 3:
                     // View Payment Records logic
-                    break;
-                case 4:
-                    // Logout logic
                     break;
                 default:
                     System.out.println("Invalid choice. Please try again.");
@@ -715,13 +709,12 @@ public class APUHostelManagement {
         String password = scanner.nextLine();
         System.out.print("Enter contact number: ");
         String contactNumber = scanner.nextLine();
-        System.out.print("Enter date of registration: ");
-        String dateOfRegistration = scanner.nextLine();
+        
 
         try {
             String userID = generateUserID("U");
             String residentID = generateUserID("R");
-            Resident resident = new Resident(userID, icPassportNumber, username, password, contactNumber, dateOfRegistration);
+            Resident resident = new Resident(userID, icPassportNumber, username, password, contactNumber);
             resident.saveToFile("unapproved_residents.txt");
             System.out.println("Resident registered successfully.");
             displayWelcomePage();
