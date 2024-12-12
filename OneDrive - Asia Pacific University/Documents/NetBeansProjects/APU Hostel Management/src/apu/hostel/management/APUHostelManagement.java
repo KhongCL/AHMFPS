@@ -120,8 +120,9 @@ public class APUHostelManagement {
             return readFromFile("users.txt");
         }
 
+        // Method to check if IC/Passport Number, Username, or Contact Number is unique
         public static boolean isUnique(String icPassportNumber, String username, String contactNumber) throws IOException {
-            List<User> users = loadAllUsers();
+            List<User> users = User.loadAllUsers();
             for (User user : users) {
                 if (user.getIcPassportNumber().equals(icPassportNumber) || user.getUsername().equals(username) || user.getContactNumber().equals(contactNumber)) {
                     return false;
@@ -129,7 +130,6 @@ public class APUHostelManagement {
             }
             return true;
         }
-    }
 
     // Manager class
     public static class Manager extends User {
@@ -638,6 +638,11 @@ public class APUHostelManagement {
         String contactNumber = scanner.nextLine();
 
         try {
+            if (!User.isUnique(icPassportNumber, username, contactNumber)) {
+                System.out.println("Error: IC/Passport Number, Username, or Contact Number already exists.");
+                return;
+            }
+            String dateOfRegistration = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
             String userID = generateUserID("U");
             User manager = new Manager(userID, icPassportNumber, username, password, contactNumber, dateOfRegistration);
             manager.saveToFile("managers.txt");
@@ -663,7 +668,14 @@ public class APUHostelManagement {
                 user.displayMenu();
             } else {
                 System.out.println("Invalid username or password.");
-                loginManager(); // Retry login
+                System.out.print("Do you want to retry? (yes/no): ");
+                String choice = scanner.nextLine();
+                if (choice.equalsIgnoreCase("yes")) {
+                    loginManager(); // Retry login
+                } else {
+                    System.out.println("Exiting login process.");
+                    displayWelcomePage();
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();
