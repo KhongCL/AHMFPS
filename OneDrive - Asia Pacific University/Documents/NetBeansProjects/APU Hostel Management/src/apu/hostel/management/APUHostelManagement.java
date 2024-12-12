@@ -14,7 +14,6 @@ public class APUHostelManagement {
         protected String contactNumber;
         protected String dateOfRegistration;
         protected String role;
-        protected boolean approved;
         
 
         public User(String userID, String icPassportNumber, String username, String password, String contactNumber, String dateOfRegistration, String role) {
@@ -25,7 +24,6 @@ public class APUHostelManagement {
             this.contactNumber = contactNumber;
             this.dateOfRegistration = dateOfRegistration;
             this.role = role;
-            this.approved = false;
         }
 
         public String getUserID() {
@@ -56,19 +54,11 @@ public class APUHostelManagement {
             return role;
         }
 
-        public boolean isApproved() {
-            return approved;
-        }
-
-        public void setApproved(boolean approved) {
-            this.approved = approved;
-        }
-
         public abstract void displayMenu();
 
         public void saveToFile(String filename) throws IOException {
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename, true))) {
-                writer.write(userID + "," + icPassportNumber + "," + username + "," + password + "," + contactNumber + "," + dateOfRegistration + "," + role + "," + approved);
+                writer.write(userID + "," + icPassportNumber + "," + username + "," + password + "," + contactNumber + "," + dateOfRegistration + "," + role);
                 writer.newLine();
             }
         }
@@ -79,7 +69,7 @@ public class APUHostelManagement {
                 String line;
                 while ((line = reader.readLine()) != null) {
                     String[] parts = line.split(",");
-                    if (parts.length == 8) {
+                    if (parts.length == 7) {
                         User user = null;
                         switch (parts[6]) {
                             case "Manager":
@@ -93,7 +83,6 @@ public class APUHostelManagement {
                                 break;
                         }
                         if (user != null) {
-                            user.setApproved(Boolean.parseBoolean(parts[7]));
                             users.add(user);
                         }
                     }
@@ -107,7 +96,7 @@ public class APUHostelManagement {
                 String line;
                 while ((line = reader.readLine()) != null) {
                     String[] parts = line.split(",");
-                    if (parts.length == 8 && parts[2].equals(username) && parts[3].equals(password)) {
+                    if (parts.length == 7 && parts[2].equals(username) && parts[3].equals(password)) {
                         User user = null;
                         switch (parts[6]) {
                             case "Manager":
@@ -119,9 +108,6 @@ public class APUHostelManagement {
                             case "Resident":
                                 user = new Resident(parts[0], parts[1], parts[2], parts[3], parts[4]);
                                 break;
-                        }
-                        if (user != null) {
-                            user.setApproved(Boolean.parseBoolean(parts[7]));
                         }
                         return user;
                     }
@@ -206,13 +192,13 @@ public class APUHostelManagement {
                 System.out.println("Unapproved Staffs:");
                 for (int i = 0; i < unapprovedStaffs.size(); i++) {
                     User user = unapprovedStaffs.get(i);
-                    System.out.println((i + 1) + ". " + user.getUsername() + " (" + user.getRole() + ")");
+                    System.out.println((i + 1) + ". " + user.getUsername() + " (" + user.getUserID() + ")");
                 }
 
                 System.out.println("Unapproved Residents:");
                 for (int i = 0; i < unapprovedResidents.size(); i++) {
                     User user = unapprovedResidents.get(i);
-                    System.out.println((i + 1 + unapprovedStaffs.size()) + ". " + user.getUsername() + " (" + user.getRole() + ")");
+                    System.out.println((i + 1 + unapprovedStaffs.size()) + ". " + user.getUsername() + " (" + user.getUserID() + ")");
                 }
 
                 System.out.print("Enter the number of the user to approve: ");
@@ -222,14 +208,12 @@ public class APUHostelManagement {
 
                 if (userIndex >= 0 && userIndex < unapprovedStaffs.size()) {
                     User userToApprove = unapprovedStaffs.get(userIndex);
-                    userToApprove.setApproved(true);
                     userToApprove.saveToFile("approved_staffs.txt");
                     unapprovedStaffs.remove(userIndex);
                     saveUnapprovedUsers(unapprovedStaffs, "unapproved_staffs.txt");
                     System.out.println("Staff approved successfully.");
                 } else if (userIndex >= unapprovedStaffs.size() && userIndex < unapprovedStaffs.size() + unapprovedResidents.size()) {
                     User userToApprove = unapprovedResidents.get(userIndex - unapprovedStaffs.size());
-                    userToApprove.setApproved(true);
                     userToApprove.saveToFile("approved_residents.txt");
                     unapprovedResidents.remove(userIndex - unapprovedStaffs.size());
                     saveUnapprovedUsers(unapprovedResidents, "unapproved_residents.txt");
@@ -248,12 +232,10 @@ public class APUHostelManagement {
                 for (User user : users) {
                     if (user instanceof Staff) {
                         Staff staff = (Staff) user;
-                        writer.write(staff.getStaffID() + "," + staff.getUserID() + "," + staff.getIcPassportNumber() + "," + staff.getUsername() + "," + staff.getPassword() + "," + staff.getContactNumber() + "," + staff.getDateOfRegistration() + "," + staff.getRole() + "," + staff.isApproved() + "," + staff.getDateOfApproval());
+                        writer.write(staff.getStaffID() + "," + staff.getUserID() + "," + staff.getDateOfApproval());
                     } else if (user instanceof Resident) {
                         Resident resident = (Resident) user;
-                        writer.write(resident.getResidentID() + "," + resident.getUserID() + "," + resident.getIcPassportNumber() + "," + resident.getUsername() + "," + resident.getPassword() + "," + resident.getContactNumber() + "," + resident.getDateOfRegistration() + "," + resident.getRole() + "," + resident.isApproved() + "," + resident.getDateOfApproval());
-                    } else {
-                        writer.write(user.getUserID() + "," + user.getIcPassportNumber() + "," + user.getUsername() + "," + user.getPassword() + "," + user.getContactNumber() + "," + user.getDateOfRegistration() + "," + user.getRole() + "," + user.isApproved());
+                        writer.write(resident.getResidentID() + "," + resident.getUserID() + "," + resident.getDateOfApproval());
                     }
                     writer.newLine();
                 }
@@ -760,7 +742,7 @@ public class APUHostelManagement {
 
         try {
             User user = User.findUser(username, password, "approved_residents.txt");
-            if (user != null && user.getRole().equals("Resident")) {
+            if (user != null && user instanceof Resident) {
                 System.out.println("Login successful.");
                 user.displayMenu();
             } else {
