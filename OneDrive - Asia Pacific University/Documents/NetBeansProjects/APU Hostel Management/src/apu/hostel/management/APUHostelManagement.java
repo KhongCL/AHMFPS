@@ -662,12 +662,10 @@ public class APUHostelManagement {
         String password = scanner.nextLine();
         System.out.print("Enter contact number: ");
         String contactNumber = scanner.nextLine();
-        System.out.print("Enter date of registration: ");
-        String dateOfRegistration = scanner.nextLine();
 
         try {
             String userID = generateUserID("U");
-            User staff = new Staff(userID, icPassportNumber, username, password, contactNumber, dateOfRegistration);
+            User staff = new Staff(userID, icPassportNumber, username, password, contactNumber);
             staff.saveToFile("unapproved_staffs.txt");
             System.out.println("Staff registered successfully.");
             displayWelcomePage();
