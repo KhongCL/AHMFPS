@@ -246,7 +246,15 @@ public class APUHostelManagement {
         private void saveUnapprovedUsers(List<User> users, String filename) throws IOException {
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
                 for (User user : users) {
-                    writer.write(user.getUserID() + "," + user.getIcPassportNumber() + "," + user.getUsername() + "," + user.getPassword() + "," + user.getContactNumber() + "," + user.getDateOfRegistration() + "," + user.getRole() + "," + user.isApproved());
+                    if (user instanceof Staff) {
+                        Staff staff = (Staff) user;
+                        writer.write(staff.getStaffID() + "," + staff.getUserID() + "," + staff.getIcPassportNumber() + "," + staff.getUsername() + "," + staff.getPassword() + "," + staff.getContactNumber() + "," + staff.getDateOfRegistration() + "," + staff.getRole() + "," + staff.isApproved() + "," + staff.getDateOfApproval());
+                    } else if (user instanceof Resident) {
+                        Resident resident = (Resident) user;
+                        writer.write(resident.getResidentID() + "," + resident.getUserID() + "," + resident.getIcPassportNumber() + "," + resident.getUsername() + "," + resident.getPassword() + "," + resident.getContactNumber() + "," + resident.getDateOfRegistration() + "," + resident.getRole() + "," + resident.isApproved() + "," + resident.getDateOfApproval());
+                    } else {
+                        writer.write(user.getUserID() + "," + user.getIcPassportNumber() + "," + user.getUsername() + "," + user.getPassword() + "," + user.getContactNumber() + "," + user.getDateOfRegistration() + "," + user.getRole() + "," + user.isApproved());
+                    }
                     writer.newLine();
                 }
             }
@@ -368,7 +376,7 @@ public class APUHostelManagement {
         public void displayMenu() {
             // Resident-specific menu implementation
             System.out.println("Resident Menu:");
-            System.out.println("1. Update Individual Login Account");
+            System.out.println("1. Update Individual Information");
             System.out.println("2. View Payment Records");
             System.out.println("3. Logout");
             System.out.print("Enter your choice: ");
@@ -379,7 +387,7 @@ public class APUHostelManagement {
 
             switch (choice) {
                 case 1:
-                    // Register Individual Login Account logic
+                    updatePersonalInformation();
                     break;
                 case 2:
                     // Update Individual Login Account logic
@@ -391,6 +399,27 @@ public class APUHostelManagement {
                     System.out.println("Invalid choice. Please try again.");
             }
             
+        }
+
+        public void updatePersonalInformation() {
+            Scanner scanner = new Scanner(System.in);
+            System.out.print("Enter new username: ");
+            String newUsername = scanner.nextLine();
+            System.out.print("Enter new password: ");
+            String newPassword = scanner.nextLine();
+            System.out.print("Enter new contact number: ");
+            String newContactNumber = scanner.nextLine();
+
+            this.username = newUsername;
+            this.password = newPassword;
+            this.contactNumber = newContactNumber;
+
+            try {
+                saveToFile("approved_residents.txt");
+                System.out.println("Personal information updated successfully.");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
         public void updateDetails() {
@@ -747,6 +776,15 @@ public class APUHostelManagement {
     private static String generateUserID(String prefix) {
         int id = 1;
         String filename = prefix.equals("R") ? "unapproved_residents.txt" : "users.txt";
+        File file = new File(filename);
+        if (!file.exists()) {
+            try {
+                file.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        
         try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
             String line;
             while ((line = reader.readLine()) != null) {
