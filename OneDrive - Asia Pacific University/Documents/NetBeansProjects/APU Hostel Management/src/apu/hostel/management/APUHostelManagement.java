@@ -122,7 +122,14 @@ public class APUHostelManagement {
 
         // Method to check if IC/Passport Number, Username, or Contact Number is unique
         public static boolean isUnique(String icPassportNumber, String username, String contactNumber) throws IOException {
-            List<User> users = User.loadAllUsers();
+            List<User> users = new ArrayList<>();
+            users.addAll(User.readFromFile("users.txt"));
+            users.addAll(User.readFromFile("unapproved_residents.txt"));
+            users.addAll(User.readFromFile("approved_residents.txt"));
+            users.addAll(User.readFromFile("unapproved_staffs.txt"));
+            users.addAll(User.readFromFile("approved_staffs.txt"));
+            users.addAll(User.readFromFile("managers.txt"));
+
             for (User user : users) {
                 if (user.getIcPassportNumber().equals(icPassportNumber) || user.getUsername().equals(username) || user.getContactNumber().equals(contactNumber)) {
                     return false;
