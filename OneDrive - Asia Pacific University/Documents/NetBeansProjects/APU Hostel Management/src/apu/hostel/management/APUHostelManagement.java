@@ -391,10 +391,10 @@ public class APUHostelManagement {
                     updatePersonalInformation();
                     break;
                 case 2:
-                    // Update Individual Login Account logic
+                    // View Payment Records
                     break;
                 case 3:
-                    // View Payment Records logic
+                    // Logout
                     break;
                 default:
                     System.out.println("Invalid choice. Please try again.");
@@ -404,23 +404,50 @@ public class APUHostelManagement {
 
         public void updatePersonalInformation() {
             Scanner scanner = new Scanner(System.in);
-            System.out.print("Enter new username: ");
-            String newUsername = scanner.nextLine();
-            System.out.print("Enter new password: ");
-            String newPassword = scanner.nextLine();
-            System.out.print("Enter new contact number: ");
-            String newContactNumber = scanner.nextLine();
+            int choice;
 
-            this.username = newUsername;
-            this.password = newPassword;
-            this.contactNumber = newContactNumber;
+            do {
+                System.out.println("Update Personal Information:");
+                System.out.println("1. Update Username");
+                System.out.println("2. Update Password");
+                System.out.println("3. Update Contact Number");
+                System.out.println("0. Go Back to Resident Menu");
+                System.out.print("Enter your choice: ");
+                choice = scanner.nextInt();
+                scanner.nextLine(); // Consume newline
 
-            try {
-                saveToFile("approved_residents.txt");
-                System.out.println("Personal information updated successfully.");
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+                switch (choice) {
+                    case 1:
+                        System.out.print("Enter new username: ");
+                        String newUsername = scanner.nextLine();
+                        this.username = newUsername;
+                        System.out.println("Username updated successfully.");
+                        break;
+                    case 2:
+                        System.out.print("Enter new password: ");
+                        String newPassword = scanner.nextLine();
+                        this.password = newPassword;
+                        System.out.println("Password updated successfully.");
+                        break;
+                    case 3:
+                        System.out.print("Enter new contact number: ");
+                        String newContactNumber = scanner.nextLine();
+                        this.contactNumber = newContactNumber;
+                        System.out.println("Contact number updated successfully.");
+                        break;
+                    case 0:
+                        System.out.println("Returning to Resident Menu...");
+                        break;
+                    default:
+                        System.out.println("Invalid choice. Please try again.");
+                }
+
+                try {
+                    saveToFile("approved_residents.txt");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            } while (choice != 0);
         }
 
         public void updateDetails() {
@@ -637,20 +664,69 @@ public class APUHostelManagement {
     // Method to handle Manager registration
     public static void registerManager() {
         Scanner scanner = new Scanner(System.in);
-        System.out.print("Enter IC/Passport Number: ");
-        String icPassportNumber = scanner.nextLine();
-        System.out.print("Enter username: ");
-        String username = scanner.nextLine();
+        String icPassportNumber, username, password, contactNumber;
+
+        while (true) {
+            System.out.print("Enter IC/Passport Number: ");
+            icPassportNumber = scanner.nextLine();
+            try {
+                if (!User.isUnique(icPassportNumber, "", "")) {
+                    System.out.println("Error: IC/Passport Number already exists.");
+                    System.out.print("Do you want to try again? (yes/no): ");
+                    if (!scanner.nextLine().equalsIgnoreCase("yes")) {
+                        displayWelcomePage();
+                        return;
+                    }
+                    continue;
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            break;
+        }
+
+        while (true) {
+            System.out.print("Enter username: ");
+            username = scanner.nextLine();
+            try {
+                if (!User.isUnique("", username, "")) {
+                    System.out.println("Error: Username already exists.");
+                    System.out.print("Do you want to try again? (yes/no): ");
+                    if (!scanner.nextLine().equalsIgnoreCase("yes")) {
+                        displayWelcomePage();
+                        return;
+                    }
+                    continue;
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            break;
+        }
+
         System.out.print("Enter password: ");
-        String password = scanner.nextLine();
-        System.out.print("Enter contact number: ");
-        String contactNumber = scanner.nextLine();
+        password = scanner.nextLine();
+
+        while (true) {
+            System.out.print("Enter contact number: ");
+            contactNumber = scanner.nextLine();
+            try {
+                if (!User.isUnique("", "", contactNumber)) {
+                    System.out.println("Error: Contact Number already exists.");
+                    System.out.print("Do you want to try again? (yes/no): ");
+                    if (!scanner.nextLine().equalsIgnoreCase("yes")) {
+                        displayWelcomePage();
+                        return;
+                    }
+                    continue;
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            break;
+        }
 
         try {
-            if (!User.isUnique(icPassportNumber, username, contactNumber)) {
-                System.out.println("Error: IC/Passport Number, Username, or Contact Number already exists.");
-                return;
-            }
             String dateOfRegistration = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
             String userID = generateUserID("U");
             User manager = new Manager(userID, icPassportNumber, username, password, contactNumber, dateOfRegistration);
@@ -694,20 +770,69 @@ public class APUHostelManagement {
     // Method to handle Staff registration
     public static void registerStaff() {
         Scanner scanner = new Scanner(System.in);
-        System.out.print("Enter IC/Passport Number: ");
-        String icPassportNumber = scanner.nextLine();
-        System.out.print("Enter username: ");
-        String username = scanner.nextLine();
+        String icPassportNumber, username, password, contactNumber;
+
+        while (true) {
+            System.out.print("Enter IC/Passport Number: ");
+            icPassportNumber = scanner.nextLine();
+            try {
+                if (!User.isUnique(icPassportNumber, "", "")) {
+                    System.out.println("Error: IC/Passport Number already exists.");
+                    System.out.print("Do you want to try again? (yes/no): ");
+                    if (!scanner.nextLine().equalsIgnoreCase("yes")) {
+                        displayWelcomePage();
+                        return;
+                    }
+                    continue;
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            break;
+        }
+
+        while (true) {
+            System.out.print("Enter username: ");
+            username = scanner.nextLine();
+            try {
+                if (!User.isUnique("", username, "")) {
+                    System.out.println("Error: Username already exists.");
+                    System.out.print("Do you want to try again? (yes/no): ");
+                    if (!scanner.nextLine().equalsIgnoreCase("yes")) {
+                        displayWelcomePage();
+                        return;
+                    }
+                    continue;
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            break;
+        }
+
         System.out.print("Enter password: ");
-        String password = scanner.nextLine();
-        System.out.print("Enter contact number: ");
-        String contactNumber = scanner.nextLine();
+        password = scanner.nextLine();
+
+        while (true) {
+            System.out.print("Enter contact number: ");
+            contactNumber = scanner.nextLine();
+            try {
+                if (!User.isUnique("", "", contactNumber)) {
+                    System.out.println("Error: Contact Number already exists.");
+                    System.out.print("Do you want to try again? (yes/no): ");
+                    if (!scanner.nextLine().equalsIgnoreCase("yes")) {
+                        displayWelcomePage();
+                        return;
+                    }
+                    continue;
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            break;
+        }
 
         try {
-            if (!User.isUnique(icPassportNumber, username, contactNumber)) {
-                System.out.println("Error: IC/Passport Number, Username, or Contact Number already exists.");
-                return;
-            }
             String dateOfRegistration = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
             Staff staff = new Staff(icPassportNumber, username, password, contactNumber, dateOfRegistration);
             staff.saveToFile("unapproved_staffs.txt");
@@ -750,21 +875,69 @@ public class APUHostelManagement {
     // Method to handle Resident registration
     public static void registerResident() {
         Scanner scanner = new Scanner(System.in);
-        System.out.print("Enter IC/Passport Number: ");
-        String icPassportNumber = scanner.nextLine();
-        System.out.print("Enter username: ");
-        String username = scanner.nextLine();
+        String icPassportNumber, username, password, contactNumber;
+
+        while (true) {
+            System.out.print("Enter IC/Passport Number: ");
+            icPassportNumber = scanner.nextLine();
+            try {
+                if (!User.isUnique(icPassportNumber, "", "")) {
+                    System.out.println("Error: IC/Passport Number already exists.");
+                    System.out.print("Do you want to try again? (yes/no): ");
+                    if (!scanner.nextLine().equalsIgnoreCase("yes")) {
+                        displayWelcomePage();
+                        return;
+                    }
+                    continue;
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            break;
+        }
+
+        while (true) {
+            System.out.print("Enter username: ");
+            username = scanner.nextLine();
+            try {
+                if (!User.isUnique("", username, "")) {
+                    System.out.println("Error: Username already exists.");
+                    System.out.print("Do you want to try again? (yes/no): ");
+                    if (!scanner.nextLine().equalsIgnoreCase("yes")) {
+                        displayWelcomePage();
+                        return;
+                    }
+                    continue;
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            break;
+        }
+
         System.out.print("Enter password: ");
-        String password = scanner.nextLine();
-        System.out.print("Enter contact number: ");
-        String contactNumber = scanner.nextLine();
-        
+        password = scanner.nextLine();
+
+        while (true) {
+            System.out.print("Enter contact number: ");
+            contactNumber = scanner.nextLine();
+            try {
+                if (!User.isUnique("", "", contactNumber)) {
+                    System.out.println("Error: Contact Number already exists.");
+                    System.out.print("Do you want to try again? (yes/no): ");
+                    if (!scanner.nextLine().equalsIgnoreCase("yes")) {
+                        displayWelcomePage();
+                        return;
+                    }
+                    continue;
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            break;
+        }
 
         try {
-            if (!User.isUnique(icPassportNumber, username, contactNumber)) {
-                System.out.println("Error: IC/Passport Number, Username, or Contact Number already exists.");
-                return;
-            }
             String dateOfRegistration = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
             Resident resident = new Resident(icPassportNumber, username, password, contactNumber, dateOfRegistration);
             resident.saveToFile("unapproved_residents.txt");
