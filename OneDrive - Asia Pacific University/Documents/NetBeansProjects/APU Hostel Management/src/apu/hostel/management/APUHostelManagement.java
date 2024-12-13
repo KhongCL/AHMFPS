@@ -356,9 +356,11 @@ public class APUHostelManagement {
     public static class Resident extends User {
         private String residentID;
         private String dateOfApproval;
+        private boolean loggedIn;
 
         public Resident(String icPassportNumber, String username, String password, String contactNumber, String dateOfRegistration) {
             super(null, icPassportNumber, username, password, contactNumber, dateOfRegistration, "Resident");
+            this.loggedIn = true;
         }
 
         public String getResidentID() {
@@ -371,6 +373,10 @@ public class APUHostelManagement {
 
         public void setDateOfApproval(String dateOfApproval) {
             this.dateOfApproval = dateOfApproval;
+        }
+
+        public boolean isLoggedIn() {
+            return loggedIn;
         }
 
         @Override
@@ -391,10 +397,10 @@ public class APUHostelManagement {
                     updatePersonalInformation();
                     break;
                 case 2:
-                    // View Payment Records
+                    viewPaymentRecords();
                     break;
                 case 3:
-                    // Logout
+                    residentLogout();
                     break;
                 default:
                     System.out.println("Invalid choice. Please try again.");
@@ -450,12 +456,47 @@ public class APUHostelManagement {
             } while (choice != 0);
         }
 
-        public void updateDetails() {
-            // Update details logic
+        public void viewPaymentRecords() {
+            System.out.println("Payment Records:");
+            String userID = this.getUserID(); // Assuming there's a method to get the current user's ID
+
+            try (BufferedReader br = new BufferedReader(new FileReader("payments.txt"))) {
+                String line;
+                boolean hasRecords = false;
+                while ((line = br.readLine()) != null) {
+                    String[] details = line.split(", ");
+                    if (details[0].equals(userID)) {
+                        hasRecords = true;
+                        System.out.println("Username: " + details[1]);
+                        System.out.println("Payment Amount: " + details[2]);
+                        System.out.println("Payment Date: " + details[3]);
+                        System.out.println("Room Number: " + details[4]);
+                        System.out.println("Receipt Number: " + details[5]);
+                        System.out.println("-----------------------------");
+                    }
+                }
+                if (!hasRecords) {
+                    System.out.println("No payment records found for your account.");
+                }
+            } catch (IOException e) {
+                System.out.println("An error occurred while reading the payment records.");
+                e.printStackTrace();
+            }
         }
 
-        public void viewPaymentRecords() {
-            // View payment records logic
+        public void residentLogout() {
+            System.out.println("Logging out...");
+            // Perform any necessary cleanup, such as closing resources or saving state
+            // For example:
+            // closeDatabaseConnection();
+            // saveUserSession();
+
+            // Mark the user as logged out
+            this.loggedIn = false;
+
+            System.out.println("You have been logged out successfully.");
+            // Route back to the main menu
+            APUHostelManagement.displayWelcomePage();
         }
     }
 
@@ -669,6 +710,10 @@ public class APUHostelManagement {
         while (true) {
             System.out.print("Enter IC/Passport Number: ");
             icPassportNumber = scanner.nextLine();
+            if (icPassportNumber.isEmpty()) {
+                System.out.println("IC/Passport Number cannot be empty. Please try again.");
+                continue;
+            }
             try {
                 if (!User.isUnique(icPassportNumber, "", "")) {
                     System.out.println("Error: IC/Passport Number already exists.");
@@ -688,6 +733,10 @@ public class APUHostelManagement {
         while (true) {
             System.out.print("Enter username: ");
             username = scanner.nextLine();
+            if (username.isEmpty()) {
+                System.out.println("Username cannot be empty. Please try again.");
+                continue;
+            }
             try {
                 if (!User.isUnique("", username, "")) {
                     System.out.println("Error: Username already exists.");
@@ -704,12 +753,23 @@ public class APUHostelManagement {
             break;
         }
 
-        System.out.print("Enter password: ");
-        password = scanner.nextLine();
+        while (true) {
+            System.out.print("Enter password: ");
+            password = scanner.nextLine();
+            if (password.isEmpty()) {
+                System.out.println("Password cannot be empty. Please try again.");
+                continue;
+            }
+            break;
+        }
 
         while (true) {
             System.out.print("Enter contact number: ");
             contactNumber = scanner.nextLine();
+            if (contactNumber.isEmpty()) {
+                System.out.println("Contact number cannot be empty. Please try again.");
+                continue;
+            }
             try {
                 if (!User.isUnique("", "", contactNumber)) {
                     System.out.println("Error: Contact Number already exists.");
@@ -741,10 +801,27 @@ public class APUHostelManagement {
     // Method to handle Manager login
     public static void loginManager() {
         Scanner scanner = new Scanner(System.in);
-        System.out.print("Enter username: ");
-        String username = scanner.nextLine();
-        System.out.print("Enter password: ");
-        String password = scanner.nextLine();
+        String username, password;
+
+        while (true) {
+            System.out.print("Enter username: ");
+            username = scanner.nextLine();
+            if (username.isEmpty()) {
+                System.out.println("Username cannot be empty. Please try again.");
+                continue;
+            }
+            break;
+        }
+
+        while (true) {
+            System.out.print("Enter password: ");
+            password = scanner.nextLine();
+            if (password.isEmpty()) {
+                System.out.println("Password cannot be empty. Please try again.");
+                continue;
+            }
+            break;
+        }
 
         try {
             User user = User.findUser(username, password, "managers.txt");
@@ -775,6 +852,10 @@ public class APUHostelManagement {
         while (true) {
             System.out.print("Enter IC/Passport Number: ");
             icPassportNumber = scanner.nextLine();
+            if (icPassportNumber.isEmpty()) {
+                System.out.println("IC/Passport Number cannot be empty. Please try again.");
+                continue;
+            }
             try {
                 if (!User.isUnique(icPassportNumber, "", "")) {
                     System.out.println("Error: IC/Passport Number already exists.");
@@ -794,6 +875,10 @@ public class APUHostelManagement {
         while (true) {
             System.out.print("Enter username: ");
             username = scanner.nextLine();
+            if (username.isEmpty()) {
+                System.out.println("Username cannot be empty. Please try again.");
+                continue;
+            }
             try {
                 if (!User.isUnique("", username, "")) {
                     System.out.println("Error: Username already exists.");
@@ -810,12 +895,23 @@ public class APUHostelManagement {
             break;
         }
 
-        System.out.print("Enter password: ");
-        password = scanner.nextLine();
+        while (true) {
+            System.out.print("Enter password: ");
+            password = scanner.nextLine();
+            if (password.isEmpty()) {
+                System.out.println("Password cannot be empty. Please try again.");
+                continue;
+            }
+            break;
+        }
 
         while (true) {
             System.out.print("Enter contact number: ");
             contactNumber = scanner.nextLine();
+            if (contactNumber.isEmpty()) {
+                System.out.println("Contact number cannot be empty. Please try again.");
+                continue;
+            }
             try {
                 if (!User.isUnique("", "", contactNumber)) {
                     System.out.println("Error: Contact Number already exists.");
@@ -846,10 +942,27 @@ public class APUHostelManagement {
     // Method to handle Staff login
     public static void loginStaff() {
         Scanner scanner = new Scanner(System.in);
-        System.out.print("Enter username: ");
-        String username = scanner.nextLine();
-        System.out.print("Enter password: ");
-        String password = scanner.nextLine();
+        String username, password;
+
+        while (true) {
+            System.out.print("Enter username: ");
+            username = scanner.nextLine();
+            if (username.isEmpty()) {
+                System.out.println("Username cannot be empty. Please try again.");
+                continue;
+            }
+            break;
+        }
+
+        while (true) {
+            System.out.print("Enter password: ");
+            password = scanner.nextLine();
+            if (password.isEmpty()) {
+                System.out.println("Password cannot be empty. Please try again.");
+                continue;
+            }
+            break;
+        }
 
         try {
             User user = User.findUser(username, password, "approved_staffs.txt");
@@ -858,7 +971,7 @@ public class APUHostelManagement {
                 user.displayMenu();
             } else {
                 System.out.println("Invalid username or password.");
-                System.out.print("Do you want to try again? (yes/no): ");
+                System.out.print("Do you want to retry? (yes/no): ");
                 String choice = scanner.nextLine();
                 if (choice.equalsIgnoreCase("yes")) {
                     loginStaff(); // Retry login
@@ -880,6 +993,10 @@ public class APUHostelManagement {
         while (true) {
             System.out.print("Enter IC/Passport Number: ");
             icPassportNumber = scanner.nextLine();
+            if (icPassportNumber.isEmpty()) {
+                System.out.println("IC/Passport Number cannot be empty. Please try again.");
+                continue;
+            }
             try {
                 if (!User.isUnique(icPassportNumber, "", "")) {
                     System.out.println("Error: IC/Passport Number already exists.");
@@ -899,6 +1016,10 @@ public class APUHostelManagement {
         while (true) {
             System.out.print("Enter username: ");
             username = scanner.nextLine();
+            if (username.isEmpty()) {
+                System.out.println("Username cannot be empty. Please try again.");
+                continue;
+            }
             try {
                 if (!User.isUnique("", username, "")) {
                     System.out.println("Error: Username already exists.");
@@ -915,12 +1036,23 @@ public class APUHostelManagement {
             break;
         }
 
-        System.out.print("Enter password: ");
-        password = scanner.nextLine();
+        while (true) {
+            System.out.print("Enter password: ");
+            password = scanner.nextLine();
+            if (password.isEmpty()) {
+                System.out.println("Password cannot be empty. Please try again.");
+                continue;
+            }
+            break;
+        }
 
         while (true) {
             System.out.print("Enter contact number: ");
             contactNumber = scanner.nextLine();
+            if (contactNumber.isEmpty()) {
+                System.out.println("Contact number cannot be empty. Please try again.");
+                continue;
+            }
             try {
                 if (!User.isUnique("", "", contactNumber)) {
                     System.out.println("Error: Contact Number already exists.");
@@ -951,10 +1083,27 @@ public class APUHostelManagement {
     // Method to handle Resident login
     public static void loginResident() {
         Scanner scanner = new Scanner(System.in);
-        System.out.print("Enter username: ");
-        String username = scanner.nextLine();
-        System.out.print("Enter password: ");
-        String password = scanner.nextLine();
+        String username, password;
+
+        while (true) {
+            System.out.print("Enter username: ");
+            username = scanner.nextLine();
+            if (username.isEmpty()) {
+                System.out.println("Username cannot be empty. Please try again.");
+                continue;
+            }
+            break;
+        }
+
+        while (true) {
+            System.out.print("Enter password: ");
+            password = scanner.nextLine();
+            if (password.isEmpty()) {
+                System.out.println("Password cannot be empty. Please try again.");
+                continue;
+            }
+            break;
+        }
 
         try {
             User user = User.findUser(username, password, "approved_residents.txt");
@@ -963,7 +1112,7 @@ public class APUHostelManagement {
                 user.displayMenu();
             } else {
                 System.out.println("Invalid username or password.");
-                System.out.print("Do you want to try again? (yes/no): ");
+                System.out.print("Do you want to retry? (yes/no): ");
                 String choice = scanner.nextLine();
                 if (choice.equalsIgnoreCase("yes")) {
                     loginResident(); // Retry login
