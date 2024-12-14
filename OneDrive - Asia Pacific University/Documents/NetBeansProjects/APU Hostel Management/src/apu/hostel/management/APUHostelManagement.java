@@ -1,6 +1,12 @@
 package apu.hostel.management;
 import java.io.*;
 import java.util.*;
+
+import apu.hostel.management.APUHostelManagement.Manager;
+import apu.hostel.management.APUHostelManagement.Resident;
+import apu.hostel.management.APUHostelManagement.Staff;
+import apu.hostel.management.APUHostelManagement.User;
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -310,6 +316,10 @@ public class APUHostelManagement {
             this.dateOfApproval = dateOfApproval;
         }
 
+        public boolean isLoggedIn() {
+            return loggedIn;
+        }
+
         @Override
         public void displayMenu() {
             System.out.println("Staff Menu:");
@@ -325,7 +335,8 @@ public class APUHostelManagement {
     
             switch (choice) {
                 case 1:
-                    // Update Individual Login Account logic
+                    updatePersonalInformation();
+                    
                     break;
                 case 2:
                     // Make Payment for Resident logic
@@ -344,12 +355,97 @@ public class APUHostelManagement {
             }
         }
 
-        public void registerUser(User user) {
-            // Register user logic
+        public void updatePersonalInformation() {
+            Scanner scanner = new Scanner(System.in);
+            int choice;
+    
+            do {
+                System.out.println("Update Personal Information:");
+                System.out.println("1. Update Username");
+                System.out.println("2. Update Password");
+                System.out.println("3. Update Contact Number");
+                System.out.println("0. Go Back to Staff Menu");
+                System.out.print("Enter your choice: ");
+                choice = scanner.nextInt();
+                scanner.nextLine(); // Consume newline
+    
+                switch (choice) {
+                    case 1:
+                        System.out.print("Enter new username: ");
+                        String newUsername = scanner.nextLine();
+                        if (newUsername.isEmpty()) {
+                            System.out.println("Username cannot be empty. Please try again.");
+                            break;
+                        }
+                        try {
+                            if (!User.isUnique("", newUsername, "")) {
+                                System.out.println("Error: Username already exists.");
+                                break;
+                            }
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                            break;
+                        }
+                        this.username = newUsername;
+                        System.out.println("Username updated successfully.");
+                        break;
+                    case 2:
+                        System.out.print("Enter new password: ");
+                        String newPassword = scanner.nextLine();
+                        if (newPassword.isEmpty()) {
+                            System.out.println("Password cannot be empty. Please try again.");
+                            break;
+                        }
+                        this.password = newPassword;
+                        System.out.println("Password updated successfully.");
+                        break;
+                    case 3:
+                        System.out.print("Enter new contact number: ");
+                        String newContactNumber = scanner.nextLine();
+                        if (newContactNumber.isEmpty()) {
+                            System.out.println("Contact number cannot be empty. Please try again.");
+                            break;
+                        }
+                        try {
+                            if (!User.isUnique("", "", newContactNumber)) {
+                                System.out.println("Error: Contact Number already exists.");
+                                break;
+                            }
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                            break;
+                        }
+                        this.contactNumber = newContactNumber;
+                        System.out.println("Contact number updated successfully.");
+                        break;
+                    case 0:
+                        System.out.println("Returning to Staff Menu...");
+                        break;
+                    default:
+                        System.out.println("Invalid choice. Please try again.");
+                }
+    
+                try {
+                    updateFile("approved_staffs.txt");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            } while (choice != 0);
+            displayMenu(); 
         }
-
-        public void updateUser(User user) {
-            // Update user logic
+    
+        private void updateFile(String filename) throws IOException {
+            List<User> users = User.readFromFile(filename);
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
+                for (User user : users) {
+                    if (user.getUserID().equals(this.userID)) {
+                        writer.write(this.userID + "," + this.icPassportNumber + "," + this.username + "," + this.password + "," + this.contactNumber + "," + this.dateOfRegistration + "," + this.role);
+                    } else {
+                        writer.write(user.getUserID() + "," + user.getIcPassportNumber() + "," + user.getUsername() + "," + user.getPassword() + "," + user.getContactNumber() + "," + user.getDateOfRegistration() + "," + user.getRole());
+                    }
+                    writer.newLine();
+                }
+            }
         }
 
         public void makePayment(Resident resident, double amount) {
@@ -435,18 +531,48 @@ public class APUHostelManagement {
                     case 1:
                         System.out.print("Enter new username: ");
                         String newUsername = scanner.nextLine();
+                        if (newUsername.isEmpty()) {
+                            System.out.println("Username cannot be empty. Please try again.");
+                            break;
+                        }
+                        try {
+                            if (!User.isUnique("", newUsername, "")) {
+                                System.out.println("Error: Username already exists.");
+                                break;
+                            }
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                            break;
+                        }
                         this.username = newUsername;
                         System.out.println("Username updated successfully.");
                         break;
                     case 2:
                         System.out.print("Enter new password: ");
                         String newPassword = scanner.nextLine();
+                        if (newPassword.isEmpty()) {
+                            System.out.println("Password cannot be empty. Please try again.");
+                            break;
+                        }
                         this.password = newPassword;
                         System.out.println("Password updated successfully.");
                         break;
                     case 3:
                         System.out.print("Enter new contact number: ");
                         String newContactNumber = scanner.nextLine();
+                        if (newContactNumber.isEmpty()) {
+                            System.out.println("Contact number cannot be empty. Please try again.");
+                            break;
+                        }
+                        try {
+                            if (!User.isUnique("", "", newContactNumber)) {
+                                System.out.println("Error: Contact Number already exists.");
+                                break;
+                            }
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                            break;
+                        }
                         this.contactNumber = newContactNumber;
                         System.out.println("Contact number updated successfully.");
                         break;
@@ -463,6 +589,7 @@ public class APUHostelManagement {
                     e.printStackTrace();
                 }
             } while (choice != 0);
+            displayMenu();
         }
 
         private void updateFile(String filename) throws IOException {
@@ -478,6 +605,7 @@ public class APUHostelManagement {
                 }
             }
         }
+    
 
         public void viewPaymentRecords() {
             System.out.println("Payment Records:");
@@ -500,6 +628,7 @@ public class APUHostelManagement {
                 }
                 if (!hasRecords) {
                     System.out.println("No payment records found for your account.");
+                    displayMenu();
                 }
             } catch (IOException e) {
                 System.out.println("An error occurred while reading the payment records.");
