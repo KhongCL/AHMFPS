@@ -1,9 +1,0 @@
-staff1,password1,Staff
-resident1,password1,Resident
-staff1,password1,Staff
-resident1,password1,Resident
-admin,admin123,Manager
-khong,123,Manager
-khong,456,Staff
-khong,789,Resident
-khong2,123,Manager,false

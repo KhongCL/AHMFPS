@@ -76,10 +76,10 @@ public class APUHostelManagement {
                                 user = new Manager(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5]);
                                 break;
                             case "Staff":
-                                user = new Staff(parts[1], parts[2], parts[3], parts[4], parts[5]);
+                                user = new Staff(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5]);
                                 break;
                             case "Resident":
-                                user = new Resident(parts[1], parts[2], parts[3], parts[4], parts[5]);
+                                user = new Resident(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5]);
                                 break;
                         }
                         if (user != null) {
@@ -90,6 +90,7 @@ public class APUHostelManagement {
             }
             return users;
         }
+        
 
         public static User findUser(String username, String password, String filename) throws IOException {
             try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
@@ -103,10 +104,10 @@ public class APUHostelManagement {
                                 user = new Manager(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5]);
                                 break;
                             case "Staff":
-                                user = new Staff(parts[1], parts[2], parts[3], parts[4], parts[5]);
+                                user = new Staff(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5]);
                                 break;
                             case "Resident":
-                                user = new Resident(parts[1], parts[2], parts[3], parts[4], parts[5]);
+                                user = new Resident(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5]);
                                 break;
                         }
                         return user;
@@ -205,6 +206,7 @@ public class APUHostelManagement {
 
                 if (unapprovedStaffs.isEmpty() && unapprovedResidents.isEmpty()) {
                     System.out.println("No users to approve.");
+                    displayMenu();
                     return;
                 }
 
@@ -248,16 +250,18 @@ public class APUHostelManagement {
                 } else {
                     System.out.println("Invalid user number.");
                 }
+                displayMenu();
             } catch (IOException e) {
                 System.out.println("An error occurred while approving the user.");
                 e.printStackTrace();
             }
         }
 
+        // Method to save unapproved users to file
         private void saveUnapprovedUsers(List<User> users, String filename) throws IOException {
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
                 for (User user : users) {
-                    writer.write(user.getIcPassportNumber() + "," + user.getUsername() + "," + user.getPassword() + "," + user.getContactNumber() + "," + user.getDateOfRegistration() + "," + user.getRole());
+                    writer.write(user.getUserID() + "," + user.getIcPassportNumber() + "," + user.getUsername() + "," + user.getPassword() + "," + user.getContactNumber() + "," + user.getDateOfRegistration() + "," + user.getRole());
                     writer.newLine();
                 }
             }
@@ -287,11 +291,13 @@ public class APUHostelManagement {
     public static class Staff extends User {
         private String staffID;
         private String dateOfApproval;
+        private boolean loggedIn;
 
-        public Staff(String icPassportNumber, String username, String password, String contactNumber, String dateOfRegistration) {
-            super(null, icPassportNumber, username, password, contactNumber, dateOfRegistration, "Staff");
+        public Staff(String userID, String icPassportNumber, String username, String password, String contactNumber, String dateOfRegistration) {
+            super(userID, icPassportNumber, username, password, contactNumber, dateOfRegistration, "Staff");
+            this.loggedIn = true;
         }
-
+        
         public String getStaffID() {
             return staffID;
         }
@@ -319,16 +325,19 @@ public class APUHostelManagement {
     
             switch (choice) {
                 case 1:
-                    // Register Individual Login Account logic
-                    break;
-                case 2:
                     // Update Individual Login Account logic
                     break;
-                case 3:
+                case 2:
                     // Make Payment for Resident logic
                     break;
-                case 4:
+                case 3:
                     // Generate Receipt logic
+                    break;
+                case 4:
+                    System.out.println("Logging out...");
+                    this.loggedIn = false;
+                    System.out.println("You have been logged out successfully.");
+                    displayWelcomePage();
                     break;
                 default:
                     System.out.println("Invalid choice. Please try again.");
@@ -358,8 +367,8 @@ public class APUHostelManagement {
         private String dateOfApproval;
         private boolean loggedIn;
 
-        public Resident(String icPassportNumber, String username, String password, String contactNumber, String dateOfRegistration) {
-            super(null, icPassportNumber, username, password, contactNumber, dateOfRegistration, "Resident");
+        public Resident(String userID, String icPassportNumber, String username, String password, String contactNumber, String dateOfRegistration) {
+            super(userID, icPassportNumber, username, password, contactNumber, dateOfRegistration, "Resident");
             this.loggedIn = true;
         }
 
@@ -496,7 +505,7 @@ public class APUHostelManagement {
 
             System.out.println("You have been logged out successfully.");
             // Route back to the main menu
-            APUHostelManagement.displayWelcomePage();
+            displayWelcomePage();
         }
     }
 
@@ -930,7 +939,7 @@ public class APUHostelManagement {
 
         try {
             String dateOfRegistration = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-            Staff staff = new Staff(icPassportNumber, username, password, contactNumber, dateOfRegistration);
+            Staff staff = new Staff(null, icPassportNumber, username, password, contactNumber, dateOfRegistration);
             staff.saveToFile("unapproved_staffs.txt");
             System.out.println("Staff registered successfully.");
             displayWelcomePage();
@@ -1071,7 +1080,7 @@ public class APUHostelManagement {
 
         try {
             String dateOfRegistration = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-            Resident resident = new Resident(icPassportNumber, username, password, contactNumber, dateOfRegistration);
+            Resident resident = new Resident(null, icPassportNumber, username, password, contactNumber, dateOfRegistration);
             resident.saveToFile("unapproved_residents.txt");
             System.out.println("Resident registered successfully.");
             displayWelcomePage();
