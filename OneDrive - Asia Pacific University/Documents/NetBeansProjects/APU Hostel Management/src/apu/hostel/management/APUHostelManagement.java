@@ -297,7 +297,7 @@ public class APUHostelManagement {
             super(userID, icPassportNumber, username, password, contactNumber, dateOfRegistration, "Staff");
             this.loggedIn = true;
         }
-        
+
         public String getStaffID() {
             return staffID;
         }
@@ -458,11 +458,25 @@ public class APUHostelManagement {
                 }
 
                 try {
-                    saveToFile("approved_residents.txt");
+                    updateFile("approved_residents.txt");
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             } while (choice != 0);
+        }
+
+        private void updateFile(String filename) throws IOException {
+            List<User> users = User.readFromFile(filename);
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
+                for (User user : users) {
+                    if (user.getUserID().equals(this.userID)) {
+                        writer.write(this.userID + "," + this.icPassportNumber + "," + this.username + "," + this.password + "," + this.contactNumber + "," + this.dateOfRegistration + "," + this.role);
+                    } else {
+                        writer.write(user.getUserID() + "," + user.getIcPassportNumber() + "," + user.getUsername() + "," + user.getPassword() + "," + user.getContactNumber() + "," + user.getDateOfRegistration() + "," + user.getRole());
+                    }
+                    writer.newLine();
+                }
+            }
         }
 
         public void viewPaymentRecords() {
