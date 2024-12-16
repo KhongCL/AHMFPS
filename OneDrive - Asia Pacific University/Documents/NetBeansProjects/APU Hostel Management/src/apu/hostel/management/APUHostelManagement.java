@@ -7,8 +7,10 @@ import apu.hostel.management.APUHostelManagement.Resident;
 import apu.hostel.management.APUHostelManagement.Staff;
 import apu.hostel.management.APUHostelManagement.User;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 
 public class APUHostelManagement {
     // User abstract class
@@ -20,9 +22,10 @@ public class APUHostelManagement {
         protected String contactNumber;
         protected String dateOfRegistration;
         protected String role;
+        protected boolean isActive;
         
 
-        public User(String userID, String icPassportNumber, String username, String password, String contactNumber, String dateOfRegistration, String role) {
+        public User(String userID, String icPassportNumber, String username, String password, String contactNumber, String dateOfRegistration, String role, boolean isActive) {
             this.userID = userID;
             this.icPassportNumber = icPassportNumber;
             this.username = username;
@@ -30,6 +33,7 @@ public class APUHostelManagement {
             this.contactNumber = contactNumber;
             this.dateOfRegistration = dateOfRegistration;
             this.role = role;
+            this.isActive = isActive;
         }
 
         public String getUserID() {
@@ -64,28 +68,35 @@ public class APUHostelManagement {
 
         public void saveToFile(String filename) throws IOException {
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename, true))) {
-                writer.write(userID + "," + icPassportNumber + "," + username + "," + password + "," + contactNumber + "," + dateOfRegistration + "," + role);
+                writer.write(userID + "," + icPassportNumber + "," + username + "," + password + "," + contactNumber + "," + dateOfRegistration + "," + role + "," + isActive);
                 writer.newLine();
             }
         }
 
+        // Method to read users from file
         public static List<User> readFromFile(String filename) throws IOException {
             List<User> users = new ArrayList<>();
             try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
                     String[] parts = line.split(",");
-                    if (parts.length == 7) {
+                    if (parts.length == 8 || parts.length == 9 || parts.length == 10) {
                         User user = null;
-                        switch (parts[6]) {
+                        switch (parts[7]) {
                             case "Manager":
-                                user = new Manager(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5]);
+                                if (parts.length == 9) {
+                                    user = new Manager(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], parts[7], Boolean.parseBoolean(parts[8]));
+                                }
                                 break;
                             case "Staff":
-                                user = new Staff(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5]);
+                                if (parts.length == 10) {
+                                    user = new Staff(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], parts[7], parts[8], Boolean.parseBoolean(parts[9]));
+                                }
                                 break;
                             case "Resident":
-                                user = new Resident(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5]);
+                                if (parts.length == 10) {
+                                    user = new Resident(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], parts[7], parts[8], Boolean.parseBoolean(parts[9]));
+                                }
                                 break;
                         }
                         if (user != null) {
@@ -98,33 +109,16 @@ public class APUHostelManagement {
         }
         
 
+        // Method to find user by username and password
         public static User findUser(String username, String password, String filename) throws IOException {
-            try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    String[] parts = line.split(",");
-                    if (parts.length == 7 && parts[2].equals(username) && parts[3].equals(password)) {
-                        User user = null;
-                        switch (parts[6]) {
-                            case "Manager":
-                                user = new Manager(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5]);
-                                break;
-                            case "Staff":
-                                user = new Staff(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5]);
-                                break;
-                            case "Resident":
-                                user = new Resident(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5]);
-                                break;
-                        }
-                        return user;
-                    }
+            List<User> users = User.readFromFile(filename);
+            System.out.println(users);
+            for (User user : users) {
+                if (user.getUsername().equals(username) && user.getPassword().equals(password)) {
+                    return user;
                 }
             }
             return null;
-        }
-
-        public static List<User> loadAllUsers() throws IOException {
-            return readFromFile("users.txt");
         }
 
         // Method to check if IC/Passport Number, Username, or Contact Number is unique
@@ -136,9 +130,11 @@ public class APUHostelManagement {
             users.addAll(User.readFromFile("unapproved_staffs.txt"));
             users.addAll(User.readFromFile("approved_staffs.txt"));
             users.addAll(User.readFromFile("managers.txt"));
-
+        
             for (User user : users) {
-                if (user.getIcPassportNumber().equals(icPassportNumber) || user.getUsername().equals(username) || user.getContactNumber().equals(contactNumber)) {
+                if ((icPassportNumber != null && !icPassportNumber.isEmpty() && user.getIcPassportNumber().equals(icPassportNumber)) ||
+                    (username != null && !username.isEmpty() && user.getUsername().equals(username)) ||
+                    (contactNumber != null && !contactNumber.isEmpty() && user.getContactNumber().equals(contactNumber))) {
                     return false;
                 }
             }
@@ -150,13 +146,25 @@ public class APUHostelManagement {
     public static class Manager extends User {
         private String managerID;
 
-        public Manager(String userID, String icPassportNumber, String username, String password, String contactNumber, String dateOfRegistration) {
-            super(userID, icPassportNumber, username, password, contactNumber, dateOfRegistration, "Manager");
-            this.managerID = "M" + userID.substring(1);
+        public Manager(String managerID, String userID, String icPassportNumber, String username, String password, String contactNumber, String dateOfRegistration, String role, boolean isActive) {
+            super(userID, icPassportNumber, username, password, contactNumber, dateOfRegistration, role, isActive);
+            this.managerID = managerID;
         }
 
         public String getManagerID() {
             return managerID;
+        }
+
+        public void setManagerID(String managerID) {
+            this.managerID = managerID;
+        }
+
+        
+        public void saveToManagerFile() throws IOException {
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter("managers.txt", true))) {
+                writer.write(managerID + "," + userID + "," + icPassportNumber + "," + username + "," + password + "," + contactNumber + "," + dateOfRegistration + "," + role + "," + isActive);
+                writer.newLine();
+            }
         }
 
         @Override
@@ -297,15 +305,19 @@ public class APUHostelManagement {
     public static class Staff extends User {
         private String staffID;
         private String dateOfApproval;
-        private boolean loggedIn;
 
-        public Staff(String userID, String icPassportNumber, String username, String password, String contactNumber, String dateOfRegistration) {
-            super(userID, icPassportNumber, username, password, contactNumber, dateOfRegistration, "Staff");
-            this.loggedIn = true;
+        public Staff(String staffID, String userID, String icPassportNumber, String username, String password, String contactNumber, String dateOfRegistration, String role, String dateOfApproval, boolean isActive) {
+            super(userID, icPassportNumber, username, password, contactNumber, dateOfRegistration, role, isActive);
+            this.staffID = staffID;
+            this.dateOfApproval = dateOfApproval;
         }
 
         public String getStaffID() {
             return staffID;
+        }
+
+        public void setStaffID(String staffID) {
+            this.staffID = staffID;
         }
 
         public String getDateOfApproval() {
@@ -316,8 +328,11 @@ public class APUHostelManagement {
             this.dateOfApproval = dateOfApproval;
         }
 
-        public boolean isLoggedIn() {
-            return loggedIn;
+        public void saveToStaffFile() throws IOException {
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter("unapproved_staffs.txt", true))) {
+                writer.write(null + "," + null + "," + icPassportNumber + "," + username + "," + password + "," + contactNumber + "," + dateOfRegistration + "," + role + "," + isActive + "," + dateOfApproval);
+                writer.newLine();
+            }
         }
 
         @Override
@@ -346,7 +361,6 @@ public class APUHostelManagement {
                     break;
                 case 4:
                     System.out.println("Logging out...");
-                    this.loggedIn = false;
                     System.out.println("You have been logged out successfully.");
                     displayWelcomePage();
                     break;
@@ -461,15 +475,19 @@ public class APUHostelManagement {
     public static class Resident extends User {
         private String residentID;
         private String dateOfApproval;
-        private boolean loggedIn;
 
-        public Resident(String userID, String icPassportNumber, String username, String password, String contactNumber, String dateOfRegistration) {
-            super(userID, icPassportNumber, username, password, contactNumber, dateOfRegistration, "Resident");
-            this.loggedIn = true;
+        public Resident(String residentID, String userID, String icPassportNumber, String username, String password, String contactNumber, String dateOfRegistration, String role, String dateOfApproval, boolean isActive) {
+            super(userID, icPassportNumber, username, password, contactNumber, dateOfRegistration, role, isActive);
+            this.residentID = residentID;
+            this.dateOfApproval = dateOfApproval;
         }
 
         public String getResidentID() {
             return residentID;
+        }
+
+        public void setResidentID(String residentID) {
+            this.residentID = residentID;
         }
 
         public String getDateOfApproval() {
@@ -480,8 +498,11 @@ public class APUHostelManagement {
             this.dateOfApproval = dateOfApproval;
         }
 
-        public boolean isLoggedIn() {
-            return loggedIn;
+        public void saveToResidentFile() throws IOException {
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter("unapproved_residents.txt", true))) {
+                writer.write(null + "," + null + "," + icPassportNumber + "," + username + "," + password + "," + contactNumber + "," + dateOfRegistration + "," + role + "," + isActive + "," + dateOfApproval);
+                writer.newLine();
+            }
         }
 
         @Override
@@ -490,7 +511,8 @@ public class APUHostelManagement {
             System.out.println("Resident Menu:");
             System.out.println("1. Update Individual Information");
             System.out.println("2. View Payment Records");
-            System.out.println("3. Logout");
+            System.out.println("3. Manage Bookings");
+            System.out.println("4. Logout");
             System.out.print("Enter your choice: ");
 
             Scanner scanner = new Scanner(System.in);
@@ -505,12 +527,16 @@ public class APUHostelManagement {
                     viewPaymentRecords();
                     break;
                 case 3:
+                    manageBookings();
+                    break;
+                case 4:
                     residentLogout();
                     break;
                 default:
                     System.out.println("Invalid choice. Please try again.");
+                    displayMenu(); // Recursively call to retry
+                    break;
             }
-            
         }
 
         public void updatePersonalInformation() {
@@ -611,29 +637,231 @@ public class APUHostelManagement {
             System.out.println("Payment Records:");
             String userID = this.getUserID(); // Assuming there's a method to get the current user's ID
 
+            // Read room data from room.txt and store it in a map
+            Map<String, String> roomMap = new HashMap<>();
+            try (BufferedReader roomReader = new BufferedReader(new FileReader("room.txt"))) {
+                String line;
+                while ((line = roomReader.readLine()) != null) {
+                    String[] parts = line.split(",");
+                    if (parts.length >= 2) {
+                        roomMap.put(parts[0], parts[1]); // Assuming parts[0] is RoomID and parts[1] is RoomNumber
+                    }
+                }
+            } catch (IOException e) {
+                System.out.println("An error occurred while reading the room data.");
+                e.printStackTrace();
+            }
+
             try (BufferedReader br = new BufferedReader(new FileReader("payments.txt"))) {
                 String line;
                 boolean hasRecords = false;
                 while ((line = br.readLine()) != null) {
-                    String[] details = line.split(", ");
-                    if (details[0].equals(userID)) {
+                    String[] details = line.split(",");
+                    if (details[1].equals(userID)) { // Assuming the second element is the residentID
                         hasRecords = true;
-                        System.out.println("Username: " + details[1]);
-                        System.out.println("Payment Amount: " + details[2]);
-                        System.out.println("Payment Date: " + details[3]);
-                        System.out.println("Room Number: " + details[4]);
-                        System.out.println("Receipt Number: " + details[5]);
+                        String roomNumber = roomMap.getOrDefault(details[5], "Unknown Room"); // Assuming the sixth element is RoomID
+                        System.out.println("Payment ID: " + details[0]);
+                        System.out.println("Resident ID: " + details[1]);
+                        System.out.println("Staff ID: " + (details[2].equals("NULL") ? "N/A" : details[2]));
+                        System.out.println("Payment Amount: " + details[3]);
+                        System.out.println("Booking Date: " + details[4]);
+                        System.out.println("Room Number: " + roomNumber);
+                        System.out.println("Payment Method: " + (details[6].equals("NULL") ? "N/A" : details[6]));
                         System.out.println("-----------------------------");
                     }
                 }
                 if (!hasRecords) {
                     System.out.println("No payment records found for your account.");
-                    displayMenu();
                 }
             } catch (IOException e) {
                 System.out.println("An error occurred while reading the payment records.");
                 e.printStackTrace();
             }
+        }
+
+        public void makeBooking() {
+            Scanner scanner = new Scanner(System.in);
+            System.out.println("Select Room Type:");
+            System.out.println("1. Standard");
+            System.out.println("2. Deluxe");
+            System.out.print("Enter your choice: ");
+            int roomTypeChoice = scanner.nextInt();
+            scanner.nextLine(); // Consume newline
+
+            String roomType = null;
+            String feeRateID = null;
+            switch (roomTypeChoice) {
+                case 1:
+                    roomType = "Standard";
+                    feeRateID = "FR01";
+                    break;
+                case 2:
+                    roomType = "Deluxe";
+                    feeRateID = "FR02";
+                    break;
+                default:
+                    System.out.println("Invalid choice. Please try again.");
+                    return;
+            }
+
+            System.out.print("Enter start date (yyyy-MM-dd): ");
+            String startDate = scanner.nextLine();
+            System.out.print("Enter end date (yyyy-MM-dd): ");
+            String endDate = scanner.nextLine();
+
+            // Generate a new PaymentID
+            String paymentID = generatePaymentID();
+
+            // Get the ResidentID of the logged-in user
+            String residentID = this.getUserID();
+
+            // Select an available room based on room type
+            String roomID = selectAvailableRoom(roomType);
+            if (roomID == null) {
+                System.out.println("No available rooms of the selected type.");
+                return;
+            }
+
+            // Calculate the payment amount
+            double paymentAmount = calculatePaymentAmount(startDate, endDate, feeRateID);
+
+            // Get the current date and time for BookingDateTime
+            String bookingDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+
+            // Add a new line to payments.txt
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter("payments.txt", true))) {
+                writer.write(paymentID + "," + residentID + ",NULL," + startDate + "," + endDate + "," + roomID + "," + paymentAmount + ",Unpaid," + bookingDateTime + ",NULL,Active");
+                writer.newLine();
+                System.out.println("Booking successful.");
+            } catch (IOException e) {
+                System.out.println("An error occurred while saving the booking.");
+                e.printStackTrace();
+            }
+        }
+
+        private String generatePaymentID() {
+            int id = 1;
+            String filename = "payments.txt";
+            File file = new File(filename);
+            if (!file.exists()) {
+                try {
+                    file.createNewFile();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    String[] parts = line.split(",");
+                    if (parts[0].startsWith("P")) {
+                        int currentId = Integer.parseInt(parts[0].substring(1));
+                        if (currentId >= id) {
+                            id = currentId + 1;
+                        }
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return "P" + String.format("%02d", id);
+        }
+
+        private String selectAvailableRoom(String roomType) {
+            Map<String, String> roomMap = new HashMap<>();
+            try (BufferedReader roomReader = new BufferedReader(new FileReader("room.txt"))) {
+                String line;
+                while ((line = roomReader.readLine()) != null) {
+                    String[] parts = line.split(",");
+                    if (parts.length >= 2 && parts[1].equals(roomType)) {
+                        roomMap.put(parts[0], parts[1]); // Assuming parts[0] is RoomID and parts[1] is RoomType
+                    }
+                }
+            } catch (IOException e) {
+                System.out.println("An error occurred while reading the room data.");
+                e.printStackTrace();
+            }
+
+            for (String roomID : roomMap.keySet()) {
+                return roomID; // Return the first available room
+            }
+            return null;
+        }
+
+        private double calculatePaymentAmount(String startDate, String endDate, String feeRateID) {
+            long daysBetween = ChronoUnit.DAYS.between(LocalDate.parse(startDate), LocalDate.parse(endDate)) + 1;
+            double ratePerDay = 0;
+            double ratePerWeek = 0;
+            double ratePerMonth = 0;
+
+            try (BufferedReader rateReader = new BufferedReader(new FileReader("fee_rate.txt"))) {
+                String line;
+                while ((line = rateReader.readLine()) != null) {
+                    String[] parts = line.split(",");
+                    if (parts[0].equals(feeRateID)) {
+                        ratePerDay = Double.parseDouble(parts[1]);
+                        ratePerWeek = Double.parseDouble(parts[2]);
+                        ratePerMonth = Double.parseDouble(parts[3]);
+                        break;
+                    }
+                }
+            } catch (IOException e) {
+                System.out.println("An error occurred while reading the fee rate data.");
+                e.printStackTrace();
+            }
+
+            if (daysBetween <= 7) {
+                return daysBetween * ratePerDay;
+            } else if (daysBetween <= 30) {
+                return (daysBetween / 7) * ratePerWeek + (daysBetween % 7) * ratePerDay;
+            } else {
+                return (daysBetween / 30) * ratePerMonth + ((daysBetween % 30) / 7) * ratePerWeek + (daysBetween % 7) * ratePerDay;
+            }
+        }
+
+        public void makePaymentForBooking() {
+            // Logic for making payment for a booking
+            System.out.println("Make Payment for Booking functionality is not yet implemented.");
+        }
+
+        public void cancelBooking() {
+            // Logic for canceling a booking
+            System.out.println("Cancel Booking functionality is not yet implemented.");
+        }
+
+        public void manageBookings() {
+            Scanner scanner = new Scanner(System.in);
+            int choice;
+
+            do {
+                System.out.println("Manage Bookings:");
+                System.out.println("1. Make Booking");
+                System.out.println("2. Make Payment for Booking");
+                System.out.println("3. Cancel Booking");
+                System.out.println("0. Go Back to Resident Menu");
+                System.out.print("Enter your choice: ");
+                choice = scanner.nextInt();
+                scanner.nextLine(); // Consume newline
+
+                switch (choice) {
+                    case 1:
+                        makeBooking();
+                        break;
+                    case 2:
+                        makePaymentForBooking();
+                        break;
+                    case 3:
+                        cancelBooking();
+                        break;
+                    case 0:
+                        System.out.println("Returning to Resident Menu...");
+                        displayMenu();
+                        return;
+                    default:
+                        System.out.println("Invalid choice. Please try again.");
+                }
+            } while (choice != 0);
         }
 
         public void residentLogout() {
@@ -642,9 +870,6 @@ public class APUHostelManagement {
             // For example:
             // closeDatabaseConnection();
             // saveUserSession();
-
-            // Mark the user as logged out
-            this.loggedIn = false;
 
             System.out.println("You have been logged out successfully.");
             // Route back to the main menu
@@ -658,18 +883,16 @@ public class APUHostelManagement {
         private String residentID;
         private String staffID;
         private double amount;
-        private String paymentDate;
-        private String receiptNumber;
+        private String bookingDate;
         private String roomNumber;
         private String paymentMethod;
 
-        public Payment(String paymentID, String residentID, String staffID, double amount, String paymentDate, String receiptNumber, String roomNumber, String paymentMethod) {
+        public Payment(String paymentID, String residentID, String staffID, double amount, String bookingDate, String roomNumber, String paymentMethod) {
             this.paymentID = paymentID;
             this.residentID = residentID;
             this.staffID = staffID;
             this.amount = amount;
-            this.paymentDate = paymentDate;
-            this.receiptNumber = receiptNumber;
+            this.bookingDate = bookingDate;
             this.roomNumber = roomNumber;
             this.paymentMethod = paymentMethod;
         }
@@ -690,12 +913,8 @@ public class APUHostelManagement {
             return amount;
         }
 
-        public String getPaymentDate() {
-            return paymentDate;
-        }
-
-        public String getReceiptNumber() {
-            return receiptNumber;
+        public String getBookingDate() {
+            return bookingDate;
         }
 
         public String getRoomNumber() {
@@ -708,7 +927,7 @@ public class APUHostelManagement {
 
         public void saveToFile(String filename) throws IOException {
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename, true))) {
-                writer.write(paymentID + "," + residentID + "," + staffID + "," + amount + "," + paymentDate + "," + receiptNumber + "," + roomNumber + "," + paymentMethod);
+                writer.write(paymentID + "," + residentID + "," + (staffID != null ? staffID : "NULL") + "," + amount + "," + bookingDate + "," + roomNumber + "," + (paymentMethod != null ? paymentMethod : "NULL"));
                 writer.newLine();
             }
         }
@@ -719,8 +938,8 @@ public class APUHostelManagement {
                 String line;
                 while ((line = reader.readLine()) != null) {
                     String[] parts = line.split(",");
-                    if (parts.length == 8) {
-                        Payment payment = new Payment(parts[0], parts[1], parts[2], Double.parseDouble(parts[3]), parts[4], parts[5], parts[6], parts[7]);
+                    if (parts.length == 7) {
+                        Payment payment = new Payment(parts[0], parts[1], parts[2].equals("NULL") ? null : parts[2], Double.parseDouble(parts[3]), parts[4], parts[5], parts[6].equals("NULL") ? null : parts[6]);
                         payments.add(payment);
                     }
                 }
@@ -941,8 +1160,10 @@ public class APUHostelManagement {
         try {
             String dateOfRegistration = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
             String userID = generateUserID("U");
-            User manager = new Manager(userID, icPassportNumber, username, password, contactNumber, dateOfRegistration);
-            manager.saveToFile("managers.txt");
+            String managerID = generateUserID("M");
+            Manager manager = new Manager(managerID, userID, icPassportNumber, username, password, contactNumber, dateOfRegistration, "Manager", true);
+            manager.saveToFile("users.txt");
+            manager.saveToManagerFile();
             System.out.println("Manager registered successfully.");
             displayWelcomePage();
         } catch (IOException e) {
@@ -1082,8 +1303,11 @@ public class APUHostelManagement {
 
         try {
             String dateOfRegistration = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-            Staff staff = new Staff(null, icPassportNumber, username, password, contactNumber, dateOfRegistration);
-            staff.saveToFile("unapproved_staffs.txt");
+            String userID = generateUserID("U");
+            String staffID = generateUserID("S");
+            Staff staff = new Staff(staffID, userID, icPassportNumber, username, password, contactNumber, dateOfRegistration, "Staff", null, true);
+            staff.saveToFile("users.txt");
+            staff.saveToStaffFile();
             System.out.println("Staff registered successfully.");
             displayWelcomePage();
         } catch (IOException e) {
@@ -1118,7 +1342,7 @@ public class APUHostelManagement {
 
         try {
             User user = User.findUser(username, password, "approved_staffs.txt");
-            if (user != null && user instanceof Staff) {
+            if (user != null && user.getRole().equals("Staff")) {
                 System.out.println("Login successful.");
                 user.displayMenu();
             } else {
@@ -1223,8 +1447,11 @@ public class APUHostelManagement {
 
         try {
             String dateOfRegistration = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-            Resident resident = new Resident(null, icPassportNumber, username, password, contactNumber, dateOfRegistration);
-            resident.saveToFile("unapproved_residents.txt");
+            String userID = generateUserID("U");
+            String residentID = generateUserID("R");
+            Resident resident = new Resident(residentID, userID, icPassportNumber, username, password, contactNumber, dateOfRegistration, "Resident", null, true);
+            resident.saveToFile("users.txt");
+            resident.saveToResidentFile();
             System.out.println("Resident registered successfully.");
             displayWelcomePage();
         } catch (IOException e) {
@@ -1259,7 +1486,7 @@ public class APUHostelManagement {
 
         try {
             User user = User.findUser(username, password, "approved_residents.txt");
-            if (user != null && user instanceof Resident) {
+            if (user != null && user.getRole().equals("Resident")) {
                 System.out.println("Login successful.");
                 user.displayMenu();
             } else {
@@ -1281,7 +1508,17 @@ public class APUHostelManagement {
     // Method to generate unique IDs with a prefix
     private static String generateUserID(String prefix) {
         int id = 1;
-        String filename = "users.txt";
+        String filename = null;
+        if (prefix.equals("U")) {
+            filename = "users.txt";
+        } else if (prefix.equals("M")) {
+            filename = "managers.txt";
+        } else if (prefix.equals("S")) {
+            filename = "approved_staffs.txt";
+        } else if (prefix.equals("R")) {
+            filename = "approved_residents.txt";
+        }
+        
         File file = new File(filename);
         if (!file.exists()) {
             try {

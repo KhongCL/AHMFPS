@@ -1,0 +1,2 @@
+FR01,Standard,40,30,20
+FR02,Deluxe,60,45,30
