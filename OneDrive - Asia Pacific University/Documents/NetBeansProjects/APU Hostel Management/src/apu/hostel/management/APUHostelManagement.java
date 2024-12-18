@@ -99,19 +99,19 @@ public class APUHostelManagement {
                                 user = new Manager(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], parts[7], Boolean.parseBoolean(parts[8]));
                                 break;
                             case "Staff":
-                                user = new Staff(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], parts[7], parts[8], Boolean.parseBoolean(parts[9]));
+                                user = new Staff(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], parts[7],Boolean.parseBoolean(parts[8]), parts[9]);
                                 break;
                             case "Resident":
-                                user = new Resident(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], parts[7], parts[8], Boolean.parseBoolean(parts[9]));
+                                user = new Resident(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], parts[7], Boolean.parseBoolean(parts[8]), parts[9]);
                                 break;
                         }
                     } else if (parts.length == 9 && "Manager".equals(parts[7])) {
                         user = new Manager(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], parts[7], Boolean.parseBoolean(parts[8]));
                     } else if (parts.length == 10) {
                         if ("Staff".equals(parts[7])) {
-                            user = new Staff(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], parts[7], parts[8], Boolean.parseBoolean(parts[9]));
+                            user = new Staff(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], parts[7], Boolean.parseBoolean(parts[8]), parts[9]);
                         } else if ("Resident".equals(parts[7])) {
-                            user = new Resident(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], parts[7], parts[8], Boolean.parseBoolean(parts[9]));
+                            user = new Resident(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], parts[7], Boolean.parseBoolean(parts[8]), parts[9]);
                         }
                     }
                     if (user != null) {
@@ -251,6 +251,7 @@ public class APUHostelManagement {
                 System.out.print("Enter the number of the user to approve: ");
                 Scanner scanner = new Scanner(System.in);
                 int userIndex = scanner.nextInt() - 1;
+                String currentDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
                 scanner.nextLine(); // Consume newline
         
                 if (userIndex >= 0 && userIndex < unapprovedStaffs.size()) {
@@ -259,7 +260,7 @@ public class APUHostelManagement {
                     String staffID = generateUserID("S");
                     staffToApprove.setUserID(userID);
                     staffToApprove.setStaffID(staffID);
-                    staffToApprove.setDateOfApproval();
+                    staffToApprove.setDateOfApproval(currentDate);
                     staffToApprove.setIsActive(true);
                     staffToApprove.saveToFile("users.txt");
                     staffToApprove.saveToStaffFile(staffID, userID, "approved_staffs.txt");
@@ -272,7 +273,7 @@ public class APUHostelManagement {
                     String residentID = generateUserID("R");
                     residentToApprove.setUserID(userID);
                     residentToApprove.setResidentID(residentID);
-                    residentToApprove.setDateOfApproval();
+                    residentToApprove.setDateOfApproval(currentDate);
                     residentToApprove.setIsActive(true);
                     residentToApprove.saveToFile("users.txt");
                     residentToApprove.saveToResidentFile(residentID, userID, "approved_residents.txt");
@@ -332,7 +333,7 @@ public class APUHostelManagement {
         private String staffID;
         private String dateOfApproval;
 
-        public Staff(String staffID, String userID, String icPassportNumber, String username, String password, String contactNumber, String dateOfRegistration, String role, String dateOfApproval, boolean isActive) {
+        public Staff(String staffID, String userID, String icPassportNumber, String username, String password, String contactNumber, String dateOfRegistration, String role, boolean isActive, String dateOfApproval) {
             super(userID, icPassportNumber, username, password, contactNumber, dateOfRegistration, role, isActive);
             this.staffID = staffID;
             this.dateOfApproval = dateOfApproval;
@@ -350,8 +351,8 @@ public class APUHostelManagement {
             return dateOfApproval;
         }
 
-        public void setDateOfApproval() {
-            this.dateOfApproval = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        public void setDateOfApproval(String dateOfApproval) {
+            this.dateOfApproval = dateOfApproval;
         }
 
         public void saveToStaffFile(String staffID, String userID, String filename) throws IOException {
@@ -479,9 +480,22 @@ public class APUHostelManagement {
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
                 for (User user : users) {
                     if (user.getUserID().equals(this.userID)) {
-                        writer.write(this.userID + "," + this.icPassportNumber + "," + this.username + "," + this.password + "," + this.contactNumber + "," + this.dateOfRegistration + "," + this.role);
+                        
+                        if (user instanceof Staff) {
+                            Staff staff = (Staff) user;
+                            writer.write(staff.getStaffID() + "," + this.userID + "," + this.icPassportNumber + "," + this.username + "," + this.password + "," + this.contactNumber + "," + this.dateOfRegistration + "," + this.role + "," + this.isActive + "," + staff.getDateOfApproval());
+                        } else if (user instanceof Resident) {
+                            Resident resident = (Resident) user;
+                            writer.write(resident.getResidentID() + "," + this.userID + "," + this.icPassportNumber + "," + this.username + "," + this.password + "," + this.contactNumber + "," + this.dateOfRegistration + "," + this.role + "," + this.isActive + "," + resident.getDateOfApproval());
+                        }
                     } else {
-                        writer.write(user.getUserID() + "," + user.getIcPassportNumber() + "," + user.getUsername() + "," + user.getPassword() + "," + user.getContactNumber() + "," + user.getDateOfRegistration() + "," + user.getRole());
+                        if (user instanceof Staff) {
+                            Staff staff = (Staff) user;
+                            writer.write(staff.getStaffID() + "," + staff.getUserID() + "," + staff.getIcPassportNumber() + "," + staff.getUsername() + "," + staff.getPassword() + "," + staff.getContactNumber() + "," + staff.getDateOfRegistration() + "," + staff.getRole() + "," + staff.getIsActive() + "," + staff.getDateOfApproval());
+                        } else if (user instanceof Resident) {
+                            Resident resident = (Resident) user;
+                            writer.write(resident.getResidentID() + "," + resident.getUserID() + "," + resident.getIcPassportNumber() + "," + resident.getUsername() + "," + resident.getPassword() + "," + resident.getContactNumber() + "," + resident.getDateOfRegistration() + "," + resident.getRole() + "," + resident.getIsActive() + "," + resident.getDateOfApproval());
+                        }
                     }
                     writer.newLine();
                 }
@@ -502,7 +516,7 @@ public class APUHostelManagement {
         private String residentID;
         private String dateOfApproval;
 
-        public Resident(String residentID, String userID, String icPassportNumber, String username, String password, String contactNumber, String dateOfRegistration, String role, String dateOfApproval, boolean isActive) {
+        public Resident(String residentID, String userID, String icPassportNumber, String username, String password, String contactNumber, String dateOfRegistration, String role, boolean isActive, String dateOfApproval) {
             super(userID, icPassportNumber, username, password, contactNumber, dateOfRegistration, role, isActive);
             this.residentID = residentID;
             this.dateOfApproval = dateOfApproval;
@@ -520,8 +534,8 @@ public class APUHostelManagement {
             return dateOfApproval;
         }
 
-        public void setDateOfApproval() {
-            this.dateOfApproval = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        public void setDateOfApproval(String dateOfApproval) {
+            this.dateOfApproval = dateOfApproval;
         }
 
         public void saveToResidentFile(String residentID, String userID, String filename) throws IOException {
@@ -649,9 +663,21 @@ public class APUHostelManagement {
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
                 for (User user : users) {
                     if (user.getUserID().equals(this.userID)) {
-                        writer.write(this.userID + "," + this.icPassportNumber + "," + this.username + "," + this.password + "," + this.contactNumber + "," + this.dateOfRegistration + "," + this.role);
+                        if (user instanceof Staff) {
+                            Staff staff = (Staff) user;
+                            writer.write(staff.getStaffID() + "," + this.userID + "," + this.icPassportNumber + "," + this.username + "," + this.password + "," + this.contactNumber + "," + this.dateOfRegistration + "," + this.role + "," + this.isActive + "," + staff.getDateOfApproval());
+                        } else if (user instanceof Resident) {
+                            Resident resident = (Resident) user;
+                            writer.write(resident.getResidentID() + "," + this.userID + "," + this.icPassportNumber + "," + this.username + "," + this.password + "," + this.contactNumber + "," + this.dateOfRegistration + "," + this.role + "," + this.isActive + "," + resident.getDateOfApproval());
+                        }
                     } else {
-                        writer.write(user.getUserID() + "," + user.getIcPassportNumber() + "," + user.getUsername() + "," + user.getPassword() + "," + user.getContactNumber() + "," + user.getDateOfRegistration() + "," + user.getRole());
+                        if (user instanceof Staff) {
+                            Staff staff = (Staff) user;
+                            writer.write(staff.getStaffID() + "," + staff.getUserID() + "," + staff.getIcPassportNumber() + "," + staff.getUsername() + "," + staff.getPassword() + "," + staff.getContactNumber() + "," + staff.getDateOfRegistration() + "," + staff.getRole() + "," + staff.getIsActive() + "," + staff.getDateOfApproval());
+                        } else if (user instanceof Resident) {
+                            Resident resident = (Resident) user;
+                            writer.write(resident.getResidentID() + "," + resident.getUserID() + "," + resident.getIcPassportNumber() + "," + resident.getUsername() + "," + resident.getPassword() + "," + resident.getContactNumber() + "," + resident.getDateOfRegistration() + "," + resident.getRole() + "," + resident.getIsActive() + "," + resident.getDateOfApproval());
+                        }
                     }
                     writer.newLine();
                 }
@@ -1331,7 +1357,7 @@ public class APUHostelManagement {
             String dateOfRegistration = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
             String userID = generateUserID("U");
             String staffID = generateUserID("S");
-            Staff staff = new Staff(staffID, userID, icPassportNumber, username, password, contactNumber, dateOfRegistration, "Staff", null, true);
+            Staff staff = new Staff(staffID, userID, icPassportNumber, username, password, contactNumber, dateOfRegistration, "Staff", true, null);
             staff.saveToStaffFile(null, null, "unapproved_staffs.txt");
             System.out.println("Staff registered successfully.");
             displayWelcomePage();
@@ -1474,7 +1500,7 @@ public class APUHostelManagement {
             String dateOfRegistration = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
             String userID = generateUserID("U");
             String residentID = generateUserID("R");
-            Resident resident = new Resident(residentID, userID, icPassportNumber, username, password, contactNumber, dateOfRegistration, "Resident", null, true);
+            Resident resident = new Resident(residentID, userID, icPassportNumber, username, password, contactNumber, dateOfRegistration, "Resident", true, null);
             resident.saveToResidentFile(null, null, "unapproved_residents.txt");
             System.out.println("Resident registered successfully.");
             displayWelcomePage();
