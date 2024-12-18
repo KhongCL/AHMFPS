@@ -1,1 +1,0 @@
-null,null,123456,kcl4,123,123456,2024-12-16 20:25:27,Resident,true,null
