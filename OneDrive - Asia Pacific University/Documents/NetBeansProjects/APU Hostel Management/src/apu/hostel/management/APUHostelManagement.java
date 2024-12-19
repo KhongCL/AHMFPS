@@ -999,171 +999,171 @@ public class APUHostelManagement {
 
 
         public void makeBooking() {
-        Scanner scanner = new Scanner(System.in);
-        System.out.println("Select Room Type:");
-        System.out.println("1. Standard");
-        System.out.println("2. Deluxe");
-        System.out.print("Enter your choice: ");
-        int roomTypeChoice = scanner.nextInt();
-        scanner.nextLine(); // Consume newline
+            Scanner scanner = new Scanner(System.in);
+            System.out.println("Select Room Type:");
+            System.out.println("1. Standard");
+            System.out.println("2. Deluxe");
+            System.out.print("Enter your choice: ");
+            int roomTypeChoice = scanner.nextInt();
+            scanner.nextLine(); // Consume newline
 
-        String roomType = null;
-        String feeRateID = null;
-        switch (roomTypeChoice) {
-            case 1:
-                roomType = "Standard";
-                feeRateID = "FR01";
-                break;
-            case 2:
-                roomType = "Deluxe";
-                feeRateID = "FR02";
-                break;
-            default:
-                System.out.println("Invalid choice. Please try again.");
+            String roomType = null;
+            String feeRateID = null;
+            switch (roomTypeChoice) {
+                case 1:
+                    roomType = "Standard";
+                    feeRateID = "FR01";
+                    break;
+                case 2:
+                    roomType = "Deluxe";
+                    feeRateID = "FR02";
+                    break;
+                default:
+                    System.out.println("Invalid choice. Please try again.");
+                    return;
+            }
+
+            System.out.print("Enter start date of your stay (yyyy-MM-dd): ");
+            String startDate = scanner.nextLine();
+            System.out.print("Enter end date of your stay (yyyy-MM-dd): ");
+            String endDate = scanner.nextLine();
+
+            // Generate a new PaymentID
+            String paymentID = generatePaymentID();
+
+            // Get the ResidentID of the logged-in user
+            String residentID = this.getUserID();
+
+            // Select an available room based on feeRateID
+            String roomID = selectAvailableRoom(feeRateID);
+            if (roomID == null) {
+                System.out.println("No available rooms of the selected type.");
                 return;
+            }
+
+            // Calculate the payment amount
+            double paymentAmount = calculatePaymentAmount(startDate, endDate, feeRateID);
+
+            // Get the current date and time for BookingDateTime
+            String bookingDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+
+            // Add a new line to payments.txt
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter("payments.txt", true))) {
+                writer.write(paymentID + "," + residentID + "," + null + "," + startDate + "," + endDate + "," + roomID + "," + paymentAmount + ",Unpaid," + bookingDateTime + "," + null + ",Active");
+                writer.newLine();
+                System.out.println("Booking successful.");
+            } catch (IOException e) {
+                System.out.println("An error occurred while saving the booking.");
+                e.printStackTrace();
+            }
+
+            // Map room IDs to room numbers
+            Map<String, String> roomMap = new HashMap<>();
+            try (BufferedReader roomReader = new BufferedReader(new FileReader("rooms.txt"))) {
+                String line;
+                while ((line = roomReader.readLine()) != null) {
+                    String[] parts = line.split(",");
+                    if (parts.length >= 4) {
+                        roomMap.put(parts[0], parts[3]); // Assuming parts[0] is RoomID and parts[3] is RoomNumber
+                    }
+                }
+            } catch (IOException e) {
+                System.out.println("An error occurred while reading the room data.");
+                e.printStackTrace();
+            }
+
+            // Print confirmation message
+            long daysBetween = ChronoUnit.DAYS.between(LocalDate.parse(startDate), LocalDate.parse(endDate)) + 1;
+            String roomNumber = roomMap.getOrDefault(roomID, "Unknown Room");
+            System.out.println("Your Booking :");
+            System.out.println("Room Number : " + roomNumber);
+            System.out.println("Stay Duration : " + daysBetween + " Days");
+            System.out.println("Payment Amount : RM " + paymentAmount);
+            System.out.println("=========================");
+            System.out.println("Please go back to Manage Bookings to make payment for this booking.");
         }
 
-        System.out.print("Enter start date of your stay (yyyy-MM-dd): ");
-        String startDate = scanner.nextLine();
-        System.out.print("Enter end date of your stay (yyyy-MM-dd): ");
-        String endDate = scanner.nextLine();
-
-        // Generate a new PaymentID
-        String paymentID = generatePaymentID();
-
-        // Get the ResidentID of the logged-in user
-        String residentID = this.getUserID();
-
-        // Select an available room based on feeRateID
-        String roomID = selectAvailableRoom(feeRateID);
-        if (roomID == null) {
-            System.out.println("No available rooms of the selected type.");
-            return;
-        }
-
-        // Calculate the payment amount
-        double paymentAmount = calculatePaymentAmount(startDate, endDate, feeRateID);
-
-        // Get the current date and time for BookingDateTime
-        String bookingDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-
-        // Add a new line to payments.txt
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter("payments.txt", true))) {
-            writer.write(paymentID + "," + residentID + "," + null + "," + startDate + "," + endDate + "," + roomID + "," + paymentAmount + ",Unpaid," + bookingDateTime + "," + null + ",Active");
-            writer.newLine();
-            System.out.println("Booking successful.");
-        } catch (IOException e) {
-            System.out.println("An error occurred while saving the booking.");
-            e.printStackTrace();
-        }
-
-        // Map room IDs to room numbers
-        Map<String, String> roomMap = new HashMap<>();
-        try (BufferedReader roomReader = new BufferedReader(new FileReader("rooms.txt"))) {
-            String line;
-            while ((line = roomReader.readLine()) != null) {
-                String[] parts = line.split(",");
-                if (parts.length >= 2) {
-                    roomMap.put(parts[0], parts[1]); // Assuming parts[0] is RoomID and parts[1] is RoomNumber
+        private String generatePaymentID() {
+            int id = 1;
+            String filename = "payments.txt";
+            File file = new File(filename);
+            if (!file.exists()) {
+                try {
+                    file.createNewFile();
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
             }
-        } catch (IOException e) {
-            System.out.println("An error occurred while reading the room data.");
-            e.printStackTrace();
-        }
 
-        // Print confirmation message
-        long daysBetween = ChronoUnit.DAYS.between(LocalDate.parse(startDate), LocalDate.parse(endDate)) + 1;
-        String roomNumber = roomMap.getOrDefault(roomID, "Unknown Room");
-        System.out.println("Your Booking :");
-        System.out.println("Room Number : " + roomNumber);
-        System.out.println("Stay Duration : " + daysBetween + " Days");
-        System.out.println("Payment Amount : RM " + paymentAmount);
-        System.out.println("=========================");
-        System.out.println("Please go back to Manage Bookings to make payment for this booking.");
-    }
-
-    private String generatePaymentID() {
-        int id = 1;
-        String filename = "payments.txt";
-        File file = new File(filename);
-        if (!file.exists()) {
-            try {
-                file.createNewFile();
+            try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    String[] parts = line.split(",");
+                    if (parts[0].startsWith("P")) {
+                        int currentId = Integer.parseInt(parts[0].substring(1));
+                        if (currentId >= id) {
+                            id = currentId + 1;
+                        }
+                    }
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
+            return "P" + String.format("%02d", id);
         }
 
-        try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] parts = line.split(",");
-                if (parts[0].startsWith("P")) {
-                    int currentId = Integer.parseInt(parts[0].substring(1));
-                    if (currentId >= id) {
-                        id = currentId + 1;
+        private String selectAvailableRoom(String feeRateID) {
+            List<String> availableRooms = new ArrayList<>();
+            try (BufferedReader roomReader = new BufferedReader(new FileReader("rooms.txt"))) {
+                String line;
+                while ((line = roomReader.readLine()) != null) {
+                    String[] parts = line.split(",");
+                    if (parts.length >= 5 && parts[1].equals(feeRateID) && parts[4].equals("available")) {
+                        availableRooms.add(parts[0]); // Assuming parts[0] is RoomID
                     }
                 }
+            } catch (IOException e) {
+                System.out.println("An error occurred while reading the room data.");
+                e.printStackTrace();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return "P" + String.format("%02d", id);
-    }
 
-    private String selectAvailableRoom(String feeRateID) {
-        List<String> availableRooms = new ArrayList<>();
-        try (BufferedReader roomReader = new BufferedReader(new FileReader("rooms.txt"))) {
-            String line;
-            while ((line = roomReader.readLine()) != null) {
-                String[] parts = line.split(",");
-                if (parts.length >= 5 && parts[1].equals(feeRateID) && parts[4].equals("available")) {
-                    availableRooms.add(parts[0]); // Assuming parts[0] is RoomID
+            if (!availableRooms.isEmpty()) {
+                Random random = new Random();
+                return availableRooms.get(random.nextInt(availableRooms.size())); // Randomly select an available room
+            }
+            return null;
+        }
+
+        private double calculatePaymentAmount(String startDate, String endDate, String feeRateID) {
+            long daysBetween = ChronoUnit.DAYS.between(LocalDate.parse(startDate), LocalDate.parse(endDate)) + 1;
+            double ratePerDay = 0;
+            double ratePerWeek = 0;
+            double ratePerMonth = 0;
+
+            try (BufferedReader rateReader = new BufferedReader(new FileReader("fee_rates.txt"))) {
+                String line;
+                while ((line = rateReader.readLine()) != null) {
+                    String[] parts = line.split(",");
+                    if (parts[0].equals(feeRateID)) {
+                        ratePerDay = Double.parseDouble(parts[2]);
+                        ratePerWeek = Double.parseDouble(parts[3]);
+                        ratePerMonth = Double.parseDouble(parts[4]);
+                        break;
+                    }
                 }
+            } catch (IOException e) {
+                System.out.println("An error occurred while reading the fee rate data.");
+                e.printStackTrace();
             }
-        } catch (IOException e) {
-            System.out.println("An error occurred while reading the room data.");
-            e.printStackTrace();
-        }
 
-        if (!availableRooms.isEmpty()) {
-            Random random = new Random();
-            return availableRooms.get(random.nextInt(availableRooms.size())); // Randomly select an available room
-        }
-        return null;
-    }
-
-    private double calculatePaymentAmount(String startDate, String endDate, String feeRateID) {
-        long daysBetween = ChronoUnit.DAYS.between(LocalDate.parse(startDate), LocalDate.parse(endDate)) + 1;
-        double ratePerDay = 0;
-        double ratePerWeek = 0;
-        double ratePerMonth = 0;
-
-        try (BufferedReader rateReader = new BufferedReader(new FileReader("fee_rates.txt"))) {
-            String line;
-            while ((line = rateReader.readLine()) != null) {
-                String[] parts = line.split(",");
-                if (parts[0].equals(feeRateID)) {
-                    ratePerDay = Double.parseDouble(parts[2]);
-                    ratePerWeek = Double.parseDouble(parts[3]);
-                    ratePerMonth = Double.parseDouble(parts[4]);
-                    break;
-                }
+            if (daysBetween <= 7 && daysBetween > 0) {
+                return daysBetween * ratePerDay;
+            } else if (daysBetween <= 30 && daysBetween > 7) {
+                return daysBetween * ratePerWeek;
+            } else {
+                return daysBetween * ratePerMonth;
             }
-        } catch (IOException e) {
-            System.out.println("An error occurred while reading the fee rate data.");
-            e.printStackTrace();
         }
-
-        if (daysBetween <= 7 && daysBetween > 0) {
-            return daysBetween * ratePerDay;
-        } else if (daysBetween <= 30 && daysBetween > 7) {
-            return daysBetween * ratePerWeek;
-        } else {
-            return daysBetween * ratePerMonth;
-        }
-    }
 
 
         public void residentLogout() {
