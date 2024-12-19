@@ -386,6 +386,7 @@ public class APUHostelManagement {
                     break;
                 case 3:
                     // Generate Receipt logic
+                    generateReceipt();
                     break;
                 case 4:
                     System.out.println("Logging out...");
@@ -586,7 +587,6 @@ public class APUHostelManagement {
             // Update payment status and booking status
             selectedPayment[2] = this.staffID; // Update staffID
             selectedPayment[7] = "paid"; // Update payment status
-            selectedPayment[10] = "completed"; // Update booking status
         
             // Write updated payments back to file
             try (BufferedWriter writer = new BufferedWriter(new FileWriter("payments.txt"))) {
@@ -603,7 +603,133 @@ public class APUHostelManagement {
         }
 
         public void generateReceipt() {
-            // Generate receipt logic
+            Scanner scanner = new Scanner(System.in);
+            List<String[]> payments = new ArrayList<>();
+            List<String[]> receipts = new ArrayList<>();
+        
+            // Read payments from file
+            try (BufferedReader reader = new BufferedReader(new FileReader("payments.txt"))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    payments.add(line.split(","));
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                return;
+            }
+        
+            // Read receipts from file
+            try (BufferedReader reader = new BufferedReader(new FileReader("receipts.txt"))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    receipts.add(line.split(","));
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                return;
+            }
+        
+            // Filter payments
+            List<String[]> eligiblePayments = new ArrayList<>();
+            for (String[] payment : payments) {
+                if (payment[2] != null && !payment[2].isEmpty() && payment[7].equalsIgnoreCase("paid") && payment[10].equalsIgnoreCase("active")) {
+                    eligiblePayments.add(payment);
+                }
+            }
+        
+            if (eligiblePayments.isEmpty()) {
+                System.out.println("No eligible payments found.");
+                displayMenu();
+                return;
+            }
+        
+            // Display eligible payments in brief
+            System.out.println("Eligible Payments:");
+            for (int i = 0; i < eligiblePayments.size(); i++) {
+                String[] payment = eligiblePayments.get(i);
+                System.out.println((i + 1) + ". Payment ID: " + payment[0] + ", Resident ID: " + payment[1] + ", Amount: " + payment[6]);
+            }
+        
+            // Select payment to generate receipt
+            int paymentIndex = -1;
+            while (true) {
+                System.out.print("Enter the number of the payment to generate receipt: ");
+                if (scanner.hasNextInt()) {
+                    paymentIndex = scanner.nextInt() - 1;
+                    scanner.nextLine(); // Consume newline
+                    if (paymentIndex >= 0 && paymentIndex < eligiblePayments.size()) {
+                        break; // Valid input, exit loop
+                    } else {
+                        System.out.println("Invalid input. Please enter a number between 1 and " + eligiblePayments.size() + ".");
+                    }
+                } else {
+                    System.out.println("Invalid input. Please enter a number.");
+                    scanner.nextLine(); // Consume invalid input
+                }
+            }
+        
+            // Show selected payment in detail
+            String[] selectedPayment = eligiblePayments.get(paymentIndex);
+            System.out.println("Selected Payment Details:");
+            System.out.println("Payment ID: " + selectedPayment[0]);
+            System.out.println("Resident ID: " + selectedPayment[1]);
+            System.out.println("Staff ID: " + selectedPayment[2]);
+            System.out.println("Start Date: " + selectedPayment[3]);
+            System.out.println("End Date: " + selectedPayment[4]);
+            System.out.println("Room ID: " + selectedPayment[5]);
+            System.out.println("Payment Amount: " + selectedPayment[6]);
+            System.out.println("Payment Status: " + selectedPayment[7]);
+            System.out.println("Booking DateTime: " + selectedPayment[8]);
+            System.out.println("Payment Method: " + selectedPayment[9]);
+            System.out.println("Booking Status: " + selectedPayment[10]);
+        
+            // Confirm receipt generation
+            String confirmation = "";
+            while (!confirmation.equalsIgnoreCase("yes") && !confirmation.equalsIgnoreCase("no")) {
+                System.out.print("Do you want to generate a receipt for this payment? (yes/no): ");
+                confirmation = scanner.nextLine();
+                if (!confirmation.equalsIgnoreCase("yes") && !confirmation.equalsIgnoreCase("no")) {
+                    System.out.println("Invalid input. Please enter 'yes' or 'no'.");
+                }
+            }
+        
+            if (confirmation.equalsIgnoreCase("no")) {
+                System.out.println("Receipt generation cancelled.");
+                displayMenu();
+                return;
+            }
+        
+            // Generate receipt
+            String receiptID = "RC" + String.format("%02d", receipts.size() + 1);
+            String currentDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+            String[] newReceipt = {receiptID, selectedPayment[0], this.staffID, currentDateTime};
+            receipts.add(newReceipt);
+        
+            // Update booking status to completed
+            selectedPayment[10] = "completed";
+        
+            // Write updated receipts back to file
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter("receipts.txt"))) {
+                for (String[] receipt : receipts) {
+                    writer.write(String.join(",", receipt));
+                    writer.newLine();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        
+            // Write updated payments back to file
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter("payments.txt"))) {
+                for (String[] payment : payments) {
+                    writer.write(String.join(",", payment));
+                    writer.newLine();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        
+            System.out.println("Receipt generated successfully.");
+            displayMenu();
         }
     }
 
@@ -873,146 +999,171 @@ public class APUHostelManagement {
 
 
         public void makeBooking() {
-            Scanner scanner = new Scanner(System.in);
-            System.out.println("Select Room Type:");
-            System.out.println("1. Standard");
-            System.out.println("2. Deluxe");
-            System.out.print("Enter your choice: ");
-            int roomTypeChoice = scanner.nextInt();
-            scanner.nextLine(); // Consume newline
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Select Room Type:");
+        System.out.println("1. Standard");
+        System.out.println("2. Deluxe");
+        System.out.print("Enter your choice: ");
+        int roomTypeChoice = scanner.nextInt();
+        scanner.nextLine(); // Consume newline
 
-            String roomType = null;
-            String feeRateID = null;
-            switch (roomTypeChoice) {
-                case 1:
-                    roomType = "Standard";
-                    feeRateID = "FR01";
-                    break;
-                case 2:
-                    roomType = "Deluxe";
-                    feeRateID = "FR02";
-                    break;
-                default:
-                    System.out.println("Invalid choice. Please try again.");
-                    return;
-            }
-
-            System.out.print("Enter start date of your stay (yyyy-MM-dd): ");
-            String startDate = scanner.nextLine();
-            System.out.print("Enter end date of your stay (yyyy-MM-dd): ");
-            String endDate = scanner.nextLine();
-
-            // Generate a new PaymentID
-            String paymentID = generatePaymentID();
-
-            // Get the ResidentID of the logged-in user
-            String residentID = this.getUserID();
-
-            // Select an available room based on feeRateID
-            String roomID = selectAvailableRoom(feeRateID);
-            if (roomID == null) {
-                System.out.println("No available rooms of the selected type.");
+        String roomType = null;
+        String feeRateID = null;
+        switch (roomTypeChoice) {
+            case 1:
+                roomType = "Standard";
+                feeRateID = "FR01";
+                break;
+            case 2:
+                roomType = "Deluxe";
+                feeRateID = "FR02";
+                break;
+            default:
+                System.out.println("Invalid choice. Please try again.");
                 return;
+        }
+
+        System.out.print("Enter start date of your stay (yyyy-MM-dd): ");
+        String startDate = scanner.nextLine();
+        System.out.print("Enter end date of your stay (yyyy-MM-dd): ");
+        String endDate = scanner.nextLine();
+
+        // Generate a new PaymentID
+        String paymentID = generatePaymentID();
+
+        // Get the ResidentID of the logged-in user
+        String residentID = this.getUserID();
+
+        // Select an available room based on feeRateID
+        String roomID = selectAvailableRoom(feeRateID);
+        if (roomID == null) {
+            System.out.println("No available rooms of the selected type.");
+            return;
+        }
+
+        // Calculate the payment amount
+        double paymentAmount = calculatePaymentAmount(startDate, endDate, feeRateID);
+
+        // Get the current date and time for BookingDateTime
+        String bookingDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+
+        // Add a new line to payments.txt
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("payments.txt", true))) {
+            writer.write(paymentID + "," + residentID + "," + null + "," + startDate + "," + endDate + "," + roomID + "," + paymentAmount + ",Unpaid," + bookingDateTime + "," + null + ",Active");
+            writer.newLine();
+            System.out.println("Booking successful.");
+        } catch (IOException e) {
+            System.out.println("An error occurred while saving the booking.");
+            e.printStackTrace();
+        }
+
+        // Map room IDs to room numbers
+        Map<String, String> roomMap = new HashMap<>();
+        try (BufferedReader roomReader = new BufferedReader(new FileReader("rooms.txt"))) {
+            String line;
+            while ((line = roomReader.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (parts.length >= 2) {
+                    roomMap.put(parts[0], parts[1]); // Assuming parts[0] is RoomID and parts[1] is RoomNumber
+                }
             }
+        } catch (IOException e) {
+            System.out.println("An error occurred while reading the room data.");
+            e.printStackTrace();
+        }
 
-            // Calculate the payment amount
-            double paymentAmount = calculatePaymentAmount(startDate, endDate, feeRateID);
+        // Print confirmation message
+        long daysBetween = ChronoUnit.DAYS.between(LocalDate.parse(startDate), LocalDate.parse(endDate)) + 1;
+        String roomNumber = roomMap.getOrDefault(roomID, "Unknown Room");
+        System.out.println("Your Booking :");
+        System.out.println("Room Number : " + roomNumber);
+        System.out.println("Stay Duration : " + daysBetween + " Days");
+        System.out.println("Payment Amount : RM " + paymentAmount);
+        System.out.println("=========================");
+        System.out.println("Please go back to Manage Bookings to make payment for this booking.");
+    }
 
-            // Get the current date and time for BookingDateTime
-            String bookingDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-
-            // Add a new line to payments.txt
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter("payments.txt", true))) {
-                writer.write(paymentID + "," + residentID + "," + null + "," + startDate + "," + endDate + "," + roomID + "," + paymentAmount + ",Unpaid," + bookingDateTime + "," + null + ",Active");
-                writer.newLine();
-                System.out.println("Booking successful.");
+    private String generatePaymentID() {
+        int id = 1;
+        String filename = "payments.txt";
+        File file = new File(filename);
+        if (!file.exists()) {
+            try {
+                file.createNewFile();
             } catch (IOException e) {
-                System.out.println("An error occurred while saving the booking.");
                 e.printStackTrace();
             }
         }
 
-        private String generatePaymentID() {
-            int id = 1;
-            String filename = "payments.txt";
-            File file = new File(filename);
-            if (!file.exists()) {
-                try {
-                    file.createNewFile();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    String[] parts = line.split(",");
-                    if (parts[0].startsWith("P")) {
-                        int currentId = Integer.parseInt(parts[0].substring(1));
-                        if (currentId >= id) {
-                            id = currentId + 1;
-                        }
+        try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (parts[0].startsWith("P")) {
+                    int currentId = Integer.parseInt(parts[0].substring(1));
+                    if (currentId >= id) {
+                        id = currentId + 1;
                     }
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
             }
-            return "P" + String.format("%02d", id);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+        return "P" + String.format("%02d", id);
+    }
 
-        private String selectAvailableRoom(String feeRateID) {
-            List<String> availableRooms = new ArrayList<>();
-            try (BufferedReader roomReader = new BufferedReader(new FileReader("rooms.txt"))) {
-                String line;
-                while ((line = roomReader.readLine()) != null) {
-                    String[] parts = line.split(",");
-                    if (parts.length >= 5 && parts[1].equals(feeRateID) && parts[4].equals("available")) {
-                        availableRooms.add(parts[0]); // Assuming parts[0] is RoomID
-                    }
+    private String selectAvailableRoom(String feeRateID) {
+        List<String> availableRooms = new ArrayList<>();
+        try (BufferedReader roomReader = new BufferedReader(new FileReader("rooms.txt"))) {
+            String line;
+            while ((line = roomReader.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (parts.length >= 5 && parts[1].equals(feeRateID) && parts[4].equals("available")) {
+                    availableRooms.add(parts[0]); // Assuming parts[0] is RoomID
                 }
-            } catch (IOException e) {
-                System.out.println("An error occurred while reading the room data.");
-                e.printStackTrace();
             }
-
-            if (!availableRooms.isEmpty()) {
-                Random random = new Random();
-                return availableRooms.get(random.nextInt(availableRooms.size())); // Randomly select an available room
-            }
-            return null;
+        } catch (IOException e) {
+            System.out.println("An error occurred while reading the room data.");
+            e.printStackTrace();
         }
 
-        private double calculatePaymentAmount(String startDate, String endDate, String feeRateID) {
-            long daysBetween = ChronoUnit.DAYS.between(LocalDate.parse(startDate), LocalDate.parse(endDate)) + 1;
-            double ratePerDay = 0;
-            double ratePerWeek = 0;
-            double ratePerMonth = 0;
+        if (!availableRooms.isEmpty()) {
+            Random random = new Random();
+            return availableRooms.get(random.nextInt(availableRooms.size())); // Randomly select an available room
+        }
+        return null;
+    }
 
-            try (BufferedReader rateReader = new BufferedReader(new FileReader("fee_rates.txt"))) {
-                String line;
-                while ((line = rateReader.readLine()) != null) {
-                    String[] parts = line.split(",");
-                    if (parts[0].equals(feeRateID)) {
-                        ratePerDay = Double.parseDouble(parts[2]);
-                        ratePerWeek = Double.parseDouble(parts[3]);
-                        ratePerMonth = Double.parseDouble(parts[4]);
-                        break;
-                    }
+    private double calculatePaymentAmount(String startDate, String endDate, String feeRateID) {
+        long daysBetween = ChronoUnit.DAYS.between(LocalDate.parse(startDate), LocalDate.parse(endDate)) + 1;
+        double ratePerDay = 0;
+        double ratePerWeek = 0;
+        double ratePerMonth = 0;
+
+        try (BufferedReader rateReader = new BufferedReader(new FileReader("fee_rates.txt"))) {
+            String line;
+            while ((line = rateReader.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (parts[0].equals(feeRateID)) {
+                    ratePerDay = Double.parseDouble(parts[2]);
+                    ratePerWeek = Double.parseDouble(parts[3]);
+                    ratePerMonth = Double.parseDouble(parts[4]);
+                    break;
                 }
-            } catch (IOException e) {
-                System.out.println("An error occurred while reading the fee rate data.");
-                e.printStackTrace();
             }
-
-            if (daysBetween <= 7 && daysBetween > 0) {
-                return daysBetween * ratePerDay;
-            } else if (daysBetween <= 30 && daysBetween > 7) {
-                return daysBetween * ratePerWeek;
-            } else {
-                return daysBetween * ratePerMonth;
-            }
+        } catch (IOException e) {
+            System.out.println("An error occurred while reading the fee rate data.");
+            e.printStackTrace();
         }
+
+        if (daysBetween <= 7 && daysBetween > 0) {
+            return daysBetween * ratePerDay;
+        } else if (daysBetween <= 30 && daysBetween > 7) {
+            return daysBetween * ratePerWeek;
+        } else {
+            return daysBetween * ratePerMonth;
+        }
+    }
 
 
         public void residentLogout() {
@@ -1163,25 +1314,44 @@ public class APUHostelManagement {
         System.out.println("2. Staff");
         System.out.println("3. Resident");
         System.out.print("Enter your choice (1-3): ");
-
-        int choice = scanner.nextInt();
-        scanner.nextLine(); // Consume newline
-
+    
+        int choice = -1;
+        while (choice < 1 || choice > 3) {
+            if (scanner.hasNextInt()) {
+                choice = scanner.nextInt();
+                scanner.nextLine(); // Consume newline
+                if (choice < 1 || choice > 3) {
+                    System.out.println("Invalid choice. Please enter a number between 1 and 3.");
+                }
+            } else {
+                System.out.println("Invalid input. Please enter a number between 1 and 3.");
+                scanner.nextLine(); // Consume invalid input
+            }
+        }
+    
         switch (choice) {
             case 1:
                 System.out.println("You have chosen Manager.");
                 System.out.println("1. Register");
                 System.out.println("2. Login");
                 System.out.print("Enter your choice (1-2): ");
-                int managerChoice = scanner.nextInt();
-                scanner.nextLine(); // Consume newline
+                int managerChoice = -1;
+                while (managerChoice < 1 || managerChoice > 2) {
+                    if (scanner.hasNextInt()) {
+                        managerChoice = scanner.nextInt();
+                        scanner.nextLine(); // Consume newline
+                        if (managerChoice < 1 || managerChoice > 2) {
+                            System.out.println("Invalid choice. Please enter a number between 1 and 2.");
+                        }
+                    } else {
+                        System.out.println("Invalid input. Please enter a number between 1 and 2.");
+                        scanner.nextLine(); // Consume invalid input
+                    }
+                }
                 if (managerChoice == 1) {
                     registerManager();
-                } else if (managerChoice == 2) {
-                    loginManager();
                 } else {
-                    System.out.println("Invalid choice. Please try again.");
-                    displayWelcomePage(); // Recursively call to retry
+                    loginManager();
                 }
                 break;
             case 2:
@@ -1189,31 +1359,47 @@ public class APUHostelManagement {
                 System.out.println("1. Register");
                 System.out.println("2. Login");
                 System.out.print("Enter your choice (1-2): ");
-                int staffChoice = scanner.nextInt();
-                scanner.nextLine(); // Consume newline
+                int staffChoice = -1;
+                while (staffChoice < 1 || staffChoice > 2) {
+                    if (scanner.hasNextInt()) {
+                        staffChoice = scanner.nextInt();
+                        scanner.nextLine(); // Consume newline
+                        if (staffChoice < 1 || staffChoice > 2) {
+                            System.out.println("Invalid choice. Please enter a number between 1 and 2.");
+                        }
+                    } else {
+                        System.out.println("Invalid input. Please enter a number between 1 and 2.");
+                        scanner.nextLine(); // Consume invalid input
+                    }
+                }
                 if (staffChoice == 1) {
                     registerStaff();
-                } else if (staffChoice == 2) {
-                    loginStaff();
                 } else {
-                    System.out.println("Invalid choice. Please try again.");
-                    displayWelcomePage(); // Recursively call to retry
+                    loginStaff();
                 }
-                    break;
+                break;
             case 3:
                 System.out.println("You have chosen Resident.");
                 System.out.println("1. Register");
                 System.out.println("2. Login");
                 System.out.print("Enter your choice (1-2): ");
-                int residentChoice = scanner.nextInt();
-                scanner.nextLine(); // Consume newline
+                int residentChoice = -1;
+                while (residentChoice < 1 || residentChoice > 2) {
+                    if (scanner.hasNextInt()) {
+                        residentChoice = scanner.nextInt();
+                        scanner.nextLine(); // Consume newline
+                        if (residentChoice < 1 || residentChoice > 2) {
+                            System.out.println("Invalid choice. Please enter a number between 1 and 2.");
+                        }
+                    } else {
+                        System.out.println("Invalid input. Please enter a number between 1 and 2.");
+                        scanner.nextLine(); // Consume invalid input
+                    }
+                }
                 if (residentChoice == 1) {
                     registerResident();
-                } else if (residentChoice == 2) {
-                    loginResident();
                 } else {
-                    System.out.println("Invalid choice. Please try again.");
-                    displayWelcomePage(); // Recursively call to retry
+                    loginResident();
                 }
                 break;
             default:
@@ -1221,7 +1407,6 @@ public class APUHostelManagement {
                 displayWelcomePage(); // Recursively call to retry
                 break;
         }
-            
     }
 
     // Method to handle Manager registration
