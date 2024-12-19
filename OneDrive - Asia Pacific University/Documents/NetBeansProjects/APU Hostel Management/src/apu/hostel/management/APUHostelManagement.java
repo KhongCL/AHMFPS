@@ -382,6 +382,7 @@ public class APUHostelManagement {
                     break;
                 case 2:
                     // Make Payment for Resident logic
+                    makePayment();
                     break;
                 case 3:
                     // Generate Receipt logic
@@ -517,13 +518,13 @@ public class APUHostelManagement {
                 return;
             }
         
-            // Display pending payments
+            // Display pending payments in brief
             System.out.println("Pending Payments:");
             List<String[]> pendingPayments = new ArrayList<>();
             for (String[] payment : payments) {
                 if (payment[7].equalsIgnoreCase("pending")) {
                     pendingPayments.add(payment);
-                    System.out.println(pendingPayments.size() + ". " + Arrays.toString(payment));
+                    System.out.println(pendingPayments.size() + ". Payment ID: " + payment[0] + ", Resident ID: " + payment[1] + ", Amount: " + payment[6]);
                 }
             }
         
@@ -535,19 +536,54 @@ public class APUHostelManagement {
         
             // Select payment to update
             int paymentIndex = -1;
-            while (paymentIndex < 0 || paymentIndex >= pendingPayments.size()) {
+            while (true) {
                 System.out.print("Enter the number of the payment to update: ");
                 if (scanner.hasNextInt()) {
                     paymentIndex = scanner.nextInt() - 1;
                     scanner.nextLine(); // Consume newline
+                    if (paymentIndex >= 0 && paymentIndex < pendingPayments.size()) {
+                        break; // Valid input, exit loop
+                    } else {
+                        System.out.println("Invalid input. Please enter a number between 1 and " + pendingPayments.size() + ".");
+                    }
                 } else {
                     System.out.println("Invalid input. Please enter a number.");
                     scanner.nextLine(); // Consume invalid input
                 }
             }
         
-            // Update payment status and booking status
+            // Show selected payment in detail
             String[] selectedPayment = pendingPayments.get(paymentIndex);
+            System.out.println("Selected Payment Details:");
+            System.out.println("Payment ID: " + selectedPayment[0]);
+            System.out.println("Resident ID: " + selectedPayment[1]);
+            System.out.println("Staff ID: " + selectedPayment[2]);
+            System.out.println("Start Date: " + selectedPayment[3]);
+            System.out.println("End Date: " + selectedPayment[4]);
+            System.out.println("Room ID: " + selectedPayment[5]);
+            System.out.println("Payment Amount: " + selectedPayment[6]);
+            System.out.println("Payment Status: " + selectedPayment[7]);
+            System.out.println("Booking DateTime: " + selectedPayment[8]);
+            System.out.println("Payment Method: " + selectedPayment[9]);
+            System.out.println("Booking Status: " + selectedPayment[10]);
+        
+            // Confirm update
+            String confirmation = "";
+            while (!confirmation.equalsIgnoreCase("yes") && !confirmation.equalsIgnoreCase("no")) {
+                System.out.print("Do you want to update this payment? (yes/no): ");
+                confirmation = scanner.nextLine();
+                if (!confirmation.equalsIgnoreCase("yes") && !confirmation.equalsIgnoreCase("no")) {
+                    System.out.println("Invalid input. Please enter 'yes' or 'no'.");
+                }
+            }
+        
+            if (confirmation.equalsIgnoreCase("no")) {
+                System.out.println("Payment update cancelled.");
+                displayMenu();
+                return;
+            }
+        
+            // Update payment status and booking status
             selectedPayment[2] = this.staffID; // Update staffID
             selectedPayment[7] = "paid"; // Update payment status
             selectedPayment[10] = "completed"; // Update booking status
@@ -931,7 +967,7 @@ public class APUHostelManagement {
                 String line;
                 while ((line = roomReader.readLine()) != null) {
                     String[] parts = line.split(",");
-                    if (parts.length >= 5 && parts[1].equals(feeRateID) && parts[4].equals("Available")) {
+                    if (parts.length >= 5 && parts[1].equals(feeRateID) && parts[4].equals("available")) {
                         availableRooms.add(parts[0]); // Assuming parts[0] is RoomID
                     }
                 }
@@ -979,10 +1015,6 @@ public class APUHostelManagement {
         }
 
 
-
-        
-
-        
         public void residentLogout() {
             System.out.println("Logging out...");
             // Perform any necessary cleanup, such as closing resources or saving state
