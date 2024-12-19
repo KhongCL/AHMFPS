@@ -689,9 +689,9 @@ public class APUHostelManagement {
             System.out.println("Payment Records:");
             String userID = this.getUserID(); // Assuming there's a method to get the current user's ID
 
-            // Read room data from room.txt and store it in a map
+            // Read room data from rooms.txt and store it in a map
             Map<String, String> roomMap = new HashMap<>();
-            try (BufferedReader roomReader = new BufferedReader(new FileReader("room.txt"))) {
+            try (BufferedReader roomReader = new BufferedReader(new FileReader("rooms.txt"))) {
                 String line;
                 while ((line = roomReader.readLine()) != null) {
                     String[] parts = line.split(",");
@@ -730,6 +730,51 @@ public class APUHostelManagement {
                 e.printStackTrace();
             }
         }
+
+        public void manageBookings() {
+            Scanner scanner = new Scanner(System.in);
+            int choice;
+
+            do {
+                System.out.println("Manage Bookings:");
+                System.out.println("1. Make Booking");
+                System.out.println("2. Make Payment for Booking");
+                System.out.println("3. Cancel Booking");
+                System.out.println("0. Go Back to Resident Menu");
+                System.out.print("Enter your choice: ");
+                choice = scanner.nextInt();
+                scanner.nextLine(); // Consume newline
+
+                switch (choice) {
+                    case 1:
+                        makeBooking();
+                        break;
+                    case 2:
+                        makePaymentForBooking();
+                        break;
+                    case 3:
+                        cancelBooking();
+                        break;
+                    case 0:
+                        System.out.println("Returning to Resident Menu...");
+                        displayMenu();
+                        return;
+                    default:
+                        System.out.println("Invalid choice. Please try again.");
+                }
+            } while (choice != 0);
+        }
+
+        public void makePaymentForBooking() {
+            // Logic for making payment for a booking
+            System.out.println("Make Payment for Booking functionality is not yet implemented.");
+        }
+
+        public void cancelBooking() {
+            // Logic for canceling a booking
+            System.out.println("Cancel Booking functionality is not yet implemented.");
+        }
+
 
         public void makeBooking() {
             Scanner scanner = new Scanner(System.in);
@@ -822,12 +867,12 @@ public class APUHostelManagement {
 
         private String selectAvailableRoom(String roomType) {
             Map<String, String> roomMap = new HashMap<>();
-            try (BufferedReader roomReader = new BufferedReader(new FileReader("room.txt"))) {
+            try (BufferedReader roomReader = new BufferedReader(new FileReader("rooms.txt"))) {
                 String line;
                 while ((line = roomReader.readLine()) != null) {
                     String[] parts = line.split(",");
                     if (parts.length >= 2 && parts[1].equals(roomType)) {
-                        roomMap.put(parts[0], parts[1]); // Assuming parts[0] is RoomID and parts[1] is RoomType
+                        roomMap.put(parts[0], parts[2]); // Assuming parts[0] is RoomID and parts[1] is RoomType
                     }
                 }
             } catch (IOException e) {
@@ -847,7 +892,7 @@ public class APUHostelManagement {
             double ratePerWeek = 0;
             double ratePerMonth = 0;
 
-            try (BufferedReader rateReader = new BufferedReader(new FileReader("fee_rate.txt"))) {
+            try (BufferedReader rateReader = new BufferedReader(new FileReader("fee_rates.txt"))) {
                 String line;
                 while ((line = rateReader.readLine()) != null) {
                     String[] parts = line.split(",");
@@ -863,59 +908,20 @@ public class APUHostelManagement {
                 e.printStackTrace();
             }
 
-            if (daysBetween <= 7) {
+            if (daysBetween <= 7 && daysBetween > 0) {
                 return daysBetween * ratePerDay;
-            } else if (daysBetween <= 30) {
+            } else if (daysBetween <= 30 && daysBetween > 7) {
                 return (daysBetween / 7) * ratePerWeek + (daysBetween % 7) * ratePerDay;
             } else {
                 return (daysBetween / 30) * ratePerMonth + ((daysBetween % 30) / 7) * ratePerWeek + (daysBetween % 7) * ratePerDay;
             }
         }
 
-        public void makePaymentForBooking() {
-            // Logic for making payment for a booking
-            System.out.println("Make Payment for Booking functionality is not yet implemented.");
-        }
 
-        public void cancelBooking() {
-            // Logic for canceling a booking
-            System.out.println("Cancel Booking functionality is not yet implemented.");
-        }
 
-        public void manageBookings() {
-            Scanner scanner = new Scanner(System.in);
-            int choice;
+        
 
-            do {
-                System.out.println("Manage Bookings:");
-                System.out.println("1. Make Booking");
-                System.out.println("2. Make Payment for Booking");
-                System.out.println("3. Cancel Booking");
-                System.out.println("0. Go Back to Resident Menu");
-                System.out.print("Enter your choice: ");
-                choice = scanner.nextInt();
-                scanner.nextLine(); // Consume newline
-
-                switch (choice) {
-                    case 1:
-                        makeBooking();
-                        break;
-                    case 2:
-                        makePaymentForBooking();
-                        break;
-                    case 3:
-                        cancelBooking();
-                        break;
-                    case 0:
-                        System.out.println("Returning to Resident Menu...");
-                        displayMenu();
-                        return;
-                    default:
-                        System.out.println("Invalid choice. Please try again.");
-                }
-            } while (choice != 0);
-        }
-
+        
         public void residentLogout() {
             System.out.println("Logging out...");
             // Perform any necessary cleanup, such as closing resources or saving state
@@ -1602,3 +1608,5 @@ public class APUHostelManagement {
 }
 
 //test netbean pull push
+
+//test again

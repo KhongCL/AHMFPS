@@ -1,0 +1,3 @@
+RM01,FR01,Standard,101,Unavailable,1
+RM02,FR02,Deluxe,102,Unavailable,2
+RM03,FR01,Standard,103,Available,1

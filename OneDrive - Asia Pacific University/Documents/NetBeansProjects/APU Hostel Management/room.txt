@@ -1,3 +1,0 @@
-RM01,FR01,101,Unavailable,1
-RM02,FR02,102,Unavailable,2
-RM03,FR01,103,Available,1
