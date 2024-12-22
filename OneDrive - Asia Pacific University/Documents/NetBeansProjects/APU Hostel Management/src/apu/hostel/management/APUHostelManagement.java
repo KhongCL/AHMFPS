@@ -180,6 +180,52 @@ public class APUHostelManagement {
             }
         }
 
+        public static List<User> readFromFileForSearch(String filename) throws IOException {
+            List<User> users = new ArrayList<>();
+            try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    String[] parts = line.split(",");
+                    System.out.println(Arrays.toString(parts));
+                    User user = null;
+                    if (parts.length == 8) {
+                        switch (parts[6]) {
+                            case "manager":
+                                user = new Manager(parts);
+                                break;
+                            case "staff":
+                                user = new Staff(parts);
+                                break;
+                            case "resident":
+                                user = new Resident(parts);
+                                break;
+                        }
+                    } else if (parts.length == 10) {
+                        if ("staff".equalsIgnoreCase(parts[7])) {
+                            user = new Staff(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], parts[7],Boolean.parseBoolean(parts[8]), parts[9]);
+                        } else if ("resident".equalsIgnoreCase(parts[7])) {
+                            user = new Resident(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], parts[7], Boolean.parseBoolean(parts[8]), parts[9]);
+                        }
+                    }
+                    if (user != null) {
+                        users.add(user);
+                    }
+                }
+            }
+            return users;
+        }
+
+        public List<User> readUsersForSearch() throws IOException {
+            List<User> users = new ArrayList<>();
+            users.addAll(User.readFromFileForSearch("users.txt"));
+            System.out.println(users);
+            users.addAll(User.readFromFileForSearch("unapproved_staffs.txt"));
+            System.out.println(users);
+            users.addAll(User.readFromFileForSearch("unapproved_residents.txt"));
+            System.out.println(users);
+            return users;
+        }
+
 
     }
 
@@ -190,6 +236,10 @@ public class APUHostelManagement {
         public Manager(String managerID, String userID, String icPassportNumber, String username, String password, String contactNumber, String dateOfRegistration, String role, boolean isActive) {
             super(userID, icPassportNumber, username, password, contactNumber, dateOfRegistration, role, isActive);
             this.managerID = managerID;
+        }
+
+        public Manager(String[] parts) {
+            super(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], Boolean.parseBoolean(parts[7]));
         }
 
         public String getManagerID() {
@@ -345,17 +395,15 @@ public class APUHostelManagement {
         public void searchUsers() {
             Scanner scanner = new Scanner(System.in);
             List<User> users = new ArrayList<>();
-
-            // Read users from files
+        
+            // Read users for search
             try {
-                users.addAll(User.readFromFile("users.txt"));
-                users.addAll(User.readFromFile("unapproved_staffs.txt"));
-                users.addAll(User.readFromFile("unapproved_residents.txt"));
+                users = readUsersForSearch();
             } catch (IOException e) {
                 e.printStackTrace();
                 return;
             }
-
+        
             // Filter options
             System.out.println("Filter options:");
             System.out.println("1. Approved/Unapproved");
@@ -363,7 +411,7 @@ public class APUHostelManagement {
             System.out.println("3. IsActive");
             System.out.println("4. No filter");
             System.out.print("Enter your choice (1-4): ");
-
+        
             int filterChoice = -1;
             while (filterChoice < 1 || filterChoice > 4) {
                 if (scanner.hasNextInt()) {
@@ -377,9 +425,9 @@ public class APUHostelManagement {
                     scanner.nextLine(); // Consume invalid input
                 }
             }
-
+        
             List<User> filteredUsers = new ArrayList<>(users);
-
+        
             if (filterChoice == 1) {
                 System.out.print("Enter 'approved' or 'unapproved': ");
                 String approvalStatus = scanner.nextLine();
@@ -400,7 +448,7 @@ public class APUHostelManagement {
                         .filter(user -> user.getIsActive() == isActive)
                         .collect(Collectors.toList());
             }
-
+        
             // Sort options
             System.out.println("Sort options:");
             System.out.println("1. Primary Key Ascending");
@@ -408,7 +456,7 @@ public class APUHostelManagement {
             System.out.println("3. Username Ascending");
             System.out.println("4. Username Descending");
             System.out.print("Enter your choice (1-4): ");
-
+        
             int sortChoice = -1;
             while (sortChoice < 1 || sortChoice > 4) {
                 if (scanner.hasNextInt()) {
@@ -422,7 +470,7 @@ public class APUHostelManagement {
                     scanner.nextLine(); // Consume invalid input
                 }
             }
-
+        
             if (sortChoice == 1) {
                 filteredUsers.sort(Comparator.comparing(User::getUserID));
             } else if (sortChoice == 2) {
@@ -432,7 +480,7 @@ public class APUHostelManagement {
             } else if (sortChoice == 4) {
                 filteredUsers.sort(Comparator.comparing(User::getUsername).reversed());
             }
-
+        
             // Search by username
             System.out.print("Enter username to search (or press Enter to skip): ");
             String usernameSearch = scanner.nextLine();
@@ -441,12 +489,18 @@ public class APUHostelManagement {
                         .filter(user -> user.getUsername().equalsIgnoreCase(usernameSearch))
                         .collect(Collectors.toList());
             }
-
-            // Display filtered and sorted users
+        
+            // Display filtered and sorted users with index numbers
             System.out.println("Filtered and Sorted Users:");
+            int index = 1;
             for (User user : filteredUsers) {
-                System.out.println(user);
+                System.out.println(index + ". " + user);
+                index++;
             }
+            System.out.println("Total users: " + filteredUsers.size());
+            System.out.println("Search completed.");
+            System.out.println("Returning to Manager Menu...");
+            displayMenu();
         }
 
         // Method to update user
@@ -559,6 +613,11 @@ public class APUHostelManagement {
             super(userID, icPassportNumber, username, password, contactNumber, dateOfRegistration, role, isActive);
             this.staffID = staffID;
             this.dateOfApproval = dateOfApproval;
+        }
+
+        public Staff(String[] parts) {
+            super(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], Boolean.parseBoolean(parts[7]));
+            this.dateOfApproval = parts[5];
         }
 
         @Override
@@ -971,6 +1030,11 @@ public class APUHostelManagement {
             this.dateOfApproval = dateOfApproval;
         }
 
+        public Resident(String[] parts) {
+            super(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], Boolean.parseBoolean(parts[7]));
+            this.dateOfApproval = parts[5];
+        }
+
         @Override
         public String toString() {
             return "UserID: " + getUserID() + ", IC/Passport Number: " + getIcPassportNumber() + ", Username: " + getUsername() + ", Contact Number: " + getContactNumber() + ", Date of Registration: " + getDateOfRegistration() + ", Role: " + getRole() + ", IsActive: " + getIsActive() + ", Date of Approval: " + dateOfApproval;
@@ -1238,7 +1302,7 @@ public class APUHostelManagement {
             // Filter unpaid bookings for the current resident
             List<String[]> unpaidBookings = new ArrayList<>();
             for (String[] payment : payments) {
-                if (payment[1].equals(residentID) && payment[7].equalsIgnoreCase("unpaid")) {
+                if (payment[1].equals(residentID) && payment[7].equals("unpaid")) {
                     unpaidBookings.add(payment);
                 }
             }
@@ -1351,7 +1415,7 @@ public class APUHostelManagement {
             // Filter unpaid bookings for the current resident
             List<String[]> unpaidBookings = new ArrayList<>();
             for (String[] payment : payments) {
-                if (payment[1].equals(residentID) && payment[7].equalsIgnoreCase("unpaid")) {
+                if (payment[1].equals(residentID) && payment[7].equals("unpaid")) {
                     unpaidBookings.add(payment);
                 }
             }
@@ -1413,6 +1477,33 @@ public class APUHostelManagement {
                 e.printStackTrace();
             }
 
+            // Update room status to available
+            String roomID = selectedBooking[5]; // Assuming roomID is at index 5
+            List<String[]> rooms = new ArrayList<>();
+            try (BufferedReader reader = new BufferedReader(new FileReader("rooms.txt"))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    String[] parts = line.split(",");
+                    if (parts[0].equals(roomID)) {
+                        parts[4] = "available"; // Assuming parts[4] is RoomStatus
+                    }
+                    rooms.add(parts);
+                }
+            } catch (IOException e) {
+                System.out.println("An error occurred while reading the room data.");
+                e.printStackTrace();
+            }
+
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter("rooms.txt"))) {
+                for (String[] room : rooms) {
+                    writer.write(String.join(",", room));
+                    writer.newLine();
+                }
+            } catch (IOException e) {
+                System.out.println("An error occurred while updating the room data.");
+                e.printStackTrace();
+            }
+
             System.out.println("This booking has been successfully cancelled.");
         }
 
@@ -1420,9 +1511,9 @@ public class APUHostelManagement {
         public void makeBooking() {
             Scanner scanner = new Scanner(System.in);
             System.out.println("Room Pricing");
-            System.out.println("Room Type\t1–7 Days\t8–30 Days\t31+ Days");
-            System.out.println("1. Standard\t$40/day\t$30/day\t$20/day");
-            System.out.println("2. Deluxe\t$60/day\t$45/day\t$30/day");
+            System.out.println("Room Type\t\t1 to 7 Days\t8 to 30 Days\t31+ Days");
+            System.out.println("1. Standard\t\tRM 40/day\tRM 30/day\tRM 20/day");
+            System.out.println("2. Deluxe\t\tRM 60/day\tRM 45/day\tRM 30/day");
             System.out.print("Enter your choice: ");
             int roomTypeChoice = scanner.nextInt();
             scanner.nextLine(); // Consume newline
@@ -1443,10 +1534,40 @@ public class APUHostelManagement {
                     return;
             }
 
-            System.out.print("Enter start date of your stay (yyyy-MM-dd): ");
-            String startDate = scanner.nextLine();
-            System.out.print("Enter end date of your stay (yyyy-MM-dd): ");
-            String endDate = scanner.nextLine();
+            LocalDate startDate = null;
+            LocalDate endDate = null;
+            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            String datePattern = "\\d{4}-\\d{2}-\\d{2}";
+
+            // Prompt for start date
+            while (startDate == null) {
+                System.out.print("Enter start date of your stay (yyyy-MM-dd): ");
+                String startDateInput = scanner.nextLine();
+                if (startDateInput.matches(datePattern)) {
+                    try {
+                        startDate = LocalDate.parse(startDateInput, dateFormatter);
+                    } catch (Exception e) {
+                        System.out.println("Invalid date. Please enter a valid date in yyyy-MM-dd format.");
+                    }
+                } else {
+                    System.out.println("Invalid date format. Please enter the date in yyyy-MM-dd format.");
+                }
+            }
+
+            // Prompt for end date
+            while (endDate == null) {
+                System.out.print("Enter end date of your stay (yyyy-MM-dd): ");
+                String endDateInput = scanner.nextLine();
+                if (endDateInput.matches(datePattern)) {
+                    try {
+                        endDate = LocalDate.parse(endDateInput, dateFormatter);
+                    } catch (Exception e) {
+                        System.out.println("Invalid date. Please enter a valid date in yyyy-MM-dd format.");
+                    }
+                } else {
+                    System.out.println("Invalid date format. Please enter the date in yyyy-MM-dd format.");
+                }
+            }
 
             // Generate a new PaymentID
             String paymentID = generatePaymentID();
@@ -1462,7 +1583,7 @@ public class APUHostelManagement {
             }
 
             // Calculate the payment amount
-            double paymentAmount = calculatePaymentAmount(startDate, endDate, feeRateID);
+            double paymentAmount = calculatePaymentAmount(startDate.toString(), endDate.toString(), feeRateID);
 
             // Get the current date and time for BookingDateTime
             String bookingDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
@@ -1477,7 +1598,7 @@ public class APUHostelManagement {
                 e.printStackTrace();
             }
 
-            // Update rooms.txt to mark the room as unavailable
+            // Update room status to unavailable
             updateRoomStatus(roomID, "unavailable");
 
             // Map room IDs to room numbers
@@ -1496,7 +1617,7 @@ public class APUHostelManagement {
             }
 
             // Print confirmation message
-            long daysBetween = ChronoUnit.DAYS.between(LocalDate.parse(startDate), LocalDate.parse(endDate)) + 1;
+            long daysBetween = ChronoUnit.DAYS.between(startDate, endDate) + 1;
             String roomNumber = roomMap.getOrDefault(roomID, "Unknown Room");
             System.out.println("Your Booking :");
             System.out.println("Room Number : " + roomNumber);

@@ -1,0 +1,1 @@
+null,null,12345677,kcl77,12377,12377,2024-12-22 17:28:16,Resident,true,null
