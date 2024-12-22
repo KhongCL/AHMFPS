@@ -50,8 +50,16 @@ public class APUHostelManagement {
             return userID;
         }
 
+        public void setIcPassportNumber(String icPassportNumber) {
+            this.icPassportNumber = icPassportNumber;
+        }
+
         public String getIcPassportNumber() {
             return icPassportNumber;
+        }
+
+        public void setUsername(String username) {
+            this.username = username;
         }
 
         public String getUsername() {
@@ -257,44 +265,32 @@ public class APUHostelManagement {
         @Override
         public void displayMenu() {
             // Manager-specific menu implementation
-           
             System.out.println("Manager Menu:");
             System.out.println("1. Approve User Registration");
-            System.out.println("2. Search User");
-            System.out.println("3. Update User");
-            System.out.println("4. Delete User");
-            System.out.println("5. Fix/Update Rate");
-            System.out.println("6. Logout");
+            System.out.println("2. Search, Update, or Delete User");
+            System.out.println("3. Fix/Update Rate");
+            System.out.println("4. Logout");
             System.out.print("Enter your choice: ");
-
+        
             Scanner scanner = new Scanner(System.in);
             int choice = scanner.nextInt();
             scanner.nextLine(); // Consume newline
-
+        
             switch (choice) {
                 case 1:
                     // Approve User Registration logic
                     approveUserRegistration();
                     break;
                 case 2:
-                    // Search User logic
+                    // Search, Update, or Delete User logic
                     searchUsers();
                     break;
                 case 3:
-                    // Update User logic
-                    updateUser(username);
-                    break;
-                case 4:
-                    // Delete User logic
-                    deleteUser(username);
-                    break;
-                case 5:
                     // Fix/Update Rate logic
                     break;
-                case 6:
+                case 4:
                     System.out.println("Logging out...");
                     displayWelcomePage();
-                    
                     break;
                 default:
                     System.out.println("Invalid choice. Please try again.");
@@ -391,6 +387,8 @@ public class APUHostelManagement {
         public void searchUsers() {
             Scanner scanner = new Scanner(System.in);
             List<User> users = new ArrayList<>();
+
+            
         
             // Read users for search
             try {
@@ -559,8 +557,7 @@ public class APUHostelManagement {
             }
             System.out.println("Total users: " + filteredUsers.size());
             System.out.println("Search completed.");
-            System.out.println("Returning to Manager Menu...");
-            displayMenu();
+            updateOrDeleteUser(filteredUsers);
         }
         
         
@@ -575,98 +572,224 @@ public class APUHostelManagement {
             return unapprovedUsers;
         }
 
-        // Method to update user
-        public void updateUser(String username) {
+        public void updateOrDeleteUser(List<User> users) {
             Scanner scanner = new Scanner(System.in);
-            List<User> users = new ArrayList<>();
-
-            // Read users from files
-            try {
-                users.addAll(User.readFromFile("users.txt"));
-                users.addAll(User.readFromFile("unapproved_staffs.txt"));
-                users.addAll(User.readFromFile("unapproved_residents.txt"));
-            } catch (IOException e) {
-                e.printStackTrace();
-                return;
+        
+            // Select user to update or delete
+            System.out.print("Enter the number of the user to update or delete (or 0 to cancel): ");
+            int userChoice = -1;
+            while (userChoice < 0 || userChoice > users.size()) {
+                if (scanner.hasNextInt()) {
+                    userChoice = scanner.nextInt();
+                    scanner.nextLine(); // Consume newline
+                    if (userChoice < 0 || userChoice > users.size()) {
+                        System.out.println("Invalid choice. Please enter a number between 0 and " + users.size() + ".");
+                    }
+                } else {
+                    System.out.println("Invalid input. Please enter a number between 0 and " + users.size() + ".");
+                    scanner.nextLine(); // Consume invalid input
+                }
             }
-
-            // Find user by username
-            User userToUpdate = users.stream()
-                    .filter(user -> user.getUsername().equalsIgnoreCase(username))
-                    .findFirst()
-                    .orElse(null);
-
-            if (userToUpdate == null) {
-                System.out.println("User not found.");
-                return;
+        
+            if (userChoice == 0) {
+                System.out.println("Operation cancelled.");
+                displayMenu();
             }
-
-            // Update user details
-            System.out.print("Enter new password: ");
-            String newPassword = scanner.nextLine();
-            System.out.print("Enter new contact number: ");
-            String newContactNumber = scanner.nextLine();
-            System.out.print("Enter new role: ");
-            String newRole = scanner.nextLine();
-            System.out.print("Enter new isActive status (true/false): ");
-            boolean newIsActive = scanner.nextBoolean();
-            scanner.nextLine(); // Consume newline
-
-            userToUpdate.setPassword(newPassword);
-            userToUpdate.setContactNumber(newContactNumber);
-            userToUpdate.setRole(newRole);
-            userToUpdate.setIsActive(newIsActive);
-
-            // Write updated users back to files
-            try {
-                User.writeToFile(users, "users.txt");
-                User.writeToFile(users, "unapproved_staffs.txt");
-                User.writeToFile(users, "unapproved_residents.txt");
-            } catch (IOException e) {
-                e.printStackTrace();
+        
+            User userToUpdate = users.get(userChoice - 1);
+        
+            // Choose to update or delete
+            System.out.println("1. Update User");
+            System.out.println("2. Delete User");
+            System.out.println("3. Return to main menu");
+            System.out.print("Enter your choice: ");
+            int actionChoice = -1;
+            while (actionChoice < 1 || actionChoice > 3) {
+                if (scanner.hasNextInt()) {
+                    actionChoice = scanner.nextInt();
+                    scanner.nextLine(); // Consume newline
+                    if (actionChoice < 1 || actionChoice > 3) {
+                        System.out.println("Invalid choice. Please enter a number between 1 and 3.");
+                    }
+                } else {
+                    System.out.println("Invalid input. Please enter a number between 1 and 3.");
+                    scanner.nextLine(); // Consume invalid input
+                }
             }
-
-            System.out.println("User updated successfully.");
+        
+            if (actionChoice == 1) {
+                // Update user details
+                int choice;
+                do {
+                    System.out.println("Update User Information:");
+                    System.out.println("1. Update IC Passport Number");
+                    System.out.println("2. Update Username");
+                    System.out.println("3. Update Password");
+                    System.out.println("4. Update Contact Number");
+                    System.out.println("0. Go Back");
+                    System.out.print("Enter your choice: ");
+                    choice = -1;
+                    while (choice < 0 || choice > 4) {
+                        if (scanner.hasNextInt()) {
+                            choice = scanner.nextInt();
+                            scanner.nextLine(); // Consume newline
+                            if (choice < 0 || choice > 4) {
+                                System.out.println("Invalid choice. Please enter a number between 0 and 4.");
+                            }
+                        } else {
+                            System.out.println("Invalid input. Please enter a number between 0 and 4.");
+                            scanner.nextLine(); // Consume invalid input
+                        }
+                    }
+        
+                    switch (choice) {
+                        case 1:
+                            System.out.print("Enter new IC Passport Number: ");
+                            String newIcPassportNumber = scanner.nextLine();
+                            if (newIcPassportNumber.isEmpty()) {
+                                System.out.println("IC Passport Number cannot be empty. Please try again.");
+                                break;
+                            }
+                            try {
+                                if (!User.isUnique(newIcPassportNumber, "", "")) {
+                                    System.out.println("Error: IC Passport Number already exists.");
+                                    break;
+                                }
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                                break;
+                            }
+                            userToUpdate.setIcPassportNumber(newIcPassportNumber);
+                            System.out.println("IC Passport Number updated successfully.");
+                            break;
+                        case 2:
+                            System.out.print("Enter new username: ");
+                            String newUsername = scanner.nextLine();
+                            if (newUsername.isEmpty()) {
+                                System.out.println("Username cannot be empty. Please try again.");
+                                break;
+                            }
+                            try {
+                                if (!User.isUnique("", newUsername, "")) {
+                                    System.out.println("Error: Username already exists.");
+                                    break;
+                                }
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                                break;
+                            }
+                            userToUpdate.setUsername(newUsername);
+                            System.out.println("Username updated successfully.");
+                            break;
+                        case 3:
+                            System.out.print("Enter new password: ");
+                            String newPassword = scanner.nextLine();
+                            if (newPassword.isEmpty()) {
+                                System.out.println("Password cannot be empty. Please try again.");
+                                break;
+                            }
+                            userToUpdate.setPassword(newPassword);
+                            System.out.println("Password updated successfully.");
+                            break;
+                        case 4:
+                            System.out.print("Enter new contact number: ");
+                            String newContactNumber = scanner.nextLine();
+                            if (newContactNumber.isEmpty()) {
+                                System.out.println("Contact number cannot be empty. Please try again.");
+                                break;
+                            }
+                            try {
+                                if (!User.isUnique("", "", newContactNumber)) {
+                                    System.out.println("Error: Contact Number already exists.");
+                                    break;
+                                }
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                                break;
+                            }
+                            userToUpdate.setContactNumber(newContactNumber);
+                            System.out.println("Contact number updated successfully.");
+                            break;
+                        case 0:
+                            System.out.println("Returning to main menu...");
+                            displayMenu();
+                            
+                        default:
+                            System.out.println("Invalid choice. Please try again.");
+                    }
+        
+                    try {
+                        updateFile("approved_staffs.txt");
+                        updateFile("approved_residents.txt");
+                        updateFile("users.txt");
+                        updateFile("managers.txt");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                } while (choice != 0);
+            } else if (actionChoice == 2) {
+                // Soft delete user
+                userToUpdate.setIsActive(false);
+                System.out.println("User deactivated successfully.");
+        
+                try {
+                    updateFile("approved_staffs.txt");
+                    updateFile("approved_residents.txt");
+                    updateFile("users.txt");
+                    updateFile("managers.txt");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                System.out.println("Returning to main menu...");
+                displayMenu();
+            }
         }
+        
+        private void updateFile(String filename) throws IOException {
+            List<User> users = User.readFromFile(filename);
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
+                if (filename.equals("users.txt")) {
+                    System.out.println("Updating users.txt...");
+                    System.out.println(this.userID + "," + this.icPassportNumber + "," + this.username + "," + this.password + "," + this.contactNumber + "," + this.dateOfRegistration + "," + this.role + "," + this.isActive);
 
-        // Method to delete user
-        public void deleteUser(String username) {
-            List<User> users = new ArrayList<>();
 
-            // Read users from files
-            try {
-                users.addAll(User.readFromFile("users.txt"));
-                users.addAll(User.readFromFile("unapproved_staffs.txt"));
-                users.addAll(User.readFromFile("unapproved_residents.txt"));
-            } catch (IOException e) {
-                e.printStackTrace();
-                return;
+                }
+                if (filename.equals("managers.txt")) {
+                    System.out.println("Updating managers.txt...");
+                    System.out.println(this.managerID + "," + this.userID + "," + this.icPassportNumber + "," + this.username + "," + this.password + "," + this.contactNumber + "," + this.dateOfRegistration + "," + this.role + "," + this.isActive);
+                }
+                for (User user : users) {
+                    if (user.getUserID().equals(this.userID)) {
+                        if (filename.equals("users.txt")) {
+                            writer.write(this.userID + "," + this.icPassportNumber + "," + this.username + "," + this.password + "," + this.contactNumber + "," + this.dateOfRegistration + "," + this.role + "," + this.isActive);
+                        } else if (filename.equals("managers.txt") && user instanceof Manager) {
+                            Manager manager = (Manager) user;
+                            writer.write(manager.getManagerID() + "," + this.userID + "," + this.icPassportNumber + "," + this.username + "," + this.password + "," + this.contactNumber + "," + this.dateOfRegistration + "," + this.role + "," + this.isActive);
+                        } else if (user instanceof Staff) {
+                            Staff staff = (Staff) user;
+                            writer.write(staff.getStaffID() + "," + this.userID + "," + this.icPassportNumber + "," + this.username + "," + this.password + "," + this.contactNumber + "," + this.dateOfRegistration + "," + this.role + "," + this.isActive + "," + staff.getDateOfApproval());
+                        } else if (user instanceof Resident) {
+                            Resident resident = (Resident) user;
+                            writer.write(resident.getResidentID() + "," + this.userID + "," + this.icPassportNumber + "," + this.username + "," + this.password + "," + this.contactNumber + "," + this.dateOfRegistration + "," + this.role + "," + this.isActive + "," + resident.getDateOfApproval());
+                        }
+                    } else {
+                        if (filename.equals("users.txt")) {
+                            writer.write(user.getUserID() + "," + user.getIcPassportNumber() + "," + user.getUsername() + "," + user.getPassword() + "," + user.getContactNumber() + "," + user.getDateOfRegistration() + "," + user.getRole() + "," + user.getIsActive());
+                        } else if (filename.equals("managers.txt") && user instanceof Manager) {
+                            Manager manager = (Manager) user;
+                            writer.write(manager.getManagerID() + "," + user.getUserID() + "," + user.getIcPassportNumber() + "," + user.getUsername() + "," + user.getPassword() + "," + user.getContactNumber() + "," + user.getDateOfRegistration() + "," + user.getRole() + "," + user.getIsActive());
+                        } else if (user instanceof Staff) {
+                            Staff staff = (Staff) user;
+                            writer.write(staff.getStaffID() + "," + staff.getUserID() + "," + staff.getIcPassportNumber() + "," + staff.getUsername() + "," + staff.getPassword() + "," + staff.getContactNumber() + "," + staff.getDateOfRegistration() + "," + staff.getRole() + "," + staff.getIsActive() + "," + staff.getDateOfApproval());
+                        } else if (user instanceof Resident) {
+                            Resident resident = (Resident) user;
+                            writer.write(resident.getResidentID() + "," + resident.getUserID() + "," + resident.getIcPassportNumber() + "," + resident.getUsername() + "," + resident.getPassword() + "," + resident.getContactNumber() + "," + resident.getDateOfRegistration() + "," + resident.getRole() + "," + resident.getIsActive() + "," + resident.getDateOfApproval());
+                        }
+                    }
+                    writer.newLine();
+                }
             }
-
-            // Find user by username
-            User userToDelete = users.stream()
-                    .filter(user -> user.getUsername().equalsIgnoreCase(username))
-                    .findFirst()
-                    .orElse(null);
-
-            if (userToDelete == null) {
-                System.out.println("User not found.");
-                return;
-            }
-
-            // Remove user from list
-            users.remove(userToDelete);
-
-            // Write updated users back to files
-            try {
-                User.writeToFile(users, "users.txt");
-                User.writeToFile(users, "unapproved_staffs.txt");
-                User.writeToFile(users, "unapproved_residents.txt");
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            System.out.println("User deleted successfully.");
         }
 
         public void fixOrUpdateRate(double rate) {
