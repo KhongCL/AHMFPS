@@ -1,6 +1,7 @@
 package apu.hostel.management;
 import java.io.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import apu.hostel.management.APUHostelManagement.Manager;
 import apu.hostel.management.APUHostelManagement.Resident;
@@ -36,6 +37,11 @@ public class APUHostelManagement {
             this.isActive = isActive;
         }
 
+        @Override
+        public String toString() {
+            return "UserID: " + userID + ", IC/Passport Number: " + icPassportNumber + ", Username: " + username + ", Contact Number: " + contactNumber + ", Date of Registration: " + dateOfRegistration + ", Role: " + role + ", IsActive: " + isActive;
+        }
+
         public void setUserID(String userID) {
             this.userID = userID;
         }
@@ -52,8 +58,16 @@ public class APUHostelManagement {
             return username;
         }
 
+        public void setPassword(String password) {
+            this.password = password;
+        }    
+
         public String getPassword() {
             return password;
+        }
+
+        public void setContactNumber(String contactNumber) {
+            this.contactNumber = contactNumber;
         }
 
         public String getContactNumber() {
@@ -64,16 +78,20 @@ public class APUHostelManagement {
             return dateOfRegistration;
         }
 
+        public void setRole(String role) {
+            this.role = role;
+        }
+
         public String getRole() {
             return role;
         }
 
-        public boolean getIsActive() {
-            return isActive;
-        }
-
         public void setIsActive(boolean isActive) {
             this.isActive = isActive;
+        }
+
+        public boolean getIsActive() {
+            return isActive;
         }
 
         public abstract void displayMenu();
@@ -152,6 +170,17 @@ public class APUHostelManagement {
             }
             return true;
         }
+
+        public static void writeToFile(List<User> users, String filename) throws IOException {
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
+                for (User user : users) {
+                    writer.write(user.userID + "," + user.icPassportNumber + "," + user.username + "," + user.password + "," + user.contactNumber + "," + user.dateOfRegistration + "," + user.role + "," + user.isActive);
+                    writer.newLine();
+                }
+            }
+        }
+
+
     }
 
     // Manager class
@@ -203,12 +232,15 @@ public class APUHostelManagement {
                     break;
                 case 2:
                     // Search User logic
+                    searchUsers();
                     break;
                 case 3:
                     // Update User logic
+                    updateUser(username);
                     break;
                 case 4:
                     // Delete User logic
+                    deleteUser(username);
                     break;
                 case 5:
                     // Fix/Update Rate logic
@@ -309,16 +341,206 @@ public class APUHostelManagement {
         }
         
 
-        public void searchUser(String username) {
-            // Search user logic
+        // Method to search users
+        public void searchUsers() {
+            Scanner scanner = new Scanner(System.in);
+            List<User> users = new ArrayList<>();
+
+            // Read users from files
+            try {
+                users.addAll(User.readFromFile("users.txt"));
+                users.addAll(User.readFromFile("unapproved_staffs.txt"));
+                users.addAll(User.readFromFile("unapproved_residents.txt"));
+            } catch (IOException e) {
+                e.printStackTrace();
+                return;
+            }
+
+            // Filter options
+            System.out.println("Filter options:");
+            System.out.println("1. Approved/Unapproved");
+            System.out.println("2. Role");
+            System.out.println("3. IsActive");
+            System.out.println("4. No filter");
+            System.out.print("Enter your choice (1-4): ");
+
+            int filterChoice = -1;
+            while (filterChoice < 1 || filterChoice > 4) {
+                if (scanner.hasNextInt()) {
+                    filterChoice = scanner.nextInt();
+                    scanner.nextLine(); // Consume newline
+                    if (filterChoice < 1 || filterChoice > 4) {
+                        System.out.println("Invalid choice. Please enter a number between 1 and 4.");
+                    }
+                } else {
+                    System.out.println("Invalid input. Please enter a number between 1 and 4.");
+                    scanner.nextLine(); // Consume invalid input
+                }
+            }
+
+            List<User> filteredUsers = new ArrayList<>(users);
+
+            if (filterChoice == 1) {
+                System.out.print("Enter 'approved' or 'unapproved': ");
+                String approvalStatus = scanner.nextLine();
+                filteredUsers = filteredUsers.stream()
+                        .filter(user -> approvalStatus.equalsIgnoreCase("approved") ? user.getIsActive() : !user.getIsActive())
+                        .collect(Collectors.toList());
+            } else if (filterChoice == 2) {
+                System.out.print("Enter role (manager, staff, resident): ");
+                String role = scanner.nextLine();
+                filteredUsers = filteredUsers.stream()
+                        .filter(user -> user.getRole().equalsIgnoreCase(role))
+                        .collect(Collectors.toList());
+            } else if (filterChoice == 3) {
+                System.out.print("Enter 'true' for active or 'false' for inactive: ");
+                boolean isActive = scanner.nextBoolean();
+                scanner.nextLine(); // Consume newline
+                filteredUsers = filteredUsers.stream()
+                        .filter(user -> user.getIsActive() == isActive)
+                        .collect(Collectors.toList());
+            }
+
+            // Sort options
+            System.out.println("Sort options:");
+            System.out.println("1. Primary Key Ascending");
+            System.out.println("2. Primary Key Descending");
+            System.out.println("3. Username Ascending");
+            System.out.println("4. Username Descending");
+            System.out.print("Enter your choice (1-4): ");
+
+            int sortChoice = -1;
+            while (sortChoice < 1 || sortChoice > 4) {
+                if (scanner.hasNextInt()) {
+                    sortChoice = scanner.nextInt();
+                    scanner.nextLine(); // Consume newline
+                    if (sortChoice < 1 || sortChoice > 4) {
+                        System.out.println("Invalid choice. Please enter a number between 1 and 4.");
+                    }
+                } else {
+                    System.out.println("Invalid input. Please enter a number between 1 and 4.");
+                    scanner.nextLine(); // Consume invalid input
+                }
+            }
+
+            if (sortChoice == 1) {
+                filteredUsers.sort(Comparator.comparing(User::getUserID));
+            } else if (sortChoice == 2) {
+                filteredUsers.sort(Comparator.comparing(User::getUserID).reversed());
+            } else if (sortChoice == 3) {
+                filteredUsers.sort(Comparator.comparing(User::getUsername));
+            } else if (sortChoice == 4) {
+                filteredUsers.sort(Comparator.comparing(User::getUsername).reversed());
+            }
+
+            // Search by username
+            System.out.print("Enter username to search (or press Enter to skip): ");
+            String usernameSearch = scanner.nextLine();
+            if (!usernameSearch.isEmpty()) {
+                filteredUsers = filteredUsers.stream()
+                        .filter(user -> user.getUsername().equalsIgnoreCase(usernameSearch))
+                        .collect(Collectors.toList());
+            }
+
+            // Display filtered and sorted users
+            System.out.println("Filtered and Sorted Users:");
+            for (User user : filteredUsers) {
+                System.out.println(user);
+            }
         }
 
+        // Method to update user
         public void updateUser(String username) {
-            // Update user logic
+            Scanner scanner = new Scanner(System.in);
+            List<User> users = new ArrayList<>();
+
+            // Read users from files
+            try {
+                users.addAll(User.readFromFile("users.txt"));
+                users.addAll(User.readFromFile("unapproved_staffs.txt"));
+                users.addAll(User.readFromFile("unapproved_residents.txt"));
+            } catch (IOException e) {
+                e.printStackTrace();
+                return;
+            }
+
+            // Find user by username
+            User userToUpdate = users.stream()
+                    .filter(user -> user.getUsername().equalsIgnoreCase(username))
+                    .findFirst()
+                    .orElse(null);
+
+            if (userToUpdate == null) {
+                System.out.println("User not found.");
+                return;
+            }
+
+            // Update user details
+            System.out.print("Enter new password: ");
+            String newPassword = scanner.nextLine();
+            System.out.print("Enter new contact number: ");
+            String newContactNumber = scanner.nextLine();
+            System.out.print("Enter new role: ");
+            String newRole = scanner.nextLine();
+            System.out.print("Enter new isActive status (true/false): ");
+            boolean newIsActive = scanner.nextBoolean();
+            scanner.nextLine(); // Consume newline
+
+            userToUpdate.setPassword(newPassword);
+            userToUpdate.setContactNumber(newContactNumber);
+            userToUpdate.setRole(newRole);
+            userToUpdate.setIsActive(newIsActive);
+
+            // Write updated users back to files
+            try {
+                User.writeToFile(users, "users.txt");
+                User.writeToFile(users, "unapproved_staffs.txt");
+                User.writeToFile(users, "unapproved_residents.txt");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            System.out.println("User updated successfully.");
         }
 
+        // Method to delete user
         public void deleteUser(String username) {
-            // Delete user logic
+            List<User> users = new ArrayList<>();
+
+            // Read users from files
+            try {
+                users.addAll(User.readFromFile("users.txt"));
+                users.addAll(User.readFromFile("unapproved_staffs.txt"));
+                users.addAll(User.readFromFile("unapproved_residents.txt"));
+            } catch (IOException e) {
+                e.printStackTrace();
+                return;
+            }
+
+            // Find user by username
+            User userToDelete = users.stream()
+                    .filter(user -> user.getUsername().equalsIgnoreCase(username))
+                    .findFirst()
+                    .orElse(null);
+
+            if (userToDelete == null) {
+                System.out.println("User not found.");
+                return;
+            }
+
+            // Remove user from list
+            users.remove(userToDelete);
+
+            // Write updated users back to files
+            try {
+                User.writeToFile(users, "users.txt");
+                User.writeToFile(users, "unapproved_staffs.txt");
+                User.writeToFile(users, "unapproved_residents.txt");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            System.out.println("User deleted successfully.");
         }
 
         public void fixOrUpdateRate(double rate) {
@@ -337,6 +559,11 @@ public class APUHostelManagement {
             super(userID, icPassportNumber, username, password, contactNumber, dateOfRegistration, role, isActive);
             this.staffID = staffID;
             this.dateOfApproval = dateOfApproval;
+        }
+
+        @Override
+        public String toString() {
+            return "UserID: " + getUserID() + ", IC/Passport Number: " + getIcPassportNumber() + ", Username: " + getUsername() + ", Contact Number: " + getContactNumber() + ", Date of Registration: " + getDateOfRegistration() + ", Role: " + getRole() + ", IsActive: " + getIsActive() + ", Date of Approval: " + dateOfApproval;
         }
 
         public String getStaffID() {
@@ -742,6 +969,11 @@ public class APUHostelManagement {
             super(userID, icPassportNumber, username, password, contactNumber, dateOfRegistration, role, isActive);
             this.residentID = residentID;
             this.dateOfApproval = dateOfApproval;
+        }
+
+        @Override
+        public String toString() {
+            return "UserID: " + getUserID() + ", IC/Passport Number: " + getIcPassportNumber() + ", Username: " + getUsername() + ", Contact Number: " + getContactNumber() + ", Date of Registration: " + getDateOfRegistration() + ", Role: " + getRole() + ", IsActive: " + getIsActive() + ", Date of Approval: " + dateOfApproval;
         }
 
         public String getResidentID() {
@@ -1187,9 +1419,10 @@ public class APUHostelManagement {
 
         public void makeBooking() {
             Scanner scanner = new Scanner(System.in);
-            System.out.println("Select Room Type:");
-            System.out.println("1. Standard");
-            System.out.println("2. Deluxe");
+            System.out.println("Room Pricing");
+            System.out.println("Room Type\t1–7 Days\t8–30 Days\t31+ Days");
+            System.out.println("1. Standard\t$40/day\t$30/day\t$20/day");
+            System.out.println("2. Deluxe\t$60/day\t$45/day\t$30/day");
             System.out.print("Enter your choice: ");
             int roomTypeChoice = scanner.nextInt();
             scanner.nextLine(); // Consume newline
@@ -1219,7 +1452,7 @@ public class APUHostelManagement {
             String paymentID = generatePaymentID();
 
             // Get the ResidentID of the logged-in user
-            String residentID = this.getUserID();
+            String residentID = this.getResidentID();
 
             // Select an available room based on feeRateID
             String roomID = selectAvailableRoom(feeRateID);
@@ -1236,13 +1469,16 @@ public class APUHostelManagement {
 
             // Add a new line to payments.txt
             try (BufferedWriter writer = new BufferedWriter(new FileWriter("payments.txt", true))) {
-                writer.write(paymentID + "," + residentID + "," + null + "," + startDate + "," + endDate + "," + roomID + "," + paymentAmount + ",Unpaid," + bookingDateTime + "," + null + ",Active");
+                writer.write(paymentID + "," + residentID + "," + null + "," + startDate + "," + endDate + "," + roomID + "," + paymentAmount + ",unpaid," + bookingDateTime + "," + null + ",active");
                 writer.newLine();
                 System.out.println("Booking successful.");
             } catch (IOException e) {
                 System.out.println("An error occurred while saving the booking.");
                 e.printStackTrace();
             }
+
+            // Update rooms.txt to mark the room as unavailable
+            updateRoomStatus(roomID, "unavailable");
 
             // Map room IDs to room numbers
             Map<String, String> roomMap = new HashMap<>();
@@ -1268,6 +1504,33 @@ public class APUHostelManagement {
             System.out.println("Payment Amount : RM " + paymentAmount);
             System.out.println("=========================");
             System.out.println("Please go back to Manage Bookings to make payment for this booking.");
+        }
+
+        private void updateRoomStatus(String roomID, String status) {
+            List<String[]> rooms = new ArrayList<>();
+            try (BufferedReader reader = new BufferedReader(new FileReader("rooms.txt"))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    String[] parts = line.split(",");
+                    if (parts[0].equals(roomID)) {
+                        parts[4] = status; // Assuming parts[4] is RoomStatus
+                    }
+                    rooms.add(parts);
+                }
+            } catch (IOException e) {
+                System.out.println("An error occurred while reading the room data.");
+                e.printStackTrace();
+            }
+
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter("rooms.txt"))) {
+                for (String[] room : rooms) {
+                    writer.write(String.join(",", room));
+                    writer.newLine();
+                }
+            } catch (IOException e) {
+                System.out.println("An error occurred while updating the room data.");
+                e.printStackTrace();
+            }
         }
 
         private String generatePaymentID() {
