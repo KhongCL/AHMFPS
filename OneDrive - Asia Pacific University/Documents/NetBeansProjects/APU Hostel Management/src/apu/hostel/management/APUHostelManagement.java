@@ -441,22 +441,50 @@ public class APUHostelManagement {
                         scanner.nextLine(); // Consume invalid input
                     }
                 }
-                if (approvalChoice == 1) {
-                    // Filter approved users (from users.txt)
-                    filteredUsers = filteredUsers.stream()
-                            .filter(user -> user.getSourceFile().equals("users.txt"))
-                            .collect(Collectors.toList());
-                } else {
-                    // Filter unapproved users (from unapproved_staffs.txt and unapproved_residents.txt)
-                    filteredUsers = filteredUsers.stream()
-                            .filter(user -> user.getSourceFile().equals("unapproved_staffs.txt") || user.getSourceFile().equals("unapproved_residents.txt"))
-                            .collect(Collectors.toList());
+                try {
+                    if (approvalChoice == 1) {
+                        // Filter approved users
+                        filteredUsers = readApprovedUsers();
+                    } else {
+                        // Filter unapproved users
+                        filteredUsers = readUnapprovedUsers();
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return;
                 }
             } else if (filterChoice == 2) {
-                System.out.print("Enter role (manager, staff, resident): ");
-                String role = scanner.nextLine();
+                System.out.println("1. Manager");
+                System.out.println("2. Staff");
+                System.out.println("3. Resident");
+                System.out.print("Enter your choice (1-3): ");
+                int roleChoice = -1;
+                while (roleChoice < 1 || roleChoice > 3) {
+                    if (scanner.hasNextInt()) {
+                        roleChoice = scanner.nextInt();
+                        scanner.nextLine(); // Consume newline
+                        if (roleChoice < 1 || roleChoice > 3) {
+                            System.out.println("Invalid choice. Please enter a number between 1 and 3.");
+                        }
+                    } else {
+                        System.out.println("Invalid input. Please enter a number between 1 and 3.");
+                        scanner.nextLine(); // Consume invalid input
+                    }
+                }
+                final String[] role = {""};
+                switch (roleChoice) {
+                    case 1:
+                        role[0] = "manager";
+                        break;
+                    case 2:
+                        role[0] = "staff";
+                        break;
+                    case 3:
+                        role[0] = "resident";
+                        break;
+                }
                 filteredUsers = filteredUsers.stream()
-                        .filter(user -> user.getRole().equalsIgnoreCase(role))
+                        .filter(user -> user.getRole().equalsIgnoreCase(role[0]))
                         .collect(Collectors.toList());
             } else if (filterChoice == 3) {
                 System.out.println("1. Active");
@@ -518,7 +546,7 @@ public class APUHostelManagement {
             String usernameSearch = scanner.nextLine();
             if (!usernameSearch.isEmpty()) {
                 filteredUsers = filteredUsers.stream()
-                        .filter(user -> user.getUsername().equalsIgnoreCase(usernameSearch))
+                        .filter(user -> user.getUsername().toLowerCase().contains(usernameSearch.toLowerCase()))
                         .collect(Collectors.toList());
             }
         
@@ -533,6 +561,18 @@ public class APUHostelManagement {
             System.out.println("Search completed.");
             System.out.println("Returning to Manager Menu...");
             displayMenu();
+        }
+        
+        
+        public List<User> readApprovedUsers() throws IOException {
+            return User.readFromFileForSearch("users.txt");
+        }
+        
+        public List<User> readUnapprovedUsers() throws IOException {
+            List<User> unapprovedUsers = new ArrayList<>();
+            unapprovedUsers.addAll(User.readFromFileForSearch("unapproved_staffs.txt"));
+            unapprovedUsers.addAll(User.readFromFileForSearch("unapproved_residents.txt"));
+            return unapprovedUsers;
         }
 
         // Method to update user
@@ -2256,7 +2296,7 @@ public class APUHostelManagement {
             String dateOfRegistration = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
             String userID = generateUserID("U");
             String staffID = generateUserID("S");
-            Staff staff = new Staff(staffID, userID, icPassportNumber, username, password, contactNumber, dateOfRegistration, "Staff", true, null);
+            Staff staff = new Staff(staffID, userID, icPassportNumber, username, password, contactNumber, dateOfRegistration, "staff", true, null);
             staff.saveToStaffFile(null, null, "unapproved_staffs.txt");
             System.out.println("Staff registered successfully.");
             displayWelcomePage();
@@ -2399,7 +2439,7 @@ public class APUHostelManagement {
             String dateOfRegistration = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
             String userID = generateUserID("U");
             String residentID = generateUserID("R");
-            Resident resident = new Resident(residentID, userID, icPassportNumber, username, password, contactNumber, dateOfRegistration, "Resident", true, null);
+            Resident resident = new Resident(residentID, userID, icPassportNumber, username, password, contactNumber, dateOfRegistration, "resident", true, null);
             resident.saveToResidentFile(null, null, "unapproved_residents.txt");
             System.out.println("Resident registered successfully.");
             displayWelcomePage();
