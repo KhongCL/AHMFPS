@@ -112,15 +112,15 @@ public class APUHostelManagement {
                     String[] parts = line.split(",");
                     User user = null;
                     if (parts.length == 8) {
-                        switch (parts[7]) {
+                        switch (parts[6]) {
                             case "manager":
-                                user = new Manager(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], parts[7], Boolean.parseBoolean(parts[8]));
+                                user = new Manager(parts);
                                 break;
                             case "staff":
-                                user = new Staff(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], parts[7],Boolean.parseBoolean(parts[8]), parts[9]);
+                                user = new Staff(parts);
                                 break;
                             case "resident":
-                                user = new Resident(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], parts[7], Boolean.parseBoolean(parts[8]), parts[9]);
+                                user = new Resident(parts);
                                 break;
                         }
                     } else if (parts.length == 9 && "manager".equals(parts[7])) {
@@ -759,7 +759,7 @@ public class APUHostelManagement {
         public void updatePersonalInformation() {
             Scanner scanner = new Scanner(System.in);
             int choice;
-    
+        
             do {
                 System.out.println("Update Personal Information:");
                 System.out.println("1. Update Username");
@@ -769,7 +769,7 @@ public class APUHostelManagement {
                 System.out.print("Enter your choice: ");
                 choice = scanner.nextInt();
                 scanner.nextLine(); // Consume newline
-    
+        
                 switch (choice) {
                     case 1:
                         System.out.print("Enter new username: ");
@@ -825,23 +825,25 @@ public class APUHostelManagement {
                     default:
                         System.out.println("Invalid choice. Please try again.");
                 }
-    
+        
                 try {
                     updateFile("approved_staffs.txt");
+                    updateFile("users.txt");
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             } while (choice != 0);
-            displayMenu(); 
+            displayMenu();
         }
-    
+        
         private void updateFile(String filename) throws IOException {
             List<User> users = User.readFromFile(filename);
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
                 for (User user : users) {
                     if (user.getUserID().equals(this.userID)) {
-                        
-                        if (user instanceof Staff) {
+                        if (filename.equals("users.txt")) {
+                            writer.write(this.userID + "," + this.icPassportNumber + "," + this.username + "," + this.password + "," + this.contactNumber + "," + this.dateOfRegistration + "," + this.role + "," + this.isActive);
+                        } else if (user instanceof Staff) {
                             Staff staff = (Staff) user;
                             writer.write(staff.getStaffID() + "," + this.userID + "," + this.icPassportNumber + "," + this.username + "," + this.password + "," + this.contactNumber + "," + this.dateOfRegistration + "," + this.role + "," + this.isActive + "," + staff.getDateOfApproval());
                         } else if (user instanceof Resident) {
@@ -849,7 +851,9 @@ public class APUHostelManagement {
                             writer.write(resident.getResidentID() + "," + this.userID + "," + this.icPassportNumber + "," + this.username + "," + this.password + "," + this.contactNumber + "," + this.dateOfRegistration + "," + this.role + "," + this.isActive + "," + resident.getDateOfApproval());
                         }
                     } else {
-                        if (user instanceof Staff) {
+                        if (filename.equals("users.txt")) {
+                            writer.write(user.getUserID() + "," + user.getIcPassportNumber() + "," + user.getUsername() + "," + user.getPassword() + "," + user.getContactNumber() + "," + user.getDateOfRegistration() + "," + user.getRole() + "," + user.getIsActive());
+                        } else if (user instanceof Staff) {
                             Staff staff = (Staff) user;
                             writer.write(staff.getStaffID() + "," + staff.getUserID() + "," + staff.getIcPassportNumber() + "," + staff.getUsername() + "," + staff.getPassword() + "," + staff.getContactNumber() + "," + staff.getDateOfRegistration() + "," + staff.getRole() + "," + staff.getIsActive() + "," + staff.getDateOfApproval());
                         } else if (user instanceof Resident) {
@@ -1172,17 +1176,17 @@ public class APUHostelManagement {
         public void updatePersonalInformation() {
             Scanner scanner = new Scanner(System.in);
             int choice;
-
+        
             do {
                 System.out.println("Update Personal Information:");
                 System.out.println("1. Update Username");
                 System.out.println("2. Update Password");
                 System.out.println("3. Update Contact Number");
-                System.out.println("0. Go Back to Resident Menu");
+                System.out.println("0. Go Back to Staff Menu");
                 System.out.print("Enter your choice: ");
                 choice = scanner.nextInt();
                 scanner.nextLine(); // Consume newline
-
+        
                 switch (choice) {
                     case 1:
                         System.out.print("Enter new username: ");
@@ -1233,27 +1237,30 @@ public class APUHostelManagement {
                         System.out.println("Contact number updated successfully.");
                         break;
                     case 0:
-                        System.out.println("Returning to Resident Menu...");
+                        System.out.println("Returning to Staff Menu...");
                         break;
                     default:
                         System.out.println("Invalid choice. Please try again.");
                 }
-
+        
                 try {
                     updateFile("approved_residents.txt");
+                    updateFile("users.txt");
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             } while (choice != 0);
             displayMenu();
         }
-
+        
         private void updateFile(String filename) throws IOException {
             List<User> users = User.readFromFile(filename);
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
                 for (User user : users) {
                     if (user.getUserID().equals(this.userID)) {
-                        if (user instanceof Staff) {
+                        if (filename.equals("users.txt")) {
+                            writer.write(this.userID + "," + this.icPassportNumber + "," + this.username + "," + this.password + "," + this.contactNumber + "," + this.dateOfRegistration + "," + this.role + "," + this.isActive);
+                        } else if (user instanceof Staff) {
                             Staff staff = (Staff) user;
                             writer.write(staff.getStaffID() + "," + this.userID + "," + this.icPassportNumber + "," + this.username + "," + this.password + "," + this.contactNumber + "," + this.dateOfRegistration + "," + this.role + "," + this.isActive + "," + staff.getDateOfApproval());
                         } else if (user instanceof Resident) {
@@ -1261,7 +1268,9 @@ public class APUHostelManagement {
                             writer.write(resident.getResidentID() + "," + this.userID + "," + this.icPassportNumber + "," + this.username + "," + this.password + "," + this.contactNumber + "," + this.dateOfRegistration + "," + this.role + "," + this.isActive + "," + resident.getDateOfApproval());
                         }
                     } else {
-                        if (user instanceof Staff) {
+                        if (filename.equals("users.txt")) {
+                            writer.write(user.getUserID() + "," + user.getIcPassportNumber() + "," + user.getUsername() + "," + user.getPassword() + "," + user.getContactNumber() + "," + user.getDateOfRegistration() + "," + user.getRole() + "," + user.getIsActive());
+                        } else if (user instanceof Staff) {
                             Staff staff = (Staff) user;
                             writer.write(staff.getStaffID() + "," + staff.getUserID() + "," + staff.getIcPassportNumber() + "," + staff.getUsername() + "," + staff.getPassword() + "," + staff.getContactNumber() + "," + staff.getDateOfRegistration() + "," + staff.getRole() + "," + staff.getIsActive() + "," + staff.getDateOfApproval());
                         } else if (user instanceof Resident) {
