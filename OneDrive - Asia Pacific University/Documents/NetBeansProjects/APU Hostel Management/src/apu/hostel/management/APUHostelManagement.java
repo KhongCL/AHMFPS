@@ -762,9 +762,10 @@ public class APUHostelManagement {
         
             do {
                 System.out.println("Update Personal Information:");
-                System.out.println("1. Update Username");
-                System.out.println("2. Update Password");
-                System.out.println("3. Update Contact Number");
+                System.out.println("1. Update IC Passport Number");
+                System.out.println("2. Update Username");
+                System.out.println("3. Update Password");
+                System.out.println("4. Update Contact Number");
                 System.out.println("0. Go Back to Staff Menu");
                 System.out.print("Enter your choice: ");
                 choice = scanner.nextInt();
@@ -772,6 +773,25 @@ public class APUHostelManagement {
         
                 switch (choice) {
                     case 1:
+                        System.out.print("Enter new IC Passport Number: ");
+                        String newIcPassportNumber = scanner.nextLine();
+                        if (newIcPassportNumber.isEmpty()) {
+                            System.out.println("IC Passport Number cannot be empty. Please try again.");
+                            break;
+                        }
+                        try {
+                            if (!User.isUnique(newIcPassportNumber, "", "")) {
+                                System.out.println("Error: IC Passport Number already exists.");
+                                break;
+                            }
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                            break;
+                        }
+                        this.icPassportNumber = newIcPassportNumber;
+                        System.out.println("IC Passport Number updated successfully.");
+                        break;
+                    case 2:
                         System.out.print("Enter new username: ");
                         String newUsername = scanner.nextLine();
                         if (newUsername.isEmpty()) {
@@ -790,7 +810,7 @@ public class APUHostelManagement {
                         this.username = newUsername;
                         System.out.println("Username updated successfully.");
                         break;
-                    case 2:
+                    case 3:
                         System.out.print("Enter new password: ");
                         String newPassword = scanner.nextLine();
                         if (newPassword.isEmpty()) {
@@ -800,7 +820,7 @@ public class APUHostelManagement {
                         this.password = newPassword;
                         System.out.println("Password updated successfully.");
                         break;
-                    case 3:
+                    case 4:
                         System.out.print("Enter new contact number: ");
                         String newContactNumber = scanner.nextLine();
                         if (newContactNumber.isEmpty()) {
@@ -835,6 +855,7 @@ public class APUHostelManagement {
             } while (choice != 0);
             displayMenu();
         }
+        
         
         private void updateFile(String filename) throws IOException {
             List<User> users = User.readFromFile(filename);
@@ -1179,9 +1200,10 @@ public class APUHostelManagement {
         
             do {
                 System.out.println("Update Personal Information:");
-                System.out.println("1. Update Username");
-                System.out.println("2. Update Password");
-                System.out.println("3. Update Contact Number");
+                System.out.println("1. Update IC Passport Number");
+                System.out.println("2. Update Username");
+                System.out.println("3. Update Password");
+                System.out.println("4. Update Contact Number");
                 System.out.println("0. Go Back to Staff Menu");
                 System.out.print("Enter your choice: ");
                 choice = scanner.nextInt();
@@ -1189,6 +1211,25 @@ public class APUHostelManagement {
         
                 switch (choice) {
                     case 1:
+                        System.out.print("Enter new IC Passport Number: ");
+                        String newIcPassportNumber = scanner.nextLine();
+                        if (newIcPassportNumber.isEmpty()) {
+                            System.out.println("IC Passport Number cannot be empty. Please try again.");
+                            break;
+                        }
+                        try {
+                            if (!User.isUnique(newIcPassportNumber, "", "")) {
+                                System.out.println("Error: IC Passport Number already exists.");
+                                break;
+                            }
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                            break;
+                        }
+                        this.icPassportNumber = newIcPassportNumber;
+                        System.out.println("IC Passport Number updated successfully.");
+                        break;
+                    case 2:
                         System.out.print("Enter new username: ");
                         String newUsername = scanner.nextLine();
                         if (newUsername.isEmpty()) {
@@ -1207,7 +1248,7 @@ public class APUHostelManagement {
                         this.username = newUsername;
                         System.out.println("Username updated successfully.");
                         break;
-                    case 2:
+                    case 3:
                         System.out.print("Enter new password: ");
                         String newPassword = scanner.nextLine();
                         if (newPassword.isEmpty()) {
@@ -1217,7 +1258,7 @@ public class APUHostelManagement {
                         this.password = newPassword;
                         System.out.println("Password updated successfully.");
                         break;
-                    case 3:
+                    case 4:
                         System.out.print("Enter new contact number: ");
                         String newContactNumber = scanner.nextLine();
                         if (newContactNumber.isEmpty()) {
