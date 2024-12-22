@@ -186,7 +186,6 @@ public class APUHostelManagement {
                 String line;
                 while ((line = reader.readLine()) != null) {
                     String[] parts = line.split(",");
-                    System.out.println(Arrays.toString(parts));
                     User user = null;
                     if (parts.length == 8) {
                         switch (parts[6]) {
@@ -218,11 +217,8 @@ public class APUHostelManagement {
         public List<User> readUsersForSearch() throws IOException {
             List<User> users = new ArrayList<>();
             users.addAll(User.readFromFileForSearch("users.txt"));
-            System.out.println(users);
             users.addAll(User.readFromFileForSearch("unapproved_staffs.txt"));
-            System.out.println(users);
             users.addAll(User.readFromFileForSearch("unapproved_residents.txt"));
-            System.out.println(users);
             return users;
         }
 
@@ -429,11 +425,33 @@ public class APUHostelManagement {
             List<User> filteredUsers = new ArrayList<>(users);
         
             if (filterChoice == 1) {
-                System.out.print("Enter 'approved' or 'unapproved': ");
-                String approvalStatus = scanner.nextLine();
-                filteredUsers = filteredUsers.stream()
-                        .filter(user -> approvalStatus.equalsIgnoreCase("approved") ? user.getIsActive() : !user.getIsActive())
-                        .collect(Collectors.toList());
+                System.out.println("1. Approved");
+                System.out.println("2. Unapproved");
+                System.out.print("Enter your choice (1-2): ");
+                int approvalChoice = -1;
+                while (approvalChoice < 1 || approvalChoice > 2) {
+                    if (scanner.hasNextInt()) {
+                        approvalChoice = scanner.nextInt();
+                        scanner.nextLine(); // Consume newline
+                        if (approvalChoice < 1 || approvalChoice > 2) {
+                            System.out.println("Invalid choice. Please enter 1 for Approved or 2 for Unapproved.");
+                        }
+                    } else {
+                        System.out.println("Invalid input. Please enter 1 for Approved or 2 for Unapproved.");
+                        scanner.nextLine(); // Consume invalid input
+                    }
+                }
+                if (approvalChoice == 1) {
+                    // Filter approved users (from users.txt)
+                    filteredUsers = filteredUsers.stream()
+                            .filter(user -> user.getSourceFile().equals("users.txt"))
+                            .collect(Collectors.toList());
+                } else {
+                    // Filter unapproved users (from unapproved_staffs.txt and unapproved_residents.txt)
+                    filteredUsers = filteredUsers.stream()
+                            .filter(user -> user.getSourceFile().equals("unapproved_staffs.txt") || user.getSourceFile().equals("unapproved_residents.txt"))
+                            .collect(Collectors.toList());
+                }
             } else if (filterChoice == 2) {
                 System.out.print("Enter role (manager, staff, resident): ");
                 String role = scanner.nextLine();
@@ -441,9 +459,23 @@ public class APUHostelManagement {
                         .filter(user -> user.getRole().equalsIgnoreCase(role))
                         .collect(Collectors.toList());
             } else if (filterChoice == 3) {
-                System.out.print("Enter 'true' for active or 'false' for inactive: ");
-                boolean isActive = scanner.nextBoolean();
-                scanner.nextLine(); // Consume newline
+                System.out.println("1. Active");
+                System.out.println("2. Inactive");
+                System.out.print("Enter your choice (1-2): ");
+                int activeChoice = -1;
+                while (activeChoice < 1 || activeChoice > 2) {
+                    if (scanner.hasNextInt()) {
+                        activeChoice = scanner.nextInt();
+                        scanner.nextLine(); // Consume newline
+                        if (activeChoice < 1 || activeChoice > 2) {
+                            System.out.println("Invalid choice. Please enter 1 for Active or 2 for Inactive.");
+                        }
+                    } else {
+                        System.out.println("Invalid input. Please enter 1 for Active or 2 for Inactive.");
+                        scanner.nextLine(); // Consume invalid input
+                    }
+                }
+                boolean isActive = (activeChoice == 1);
                 filteredUsers = filteredUsers.stream()
                         .filter(user -> user.getIsActive() == isActive)
                         .collect(Collectors.toList());
@@ -1286,7 +1318,7 @@ public class APUHostelManagement {
         public void makePaymentForBooking() {
             Scanner scanner = new Scanner(System.in);
             List<String[]> payments = new ArrayList<>();
-            String residentID = this.getUserID(); // Get the currently logged-in resident's ID
+            String residentID = this.getResidentID(); // Get the currently logged-in resident's ID
 
             // Read payments from file
             try (BufferedReader reader = new BufferedReader(new FileReader("payments.txt"))) {
@@ -1399,7 +1431,7 @@ public class APUHostelManagement {
         public void cancelBooking() {
             Scanner scanner = new Scanner(System.in);
             List<String[]> payments = new ArrayList<>();
-            String residentID = this.getUserID(); // Get the currently logged-in resident's ID
+            String residentID = this.getResidentID(); // Get the currently logged-in resident's ID
 
             // Read payments from file
             try (BufferedReader reader = new BufferedReader(new FileReader("payments.txt"))) {
