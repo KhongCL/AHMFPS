@@ -894,7 +894,7 @@ public class APUHostelManagement {
         
             // Load existing rates from file
             try {
-                rates = FeeRate.readFromFile("rates.txt");
+                rates = readRatesFromFile("rates.txt");
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -904,8 +904,10 @@ public class APUHostelManagement {
             System.out.println("2. Update Existing Rates");
             System.out.println("3. Delete Rate");
             System.out.println("4. Restore Deleted Rate");
-            System.out.print("Enter your choice (1-4): ");
-            int choice = getValidatedChoice(scanner, 1, 4);
+            System.out.println("5. Delete All Rates");
+            System.out.println("6. Restore All Rates");
+            System.out.print("Enter your choice (1-6): ");
+            int choice = getValidatedChoice(scanner, 1, 6);
         
             if (choice == 1) {
                 setInitialRates(scanner, rates);
@@ -915,6 +917,10 @@ public class APUHostelManagement {
                 deleteRate(scanner, rates);
             } else if (choice == 4) {
                 restoreDeletedRate(scanner, rates);
+            } else if (choice == 5) {
+                deleteAllRates(scanner, rates);
+            } else if (choice == 6) {
+                restoreAllRates(scanner, rates);
             }
         
             // Save updated rates to file
@@ -1076,6 +1082,49 @@ public class APUHostelManagement {
                 System.out.println("Rate restored successfully.");
             } else {
                 System.out.println("Rate restoration cancelled.");
+            }
+        }
+        
+        private void deleteAllRates(Scanner scanner, List<FeeRate> rates) {
+            if (rates.isEmpty()) {
+                System.out.println("No existing rates to delete.");
+                return;
+            }
+        
+            System.out.print("Are you sure you want to delete all rates? This action cannot be undone. (yes/no): ");
+            String confirm = scanner.nextLine();
+            if (confirm.equalsIgnoreCase("yes")) {
+                for (FeeRate rate : rates) {
+                    rate.setActive(false);
+                }
+                System.out.println("All rates deleted successfully.");
+            } else {
+                System.out.println("Delete all rates cancelled.");
+            }
+        }
+        
+        private void restoreAllRates(Scanner scanner, List<FeeRate> rates) {
+            List<FeeRate> deletedRates = new ArrayList<>();
+            for (FeeRate rate : rates) {
+                if (!rate.isActive()) {
+                    deletedRates.add(rate);
+                }
+            }
+        
+            if (deletedRates.isEmpty()) {
+                System.out.println("No deleted rates to restore.");
+                return;
+            }
+        
+            System.out.print("Are you sure you want to restore all rates? (yes/no): ");
+            String confirm = scanner.nextLine();
+            if (confirm.equalsIgnoreCase("yes")) {
+                for (FeeRate rate : deletedRates) {
+                    rate.setActive(true);
+                }
+                System.out.println("All rates restored successfully.");
+            } else {
+                System.out.println("Restore all rates cancelled.");
             }
         }
         
@@ -2111,6 +2160,7 @@ public class APUHostelManagement {
 
             String roomType = null;
             String feeRateID = null;
+            boolean feeRateActive = false;
             switch (roomTypeChoice) {
                 case 1:
                     roomType = "Standard";
@@ -2125,6 +2175,26 @@ public class APUHostelManagement {
                     return;
             }
 
+            // Check if the selected fee rate is active
+            try (BufferedReader rateReader = new BufferedReader(new FileReader("fee_rates.txt"))) {
+                String line;
+                while ((line = rateReader.readLine()) != null) {
+                    String[] parts = line.split(",");
+                    if (parts[0].equals(feeRateID)) {
+                        feeRateActive = Boolean.parseBoolean(parts[6]); // Assuming the 7th element is isActive
+                        break;
+                    }
+                }
+            } catch (IOException e) {
+                System.out.println("An error occurred while reading the fee rate data.");
+                e.printStackTrace();
+                return;
+            }
+
+            if (!feeRateActive) {
+                System.out.println(roomType + " rooms cannot currently be booked.");
+                return;
+            }
 
             LocalDate startDate = null;
             LocalDate endDate = null;
@@ -2180,6 +2250,28 @@ public class APUHostelManagement {
             String roomID = selectAvailableRoom(feeRateID);
             if (roomID == null) {
                 System.out.println("No available rooms of the selected type.");
+                return;
+            }
+
+            // Check if the selected room is active
+            boolean roomActive = false;
+            try (BufferedReader roomReader = new BufferedReader(new FileReader("rooms.txt"))) {
+                String line;
+                while ((line = roomReader.readLine()) != null) {
+                    String[] parts = line.split(",");
+                    if (parts[0].equals(roomID)) {
+                        roomActive = Boolean.parseBoolean(parts[4]); // Assuming the 5th element is isActive
+                        break;
+                    }
+                }
+            } catch (IOException e) {
+                System.out.println("An error occurred while reading the room data.");
+                e.printStackTrace();
+                return;
+            }
+
+            if (!roomActive) {
+                System.out.println("The selected room cannot currently be booked.");
                 return;
             }
 
