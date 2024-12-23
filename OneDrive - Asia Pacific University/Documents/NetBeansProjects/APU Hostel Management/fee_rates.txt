@@ -1,2 +1,2 @@
-FR01,Standard,40,30,20
-FR02,Deluxe,60,45,30
+FR01,Standard,40,270,1040,12000,true
+FR02,Deluxe,60,410,1600,18000,true

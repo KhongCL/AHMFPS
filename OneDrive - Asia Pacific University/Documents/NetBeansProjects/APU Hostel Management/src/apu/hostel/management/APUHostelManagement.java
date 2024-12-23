@@ -873,8 +873,240 @@ public class APUHostelManagement {
             }
         }
 
-        public void fixOrUpdateRate(double rate) {
-            // Fix or update rate logic
+        public static List<FeeRate> readRatesFromFile(String filename) throws IOException {
+            List<FeeRate> feeRates = new ArrayList<>();
+            try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    String[] parts = line.split(",");
+                    if (parts.length == 7) {
+                        FeeRate feeRate = new FeeRate(parts[0], parts[1], Double.parseDouble(parts[2]), Double.parseDouble(parts[3]), Double.parseDouble(parts[4]), Double.parseDouble(parts[5]), Boolean.parseBoolean(parts[6]));
+                        feeRates.add(feeRate);
+                    }
+                }
+            }
+            return feeRates;
+        }
+        
+        public void fixOrUpdateRate() {
+            Scanner scanner = new Scanner(System.in);
+            List<FeeRate> rates = new ArrayList<>();
+        
+            // Load existing rates from file
+            try {
+                rates = FeeRate.readFromFile("rates.txt");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        
+            System.out.println("Fix or Update Rates:");
+            System.out.println("1. Set Initial Rates");
+            System.out.println("2. Update Existing Rates");
+            System.out.println("3. Delete Rate");
+            System.out.println("4. Restore Deleted Rate");
+            System.out.print("Enter your choice (1-4): ");
+            int choice = getValidatedChoice(scanner, 1, 4);
+        
+            if (choice == 1) {
+                setInitialRates(scanner, rates);
+            } else if (choice == 2) {
+                updateExistingRates(scanner, rates);
+            } else if (choice == 3) {
+                deleteRate(scanner, rates);
+            } else if (choice == 4) {
+                restoreDeletedRate(scanner, rates);
+            }
+        
+            // Save updated rates to file
+            saveRatesToFile(rates);
+        }
+        
+        private int getValidatedChoice(Scanner scanner, int min, int max) {
+            int choice = -1;
+            while (choice < min || choice > max) {
+                if (scanner.hasNextInt()) {
+                    choice = scanner.nextInt();
+                    scanner.nextLine(); // Consume newline
+                    if (choice < min || choice > max) {
+                        System.out.println("Invalid choice. Please enter a number between " + min + " and " + max + ".");
+                    }
+                } else {
+                    System.out.println("Invalid input. Please enter a number between " + min + " and " + max + ".");
+                    scanner.nextLine(); // Consume invalid input
+                }
+            }
+            return choice;
+        }
+        
+        private void setInitialRates(Scanner scanner, List<FeeRate> rates) {
+            while (true) {
+                String feeRateID = "FR" + String.format("%02d", rates.size() + 1);
+        
+                System.out.println("Available Room Types:");
+                System.out.println("1. Standard");
+                System.out.println("2. Deluxe");
+                System.out.print("Enter your choice (1-2): ");
+                int roomTypeChoice = getValidatedChoice(scanner, 1, 2);
+                String roomType = (roomTypeChoice == 1) ? "Standard" : "Deluxe";
+        
+                double dailyRate = getValidatedRate(scanner, "Daily Rate");
+                double weeklyRate = getValidatedRate(scanner, "Weekly Rate");
+                double monthlyRate = getValidatedRate(scanner, "Monthly Rate");
+                double yearlyRate = getValidatedRate(scanner, "Yearly Rate");
+        
+                rates.add(new FeeRate(feeRateID, roomType, dailyRate, weeklyRate, monthlyRate, yearlyRate, true));
+        
+                System.out.print("Do you want to add another rate? (yes/no): ");
+                String addMore = scanner.nextLine();
+                if (addMore.equalsIgnoreCase("no")) {
+                    break;
+                }
+            }
+        }
+        
+        private void updateExistingRates(Scanner scanner, List<FeeRate> rates) {
+            if (rates.isEmpty()) {
+                System.out.println("No existing rates to update.");
+                return;
+            }
+        
+            System.out.println("Existing Fee Rates:");
+            for (int i = 0; i < rates.size(); i++) {
+                if (rates.get(i).isActive()) {
+                    System.out.println((i + 1) + ". " + rates.get(i));
+                }
+            }
+        
+            System.out.print("Enter the number of the fee rate to update: ");
+            int rateChoice = getValidatedChoice(scanner, 1, rates.size());
+            FeeRate rateToUpdate = rates.get(rateChoice - 1);
+        
+            System.out.println("Which rate do you want to update?");
+            System.out.println("1. Daily Rate");
+            System.out.println("2. Weekly Rate");
+            System.out.println("3. Monthly Rate");
+            System.out.println("4. Yearly Rate");
+            System.out.print("Enter your choice (1-4): ");
+            int rateTypeChoice = getValidatedChoice(scanner, 1, 4);
+        
+            double newRate = getValidatedRate(scanner, "new rate");
+        
+            System.out.print("Are you sure you want to update the rate? (yes/no): ");
+            String confirm = scanner.nextLine();
+            if (confirm.equalsIgnoreCase("yes")) {
+                switch (rateTypeChoice) {
+                    case 1:
+                        rateToUpdate.setDailyRate(newRate);
+                        break;
+                    case 2:
+                        rateToUpdate.setWeeklyRate(newRate);
+                        break;
+                    case 3:
+                        rateToUpdate.setMonthlyRate(newRate);
+                        break;
+                    case 4:
+                        rateToUpdate.setYearlyRate(newRate);
+                        break;
+                }
+                System.out.println("Rate updated successfully.");
+            } else {
+                System.out.println("Rate update cancelled.");
+            }
+        }
+        
+        private void deleteRate(Scanner scanner, List<FeeRate> rates) {
+            if (rates.isEmpty()) {
+                System.out.println("No existing rates to delete.");
+                return;
+            }
+        
+            System.out.println("Existing Fee Rates:");
+            for (int i = 0; i < rates.size(); i++) {
+                if (rates.get(i).isActive()) {
+                    System.out.println((i + 1) + ". " + rates.get(i));
+                }
+            }
+        
+            System.out.print("Enter the number of the fee rate to delete: ");
+            int rateChoice = getValidatedChoice(scanner, 1, rates.size());
+            FeeRate rateToDelete = rates.get(rateChoice - 1);
+        
+            System.out.println("Rate Details:");
+            System.out.println(rateToDelete);
+        
+            System.out.print("Are you sure you want to delete this rate? (yes/no): ");
+            String confirm = scanner.nextLine();
+            if (confirm.equalsIgnoreCase("yes")) {
+                rateToDelete.setActive(false);
+                System.out.println("Rate deleted successfully.");
+            } else {
+                System.out.println("Rate deletion cancelled.");
+            }
+        }
+        
+        private void restoreDeletedRate(Scanner scanner, List<FeeRate> rates) {
+            List<FeeRate> deletedRates = new ArrayList<>();
+            for (FeeRate rate : rates) {
+                if (!rate.isActive()) {
+                    deletedRates.add(rate);
+                }
+            }
+        
+            if (deletedRates.isEmpty()) {
+                System.out.println("No deleted rates to restore.");
+                return;
+            }
+        
+            System.out.println("Deleted Fee Rates:");
+            for (int i = 0; i < deletedRates.size(); i++) {
+                System.out.println((i + 1) + ". " + deletedRates.get(i));
+            }
+        
+            System.out.print("Enter the number of the fee rate to restore: ");
+            int rateChoice = getValidatedChoice(scanner, 1, deletedRates.size());
+            FeeRate rateToRestore = deletedRates.get(rateChoice - 1);
+        
+            System.out.println("Rate Details:");
+            System.out.println(rateToRestore);
+        
+            System.out.print("Are you sure you want to restore this rate? (yes/no): ");
+            String confirm = scanner.nextLine();
+            if (confirm.equalsIgnoreCase("yes")) {
+                rateToRestore.setActive(true);
+                System.out.println("Rate restored successfully.");
+            } else {
+                System.out.println("Rate restoration cancelled.");
+            }
+        }
+        
+        private double getValidatedRate(Scanner scanner, String rateType) {
+            double rate = -1;
+            while (rate < 0) {
+                System.out.print("Enter " + rateType + ": ");
+                if (scanner.hasNextDouble()) {
+                    rate = scanner.nextDouble();
+                    if (rate < 0) {
+                        System.out.println(rateType + " cannot be negative. Please enter a valid rate.");
+                    }
+                } else {
+                    System.out.println("Invalid input. Please enter a valid " + rateType + ".");
+                    scanner.nextLine(); // Consume invalid input
+                }
+            }
+            scanner.nextLine(); // Consume newline
+            return rate;
+        }
+        
+        private void saveRatesToFile(List<FeeRate> rates) {
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter("rates.txt"))) {
+                for (FeeRate rate : rates) {
+                    writer.write(rate.toString());
+                    writer.newLine();
+                }
+                System.out.println("Rates updated successfully.");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
         
@@ -1379,8 +1611,20 @@ public class APUHostelManagement {
             System.out.print("Enter your choice: ");
 
             Scanner scanner = new Scanner(System.in);
-            int choice = scanner.nextInt();
-            scanner.nextLine(); // Consume newline
+            int choice = -1;
+
+            while (choice < 1 || choice > 4) {
+                if (scanner.hasNextInt()) {
+                    choice = scanner.nextInt();
+                    scanner.nextLine(); // Consume newline
+                    if (choice < 1 || choice > 4) {
+                        System.out.println("Invalid choice. Please enter a number between 1 and 4.");
+                    }
+                } else {
+                    System.out.println("Invalid input. Please enter a number between 1 and 4.");
+                    scanner.nextLine(); // Consume invalid input
+                }
+            }
 
             switch (choice) {
                 case 1:
@@ -1405,18 +1649,23 @@ public class APUHostelManagement {
         public void updatePersonalInformation() {
             Scanner scanner = new Scanner(System.in);
             int choice;
-        
+
             do {
                 System.out.println("Update Personal Information:");
                 System.out.println("1. Update IC Passport Number");
                 System.out.println("2. Update Username");
                 System.out.println("3. Update Password");
                 System.out.println("4. Update Contact Number");
-                System.out.println("0. Go Back to Staff Menu");
+                System.out.println("0. Go Back to Resident Menu");
                 System.out.print("Enter your choice: ");
+                
+                while (!scanner.hasNextInt()) {
+                    System.out.println("Invalid input. Please enter a number between 0 and 4.");
+                    scanner.next(); // Consume invalid input
+                }
                 choice = scanner.nextInt();
                 scanner.nextLine(); // Consume newline
-        
+
                 switch (choice) {
                     case 1:
                         System.out.println("Current IC Passport Number: " + this.icPassportNumber);
@@ -1490,12 +1739,13 @@ public class APUHostelManagement {
                         System.out.println("Contact number updated successfully.");
                         break;
                     case 0:
-                        System.out.println("Returning to Staff Menu...");
-                        break;
+                        System.out.println("Returning to Resident Menu...");
+                        displayMenu();
+                        return;
                     default:
                         System.out.println("Invalid choice. Please try again.");
                 }
-        
+
                 try {
                     updateFile("approved_residents.txt");
                     updateFile("users.txt");
@@ -1556,9 +1806,9 @@ public class APUHostelManagement {
                 e.printStackTrace();
             }
 
+            boolean hasRecords = false;
             try (BufferedReader br = new BufferedReader(new FileReader("payments.txt"))) {
                 String line;
-                boolean hasRecords = false;
                 while ((line = br.readLine()) != null) {
                     String[] details = line.split(",");
                     if (details[1].equals(userID)) { // Assuming the second element is the residentID
@@ -1574,12 +1824,14 @@ public class APUHostelManagement {
                         System.out.println("-----------------------------");
                     }
                 }
-                if (!hasRecords) {
-                    System.out.println("No payment records found for your account.");
-                }
             } catch (IOException e) {
                 System.out.println("An error occurred while reading the payment records.");
                 e.printStackTrace();
+            }
+
+            if (!hasRecords) {
+                System.out.println("No payment records found for your account.");
+                displayMenu();
             }
         }
 
@@ -1594,6 +1846,11 @@ public class APUHostelManagement {
                 System.out.println("3. Cancel Booking");
                 System.out.println("0. Go Back to Resident Menu");
                 System.out.print("Enter your choice: ");
+                
+                while (!scanner.hasNextInt()) {
+                    System.out.println("Invalid input. Please enter a number between 0 and 3.");
+                    scanner.next(); // Consume invalid input
+                }
                 choice = scanner.nextInt();
                 scanner.nextLine(); // Consume newline
 
@@ -1845,9 +2102,9 @@ public class APUHostelManagement {
         public void makeBooking() {
             Scanner scanner = new Scanner(System.in);
             System.out.println("Room Pricing");
-            System.out.println("Room Type\t\t1 to 7 Days\t8 to 30 Days\t31+ Days");
-            System.out.println("1. Standard\t\tRM 40/day\tRM 30/day\tRM 20/day");
-            System.out.println("2. Deluxe\t\tRM 60/day\tRM 45/day\tRM 30/day");
+            System.out.println("Room Type\t\tDaily Rate\tWeekly Rate\tMonthly Rate\tYearly Rate");
+            System.out.println("1. Standard\t\tRM 40/day\tRM 270/week\tRM 1040/month\tRM 12000/year");
+            System.out.println("2. Deluxe\t\tRM 60/day\tRM 410/week\tRM 1600/month\tRM 18000/year");
             System.out.print("Enter your choice: ");
             int roomTypeChoice = scanner.nextInt();
             scanner.nextLine(); // Consume newline
@@ -1868,10 +2125,12 @@ public class APUHostelManagement {
                     return;
             }
 
+
             LocalDate startDate = null;
             LocalDate endDate = null;
             DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
             String datePattern = "\\d{4}-\\d{2}-\\d{2}";
+            LocalDate currentDate = LocalDate.now();
 
             // Prompt for start date
             while (startDate == null) {
@@ -1880,6 +2139,10 @@ public class APUHostelManagement {
                 if (startDateInput.matches(datePattern)) {
                     try {
                         startDate = LocalDate.parse(startDateInput, dateFormatter);
+                        if (startDate.isBefore(currentDate)) {
+                            System.out.println("You cannot travel back in time. Please enter a valid start date.");
+                            startDate = null;
+                        }
                     } catch (Exception e) {
                         System.out.println("Invalid date. Please enter a valid date in yyyy-MM-dd format.");
                     }
@@ -1895,6 +2158,10 @@ public class APUHostelManagement {
                 if (endDateInput.matches(datePattern)) {
                     try {
                         endDate = LocalDate.parse(endDateInput, dateFormatter);
+                        if (!endDate.isAfter(startDate)) {
+                            System.out.println("You cannot travel back in time. The end date must be after the start date.");
+                            endDate = null;
+                        }
                     } catch (Exception e) {
                         System.out.println("Invalid date. Please enter a valid date in yyyy-MM-dd format.");
                     }
@@ -1917,7 +2184,7 @@ public class APUHostelManagement {
             }
 
             // Calculate the payment amount
-            double paymentAmount = calculatePaymentAmount(startDate.toString(), endDate.toString(), feeRateID);
+            double paymentAmount = calculatePaymentAmount(startDate, endDate, feeRateID);
 
             // Get the current date and time for BookingDateTime
             String bookingDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
@@ -2039,20 +2306,22 @@ public class APUHostelManagement {
             return null;
         }
 
-        private double calculatePaymentAmount(String startDate, String endDate, String feeRateID) {
-            long daysBetween = ChronoUnit.DAYS.between(LocalDate.parse(startDate), LocalDate.parse(endDate)) + 1;
-            double ratePerDay = 0;
-            double ratePerWeek = 0;
-            double ratePerMonth = 0;
+        private double calculatePaymentAmount(LocalDate startDate, LocalDate endDate, String feeRateID) {
+            long totalDays = ChronoUnit.DAYS.between(startDate, endDate) + 1;
+            double dailyRate = 0;
+            double weeklyRate = 0;
+            double monthlyRate = 0;
+            double yearlyRate = 0;
 
             try (BufferedReader rateReader = new BufferedReader(new FileReader("fee_rates.txt"))) {
                 String line;
                 while ((line = rateReader.readLine()) != null) {
                     String[] parts = line.split(",");
                     if (parts[0].equals(feeRateID)) {
-                        ratePerDay = Double.parseDouble(parts[2]);
-                        ratePerWeek = Double.parseDouble(parts[3]);
-                        ratePerMonth = Double.parseDouble(parts[4]);
+                        dailyRate = Double.parseDouble(parts[2]);
+                        weeklyRate = Double.parseDouble(parts[3]);
+                        monthlyRate = Double.parseDouble(parts[4]);
+                        yearlyRate = Double.parseDouble(parts[5]);
                         break;
                     }
                 }
@@ -2061,13 +2330,15 @@ public class APUHostelManagement {
                 e.printStackTrace();
             }
 
-            if (daysBetween <= 7 && daysBetween > 0) {
-                return daysBetween * ratePerDay;
-            } else if (daysBetween <= 30 && daysBetween > 7) {
-                return daysBetween * ratePerWeek;
-            } else {
-                return daysBetween * ratePerMonth;
-            }
+            long years = totalDays / 365;
+            long remainingDaysAfterYears = totalDays % 365;
+            long months = remainingDaysAfterYears / 30;
+            long remainingDaysAfterMonths = remainingDaysAfterYears % 30;
+            long weeks = remainingDaysAfterMonths / 7;
+            long remainingDays = remainingDaysAfterMonths % 7;
+
+            double totalCost = (years * yearlyRate) + (months * monthlyRate) + (weeks * weeklyRate) + (remainingDays * dailyRate);
+            return totalCost;
         }
 
 
@@ -2171,47 +2442,88 @@ public class APUHostelManagement {
     public static class FeeRate {
         private String feeRateID;
         private String roomType;
+        private double dailyRate;
+        private double weeklyRate;
         private double monthlyRate;
-        private String effectiveDate;
-
-        public FeeRate(String feeRateID, String roomType, double monthlyRate, String effectiveDate) {
+        private double yearlyRate;
+        private boolean isActive;
+    
+        public FeeRate(String feeRateID, String roomType, double dailyRate, double weeklyRate, double monthlyRate, double yearlyRate, boolean isActive) {
             this.feeRateID = feeRateID;
             this.roomType = roomType;
+            this.dailyRate = dailyRate;
+            this.weeklyRate = weeklyRate;
             this.monthlyRate = monthlyRate;
-            this.effectiveDate = effectiveDate;
+            this.yearlyRate = yearlyRate;
+            this.isActive = isActive;
         }
-
+    
         public String getFeeRateID() {
             return feeRateID;
         }
-
+    
         public String getRoomType() {
             return roomType;
         }
-
+    
         public double getMonthlyRate() {
             return monthlyRate;
         }
-
-        public String getEffectiveDate() {
-            return effectiveDate;
+    
+        public boolean isActive() {
+            return isActive;
         }
-
+    
+        public void setActive(boolean isActive) {
+            this.isActive = isActive;
+        }
+    
+        public void setDailyRate(double dailyRate) {
+            this.dailyRate = dailyRate;
+        }
+    
+        public void setWeeklyRate(double weeklyRate) {
+            this.weeklyRate = weeklyRate;
+        }
+    
+        public void setMonthlyRate(double monthlyRate) {
+            this.monthlyRate = monthlyRate;
+        }
+    
+        public void setYearlyRate(double yearlyRate) {
+            this.yearlyRate = yearlyRate;
+        }
+    
+        @Override
+        public String toString() {
+            return feeRateID + "," + roomType + "," + dailyRate + "," + weeklyRate + "," + monthlyRate + "," + yearlyRate + "," + isActive;
+        }
+    
         public void saveToFile(String filename) throws IOException {
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename, true))) {
-                writer.write(feeRateID + "," + roomType + "," + monthlyRate + "," + effectiveDate);
+                writer.write(toString());
                 writer.newLine();
             }
         }
-
+    
+        public double calculateCost(int days) {
+            int months = days / 30;
+            days %= 30;
+            int weeks = days / 7;
+            days %= 7;
+    
+            double cost = (months * monthlyRate) + (weeks * weeklyRate) + (days * dailyRate);
+            return cost;
+        }
+    
         public static List<FeeRate> readFromFile(String filename) throws IOException {
             List<FeeRate> feeRates = new ArrayList<>();
             try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
                     String[] parts = line.split(",");
-                    if (parts.length == 4) {
-                        FeeRate feeRate = new FeeRate(parts[0], parts[1], Double.parseDouble(parts[2]), parts[3]);
+                    if (parts.length == 7) {
+                        FeeRate feeRate = new FeeRate(parts[0], parts[1], Double.parseDouble(parts[2]), Double.parseDouble(parts[3]), Double.parseDouble(parts[4]), Double.parseDouble(parts[5]), Boolean.parseBoolean(parts[6]));
                         feeRates.add(feeRate);
                     }
                 }
