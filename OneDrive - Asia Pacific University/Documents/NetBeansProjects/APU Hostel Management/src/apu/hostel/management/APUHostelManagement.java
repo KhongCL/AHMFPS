@@ -269,7 +269,8 @@ public class APUHostelManagement {
             System.out.println("1. Approve User Registration");
             System.out.println("2. Search, Update, Delete or Restore User");
             System.out.println("3. Fix, Update, Delete or Restore Rate");
-            System.out.println("4. Logout");
+            System.out.println("4. Manage Rooms");
+            System.out.println("5. Logout");
             System.out.print("Enter your choice: ");
         
             Scanner scanner = new Scanner(System.in);
@@ -290,6 +291,10 @@ public class APUHostelManagement {
                     fixOrUpdateRate();
                     break;
                 case 4:
+                    // Manage Rooms logic
+                    manageRooms();
+                    break;
+                case 5:
                     System.out.println("Logging out...");
                     displayWelcomePage();
                     break;
@@ -639,7 +644,7 @@ public class APUHostelManagement {
         private void deleteAllUsers(List<User> users) {
             Scanner scanner = new Scanner(System.in);
         
-            System.out.print("Are you sure you want to delete all users? This action cannot be undone. You can retore all rates on the menu. (yes/no): ");
+            System.out.print("Are you sure you want to delete all users? This action cannot be undone. You can retore all users on the menu. (yes/no): ");
             String confirm = scanner.nextLine().trim().toLowerCase();
             if (confirm.equals("yes")) {
                 for (User user : users) {
@@ -1021,7 +1026,7 @@ public class APUHostelManagement {
                 System.out.println("2. Deluxe");
                 System.out.print("Enter your choice (1-2): ");
                 int roomTypeChoice = getValidatedChoice(scanner, 1, 2);
-                String roomType = (roomTypeChoice == 1) ? "Standard" : "Deluxe";
+                String roomType = (roomTypeChoice == 1) ? "standard" : "deluxe";
         
                 double dailyRate = getValidatedRate(scanner, "Daily Rate");
                 double weeklyRate = getValidatedRate(scanner, "Weekly Rate");
@@ -1231,6 +1236,261 @@ public class APUHostelManagement {
                 e.printStackTrace();
             }
         }
+
+        private void manageRooms() {
+            Scanner scanner = new Scanner(System.in);
+        
+            while (true) {
+                System.out.println("Manage Rooms:");
+                System.out.println("1. Add Room");
+                System.out.println("2. Update Room");
+                System.out.println("3. Delete Room");
+                System.out.println("4. Restore Room");
+                System.out.println("5. Delete All Rooms");
+                System.out.println("6. Restore All Rooms");
+                System.out.println("7. Return to main menu");
+                System.out.print("Enter your choice (1-7): ");
+                int choice = getValidatedChoice(scanner, 1, 7);
+        
+                if (choice == 1) {
+                    addRoom(scanner);
+                } else if (choice == 2) {
+                    updateRoom(scanner);
+                } else if (choice == 3) {
+                    deleteRoom(scanner);
+                } else if (choice == 4) {
+                    restoreRoom(scanner);
+                } else if (choice == 5) {
+                    deleteAllRooms(scanner);
+                } else if (choice == 6) {
+                    restoreAllRooms(scanner);
+                } else if (choice == 7) {
+                    break;
+                }
+            }
+            displayMenu();
+        }
+        
+        private void addRoom(Scanner scanner) {
+            List<FeeRate> feeRates = new ArrayList<>();
+            List<Room> rooms = new ArrayList<>();
+            try {
+                feeRates = readRatesFromFile("fee_rates.txt");
+                rooms = readRoomsFromFile("rooms.txt");
+            } catch (IOException e) {
+                e.printStackTrace();
+                return;
+            }
+        
+            String roomId = "RM" + String.format("%02d", rooms.size() + 1);
+            int roomNumber = 101 + rooms.size();
+        
+            System.out.println("Available Fee Rates:");
+            for (int i = 0; i < feeRates.size(); i++) {
+                System.out.println((i + 1) + ". " + feeRates.get(i));
+            }
+            System.out.print("Enter the number of the fee rate to use: ");
+            int feeRateChoice = getValidatedChoice(scanner, 1, feeRates.size());
+            FeeRate selectedFeeRate = feeRates.get(feeRateChoice - 1);
+        
+            System.out.print("Enter Room Capacity: ");
+            int roomCapacity = getValidatedChoice(scanner, 1, 10);
+        
+            Room newRoom = new Room(roomId, selectedFeeRate.getFeeRateID(), selectedFeeRate.getRoomType(), roomNumber, "available", roomCapacity, true);
+            rooms.add(newRoom);
+            saveRoomsToFile(rooms);
+        
+            System.out.print("Do you want to add another room? (yes/no): ");
+            String addMore = scanner.nextLine();
+            if (addMore.equalsIgnoreCase("yes")) {
+                addRoom(scanner);
+            }
+        }
+        
+        private void updateRoom(Scanner scanner) {
+            List<Room> rooms = new ArrayList<>();
+            rooms = readRoomsFromFile("rooms.txt");
+        
+            System.out.println("Existing Rooms:");
+            for (int i = 0; i < rooms.size(); i++) {
+                System.out.println((i + 1) + ". " + rooms.get(i));
+            }
+            System.out.print("Enter the number of the room to update: ");
+            int roomChoice = getValidatedChoice(scanner, 1, rooms.size());
+            Room roomToUpdate = rooms.get(roomChoice - 1);
+        
+            System.out.println("Current Room Details:");
+            System.out.println("Room ID: " + roomToUpdate.getRoomID());
+            System.out.println("Fee Rate ID: " + roomToUpdate.getFeeRateID());
+            System.out.println("Room Type: " + roomToUpdate.getRoomType());
+            System.out.println("Room Number: " + roomToUpdate.getRoomNumber());
+            System.out.println("Room Status: " + roomToUpdate.getRoomStatus());
+            System.out.println("Room Capacity: " + roomToUpdate.getRoomCapacity());
+        
+            System.out.println("Which attribute do you want to update?");
+            System.out.println("1. Fee Rate");
+            System.out.println("2. Room Status");
+            System.out.println("3. Room Capacity");
+            System.out.print("Enter your choice (1-3): ");
+            int attributeChoice = getValidatedChoice(scanner, 1, 3);
+        
+            if (attributeChoice == 1) {
+                List<FeeRate> feeRates = new ArrayList<>();
+                try {
+                    feeRates = readRatesFromFile("fee_rates.txt");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return;
+                }
+        
+                System.out.println("Available Fee Rates:");
+                for (int i = 0; i < feeRates.size(); i++) {
+                    System.out.println((i + 1) + ". " + feeRates.get(i));
+                }
+                System.out.print("Enter the number of the fee rate to use: ");
+                int feeRateChoice = getValidatedChoice(scanner, 1, feeRates.size());
+                FeeRate selectedFeeRate = feeRates.get(feeRateChoice - 1);
+                roomToUpdate.setFeeRateID(selectedFeeRate.getFeeRateID());
+                roomToUpdate.setRoomType(selectedFeeRate.getRoomType());
+                System.out.println("Fee Rate updated successfully.");
+            } else if (attributeChoice == 2) {
+                String newStatus = roomToUpdate.getRoomStatus().equals("available") ? "unavailable" : "available";
+                roomToUpdate.setRoomStatus(newStatus);
+                System.out.println("Room status updated successfully to " + newStatus + ".");   
+            } else if (attributeChoice == 3) {
+                System.out.print("Enter new Room Capacity: ");
+                int newCapacity = getValidatedChoice(scanner, 1, 10);
+                roomToUpdate.setRoomCapacity(newCapacity);
+                System.out.println("Room capacity updated successfully.");
+            }
+        
+            saveRoomsToFile(rooms);
+        }
+        
+        private void deleteRoom(Scanner scanner) {
+            List<Room> rooms = readRoomsFromFile("rooms.txt");
+        
+            System.out.println("Existing Rooms:");
+            for (int i = 0; i < rooms.size(); i++) {
+                System.out.println((i + 1) + ". " + rooms.get(i));
+            }
+            System.out.print("Enter the number of the room to delete: ");
+            int roomChoice = getValidatedChoice(scanner, 1, rooms.size());
+            Room roomToDelete = rooms.get(roomChoice - 1);
+        
+            if (!roomToDelete.isActive()) {
+                System.out.println("This room is already deactivated.");
+            } else {
+                System.out.print("Are you sure you want to delete this room? (yes/no): ");
+                String confirm = scanner.nextLine().trim().toLowerCase();
+                if (confirm.equals("yes")) {
+                    roomToDelete.setActive(false);
+                    saveRoomsToFile(rooms);
+                    System.out.println("Room deleted successfully.");
+                } else {
+                    System.out.println("Room deletion cancelled.");
+                }
+            }
+        }
+        
+        private void restoreRoom(Scanner scanner) {
+            List<Room> rooms = readRoomsFromFile("rooms.txt");
+        
+            System.out.println("Existing Rooms:");
+            for (int i = 0; i < rooms.size(); i++) {
+                System.out.println((i + 1) + ". " + rooms.get(i));
+            }
+            System.out.print("Enter the number of the room to restore: ");
+            int roomChoice = getValidatedChoice(scanner, 1, rooms.size());
+            Room roomToRestore = rooms.get(roomChoice - 1);
+        
+            if (roomToRestore.isActive()) {
+                System.out.println("This room is already active.");
+            } else {
+                System.out.print("Are you sure you want to restore this room? (yes/no): ");
+                String confirm = scanner.nextLine().trim().toLowerCase();
+                if (confirm.equals("yes")) {
+                    roomToRestore.setActive(true);
+                    saveRoomsToFile(rooms);
+                    System.out.println("Room restored successfully.");
+                } else {
+                    System.out.println("Room restoration cancelled.");
+                }
+            }
+        }
+        
+        private void deleteAllRooms(Scanner scanner) {
+            List<Room> rooms = readRoomsFromFile("rooms.txt");
+        
+            System.out.println("Existing Rooms:");
+            for (Room room : rooms) {
+                System.out.println(room);
+            }
+        
+            System.out.print("Are you sure you want to delete all rooms? This action cannot be undone. You can retore all rooms on the menu. (yes/no): ");
+            String confirm = scanner.nextLine().trim().toLowerCase();
+            if (confirm.equals("yes")) {
+                for (Room room : rooms) {
+                    room.setActive(false);
+                }
+                saveRoomsToFile(rooms);
+                System.out.println("All rooms deleted successfully.");
+            } else {
+                System.out.println("Delete all rooms cancelled.");
+            }
+        }
+        
+        private void restoreAllRooms(Scanner scanner) {
+            List<Room> rooms = readRoomsFromFile("rooms.txt");
+        
+            System.out.println("Existing Rooms:");
+            for (Room room : rooms) {
+                System.out.println(room);
+            }
+        
+            System.out.print("Are you sure you want to restore all rooms? (yes/no): ");
+            String confirm = scanner.nextLine().trim().toLowerCase();
+            if (confirm.equals("yes")) {
+                for (Room room : rooms) {
+                    room.setActive(true);
+                }
+                saveRoomsToFile(rooms);
+                System.out.println("All rooms restored successfully.");
+            } else {
+                System.out.println("Restore all rooms cancelled.");
+            }
+        }
+
+        private List<Room> readRoomsFromFile(String filename) {
+            List<Room> rooms = new ArrayList<>();
+            try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    String[] parts = line.split(",");
+                    if (parts.length == 7) {
+                        Room room = new Room(parts[0], parts[1], parts[2], Integer.parseInt(parts[3]), parts[4], Integer.parseInt(parts[5]), Boolean.parseBoolean(parts[6]));
+                        rooms.add(room);
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return rooms;
+        }
+
+        private void saveRoomsToFile(List<Room> rooms) {
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter("rooms.txt"))) {
+                for (Room room : rooms) {
+                    writer.write(room.toString());
+                    writer.newLine();
+                }
+                System.out.println("Rooms updated successfully.");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+
 
         
     }
@@ -2711,6 +2971,87 @@ public class APUHostelManagement {
                 }
             }
             return feeRates;
+        }
+    }
+
+    public static class Room {
+        private String roomID;
+        private String feeRateID;
+        private String roomType;
+        private int roomNumber;
+        private String roomStatus;
+        private int roomCapacity;
+        private boolean isActive;
+    
+        public Room(String roomID, String feeRateID, String roomType, int roomNumber, String roomStatus, int roomCapacity, boolean isActive) {
+            this.roomID = roomID;
+            this.feeRateID = feeRateID;
+            this.roomType = roomType;
+            this.roomNumber = roomNumber;
+            this.roomStatus = roomStatus;
+            this.roomCapacity = roomCapacity;
+            this.isActive = isActive;
+        }
+    
+        public String getRoomID() {
+            return roomID;
+        }
+    
+        public void setRoomID(String roomID) {
+            this.roomID = roomID;
+        }
+    
+        public String getFeeRateID() {
+            return feeRateID;
+        }
+    
+        public void setFeeRateID(String feeRateID) {
+            this.feeRateID = feeRateID;
+        }
+    
+        public String getRoomType() {
+            return roomType;
+        }
+    
+        public void setRoomType(String roomType) {
+            this.roomType = roomType;
+        }
+    
+        public int getRoomNumber() {
+            return roomNumber;
+        }
+    
+        public void setRoomNumber(int roomNumber) {
+            this.roomNumber = roomNumber;
+        }
+    
+        public String getRoomStatus() {
+            return roomStatus;
+        }
+    
+        public void setRoomStatus(String roomStatus) {
+            this.roomStatus = roomStatus;
+        }
+    
+        public int getRoomCapacity() {
+            return roomCapacity;
+        }
+    
+        public void setRoomCapacity(int roomCapacity) {
+            this.roomCapacity = roomCapacity;
+        }
+    
+        public boolean isActive() {
+            return isActive;
+        }
+    
+        public void setActive(boolean active) {
+            isActive = active;
+        }
+    
+        @Override
+        public String toString() {
+            return roomID + "," + feeRateID + "," + roomType + "," + roomNumber + "," + roomStatus + "," + roomCapacity + "," + isActive;
         }
     }
 
