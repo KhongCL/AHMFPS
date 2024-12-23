@@ -574,60 +574,118 @@ public class APUHostelManagement {
         public void updateDeleteOrRestoreUser(List<User> users) {
             Scanner scanner = new Scanner(System.in);
         
-            // Select user to update or delete
-            System.out.print("Enter the number of the user to update or delete (or 0 to cancel): ");
-            int userChoice = -1;
-            while (userChoice < 0 || userChoice > users.size()) {
-                if (scanner.hasNextInt()) {
-                    userChoice = scanner.nextInt();
-                    scanner.nextLine(); // Consume newline
-                    if (userChoice < 0 || userChoice > users.size()) {
-                        System.out.println("Invalid choice. Please enter a number between 0 and " + users.size() + ".");
+            while (true) {
+                System.out.println("User Management:");
+                System.out.println("1. Choose user to update or delete");
+                System.out.println("2. Delete all users");
+                System.out.println("3. Restore all users");
+                System.out.println("4. Return to main menu");
+                System.out.print("Enter your choice (1-4): ");
+                int choice = getValidatedChoice(scanner, 1, 4);
+        
+                if (choice == 1) {
+                    // Select user to update or delete
+                    System.out.print("Enter the number of the user to update or delete (or 0 to cancel): ");
+                    int userChoice = -1;
+                    while (userChoice < 0 || userChoice > users.size()) {
+                        if (scanner.hasNextInt()) {
+                            userChoice = scanner.nextInt();
+                            scanner.nextLine(); // Consume newline
+                            if (userChoice < 0 || userChoice > users.size()) {
+                                System.out.println("Invalid choice. Please enter a number between 0 and " + users.size() + ".");
+                            }
+                        } else {
+                            System.out.println("Invalid input. Please enter a number between 0 and " + users.size() + ".");
+                            scanner.nextLine(); // Consume invalid input
+                        }
                     }
+        
+                    if (userChoice == 0) {
+                        System.out.println("Operation cancelled.");
+                        continue;
+                    }
+        
+                    User userToUpdate = users.get(userChoice - 1);
+        
+                    // Choose to update, delete, or restore
+                    System.out.println("1. Update User");
+                    System.out.println("2. Delete User");
+                    System.out.println("3. Restore User");
+                    System.out.println("4. Return to main menu");
+                    System.out.print("Enter your choice: ");
+                    int actionChoice = getValidatedChoice(scanner, 1, 4);
+        
+                    if (actionChoice == 1) {
+                        updateUser(userToUpdate);
+                    } else if (actionChoice == 2) {
+                        deleteUser(userToUpdate);
+                    } else if (actionChoice == 3) {
+                        restoreUser(userToUpdate);
+                    } else {
+                        System.out.println("Returning to main menu...");
+                        break;
+                    }
+                } else if (choice == 2) {
+                    deleteAllUsers(users);
+                } else if (choice == 3) {
+                    restoreAllUsers(users);
                 } else {
-                    System.out.println("Invalid input. Please enter a number between 0 and " + users.size() + ".");
-                    scanner.nextLine(); // Consume invalid input
+                    System.out.println("Returning to main menu...");
+                    displayMenu();
                 }
             }
+        }
         
-            if (userChoice == 0) {
-                System.out.println("Operation cancelled.");
-                displayMenu();
-                return;
-            }
+        private void deleteAllUsers(List<User> users) {
+            Scanner scanner = new Scanner(System.in);
         
-            User userToUpdate = users.get(userChoice - 1);
-        
-            // Choose to update, delete, or restore
-            System.out.println("1. Update User");
-            System.out.println("2. Delete User");
-            System.out.println("3. Restore User");
-            System.out.println("4. Return to main menu");
-            System.out.print("Enter your choice: ");
-            int actionChoice = -1;
-            while (actionChoice < 1 || actionChoice > 4) {
-                if (scanner.hasNextInt()) {
-                    actionChoice = scanner.nextInt();
-                    scanner.nextLine(); // Consume newline
-                    if (actionChoice < 1 || actionChoice > 4) {
-                        System.out.println("Invalid choice. Please enter a number between 1 and 4.");
-                    }
-                } else {
-                    System.out.println("Invalid input. Please enter a number between 1 and 4.");
-                    scanner.nextLine(); // Consume invalid input
+            System.out.print("Are you sure you want to delete all users? This action cannot be undone. You can retore all rates on the menu. (yes/no): ");
+            String confirm = scanner.nextLine().trim().toLowerCase();
+            if (confirm.equals("yes")) {
+                for (User user : users) {
+                    user.setIsActive(false);
                 }
-            }
-        
-            if (actionChoice == 1) {
-                updateUser(userToUpdate);
-            } else if (actionChoice == 2) {
-                deleteUser(userToUpdate);
-            } else if (actionChoice == 3) {
-                restoreUser(userToUpdate);
+                System.out.println("All users deleted successfully.");
+                try {
+                    for (String filename : getAllFilenames()) {
+                        for (User user : users) {
+                            updateFile(filename, user);
+                        }
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             } else {
-                System.out.println("Returning to main menu...");
-                displayMenu();
+                System.out.println("Delete all users cancelled.");
             }
+        }
+        
+        private void restoreAllUsers(List<User> users) {
+            Scanner scanner = new Scanner(System.in);
+        
+            System.out.print("Are you sure you want to restore all users? (yes/no): ");
+            String confirm = scanner.nextLine().trim().toLowerCase();
+            if (confirm.equals("yes")) {
+                for (User user : users) {
+                    user.setIsActive(true);
+                }
+                System.out.println("All users restored successfully.");
+                try {
+                    for (String filename : getAllFilenames()) {
+                        for (User user : users) {
+                            updateFile(filename, user);
+                        }
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                System.out.println("Restore all users cancelled.");
+            }
+        }
+        
+        private List<String> getAllFilenames() {
+            return Arrays.asList("approved_staffs.txt", "approved_residents.txt", "users.txt", "managers.txt", "unapproved_staffs.txt", "unapproved_residents.txt");
         }
         
         public void updateUser(User userToUpdate) {

@@ -1,3 +1,3 @@
 M01,U01,456,kcl,123,123,2024-12-16 20:10:28,manager,true
-M02,U02,00000,jacob,kkk,1k2k,2024-12-16 20:30:41,manager,false
-M03,U03,123f,kcl55,321,321,2024-12-18 16:16:10,manager,false
+M02,U02,00000,jacob,kkk,1k2k,2024-12-16 20:30:41,manager,true
+M03,U03,123f,kcl55,321,321,2024-12-18 16:16:10,manager,true

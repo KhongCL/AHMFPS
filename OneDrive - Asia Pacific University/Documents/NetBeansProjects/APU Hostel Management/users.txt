@@ -1,7 +1,7 @@
 U01,456,kcl,123,123,2024-12-16 20:10:28,manager,true
-U02,00000,jacob,kkk,1k2k,2024-12-16 20:30:41,manager,false
-U03,123f,kcl55,321,321,2024-12-18 16:16:10,manager,false
+U02,00000,jacob,kkk,1k2k,2024-12-16 20:30:41,manager,true
+U03,123f,kcl55,321,321,2024-12-18 16:16:10,manager,true
 U04,kcl8888,kcl888,123,333,2024-12-18 17:26:06,resident,true
-U05,lck,lck5,lck123,lck656,2024-12-18 17:14:03,resident,false
-U06,783264,kkkllll,123,41235,2024-12-18 17:25:21,staff,false
+U05,lck,lck5,lck123,lck656,2024-12-18 17:14:03,resident,true
+U06,783264,kkkllll,123,41235,2024-12-18 17:25:21,staff,true
 U07,kkk123,kkk222,kkk333,kkk444,2024-12-18 17:15:12,staff,true
