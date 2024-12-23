@@ -594,6 +594,7 @@ public class APUHostelManagement {
             if (userChoice == 0) {
                 System.out.println("Operation cancelled.");
                 displayMenu();
+                return;
             }
         
             User userToUpdate = users.get(userChoice - 1);
@@ -644,6 +645,7 @@ public class APUHostelManagement {
         
                     switch (choice) {
                         case 1:
+                            System.out.println("Current IC Passport Number: " + userToUpdate.getIcPassportNumber());
                             System.out.print("Enter new IC Passport Number: ");
                             String newIcPassportNumber = scanner.nextLine();
                             if (newIcPassportNumber.isEmpty()) {
@@ -663,6 +665,7 @@ public class APUHostelManagement {
                             System.out.println("IC Passport Number updated successfully.");
                             break;
                         case 2:
+                            System.out.println("Current Username: " + userToUpdate.getUsername());
                             System.out.print("Enter new username: ");
                             String newUsername = scanner.nextLine();
                             if (newUsername.isEmpty()) {
@@ -682,6 +685,7 @@ public class APUHostelManagement {
                             System.out.println("Username updated successfully.");
                             break;
                         case 3:
+                            System.out.println("Current Password: " + userToUpdate.getPassword());
                             System.out.print("Enter new password: ");
                             String newPassword = scanner.nextLine();
                             if (newPassword.isEmpty()) {
@@ -692,6 +696,7 @@ public class APUHostelManagement {
                             System.out.println("Password updated successfully.");
                             break;
                         case 4:
+                            System.out.println("Current Contact Number: " + userToUpdate.getContactNumber());
                             System.out.print("Enter new contact number: ");
                             String newContactNumber = scanner.nextLine();
                             if (newContactNumber.isEmpty()) {
@@ -713,16 +718,18 @@ public class APUHostelManagement {
                         case 0:
                             System.out.println("Returning to main menu...");
                             displayMenu();
-                            
+                            return;
                         default:
                             System.out.println("Invalid choice. Please try again.");
                     }
         
                     try {
-                        updateFile("approved_staffs.txt");
-                        updateFile("approved_residents.txt");
-                        updateFile("users.txt");
-                        updateFile("managers.txt");
+                        updateFile("approved_staffs.txt", userToUpdate);
+                        updateFile("approved_residents.txt", userToUpdate);
+                        updateFile("users.txt", userToUpdate);
+                        updateFile("managers.txt", userToUpdate);
+                        updateFile("unapproved_staffs.txt", userToUpdate);
+                        updateFile("unapproved_residents.txt", userToUpdate);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -733,10 +740,12 @@ public class APUHostelManagement {
                 System.out.println("User deactivated successfully.");
         
                 try {
-                    updateFile("approved_staffs.txt");
-                    updateFile("approved_residents.txt");
-                    updateFile("users.txt");
-                    updateFile("managers.txt");
+                    updateFile("approved_staffs.txt", userToUpdate);
+                    updateFile("approved_residents.txt", userToUpdate);
+                    updateFile("users.txt", userToUpdate);
+                    updateFile("managers.txt", userToUpdate);
+                    updateFile("unapproved_staffs.txt", userToUpdate);
+                    updateFile("unapproved_residents.txt", userToUpdate);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -746,32 +755,33 @@ public class APUHostelManagement {
             }
         }
         
-        private void updateFile(String filename) throws IOException {
+        private void updateFile(String filename, User updatedUser) throws IOException {
             List<User> users = User.readFromFile(filename);
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
-                if (filename.equals("users.txt")) {
-                    System.out.println("Updating users.txt...");
-                    System.out.println(this.userID + "," + this.icPassportNumber + "," + this.username + "," + this.password + "," + this.contactNumber + "," + this.dateOfRegistration + "," + this.role + "," + this.isActive);
-
-
-                }
-                if (filename.equals("managers.txt")) {
-                    System.out.println("Updating managers.txt...");
-                    System.out.println(this.managerID + "," + this.userID + "," + this.icPassportNumber + "," + this.username + "," + this.password + "," + this.contactNumber + "," + this.dateOfRegistration + "," + this.role + "," + this.isActive);
-                }
                 for (User user : users) {
-                    if (user.getUserID().equals(this.userID)) {
+                    boolean isMatch = user.getUserID().equals(updatedUser.getUserID());
+                    if (filename.equals("unapproved_staffs.txt") || filename.equals("unapproved_residents.txt")) {
+                        isMatch = user.getIcPassportNumber().equals(updatedUser.getIcPassportNumber()) ||
+                                  user.getUsername().equals(updatedUser.getUsername()) ||
+                                  user.getContactNumber().equals(updatedUser.getContactNumber());
+                    }
+                    
+                    if (isMatch) {
                         if (filename.equals("users.txt")) {
-                            writer.write(this.userID + "," + this.icPassportNumber + "," + this.username + "," + this.password + "," + this.contactNumber + "," + this.dateOfRegistration + "," + this.role + "," + this.isActive);
+                            writer.write(updatedUser.getUserID() + "," + updatedUser.getIcPassportNumber() + "," + updatedUser.getUsername() + "," + updatedUser.getPassword() + "," + updatedUser.getContactNumber() + "," + updatedUser.getDateOfRegistration() + "," + updatedUser.getRole() + "," + updatedUser.getIsActive());
                         } else if (filename.equals("managers.txt") && user instanceof Manager) {
                             Manager manager = (Manager) user;
-                            writer.write(manager.getManagerID() + "," + this.userID + "," + this.icPassportNumber + "," + this.username + "," + this.password + "," + this.contactNumber + "," + this.dateOfRegistration + "," + this.role + "," + this.isActive);
-                        } else if (user instanceof Staff) {
+                            writer.write(manager.getManagerID() + "," + updatedUser.getUserID() + "," + updatedUser.getIcPassportNumber() + "," + updatedUser.getUsername() + "," + updatedUser.getPassword() + "," + updatedUser.getContactNumber() + "," + updatedUser.getDateOfRegistration() + "," + updatedUser.getRole() + "," + updatedUser.getIsActive());
+                        } else if (filename.equals("approved_staffs.txt") && user instanceof Staff) {
                             Staff staff = (Staff) user;
-                            writer.write(staff.getStaffID() + "," + this.userID + "," + this.icPassportNumber + "," + this.username + "," + this.password + "," + this.contactNumber + "," + this.dateOfRegistration + "," + this.role + "," + this.isActive + "," + staff.getDateOfApproval());
-                        } else if (user instanceof Resident) {
+                            writer.write(staff.getStaffID() + "," + updatedUser.getUserID() + "," + updatedUser.getIcPassportNumber() + "," + updatedUser.getUsername() + "," + updatedUser.getPassword() + "," + updatedUser.getContactNumber() + "," + updatedUser.getDateOfRegistration() + "," + updatedUser.getRole() + "," + updatedUser.getIsActive() + "," + staff.getDateOfApproval());
+                        } else if (filename.equals("approved_residents.txt") && user instanceof Resident) {
                             Resident resident = (Resident) user;
-                            writer.write(resident.getResidentID() + "," + this.userID + "," + this.icPassportNumber + "," + this.username + "," + this.password + "," + this.contactNumber + "," + this.dateOfRegistration + "," + this.role + "," + this.isActive + "," + resident.getDateOfApproval());
+                            writer.write(resident.getResidentID() + "," + updatedUser.getUserID() + "," + updatedUser.getIcPassportNumber() + "," + updatedUser.getUsername() + "," + updatedUser.getPassword() + "," + updatedUser.getContactNumber() + "," + updatedUser.getDateOfRegistration() + "," + updatedUser.getRole() + "," + updatedUser.getIsActive() + "," + resident.getDateOfApproval());
+                        } else if (filename.equals("unapproved_staffs.txt") && user instanceof Staff) {
+                            writer.write("null,null," + updatedUser.getIcPassportNumber() + "," + updatedUser.getUsername() + "," + updatedUser.getPassword() + "," + updatedUser.getContactNumber() + "," + updatedUser.getDateOfRegistration() + "," + updatedUser.getRole() + "," + updatedUser.getIsActive() + ",null");
+                        } else if (filename.equals("unapproved_residents.txt") && user instanceof Resident) {
+                            writer.write("null,null," + updatedUser.getIcPassportNumber() + "," + updatedUser.getUsername() + "," + updatedUser.getPassword() + "," + updatedUser.getContactNumber() + "," + updatedUser.getDateOfRegistration() + "," + updatedUser.getRole() + "," + updatedUser.getIsActive() + ",null");
                         }
                     } else {
                         if (filename.equals("users.txt")) {
@@ -779,12 +789,16 @@ public class APUHostelManagement {
                         } else if (filename.equals("managers.txt") && user instanceof Manager) {
                             Manager manager = (Manager) user;
                             writer.write(manager.getManagerID() + "," + user.getUserID() + "," + user.getIcPassportNumber() + "," + user.getUsername() + "," + user.getPassword() + "," + user.getContactNumber() + "," + user.getDateOfRegistration() + "," + user.getRole() + "," + user.getIsActive());
-                        } else if (user instanceof Staff) {
+                        } else if (filename.equals("approved_staffs.txt") && user instanceof Staff) {
                             Staff staff = (Staff) user;
                             writer.write(staff.getStaffID() + "," + staff.getUserID() + "," + staff.getIcPassportNumber() + "," + staff.getUsername() + "," + staff.getPassword() + "," + staff.getContactNumber() + "," + staff.getDateOfRegistration() + "," + staff.getRole() + "," + staff.getIsActive() + "," + staff.getDateOfApproval());
-                        } else if (user instanceof Resident) {
+                        } else if (filename.equals("approved_residents.txt") && user instanceof Resident) {
                             Resident resident = (Resident) user;
                             writer.write(resident.getResidentID() + "," + resident.getUserID() + "," + resident.getIcPassportNumber() + "," + resident.getUsername() + "," + resident.getPassword() + "," + resident.getContactNumber() + "," + resident.getDateOfRegistration() + "," + resident.getRole() + "," + resident.getIsActive() + "," + resident.getDateOfApproval());
+                        } else if (filename.equals("unapproved_staffs.txt") && user instanceof Staff) {
+                            writer.write("null,null," + user.getIcPassportNumber() + "," + user.getUsername() + "," + user.getPassword() + "," + user.getContactNumber() + "," + user.getDateOfRegistration() + "," + user.getRole() + "," + user.getIsActive() + ",null");
+                        } else if (filename.equals("unapproved_residents.txt") && user instanceof Resident) {
+                            writer.write("null,null," + user.getIcPassportNumber() + "," + user.getUsername() + "," + user.getPassword() + "," + user.getContactNumber() + "," + user.getDateOfRegistration() + "," + user.getRole() + "," + user.getIsActive() + ",null");
                         }
                     }
                     writer.newLine();
@@ -896,6 +910,7 @@ public class APUHostelManagement {
         
                 switch (choice) {
                     case 1:
+                        System.out.println("Current IC Passport Number: " + this.icPassportNumber);
                         System.out.print("Enter new IC Passport Number: ");
                         String newIcPassportNumber = scanner.nextLine();
                         if (newIcPassportNumber.isEmpty()) {
@@ -915,6 +930,7 @@ public class APUHostelManagement {
                         System.out.println("IC Passport Number updated successfully.");
                         break;
                     case 2:
+                        System.out.println("Current Username: " + this.username);
                         System.out.print("Enter new username: ");
                         String newUsername = scanner.nextLine();
                         if (newUsername.isEmpty()) {
@@ -934,6 +950,7 @@ public class APUHostelManagement {
                         System.out.println("Username updated successfully.");
                         break;
                     case 3:
+                        System.out.println("Current Password: " + this.password);
                         System.out.print("Enter new password: ");
                         String newPassword = scanner.nextLine();
                         if (newPassword.isEmpty()) {
@@ -944,6 +961,7 @@ public class APUHostelManagement {
                         System.out.println("Password updated successfully.");
                         break;
                     case 4:
+                        System.out.println("Current Contact Number: " + this.contactNumber);
                         System.out.print("Enter new contact number: ");
                         String newContactNumber = scanner.nextLine();
                         if (newContactNumber.isEmpty()) {
@@ -1334,6 +1352,7 @@ public class APUHostelManagement {
         
                 switch (choice) {
                     case 1:
+                        System.out.println("Current IC Passport Number: " + this.icPassportNumber);
                         System.out.print("Enter new IC Passport Number: ");
                         String newIcPassportNumber = scanner.nextLine();
                         if (newIcPassportNumber.isEmpty()) {
@@ -1353,6 +1372,7 @@ public class APUHostelManagement {
                         System.out.println("IC Passport Number updated successfully.");
                         break;
                     case 2:
+                        System.out.println("Current Username: " + this.username);
                         System.out.print("Enter new username: ");
                         String newUsername = scanner.nextLine();
                         if (newUsername.isEmpty()) {
@@ -1372,6 +1392,7 @@ public class APUHostelManagement {
                         System.out.println("Username updated successfully.");
                         break;
                     case 3:
+                        System.out.println("Current Password: " + this.password);
                         System.out.print("Enter new password: ");
                         String newPassword = scanner.nextLine();
                         if (newPassword.isEmpty()) {
@@ -1382,6 +1403,7 @@ public class APUHostelManagement {
                         System.out.println("Password updated successfully.");
                         break;
                     case 4:
+                        System.out.println("Current Contact Number: " + this.contactNumber);
                         System.out.print("Enter new contact number: ");
                         String newContactNumber = scanner.nextLine();
                         if (newContactNumber.isEmpty()) {
