@@ -1,5 +1,5 @@
 RM01,FR01,standard,101,unavailable,1,true
-RM02,FR02,deluxe,102,unavailable,2,true
+RM02,FR02,deluxe,102,available,2,true
 RM03,FR01,standard,103,available,1,true
 RM04,FR01,standard,104,available,5,true
 RM05,FR07,standard,105,available,6,true

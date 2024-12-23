@@ -1794,6 +1794,16 @@ public class APUHostelManagement {
             selectedPayment[2] = this.staffID; // Update staffID
             selectedPayment[7] = "paid"; // Update payment status
         
+            // Update the corresponding room's status
+            List<Room> rooms = readRoomsFromFile("rooms.txt");
+            for (Room room : rooms) {
+                if (room.getRoomID().equals(selectedPayment[5])) {
+                    room.setRoomStatus("available");
+                    break;
+                }
+            }
+            saveRoomsToFile(rooms);
+        
             // Write updated payments back to file
             try (BufferedWriter writer = new BufferedWriter(new FileWriter("payments.txt"))) {
                 for (String[] payment : payments) {
@@ -1806,6 +1816,35 @@ public class APUHostelManagement {
         
             System.out.println("Payment updated successfully.");
             displayMenu();
+        }
+
+        private List<Room> readRoomsFromFile(String filename) {
+            List<Room> rooms = new ArrayList<>();
+            try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    String[] parts = line.split(",");
+                    if (parts.length == 7) {
+                        Room room = new Room(parts[0], parts[1], parts[2], Integer.parseInt(parts[3]), parts[4], Integer.parseInt(parts[5]), Boolean.parseBoolean(parts[6]));
+                        rooms.add(room);
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return rooms;
+        }
+
+        private void saveRoomsToFile(List<Room> rooms) {
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter("rooms.txt"))) {
+                for (Room room : rooms) {
+                    writer.write(room.toString());
+                    writer.newLine();
+                }
+                System.out.println("Rooms updated successfully.");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
         public void generateReceipt() {
