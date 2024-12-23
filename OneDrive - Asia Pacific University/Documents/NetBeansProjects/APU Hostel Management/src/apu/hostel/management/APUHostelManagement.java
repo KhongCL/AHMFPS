@@ -268,7 +268,7 @@ public class APUHostelManagement {
             System.out.println("Manager Menu:");
             System.out.println("1. Approve User Registration");
             System.out.println("2. Search, Update, Delete or Restore User");
-            System.out.println("3. Fix/Update Rate");
+            System.out.println("3. Fix, Update, Delete or Restore Rate");
             System.out.println("4. Logout");
             System.out.print("Enter your choice: ");
         
@@ -287,6 +287,7 @@ public class APUHostelManagement {
                     break;
                 case 3:
                     // Fix/Update Rate logic
+                    fixOrUpdateRate();
                     break;
                 case 4:
                     System.out.println("Logging out...");
@@ -894,39 +895,48 @@ public class APUHostelManagement {
         
             // Load existing rates from file
             try {
-                rates = readRatesFromFile("rates.txt");
+                rates = readRatesFromFile("fee_rates.txt");
             } catch (IOException e) {
                 e.printStackTrace();
             }
         
-            System.out.println("Fix or Update Rates:");
-            System.out.println("1. Set Initial Rates");
-            System.out.println("2. Update Existing Rates");
-            System.out.println("3. Delete Rate");
-            System.out.println("4. Restore Deleted Rate");
-            System.out.println("5. Delete All Rates");
-            System.out.println("6. Restore All Rates");
-            System.out.print("Enter your choice (1-6): ");
-            int choice = getValidatedChoice(scanner, 1, 6);
+            while (true) {
+                System.out.println("Fix or Update Rates:");
+                System.out.println("1. Set Initial Rates");
+                System.out.println("2. Update Existing Rates");
+                System.out.println("3. Delete Rate");
+                System.out.println("4. Restore Deleted Rate");
+                System.out.println("5. Delete All Rates");
+                System.out.println("6. Restore All Rates");
+                System.out.println("7. Exit");
+                System.out.print("Enter your choice (1-7): ");
+                int choice = getValidatedChoice(scanner, 1, 7);
         
-            if (choice == 1) {
-                setInitialRates(scanner, rates);
-            } else if (choice == 2) {
-                updateExistingRates(scanner, rates);
-            } else if (choice == 3) {
-                deleteRate(scanner, rates);
-            } else if (choice == 4) {
-                restoreDeletedRate(scanner, rates);
-            } else if (choice == 5) {
-                deleteAllRates(scanner, rates);
-            } else if (choice == 6) {
-                restoreAllRates(scanner, rates);
+                if (choice == 1) {
+                    setInitialRates(scanner, rates);
+                    saveRatesToFile(rates);
+                } else if (choice == 2) {
+                    updateExistingRates(scanner, rates);
+                    saveRatesToFile(rates);
+                } else if (choice == 3) {
+                    deleteRate(scanner, rates);
+                    saveRatesToFile(rates);
+                } else if (choice == 4) {
+                    restoreDeletedRate(scanner, rates);
+                    saveRatesToFile(rates);
+                } else if (choice == 5) {
+                    deleteAllRates(scanner, rates);
+                    saveRatesToFile(rates);
+                } else if (choice == 6) {
+                    restoreAllRates(scanner, rates);
+                    saveRatesToFile(rates);
+                } else if (choice == 7) {
+                    break;
+                }
             }
-        
-            // Save updated rates to file
-            saveRatesToFile(rates);
+            displayMenu();
         }
-        
+
         private int getValidatedChoice(Scanner scanner, int min, int max) {
             int choice = -1;
             while (choice < min || choice > max) {
@@ -986,6 +996,12 @@ public class APUHostelManagement {
             System.out.print("Enter the number of the fee rate to update: ");
             int rateChoice = getValidatedChoice(scanner, 1, rates.size());
             FeeRate rateToUpdate = rates.get(rateChoice - 1);
+        
+            System.out.println("Current Rates:");
+            System.out.println("Daily Rate: " + rateToUpdate.getDailyRate());
+            System.out.println("Weekly Rate: " + rateToUpdate.getWeeklyRate());
+            System.out.println("Monthly Rate: " + rateToUpdate.getMonthlyRate());
+            System.out.println("Yearly Rate: " + rateToUpdate.getYearlyRate());
         
             System.out.println("Which rate do you want to update?");
             System.out.println("1. Daily Rate");
@@ -1091,7 +1107,7 @@ public class APUHostelManagement {
                 return;
             }
         
-            System.out.print("Are you sure you want to delete all rates? This action cannot be undone. (yes/no): ");
+            System.out.print("Are you sure you want to delete all rates? This action cannot be undone. You can retore all rates on the menu. (yes/no): ");
             String confirm = scanner.nextLine();
             if (confirm.equalsIgnoreCase("yes")) {
                 for (FeeRate rate : rates) {
@@ -1127,7 +1143,7 @@ public class APUHostelManagement {
                 System.out.println("Restore all rates cancelled.");
             }
         }
-        
+
         private double getValidatedRate(Scanner scanner, String rateType) {
             double rate = -1;
             while (rate < 0) {
@@ -1147,7 +1163,7 @@ public class APUHostelManagement {
         }
         
         private void saveRatesToFile(List<FeeRate> rates) {
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter("rates.txt"))) {
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter("fee_rates.txt"))) {
                 for (FeeRate rate : rates) {
                     writer.write(rate.toString());
                     writer.newLine();
@@ -2557,9 +2573,25 @@ public class APUHostelManagement {
         public String getRoomType() {
             return roomType;
         }
+
+        public double getDailyRate() {
+            return dailyRate;
+        }
+
+        public double getWeeklyRate() {
+            return weeklyRate;
+        }
     
         public double getMonthlyRate() {
             return monthlyRate;
+        }
+
+        public double getYearlyRate() {
+            return yearlyRate;
+        }
+
+        public boolean getIsActive() {
+            return isActive;
         }
     
         public boolean isActive() {
