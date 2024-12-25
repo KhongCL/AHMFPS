@@ -1,10 +1,10 @@
 RM01,FR01,standard,101,unavailable,1,true
 RM02,FR02,large,102,available,3,true
-RM03,FR03,family,103,available,6,true
-RM04,FR03,family,104,available,6,true
+RM03,FR03,large,103,available,3,true
+RM04,FR03,large,104,available,3,true
 RM05,FR02,large,105,available,3,true
 RM06,FR01,standard,106,available,1,true
 RM07,FR01,standard,107,available,1,true
 RM08,FR04,standard,108,available,1,true
-RM09,FR03,family,109,unavailable,12,true
-RM10,FR03,family,110,available,6,true
+RM09,FR03,large,109,unavailable,3,true
+RM10,FR03,large,110,available,3,true

@@ -1098,24 +1098,49 @@ public class APUHostelManagement {
                 System.out.print("Enter your choice (1-3): ");
                 int roomTypeChoice = getValidatedChoice(scanner, 1, 3);
                 String roomType;
+                int roomCapacity = 0;
                 switch (roomTypeChoice) {
                     case 1:
                         roomType = "standard";
+                        roomCapacity = 1;
                         break;
                     case 2:
                         roomType = "large";
+                        roomCapacity = 3;
                         break;
                     case 3:
                         roomType = "family";
+                        roomCapacity = 6;
                         break;
                     default:
                         System.out.println("Invalid choice. Please try again.");
                         return;
                 }
-                rateToUpdate.setRoomType(roomType);
-                System.out.println("Room Type updated successfully.");
+                System.out.println("Current Room Type: " + rateToUpdate.getRoomType());
+                System.out.println("New Room Type: " + roomType);
+                System.out.print("Are you sure you want to update the room type? (yes/no): ");
+                String confirm = scanner.nextLine().trim().toLowerCase();
+                if (confirm.equals("yes")) {
+                    rateToUpdate.setRoomType(roomType);
+        
+                    // Update room type in rooms.txt
+                    List<Room> rooms = readRoomsFromFile("rooms.txt");
+                    for (Room room : rooms) {
+                        if (room.getFeeRateID().equals(rateToUpdate.getFeeRateID())) {
+                            room.setRoomType(roomType);
+                            room.setRoomCapacity(roomCapacity);
+                        }
+                    }
+                    saveRoomsToFile(rooms);
+        
+                    System.out.println("Room Type updated successfully.");
+                } else {
+                    System.out.println("Room type update cancelled.");
+                }
             } else {
                 double newRate = getValidatedRate(scanner, "new rate");
+                System.out.println("Current Rate: " + getCurrentRate(rateToUpdate, attributeChoice));
+                System.out.println("New Rate: " + newRate);
                 System.out.print("Are you sure you want to update the rate? (yes/no): ");
                 String confirm = scanner.nextLine().trim().toLowerCase();
                 if (confirm.equals("yes")) {
@@ -1137,6 +1162,21 @@ public class APUHostelManagement {
                 } else {
                     System.out.println("Rate update cancelled.");
                 }
+            }
+        }
+        
+        private double getCurrentRate(FeeRate rate, int attributeChoice) {
+            switch (attributeChoice) {
+                case 2:
+                    return rate.getDailyRate();
+                case 3:
+                    return rate.getWeeklyRate();
+                case 4:
+                    return rate.getMonthlyRate();
+                case 5:
+                    return rate.getYearlyRate();
+                default:
+                    return -1;
             }
         }
         
@@ -2505,29 +2545,43 @@ public class APUHostelManagement {
                 System.out.println("2. Bank Transfer");
                 System.out.println("3. Cash");
                 System.out.print("Enter your choice: ");
-                int paymentMethodChoice = scanner.nextInt();
-                scanner.nextLine(); // Consume newline
+                if (scanner.hasNextInt()) {
+                    int paymentMethodChoice = scanner.nextInt();
+                    scanner.nextLine(); // Consume newline
 
-                switch (paymentMethodChoice) {
-                    case 1:
-                        paymentMethod = "credit_card";
-                        break;
-                    case 2:
-                        paymentMethod = "bank_transfer";
-                        break;
-                    case 3:
-                        paymentMethod = "cash";
-                        break;
-                    default:
-                        System.out.println("Invalid choice. Please try again.");
-                        continue;
+                    switch (paymentMethodChoice) {
+                        case 1:
+                            paymentMethod = "credit_card";
+                            break;
+                        case 2:
+                            paymentMethod = "bank_transfer";
+                            break;
+                        case 3:
+                            paymentMethod = "cash";
+                            break;
+                        default:
+                            System.out.println("Invalid choice. Please try again.");
+                            continue;
+                    }
+                    break;
+                } else {
+                    System.out.println("Invalid input. Please enter a number.");
+                    scanner.nextLine(); // Consume invalid input
                 }
-                break;
             }
 
             // Confirm payment
-            System.out.print("Do you want to proceed with the payment? (yes/no): ");
-            String confirmation = scanner.nextLine();
+            String confirmation = "";
+            while (true) {
+                System.out.print("Do you want to proceed with the payment? (yes/no): ");
+                confirmation = scanner.nextLine();
+                if (confirmation.equalsIgnoreCase("yes") || confirmation.equalsIgnoreCase("no")) {
+                    break; // Valid input, exit loop
+                } else {
+                    System.out.println("Invalid input. Please enter 'yes' or 'no'.");
+                }
+            }
+
             if (!confirmation.equalsIgnoreCase("yes")) {
                 System.out.println("Payment cancelled.");
                 return;
@@ -2611,8 +2665,17 @@ public class APUHostelManagement {
             }
 
             // Confirm cancellation
-            System.out.print("Do you want to proceed with the cancellation? (yes/no): ");
-            String confirmation = scanner.nextLine();
+            String confirmation = "";
+            while (true) {
+                System.out.print("Do you want to proceed with the cancellation? (yes/no): ");
+                confirmation = scanner.nextLine();
+                if (confirmation.equalsIgnoreCase("yes") || confirmation.equalsIgnoreCase("no")) {
+                    break; // Valid input, exit loop
+                } else {
+                    System.out.println("Invalid input. Please enter 'yes' or 'no'.");
+                }
+            }
+
             if (!confirmation.equalsIgnoreCase("yes")) {
                 System.out.println("Cancellation cancelled.");
                 return;
