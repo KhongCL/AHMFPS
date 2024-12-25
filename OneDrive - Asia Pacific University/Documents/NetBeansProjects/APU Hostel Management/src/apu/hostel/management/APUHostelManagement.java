@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.time.format.DateTimeParseException;
+import java.time.YearMonth;
 
 public class APUHostelManagement {
     // User abstract class
@@ -2929,7 +2930,12 @@ public class APUHostelManagement {
                 String startDateInput = scanner.nextLine();
                 if (startDateInput.matches(datePattern)) {
                     try {
-                        startDate = LocalDate.parse(startDateInput, dateFormatter);
+                        LocalDate parsedDate = LocalDate.parse(startDateInput, dateFormatter);
+                        YearMonth yearMonth = YearMonth.of(parsedDate.getYear(), parsedDate.getMonth());
+                        if (parsedDate.getDayOfMonth() > yearMonth.lengthOfMonth()) {
+                            throw new DateTimeParseException("Invalid day for the month", startDateInput, 0);
+                        }
+                        startDate = parsedDate;
                         if (startDate.isBefore(currentDate)) {
                             System.out.println("You cannot travel back in time. Please enter a valid start date.");
                             startDate = null;
@@ -2949,7 +2955,12 @@ public class APUHostelManagement {
                 String endDateInput = scanner.nextLine();
                 if (endDateInput.matches(datePattern)) {
                     try {
-                        endDate = LocalDate.parse(endDateInput, dateFormatter);
+                        LocalDate parsedDate = LocalDate.parse(endDateInput, dateFormatter);
+                        YearMonth yearMonth = YearMonth.of(parsedDate.getYear(), parsedDate.getMonth());
+                        if (parsedDate.getDayOfMonth() > yearMonth.lengthOfMonth()) {
+                            throw new DateTimeParseException("Invalid day for the month", endDateInput, 0);
+                        }
+                        endDate = parsedDate;
                         if (!endDate.isAfter(startDate)) {
                             System.out.println("The end date must be after the start date.");
                             endDate = null;
@@ -3645,23 +3656,31 @@ public class APUHostelManagement {
             System.out.println("Password must be between 8 and 12 characters long.");
             return false;
         }
-
+    
         // Check if password is similar to username
         if (password.contains(username)) {
             System.out.println("Password cannot be similar to the username.");
             return false;
         }
-
+    
         // Check for at least one number, one special character, and one uppercase letter
         boolean hasNumber = password.matches(".*\\d.*");
-        boolean hasSpecialChar = password.matches(".*[^a-zA-Z0-9_].*");
         boolean hasUppercase = password.matches(".*[A-Z].*");
-
+        boolean hasSpecialChar = password.matches(".*[!@#$%^&*()].*");
+    
+        // Check for invalid characters
+        boolean hasInvalidChar = password.matches(".*[^a-zA-Z0-9!@#$%^&*()].*");
+    
         if (!(hasNumber && hasSpecialChar && hasUppercase)) {
-            System.out.println("Password must contain at least one number, one special character, and one uppercase letter.");
+            System.out.println("Password must contain at least one number, one special character (!@#$%^&*()), and one uppercase letter.");
             return false;
         }
-
+    
+        if (hasInvalidChar) {
+            System.out.println("Password contains invalid characters. Only !@#$%^&*() are allowed as special characters.");
+            return false;
+        }
+    
         return true;
     }
 
@@ -3690,105 +3709,85 @@ public class APUHostelManagement {
         Scanner scanner = new Scanner(System.in);
         String icPassportNumber, username, password, contactNumber;
         boolean isIC = false;
-
+    
         while (true) {
-            System.out.print("Do you want to use IC or Passport Number to register? (IC/Passport): ");
+            System.out.println("Do you want to use IC or Passport Number to register?");
+            System.out.println("1. IC");
+            System.out.println("2. Passport");
+            System.out.print("Enter your choice (1-2): ");
             String choice = scanner.nextLine();
-            if (choice.equalsIgnoreCase("IC")) {
+            if (choice.equals("1")) {
                 isIC = true;
                 break;
-            } else if (choice.equalsIgnoreCase("Passport")) {
+            } else if (choice.equals("2")) {
                 isIC = false;
                 break;
             } else {
-                System.out.println("Invalid choice. Please enter 'IC' or 'Passport'.");
+                System.out.println("Invalid choice. Please enter '1' for IC or '2' for Passport.");
             }
         }
-
+    
         while (true) {
             System.out.print("Enter " + (isIC ? "IC" : "Passport") + " Number: ");
             icPassportNumber = scanner.nextLine();
-            if (icPassportNumber.isEmpty()) {
-                System.out.println((isIC ? "IC" : "Passport") + " Number cannot be empty. Please try again.");
-                continue;
-            }
-            try {
-                if (!User.isUnique(icPassportNumber, "", "")) {
-                    System.out.println("Error: " + (isIC ? "IC" : "Passport") + " Number already exists.");
-                    System.out.print("Do you want to try again? (yes/no): ");
-                    if (!scanner.nextLine().equalsIgnoreCase("yes")) {
-                        displayWelcomePage();
-                        return;
-                    }
-                    continue;
+            if (!isValidICPassport(icPassportNumber)) {
+                System.out.print("Do you want to try again? (yes/no): ");
+                if (!scanner.nextLine().equalsIgnoreCase("yes")) {
+                    displayWelcomePage();
+                    return;
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
+                continue;
             }
             break;
         }
-
+    
         while (true) {
             System.out.print("Enter username: ");
             username = scanner.nextLine();
-            if (username.isEmpty()) {
-                System.out.println("Username cannot be empty. Please try again.");
-                continue;
-            }
-            try {
-                if (!User.isUnique("", username, "")) {
-                    System.out.println("Error: Username already exists.");
-                    System.out.print("Do you want to try again? (yes/no): ");
-                    if (!scanner.nextLine().equalsIgnoreCase("yes")) {
-                        displayWelcomePage();
-                        return;
-                    }
-                    continue;
+            if (!isValidUsername(username)) {
+                System.out.print("Do you want to try again? (yes/no): ");
+                if (!scanner.nextLine().equalsIgnoreCase("yes")) {
+                    displayWelcomePage();
+                    return;
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
+                continue;
             }
             break;
         }
-
+    
         while (true) {
             System.out.print("Enter password: ");
             password = scanner.nextLine();
-            if (password.isEmpty()) {
-                System.out.println("Password cannot be empty. Please try again.");
+            if (!isValidPassword(password, username)) {
+                System.out.print("Do you want to try again? (yes/no): ");
+                if (!scanner.nextLine().equalsIgnoreCase("yes")) {
+                    displayWelcomePage();
+                    return;
+                }
                 continue;
             }
             break;
         }
-
+    
         while (true) {
             System.out.print("Enter contact number: ");
             contactNumber = scanner.nextLine();
-            if (contactNumber.isEmpty()) {
-                System.out.println("Contact number cannot be empty. Please try again.");
-                continue;
-            }
-            try {
-                if (!User.isUnique("", "", contactNumber)) {
-                    System.out.println("Error: Contact Number already exists.");
-                    System.out.print("Do you want to try again? (yes/no): ");
-                    if (!scanner.nextLine().equalsIgnoreCase("yes")) {
-                        displayWelcomePage();
-                        return;
-                    }
-                    continue;
+            if (!isValidContactNumber(contactNumber)) {
+                System.out.print("Do you want to try again? (yes/no): ");
+                if (!scanner.nextLine().equalsIgnoreCase("yes")) {
+                    displayWelcomePage();
+                    return;
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
+                continue;
             }
             break;
         }
-
+    
         try {
             String dateOfRegistration = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
             String userID = generateUserID("U");
             String managerID = generateUserID("M");
-            Manager manager = new Manager(managerID, userID, icPassportNumber, username, password, contactNumber, dateOfRegistration, "Manager", true);
+            Manager manager = new Manager(managerID, userID, icPassportNumber, username, password, contactNumber, dateOfRegistration, "manager", true);
             manager.saveToFile("users.txt");
             manager.saveToManagerFile();
             System.out.println("Manager registered successfully.");
