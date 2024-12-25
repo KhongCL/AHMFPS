@@ -1048,7 +1048,21 @@ public class APUHostelManagement {
                 double monthlyRate = getValidatedRate(scanner, "Monthly Rate");
                 double yearlyRate = getValidatedRate(scanner, "Yearly Rate");
         
-                rates.add(new FeeRate(feeRateID, roomType, dailyRate, weeklyRate, monthlyRate, yearlyRate, true));
+                System.out.println("Fee Rate Details:");
+                System.out.println("Fee Rate ID: " + feeRateID);
+                System.out.println("Room Type: " + roomType);
+                System.out.println("Daily Rate: " + dailyRate);
+                System.out.println("Weekly Rate: " + weeklyRate);
+                System.out.println("Monthly Rate: " + monthlyRate);
+                System.out.println("Yearly Rate: " + yearlyRate);
+                System.out.print("Are you sure you want to add this rate? (yes/no): ");
+                String confirm = scanner.nextLine().trim().toLowerCase();
+                if (confirm.equals("yes")) {
+                    rates.add(new FeeRate(feeRateID, roomType, dailyRate, weeklyRate, monthlyRate, yearlyRate, true));
+                    System.out.println("Rate added successfully.");
+                } else {
+                    System.out.println("Rate addition cancelled.");
+                }
         
                 System.out.print("Do you want to add another rate? (yes/no): ");
                 String addMore = scanner.nextLine().trim().toLowerCase();
@@ -1116,6 +1130,10 @@ public class APUHostelManagement {
                         System.out.println("Invalid choice. Please try again.");
                         return;
                 }
+                if (roomType.equals(rateToUpdate.getRoomType())) {
+                    System.out.println("The selected room type is the same as the current room type.");
+                    return;
+                }
                 System.out.println("Current Room Type: " + rateToUpdate.getRoomType());
                 System.out.println("New Room Type: " + roomType);
                 System.out.print("Are you sure you want to update the room type? (yes/no): ");
@@ -1139,6 +1157,10 @@ public class APUHostelManagement {
                 }
             } else {
                 double newRate = getValidatedRate(scanner, "new rate");
+                if (newRate == getCurrentRate(rateToUpdate, attributeChoice)) {
+                    System.out.println("The new rate is the same as the current rate.");
+                    return;
+                }
                 System.out.println("Current Rate: " + getCurrentRate(rateToUpdate, attributeChoice));
                 System.out.println("New Rate: " + newRate);
                 System.out.print("Are you sure you want to update the rate? (yes/no): ");
@@ -1479,6 +1501,12 @@ public class APUHostelManagement {
                 System.out.print("Enter the number of the fee rate to use: ");
                 int feeRateChoice = getValidatedChoice(scanner, 1, activeFeeRates.size());
                 FeeRate selectedFeeRate = activeFeeRates.get(feeRateChoice - 1);
+        
+                if (selectedFeeRate.getFeeRateID().equals(roomToUpdate.getFeeRateID())) {
+                    System.out.println("The selected fee rate ID is the same as the current fee rate ID.");
+                    return;
+                }
+        
                 roomToUpdate.setFeeRateID(selectedFeeRate.getFeeRateID());
                 roomToUpdate.setRoomType(selectedFeeRate.getRoomType());
         
