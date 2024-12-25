@@ -2546,7 +2546,7 @@ public class APUHostelManagement {
 
             if (!hasRecords) {
                 System.out.println("No payment records found for your account.");
-                displayMenu();
+                return;
             }
         }
 
@@ -2581,7 +2581,6 @@ public class APUHostelManagement {
                         break;
                     case 0:
                         System.out.println("Returning to Resident Menu...");
-                        displayMenu();
                         return;
                     default:
                         System.out.println("Invalid choice. Please try again.");
