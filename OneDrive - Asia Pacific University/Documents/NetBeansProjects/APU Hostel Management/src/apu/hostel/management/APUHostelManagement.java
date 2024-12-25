@@ -13,7 +13,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.time.format.DateTimeParseException;
-import java.time.YearMonth;
 
 public class APUHostelManagement {
     // User abstract class
@@ -2931,8 +2930,7 @@ public class APUHostelManagement {
                 if (startDateInput.matches(datePattern)) {
                     try {
                         LocalDate parsedDate = LocalDate.parse(startDateInput, dateFormatter);
-                        YearMonth yearMonth = YearMonth.of(parsedDate.getYear(), parsedDate.getMonth());
-                        if (parsedDate.getDayOfMonth() > yearMonth.lengthOfMonth()) {
+                        if (isInvalidDate(parsedDate)) {
                             throw new DateTimeParseException("Invalid day for the month", startDateInput, 0);
                         }
                         startDate = parsedDate;
@@ -2956,8 +2954,7 @@ public class APUHostelManagement {
                 if (endDateInput.matches(datePattern)) {
                     try {
                         LocalDate parsedDate = LocalDate.parse(endDateInput, dateFormatter);
-                        YearMonth yearMonth = YearMonth.of(parsedDate.getYear(), parsedDate.getMonth());
-                        if (parsedDate.getDayOfMonth() > yearMonth.lengthOfMonth()) {
+                        if (isInvalidDate(parsedDate)) {
                             throw new DateTimeParseException("Invalid day for the month", endDateInput, 0);
                         }
                         endDate = parsedDate;
@@ -3052,6 +3049,23 @@ public class APUHostelManagement {
             System.out.println("Payment Amount : RM " + paymentAmount);
             System.out.println("=========================");
             System.out.println("Please go back to Manage Bookings to make payment for this booking.");
+        }
+
+        private boolean isInvalidDate(LocalDate date) {
+            int day = date.getDayOfMonth();
+            int month = date.getMonthValue();
+            int year = date.getYear();
+
+            // Check for invalid dates
+            if ((month == 2 && day > 29) || // February cannot have more than 29 days
+                (month == 2 && day == 29 && !date.isLeapYear()) || // February 29th on a non-leap year
+                (month == 4 && day > 30) || // April cannot have more than 30 days
+                (month == 6 && day > 30) || // June cannot have more than 30 days
+                (month == 9 && day > 30) || // September cannot have more than 30 days
+                (month == 11 && day > 30)) { // November cannot have more than 30 days
+                return true;
+            }
+            return false;
         }
 
         private void updateRoomStatus(String roomID, String status) {

@@ -6,3 +6,5 @@ M05,U09,A00000000,khongcl,hfwheJ12?,010-000-0000,2024-12-25 18:16:33,Manager,tru
 M06,U10,A00000000,khongcl,Kjkjf1<!1,010-000-0000,2024-12-25 18:19:34,manager,true
 M07,U11,A30948533,jrh_fwugr,wuhfkwh,,A2!,010-325-4544,2024-12-25 18:20:57,manager,true
 M08,U12,B00000000,supernig,hvwfhA1,??,011-111-1111,2024-12-25 18:22:35,manager,true
+M09,U13,B00000000,supernig,hjew!hfhA2,010-325-4544,2024-12-25 18:30:41,manager,true
+M10,U14,562354-23-2134,Khongcl,ytwf!aA33,016-666-6666,2024-12-25 18:34:59,manager,true
