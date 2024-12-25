@@ -2368,6 +2368,7 @@ public class APUHostelManagement {
                     displayMenu(); // Recursively call to retry
                     break;
             }
+            displayMenu();
         }
 
         public void updatePersonalInformation() {
