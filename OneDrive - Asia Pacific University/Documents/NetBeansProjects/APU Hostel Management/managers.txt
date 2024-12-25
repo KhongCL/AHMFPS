@@ -1,3 +1,4 @@
 M01,U01,kekekeke,kcl,123,000,2024-12-16 20:10:28,manager,true
 M02,U02,00000,jacob,kkk,1k2k,2024-12-16 20:30:41,manager,true
 M03,U03,123f,kcl55,321,321,2024-12-18 16:16:10,manager,true
+M04,U08,000000-00-0000,khongcl,Kcl1307!,010-000-0000,2024-12-25 17:48:38,Manager,true

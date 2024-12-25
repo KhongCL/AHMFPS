@@ -12,6 +12,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.time.format.DateTimeParseException;
 
 public class APUHostelManagement {
     // User abstract class
@@ -2933,8 +2934,9 @@ public class APUHostelManagement {
                             System.out.println("You cannot travel back in time. Please enter a valid start date.");
                             startDate = null;
                         }
-                    } catch (Exception e) {
-                        System.out.println("Invalid date. Please enter a valid date in yyyy-MM-dd format.");
+                    } catch (DateTimeParseException e) {
+                        System.out.println("This date does not exist, please input a valid date.");
+                        startDate = null;
                     }
                 } else {
                     System.out.println("Invalid date format. Please enter the date in yyyy-MM-dd format.");
@@ -2949,11 +2951,12 @@ public class APUHostelManagement {
                     try {
                         endDate = LocalDate.parse(endDateInput, dateFormatter);
                         if (!endDate.isAfter(startDate)) {
-                            System.out.println("You cannot travel back in time. The end date must be after the start date.");
+                            System.out.println("The end date must be after the start date.");
                             endDate = null;
                         }
-                    } catch (Exception e) {
-                        System.out.println("Invalid date. Please enter a valid date in yyyy-MM-dd format.");
+                    } catch (DateTimeParseException e) {
+                        System.out.println("This date does not exist, please input a valid date.");
+                        endDate = null;
                     }
                 } else {
                     System.out.println("Invalid date format. Please enter the date in yyyy-MM-dd format.");
@@ -3551,8 +3554,28 @@ public class APUHostelManagement {
         }
     }
 
+    // Method to check if IC/Passport Number, Username, or Contact Number is unique
+    public static boolean isUnique(String icPassportNumber, String username, String contactNumber) throws IOException {
+        List<User> users = new ArrayList<>();
+        users.addAll(User.readFromFile("users.txt"));
+        users.addAll(User.readFromFile("unapproved_residents.txt"));
+        users.addAll(User.readFromFile("approved_residents.txt"));
+        users.addAll(User.readFromFile("unapproved_staffs.txt"));
+        users.addAll(User.readFromFile("approved_staffs.txt"));
+        users.addAll(User.readFromFile("managers.txt"));
+
+        for (User user : users) {
+            if ((icPassportNumber != null && !icPassportNumber.isEmpty() && user.getIcPassportNumber().equals(icPassportNumber)) ||
+                (username != null && !username.isEmpty() && user.getUsername().equals(username)) ||
+                (contactNumber != null && !contactNumber.isEmpty() && user.getContactNumber().equals(contactNumber))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     // Validation methods
-    public static boolean isValidICPassport(String icPassport, List<String> unverifiedUsers, List<String> verifiedUsers) {
+    public static boolean isValidICPassport(String icPassport) {
         String icPassportType;
 
         // Check IC format
@@ -3568,23 +3591,20 @@ public class APUHostelManagement {
         }
 
         // Check uniqueness
-        for (String user : unverifiedUsers) {
-            if (user.split(",")[0].trim().equals(icPassport.trim())) {
+        try {
+            if (!isUnique(icPassport, "", "")) {
                 System.out.println(icPassportType + " number already exists. Please use a different " + icPassportType + " number.");
                 return false;
             }
-        }
-        for (String user : verifiedUsers) {
-            if (user.split(",")[1].trim().equals(icPassport.trim())) {
-                System.out.println(icPassportType + " number already exists. Please use a different " + icPassportType + " number.");
-                return false;
-            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
         }
 
         return true;
     }
 
-    public static boolean isValidUsername(String username, List<String> unverifiedUsers, List<String> verifiedUsers) {
+    public static boolean isValidUsername(String username) {
         // Check length
         if (username.length() < 3 || username.length() > 12) {
             System.out.println("Username must be between 3 and 12 characters long.");
@@ -3606,17 +3626,14 @@ public class APUHostelManagement {
         }
 
         // Check uniqueness
-        for (String user : unverifiedUsers) {
-            if (user.split(",")[1].equals(username)) {
-                System.out.println("Username already exists in unverified users. Please choose a different username.");
+        try {
+            if (!isUnique("", username, "")) {
+                System.out.println("Username already exists. Please choose a different username.");
                 return false;
             }
-        }
-        for (String user : verifiedUsers) {
-            if (user.split(",")[2].equals(username)) {
-                System.out.println("Username already exists in verified users. Please choose a different username.");
-                return false;
-            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
         }
 
         return true;
@@ -3648,22 +3665,18 @@ public class APUHostelManagement {
         return true;
     }
 
-    public static boolean isValidContactNumber(String contactNumber, List<String> unverifiedUsers, List<String> verifiedUsers) {
+    public static boolean isValidContactNumber(String contactNumber) {
         // Check contact number format
         if (contactNumber.length() == 12 && contactNumber.startsWith("01") && contactNumber.charAt(3) == '-' && contactNumber.charAt(7) == '-' && contactNumber.replace("-", "").matches("\\d+")) {
-            // Check uniqueness in unverified users
-            for (String user : unverifiedUsers) {
-                if (user.split(",")[3].trim().equals(contactNumber.trim())) {
+            // Check uniqueness
+            try {
+                if (!isUnique("", "", contactNumber)) {
                     System.out.println("Contact number already exists. Please choose a different contact number.");
                     return false;
                 }
-            }
-            // Check uniqueness in verified users
-            for (String user : verifiedUsers) {
-                if (user.split(",")[4].trim().equals(contactNumber.trim())) {
-                    System.out.println("Contact number already exists. Please choose a different contact number.");
-                    return false;
-                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                return false;
             }
             return true;
         } else {
@@ -3672,60 +3685,103 @@ public class APUHostelManagement {
         }
     }
 
-    
-
     // Method to handle Manager registration
     public static void registerManager() {
         Scanner scanner = new Scanner(System.in);
         String icPassportNumber, username, password, contactNumber;
         boolean isIC = false;
-        List<String> unverifiedUsers = new ArrayList<>(); // Replace with actual data source
-        List<String> verifiedUsers = new ArrayList<>(); // Replace with actual data source
 
         while (true) {
-            System.out.print("Do you want to use 1. IC or 2. Passport Number to register? (Enter 1 or 2): ");
+            System.out.print("Do you want to use IC or Passport Number to register? (IC/Passport): ");
             String choice = scanner.nextLine();
-            if (choice.equals("1")) {
+            if (choice.equalsIgnoreCase("IC")) {
                 isIC = true;
                 break;
-            } else if (choice.equals("2")) {
+            } else if (choice.equalsIgnoreCase("Passport")) {
                 isIC = false;
                 break;
             } else {
-                System.out.println("Invalid choice. Please enter '1' for IC or '2' for Passport.");
+                System.out.println("Invalid choice. Please enter 'IC' or 'Passport'.");
             }
         }
 
         while (true) {
             System.out.print("Enter " + (isIC ? "IC" : "Passport") + " Number: ");
             icPassportNumber = scanner.nextLine();
-            if (isValidICPassport(icPassportNumber, unverifiedUsers, verifiedUsers)) {
-                break;
+            if (icPassportNumber.isEmpty()) {
+                System.out.println((isIC ? "IC" : "Passport") + " Number cannot be empty. Please try again.");
+                continue;
             }
+            try {
+                if (!User.isUnique(icPassportNumber, "", "")) {
+                    System.out.println("Error: " + (isIC ? "IC" : "Passport") + " Number already exists.");
+                    System.out.print("Do you want to try again? (yes/no): ");
+                    if (!scanner.nextLine().equalsIgnoreCase("yes")) {
+                        displayWelcomePage();
+                        return;
+                    }
+                    continue;
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            break;
         }
 
         while (true) {
             System.out.print("Enter username: ");
             username = scanner.nextLine();
-            if (isValidUsername(username, unverifiedUsers, verifiedUsers)) {
-                break;
+            if (username.isEmpty()) {
+                System.out.println("Username cannot be empty. Please try again.");
+                continue;
             }
+            try {
+                if (!User.isUnique("", username, "")) {
+                    System.out.println("Error: Username already exists.");
+                    System.out.print("Do you want to try again? (yes/no): ");
+                    if (!scanner.nextLine().equalsIgnoreCase("yes")) {
+                        displayWelcomePage();
+                        return;
+                    }
+                    continue;
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            break;
         }
 
         while (true) {
             System.out.print("Enter password: ");
             password = scanner.nextLine();
-            if (isValidPassword(password, username)) {
-                break;
+            if (password.isEmpty()) {
+                System.out.println("Password cannot be empty. Please try again.");
+                continue;
             }
+            break;
         }
 
         while (true) {
             System.out.print("Enter contact number: ");
             contactNumber = scanner.nextLine();
-            if (isValidContactNumber(contactNumber, unverifiedUsers, verifiedUsers)) {
-                break;
+            if (contactNumber.isEmpty()) {
+                System.out.println("Contact number cannot be empty. Please try again.");
+                continue;
             }
+            try {
+                if (!User.isUnique("", "", contactNumber)) {
+                    System.out.println("Error: Contact Number already exists.");
+                    System.out.print("Do you want to try again? (yes/no): ");
+                    if (!scanner.nextLine().equalsIgnoreCase("yes")) {
+                        displayWelcomePage();
+                        return;
+                    }
+                    continue;
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            break;
         }
 
         try {
