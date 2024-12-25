@@ -270,7 +270,8 @@ public class APUHostelManagement {
             System.out.println("2. Search, Update, Delete or Restore User");
             System.out.println("3. Fix, Update, Delete or Restore Rate");
             System.out.println("4. Manage Rooms");
-            System.out.println("5. Logout");
+            System.out.println("5. Update Personal Information");
+            System.out.println("6. Logout");
             System.out.print("Enter your choice: ");
         
             Scanner scanner = new Scanner(System.in);
@@ -295,6 +296,10 @@ public class APUHostelManagement {
                     manageRooms();
                     break;
                 case 5:
+                    // Update Personal Information logic
+                    updatePersonalInformation();
+                    break;
+                case 6:
                     System.out.println("Logging out...");
                     displayWelcomePage();
                     break;
@@ -303,6 +308,110 @@ public class APUHostelManagement {
                     displayMenu(); // Recursively call to retry
                     break;
             }
+        }
+        
+        public void updatePersonalInformation() {
+            Scanner scanner = new Scanner(System.in);
+            int choice;
+        
+            do {
+                System.out.println("Update Personal Information:");
+                System.out.println("1. Update IC Passport Number");
+                System.out.println("2. Update Username");
+                System.out.println("3. Update Password");
+                System.out.println("4. Update Contact Number");
+                System.out.println("0. Go Back to Manager Menu");
+                System.out.print("Enter your choice: ");
+                choice = scanner.nextInt();
+                scanner.nextLine(); // Consume newline
+        
+                switch (choice) {
+                    case 1:
+                        System.out.println("Current IC Passport Number: " + this.icPassportNumber);
+                        System.out.print("Enter new IC Passport Number: ");
+                        String newIcPassportNumber = scanner.nextLine();
+                        if (newIcPassportNumber.isEmpty()) {
+                            System.out.println("IC Passport Number cannot be empty. Please try again.");
+                            break;
+                        }
+                        try {
+                            if (!isUnique(newIcPassportNumber, "", "")) {
+                                System.out.println("Error: IC Passport Number already exists.");
+                                break;
+                            }
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                            break;
+                        }
+                        this.icPassportNumber = newIcPassportNumber;
+                        System.out.println("IC Passport Number updated successfully.");
+                        break;
+                    case 2:
+                        System.out.println("Current Username: " + this.username);
+                        System.out.print("Enter new username: ");
+                        String newUsername = scanner.nextLine();
+                        if (newUsername.isEmpty()) {
+                            System.out.println("Username cannot be empty. Please try again.");
+                            break;
+                        }
+                        try {
+                            if (!isUnique("", newUsername, "")) {
+                                System.out.println("Error: Username already exists.");
+                                break;
+                            }
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                            break;
+                        }
+                        this.username = newUsername;
+                        System.out.println("Username updated successfully.");
+                        break;
+                    case 3:
+                        System.out.println("Current Password: " + this.password);
+                        System.out.print("Enter new password: ");
+                        String newPassword = scanner.nextLine();
+                        if (newPassword.isEmpty()) {
+                            System.out.println("Password cannot be empty. Please try again.");
+                            break;
+                        }
+                        this.password = newPassword;
+                        System.out.println("Password updated successfully.");
+                        break;
+                    case 4:
+                        System.out.println("Current Contact Number: " + this.contactNumber);
+                        System.out.print("Enter new contact number: ");
+                        String newContactNumber = scanner.nextLine();
+                        if (newContactNumber.isEmpty()) {
+                            System.out.println("Contact number cannot be empty. Please try again.");
+                            break;
+                        }
+                        try {
+                            if (!isUnique("", "", newContactNumber)) {
+                                System.out.println("Error: Contact Number already exists.");
+                                break;
+                            }
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                            break;
+                        }
+                        this.contactNumber = newContactNumber;
+                        System.out.println("Contact number updated successfully.");
+                        break;
+                    case 0:
+                        System.out.println("Returning to Manager Menu...");
+                        break;
+                    default:
+                        System.out.println("Invalid choice. Please try again.");
+                }
+        
+                try {
+                    updateFile("managers.txt", this);
+                    updateFile("users.txt", this);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            } while (choice != 0);
+            displayMenu();
         }
 
         private void approveUserRegistration() {
@@ -3442,21 +3551,159 @@ public class APUHostelManagement {
         }
     }
 
+        // Validation methods
+    public static boolean isValidICPassport(String icPassport, List<String> unverifiedUsers, List<String> verifiedUsers) {
+        String icPassportType;
+
+        // Check IC format
+        if (icPassport.length() == 14 && icPassport.charAt(6) == '-' && icPassport.charAt(9) == '-' && icPassport.replace("-", "").matches("\\d+")) {
+            icPassportType = "IC";
+        }
+        // Check Passport format
+        else if (icPassport.length() == 9 && Character.isLetter(icPassport.charAt(0)) && icPassport.substring(1).matches("\\d+")) {
+            icPassportType = "Passport";
+        } else {
+            System.out.println("Invalid IC/Passport format. IC format: xxxxxx-xx-xxxx, Passport format: one alphabet followed by 8 numbers.");
+            return false;
+        }
+
+        // Check uniqueness
+        for (String user : unverifiedUsers) {
+            if (user.split(",")[0].trim().equals(icPassport.trim())) {
+                System.out.println(icPassportType + " number already exists. Please use a different " + icPassportType + " number.");
+                return false;
+            }
+        }
+        for (String user : verifiedUsers) {
+            if (user.split(",")[1].trim().equals(icPassport.trim())) {
+                System.out.println(icPassportType + " number already exists. Please use a different " + icPassportType + " number.");
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public static boolean isValidUsername(String username, List<String> unverifiedUsers, List<String> verifiedUsers) {
+        // Check length
+        if (username.length() < 3 || username.length() > 12) {
+            System.out.println("Username must be between 3 and 12 characters long.");
+            return false;
+        }
+
+        // Check allowed characters
+        for (char c : username.toCharArray()) {
+            if (!Character.isLetterOrDigit(c) && c != '_') {
+                System.out.println("Username can only contain letters, numbers, and underscores.");
+                return false;
+            }
+        }
+
+        // Check for at least one letter
+        if (!username.matches(".*[a-zA-Z]+.*")) {
+            System.out.println("Username must contain at least one letter.");
+            return false;
+        }
+
+        // Check uniqueness
+        for (String user : unverifiedUsers) {
+            if (user.split(",")[1].equals(username)) {
+                System.out.println("Username already exists in unverified users. Please choose a different username.");
+                return false;
+            }
+        }
+        for (String user : verifiedUsers) {
+            if (user.split(",")[2].equals(username)) {
+                System.out.println("Username already exists in verified users. Please choose a different username.");
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public static boolean isValidPassword(String password, String username) {
+        // Check length
+        if (password.length() < 8 || password.length() > 12) {
+            System.out.println("Password must be between 8 and 12 characters long.");
+            return false;
+        }
+
+        // Check if password is similar to username
+        if (password.contains(username)) {
+            System.out.println("Password cannot be similar to the username.");
+            return false;
+        }
+
+        // Check for at least one number, one special character, and one uppercase letter
+        boolean hasNumber = password.matches(".*\\d.*");
+        boolean hasSpecialChar = password.matches(".*[^a-zA-Z0-9_].*");
+        boolean hasUppercase = password.matches(".*[A-Z].*");
+
+        if (!(hasNumber && hasSpecialChar && hasUppercase)) {
+            System.out.println("Password must contain at least one number, one special character, and one uppercase letter.");
+            return false;
+        }
+
+        return true;
+    }
+
+    public static boolean isValidPhoneNumber(String phoneNumber, List<String> unverifiedUsers, List<String> verifiedUsers) {
+        // Check phone number format
+        if (phoneNumber.length() == 12 && phoneNumber.startsWith("01") && phoneNumber.charAt(3) == '-' && phoneNumber.charAt(7) == '-' && phoneNumber.replace("-", "").matches("\\d+")) {
+            // Check uniqueness in unverified users
+            for (String user : unverifiedUsers) {
+                if (user.split(",")[3].trim().equals(phoneNumber.trim())) {
+                    System.out.println("Phone number already exists. Please choose a different phone number.");
+                    return false;
+                }
+            }
+            // Check uniqueness in verified users
+            for (String user : verifiedUsers) {
+                if (user.split(",")[4].trim().equals(phoneNumber.trim())) {
+                    System.out.println("Phone number already exists. Please choose a different phone number.");
+                    return false;
+                }
+            }
+            return true;
+        } else {
+            System.out.println("Invalid phone number format. The correct format is 01X-XXX-XXXX.");
+            return false;
+        }
+    }
+
+    
+
     // Method to handle Manager registration
     public static void registerManager() {
         Scanner scanner = new Scanner(System.in);
         String icPassportNumber, username, password, contactNumber;
+        boolean isIC = false;
 
         while (true) {
-            System.out.print("Enter IC/Passport Number: ");
+            System.out.print("Do you want to use IC or Passport Number to register? (IC/Passport): ");
+            String choice = scanner.nextLine();
+            if (choice.equalsIgnoreCase("IC")) {
+                isIC = true;
+                break;
+            } else if (choice.equalsIgnoreCase("Passport")) {
+                isIC = false;
+                break;
+            } else {
+                System.out.println("Invalid choice. Please enter 'IC' or 'Passport'.");
+            }
+        }
+
+        while (true) {
+            System.out.print("Enter " + (isIC ? "IC" : "Passport") + " Number: ");
             icPassportNumber = scanner.nextLine();
             if (icPassportNumber.isEmpty()) {
-                System.out.println("IC/Passport Number cannot be empty. Please try again.");
+                System.out.println((isIC ? "IC" : "Passport") + " Number cannot be empty. Please try again.");
                 continue;
             }
             try {
                 if (!User.isUnique(icPassportNumber, "", "")) {
-                    System.out.println("Error: IC/Passport Number already exists.");
+                    System.out.println("Error: " + (isIC ? "IC" : "Passport") + " Number already exists.");
                     System.out.print("Do you want to try again? (yes/no): ");
                     if (!scanner.nextLine().equalsIgnoreCase("yes")) {
                         displayWelcomePage();
