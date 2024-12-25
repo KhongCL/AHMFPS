@@ -1320,8 +1320,25 @@ public class APUHostelManagement {
             }
         
             Room newRoom = new Room(roomId, selectedFeeRate.getFeeRateID(), selectedFeeRate.getRoomType(), roomNumber, "available", roomCapacity, true);
-            rooms.add(newRoom);
-            saveRoomsToFile(rooms);
+        
+            // Confirmation before adding the room
+            System.out.println("Room Details:");
+            System.out.println("Room ID: " + newRoom.getRoomID());
+            System.out.println("Fee Rate ID: " + newRoom.getFeeRateID());
+            System.out.println("Room Type: " + newRoom.getRoomType());
+            System.out.println("Room Number: " + newRoom.getRoomNumber());
+            System.out.println("Room Status: " + newRoom.getRoomStatus());
+            System.out.println("Room Capacity: " + newRoom.getRoomCapacity());
+            System.out.print("Do you want to add this room? (yes/no): ");
+            String confirmation = scanner.nextLine().trim().toLowerCase();
+        
+            if (confirmation.equals("yes")) {
+                rooms.add(newRoom);
+                saveRoomsToFile(rooms);
+                System.out.println("Room added successfully.");
+            } else {
+                System.out.println("Room addition cancelled.");
+            }
         
             System.out.print("Do you want to add another room? (yes/no): ");
             String addMore = scanner.nextLine();
@@ -1409,58 +1426,79 @@ public class APUHostelManagement {
                 System.out.println("Room status updated successfully to " + newStatus + ".");
             }
         
-            saveRoomsToFile(rooms);
+            // Confirmation before saving the updated room
+            System.out.print("Do you want to save the changes? (yes/no): ");
+            String confirmation = scanner.nextLine().trim().toLowerCase();
+        
+            if (confirmation.equals("yes")) {
+                saveRoomsToFile(rooms);
+                System.out.println("Room updated successfully.");
+            } else {
+                System.out.println("Room update cancelled.");
+            }
         }
         
         private void deleteRoom(Scanner scanner) {
             List<Room> rooms = readRoomsFromFile("rooms.txt");
         
-            System.out.println("Existing Rooms:");
+            System.out.println("Existing Active Rooms:");
+            List<Room> activeRooms = new ArrayList<>();
             for (int i = 0; i < rooms.size(); i++) {
-                System.out.println((i + 1) + ". " + rooms.get(i));
-            }
-            System.out.print("Enter the number of the room to delete: ");
-            int roomChoice = getValidatedChoice(scanner, 1, rooms.size());
-            Room roomToDelete = rooms.get(roomChoice - 1);
-        
-            if (!roomToDelete.isActive()) {
-                System.out.println("This room is already deactivated.");
-            } else {
-                System.out.print("Are you sure you want to delete this room? (yes/no): ");
-                String confirm = scanner.nextLine().trim().toLowerCase();
-                if (confirm.equals("yes")) {
-                    roomToDelete.setActive(false);
-                    saveRoomsToFile(rooms);
-                    System.out.println("Room deleted successfully.");
-                } else {
-                    System.out.println("Room deletion cancelled.");
+                if (rooms.get(i).isActive()) {
+                    activeRooms.add(rooms.get(i));
+                    System.out.println((activeRooms.size()) + ". " + rooms.get(i));
                 }
+            }
+        
+            if (activeRooms.isEmpty()) {
+                System.out.println("No active rooms available.");
+                return;
+            }
+        
+            System.out.print("Enter the number of the room to delete: ");
+            int roomChoice = getValidatedChoice(scanner, 1, activeRooms.size());
+            Room roomToDelete = activeRooms.get(roomChoice - 1);
+        
+            System.out.print("Are you sure you want to delete this room? (yes/no): ");
+            String confirm = scanner.nextLine().trim().toLowerCase();
+            if (confirm.equals("yes")) {
+                roomToDelete.setActive(false);
+                saveRoomsToFile(rooms);
+                System.out.println("Room deleted successfully.");
+            } else {
+                System.out.println("Room deletion cancelled.");
             }
         }
         
         private void restoreRoom(Scanner scanner) {
             List<Room> rooms = readRoomsFromFile("rooms.txt");
         
-            System.out.println("Existing Rooms:");
+            System.out.println("Existing Inactive Rooms:");
+            List<Room> inactiveRooms = new ArrayList<>();
             for (int i = 0; i < rooms.size(); i++) {
-                System.out.println((i + 1) + ". " + rooms.get(i));
-            }
-            System.out.print("Enter the number of the room to restore: ");
-            int roomChoice = getValidatedChoice(scanner, 1, rooms.size());
-            Room roomToRestore = rooms.get(roomChoice - 1);
-        
-            if (roomToRestore.isActive()) {
-                System.out.println("This room is already active.");
-            } else {
-                System.out.print("Are you sure you want to restore this room? (yes/no): ");
-                String confirm = scanner.nextLine().trim().toLowerCase();
-                if (confirm.equals("yes")) {
-                    roomToRestore.setActive(true);
-                    saveRoomsToFile(rooms);
-                    System.out.println("Room restored successfully.");
-                } else {
-                    System.out.println("Room restoration cancelled.");
+                if (!rooms.get(i).isActive()) {
+                    inactiveRooms.add(rooms.get(i));
+                    System.out.println((inactiveRooms.size()) + ". " + rooms.get(i));
                 }
+            }
+        
+            if (inactiveRooms.isEmpty()) {
+                System.out.println("No inactive rooms available.");
+                return;
+            }
+        
+            System.out.print("Enter the number of the room to restore: ");
+            int roomChoice = getValidatedChoice(scanner, 1, inactiveRooms.size());
+            Room roomToRestore = inactiveRooms.get(roomChoice - 1);
+        
+            System.out.print("Are you sure you want to restore this room? (yes/no): ");
+            String confirm = scanner.nextLine().trim().toLowerCase();
+            if (confirm.equals("yes")) {
+                roomToRestore.setActive(true);
+                saveRoomsToFile(rooms);
+                System.out.println("Room restored successfully.");
+            } else {
+                System.out.println("Room restoration cancelled.");
             }
         }
         
@@ -2571,7 +2609,7 @@ public class APUHostelManagement {
             System.out.println("Room Pricing");
             System.out.println("Room Type\t\tCapacity\tDaily Rate\tWeekly Rate\tMonthly Rate\tYearly Rate");
             System.out.println("1. Standard\t\t1\t\tRM 40/day\tRM 270/week\tRM 1040/month\tRM 12000/year");
-            System.out.println("2. Deluxe\t\t3\t\tRM 60/day\tRM 410/week\tRM 1600/month\tRM 18000/year");
+            System.out.println("2. Large\t\t3\t\tRM 60/day\tRM 410/week\tRM 1600/month\tRM 18000/year");
             System.out.println("3. Family\t\t6\t\tRM 120/day\tRM 750/week\tRM 3000/month\tRM 36000/year");
             System.out.print("Enter your choice: ");
             int roomTypeChoice = scanner.nextInt();
@@ -2586,7 +2624,7 @@ public class APUHostelManagement {
                     feeRateID = "FR01";
                     break;
                 case 2:
-                    roomType = "Deluxe";
+                    roomType = "Large";
                     feeRateID = "FR02";
                     break;
                 case 3:
