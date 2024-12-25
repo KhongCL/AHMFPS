@@ -1023,10 +1023,25 @@ public class APUHostelManagement {
         
                 System.out.println("Available Room Types:");
                 System.out.println("1. Standard");
-                System.out.println("2. Deluxe");
-                System.out.print("Enter your choice (1-2): ");
-                int roomTypeChoice = getValidatedChoice(scanner, 1, 2);
-                String roomType = (roomTypeChoice == 1) ? "standard" : "deluxe";
+                System.out.println("2. Large");
+                System.out.println("3. Family");
+                System.out.print("Enter your choice (1-3): ");
+                int roomTypeChoice = getValidatedChoice(scanner, 1, 3);
+                String roomType;
+                switch (roomTypeChoice) {
+                    case 1:
+                        roomType = "standard";
+                        break;
+                    case 2:
+                        roomType = "large";
+                        break;
+                    case 3:
+                        roomType = "family";
+                        break;
+                    default:
+                        System.out.println("Invalid choice. Please try again.");
+                        continue;
+                }
         
                 double dailyRate = getValidatedRate(scanner, "Daily Rate");
                 double weeklyRate = getValidatedRate(scanner, "Weekly Rate");
@@ -1036,12 +1051,13 @@ public class APUHostelManagement {
                 rates.add(new FeeRate(feeRateID, roomType, dailyRate, weeklyRate, monthlyRate, yearlyRate, true));
         
                 System.out.print("Do you want to add another rate? (yes/no): ");
-                String addMore = scanner.nextLine();
+                String addMore = scanner.nextLine().trim().toLowerCase();
                 if (addMore.equalsIgnoreCase("no")) {
                     break;
                 }
             }
         }
+        
         
         private void updateExistingRates(Scanner scanner, List<FeeRate> rates) {
             if (rates.isEmpty()) {
@@ -1051,9 +1067,7 @@ public class APUHostelManagement {
         
             System.out.println("Existing Fee Rates:");
             for (int i = 0; i < rates.size(); i++) {
-                if (rates.get(i).isActive()) {
-                    System.out.println((i + 1) + ". " + rates.get(i));
-                }
+                System.out.println((i + 1) + ". " + rates.get(i));
             }
         
             System.out.print("Enter the number of the fee rate to update: ");
@@ -1061,41 +1075,68 @@ public class APUHostelManagement {
             FeeRate rateToUpdate = rates.get(rateChoice - 1);
         
             System.out.println("Current Rates:");
+            System.out.println("Room Type: " + rateToUpdate.getRoomType());
             System.out.println("Daily Rate: " + rateToUpdate.getDailyRate());
             System.out.println("Weekly Rate: " + rateToUpdate.getWeeklyRate());
             System.out.println("Monthly Rate: " + rateToUpdate.getMonthlyRate());
             System.out.println("Yearly Rate: " + rateToUpdate.getYearlyRate());
         
-            System.out.println("Which rate do you want to update?");
-            System.out.println("1. Daily Rate");
-            System.out.println("2. Weekly Rate");
-            System.out.println("3. Monthly Rate");
-            System.out.println("4. Yearly Rate");
-            System.out.print("Enter your choice (1-4): ");
-            int rateTypeChoice = getValidatedChoice(scanner, 1, 4);
+            System.out.println("Which attribute do you want to update?");
+            System.out.println("1. Room Type");
+            System.out.println("2. Daily Rate");
+            System.out.println("3. Weekly Rate");
+            System.out.println("4. Monthly Rate");
+            System.out.println("5. Yearly Rate");
+            System.out.print("Enter your choice (1-5): ");
+            int attributeChoice = getValidatedChoice(scanner, 1, 5);
         
-            double newRate = getValidatedRate(scanner, "new rate");
-        
-            System.out.print("Are you sure you want to update the rate? (yes/no): ");
-            String confirm = scanner.nextLine();
-            if (confirm.equalsIgnoreCase("yes")) {
-                switch (rateTypeChoice) {
+            if (attributeChoice == 1) {
+                System.out.println("Available Room Types:");
+                System.out.println("1. Standard");
+                System.out.println("2. Large");
+                System.out.println("3. Family");
+                System.out.print("Enter your choice (1-3): ");
+                int roomTypeChoice = getValidatedChoice(scanner, 1, 3);
+                String roomType;
+                switch (roomTypeChoice) {
                     case 1:
-                        rateToUpdate.setDailyRate(newRate);
+                        roomType = "standard";
                         break;
                     case 2:
-                        rateToUpdate.setWeeklyRate(newRate);
+                        roomType = "large";
                         break;
                     case 3:
-                        rateToUpdate.setMonthlyRate(newRate);
+                        roomType = "family";
                         break;
-                    case 4:
-                        rateToUpdate.setYearlyRate(newRate);
-                        break;
+                    default:
+                        System.out.println("Invalid choice. Please try again.");
+                        return;
                 }
-                System.out.println("Rate updated successfully.");
+                rateToUpdate.setRoomType(roomType);
+                System.out.println("Room Type updated successfully.");
             } else {
-                System.out.println("Rate update cancelled.");
+                double newRate = getValidatedRate(scanner, "new rate");
+                System.out.print("Are you sure you want to update the rate? (yes/no): ");
+                String confirm = scanner.nextLine().trim().toLowerCase();
+                if (confirm.equals("yes")) {
+                    switch (attributeChoice) {
+                        case 2:
+                            rateToUpdate.setDailyRate(newRate);
+                            break;
+                        case 3:
+                            rateToUpdate.setWeeklyRate(newRate);
+                            break;
+                        case 4:
+                            rateToUpdate.setMonthlyRate(newRate);
+                            break;
+                        case 5:
+                            rateToUpdate.setYearlyRate(newRate);
+                            break;
+                    }
+                    System.out.println("Rate updated successfully.");
+                } else {
+                    System.out.println("Rate update cancelled.");
+                }
             }
         }
         
@@ -1505,19 +1546,28 @@ public class APUHostelManagement {
         private void deleteAllRooms(Scanner scanner) {
             List<Room> rooms = readRoomsFromFile("rooms.txt");
         
-            System.out.println("Existing Rooms:");
+            System.out.println("Existing Active Rooms:");
+            List<Room> activeRooms = new ArrayList<>();
             for (Room room : rooms) {
-                System.out.println(room);
+                if (room.isActive()) {
+                    activeRooms.add(room);
+                    System.out.println(activeRooms.size() + ". " + room);
+                }
             }
         
-            System.out.print("Are you sure you want to delete all rooms? This action cannot be undone. You can retore all rooms on the menu. (yes/no): ");
+            if (activeRooms.isEmpty()) {
+                System.out.println("No active rooms available.");
+                return;
+            }
+        
+            System.out.print("Are you sure you want to delete all active rooms? This action cannot be undone. You can restore all rooms from the menu. (yes/no): ");
             String confirm = scanner.nextLine().trim().toLowerCase();
             if (confirm.equals("yes")) {
-                for (Room room : rooms) {
+                for (Room room : activeRooms) {
                     room.setActive(false);
                 }
                 saveRoomsToFile(rooms);
-                System.out.println("All rooms deleted successfully.");
+                System.out.println("All active rooms deleted successfully.");
             } else {
                 System.out.println("Delete all rooms cancelled.");
             }
@@ -1526,19 +1576,28 @@ public class APUHostelManagement {
         private void restoreAllRooms(Scanner scanner) {
             List<Room> rooms = readRoomsFromFile("rooms.txt");
         
-            System.out.println("Existing Rooms:");
+            System.out.println("Existing Inactive Rooms:");
+            List<Room> inactiveRooms = new ArrayList<>();
             for (Room room : rooms) {
-                System.out.println(room);
+                if (!room.isActive()) {
+                    inactiveRooms.add(room);
+                    System.out.println(inactiveRooms.size() + ". " + room);
+                }
             }
         
-            System.out.print("Are you sure you want to restore all rooms? (yes/no): ");
+            if (inactiveRooms.isEmpty()) {
+                System.out.println("No inactive rooms available.");
+                return;
+            }
+        
+            System.out.print("Are you sure you want to restore all inactive rooms? (yes/no): ");
             String confirm = scanner.nextLine().trim().toLowerCase();
             if (confirm.equals("yes")) {
-                for (Room room : rooms) {
+                for (Room room : inactiveRooms) {
                     room.setActive(true);
                 }
                 saveRoomsToFile(rooms);
-                System.out.println("All rooms restored successfully.");
+                System.out.println("All inactive rooms restored successfully.");
             } else {
                 System.out.println("Restore all rooms cancelled.");
             }
@@ -2721,7 +2780,7 @@ public class APUHostelManagement {
                 while ((line = roomReader.readLine()) != null) {
                     String[] parts = line.split(",");
                     if (parts[0].equals(roomID)) {
-                        roomActive = Boolean.parseBoolean(parts[4]); // Assuming the 5th element is isActive
+                        roomActive = Boolean.parseBoolean(parts[6]); // Assuming the 7th element is isActive
                         break;
                     }
                 }
@@ -2843,7 +2902,7 @@ public class APUHostelManagement {
                 String line;
                 while ((line = roomReader.readLine()) != null) {
                     String[] parts = line.split(",");
-                    if (parts.length >= 5 && parts[1].equals(feeRateID) && parts[4].equals("available")) {
+                    if (parts.length >= 7 && parts[1].equals(feeRateID) && parts[4].equals("available") && Boolean.parseBoolean(parts[6])) {
                         availableRooms.add(parts[0]); // Assuming parts[0] is RoomID
                     }
                 }
@@ -3045,6 +3104,10 @@ public class APUHostelManagement {
     
         public void setActive(boolean isActive) {
             this.isActive = isActive;
+        }
+
+        public void setRoomType(String roomType) {
+            this.roomType = roomType;
         }
     
         public void setDailyRate(double dailyRate) {

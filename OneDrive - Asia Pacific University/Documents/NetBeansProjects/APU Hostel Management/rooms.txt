@@ -6,4 +6,5 @@ RM05,FR02,large,105,available,3,true
 RM06,FR01,standard,106,available,1,true
 RM07,FR01,standard,107,available,1,true
 RM08,FR04,standard,108,available,1,true
-RM09,FR03,family,109,unavailable,12,false
+RM09,FR03,family,109,unavailable,12,true
+RM10,FR03,family,110,available,6,true
