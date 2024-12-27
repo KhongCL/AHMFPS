@@ -2909,10 +2909,10 @@ public class APUHostelManagement {
                         if (year == 0 || month == 0 || day == 0) {
                             throw new DateTimeParseException("Invalid date components", startDateInput, 0);
                         }
-                        LocalDate parsedDate = LocalDate.of(year, month, day);
                         if (isInvalidDate(year, month, day)) {
                             throw new DateTimeParseException("Invalid day for the month", startDateInput, 0);
                         }
+                        LocalDate parsedDate = LocalDate.of(year, month, day);
                         startDate = parsedDate;
                         if (startDate.isBefore(currentDate)) {
                             System.out.println("You cannot travel back in time. Please enter a valid start date.");
@@ -2940,10 +2940,10 @@ public class APUHostelManagement {
                         if (year == 0 || month == 0 || day == 0) {
                             throw new DateTimeParseException("Invalid date components", endDateInput, 0);
                         }
-                        LocalDate parsedDate = LocalDate.of(year, month, day);
                         if (isInvalidDate(year, month, day)) {
                             throw new DateTimeParseException("Invalid day for the month", endDateInput, 0);
                         }
+                        LocalDate parsedDate = LocalDate.of(year, month, day);
                         endDate = parsedDate;
                         if (!endDate.isAfter(startDate)) {
                             System.out.println("The end date must be after the start date.");
