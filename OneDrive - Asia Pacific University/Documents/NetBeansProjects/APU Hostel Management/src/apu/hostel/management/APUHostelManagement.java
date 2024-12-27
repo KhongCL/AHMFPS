@@ -10,6 +10,7 @@ import apu.hostel.management.APUHostelManagement.User;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Year;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.time.format.DateTimeParseException;
@@ -2901,8 +2902,15 @@ public class APUHostelManagement {
                 String startDateInput = scanner.nextLine();
                 if (startDateInput.matches(datePattern)) {
                     try {
-                        LocalDate parsedDate = LocalDate.parse(startDateInput, dateFormatter);
-                        if (isInvalidDate(parsedDate)) {
+                        String[] dateParts = startDateInput.split("-");
+                        int year = Integer.parseInt(dateParts[0]);
+                        int month = Integer.parseInt(dateParts[1]);
+                        int day = Integer.parseInt(dateParts[2]);
+                        if (year == 0 || month == 0 || day == 0) {
+                            throw new DateTimeParseException("Invalid date components", startDateInput, 0);
+                        }
+                        LocalDate parsedDate = LocalDate.of(year, month, day);
+                        if (isInvalidDate(year, month, day)) {
                             throw new DateTimeParseException("Invalid day for the month", startDateInput, 0);
                         }
                         startDate = parsedDate;
@@ -2910,7 +2918,7 @@ public class APUHostelManagement {
                             System.out.println("You cannot travel back in time. Please enter a valid start date.");
                             startDate = null;
                         }
-                    } catch (DateTimeParseException e) {
+                    } catch (DateTimeParseException | NumberFormatException e) {
                         System.out.println("This date does not exist, please input a valid date.");
                         startDate = null;
                     }
@@ -2925,8 +2933,15 @@ public class APUHostelManagement {
                 String endDateInput = scanner.nextLine();
                 if (endDateInput.matches(datePattern)) {
                     try {
-                        LocalDate parsedDate = LocalDate.parse(endDateInput, dateFormatter);
-                        if (isInvalidDate(parsedDate)) {
+                        String[] dateParts = endDateInput.split("-");
+                        int year = Integer.parseInt(dateParts[0]);
+                        int month = Integer.parseInt(dateParts[1]);
+                        int day = Integer.parseInt(dateParts[2]);
+                        if (year == 0 || month == 0 || day == 0) {
+                            throw new DateTimeParseException("Invalid date components", endDateInput, 0);
+                        }
+                        LocalDate parsedDate = LocalDate.of(year, month, day);
+                        if (isInvalidDate(year, month, day)) {
                             throw new DateTimeParseException("Invalid day for the month", endDateInput, 0);
                         }
                         endDate = parsedDate;
@@ -2934,7 +2949,7 @@ public class APUHostelManagement {
                             System.out.println("The end date must be after the start date.");
                             endDate = null;
                         }
-                    } catch (DateTimeParseException e) {
+                    } catch (DateTimeParseException | NumberFormatException e) {
                         System.out.println("This date does not exist, please input a valid date.");
                         endDate = null;
                     }
@@ -3023,19 +3038,23 @@ public class APUHostelManagement {
             System.out.println("Please go back to Manage Bookings to make payment for this booking.");
         }
 
-        private boolean isInvalidDate(LocalDate date) {
-            int day = date.getDayOfMonth();
-            int month = date.getMonthValue();
-            int year = date.getYear();
-
-            // Check for invalid dates
-            if ((month == 2 && day > 29) || // February cannot have more than 29 days
-                (month == 2 && day == 29 && !date.isLeapYear()) || // February 29th on a non-leap year
-                (month == 4 && day > 30) || // April cannot have more than 30 days
-                (month == 6 && day > 30) || // June cannot have more than 30 days
-                (month == 9 && day > 30) || // September cannot have more than 30 days
-                (month == 11 && day > 30)) { // November cannot have more than 30 days
-                return true;
+        private boolean isInvalidDate(int year, int month, int day) {
+            switch (month) {
+                case 2:
+                    if (day > 29 || (day == 29 && !Year.isLeap(year))) {
+                        return true;
+                    }
+                    break;
+                case 4: case 6: case 9: case 11:
+                    if (day > 30) {
+                        return true;
+                    }
+                    break;
+                default:
+                    if (day > 31) {
+                        return true;
+                    }
+                    break;
             }
             return false;
         }

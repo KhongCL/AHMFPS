@@ -1,4 +1,4 @@
-RM01,FR01,standard,101,unavailable,1,true
+RM01,FR01,standard,101,available,1,true
 RM02,FR02,large,102,available,3,true
 RM03,FR03,large,103,unavailable,3,true
 RM04,FR03,large,104,unavailable,3,true
