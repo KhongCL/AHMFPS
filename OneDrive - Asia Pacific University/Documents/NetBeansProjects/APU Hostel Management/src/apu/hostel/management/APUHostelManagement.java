@@ -3,11 +3,6 @@ import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import apu.hostel.management.APUHostelManagement.Manager;
-import apu.hostel.management.APUHostelManagement.Resident;
-import apu.hostel.management.APUHostelManagement.Staff;
-import apu.hostel.management.APUHostelManagement.User;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Year;
