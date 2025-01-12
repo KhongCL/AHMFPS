@@ -1438,28 +1438,31 @@ public class APUHostelManagement {
             while (true) {
                 System.out.println("Manage Rooms:");
                 System.out.println("1. Add Room");
-                System.out.println("2. Update Room");
-                System.out.println("3. Delete Room");
-                System.out.println("4. Restore Room");
-                System.out.println("5. Delete All Rooms");
-                System.out.println("6. Restore All Rooms");
-                System.out.println("7. Return to main menu");
-                System.out.print("Enter your choice (1-7): ");
-                int choice = getValidatedChoice(scanner, 1, 7);
+                System.out.println("2. Update Room Status");
+                System.out.println("3. Update Room Type");
+                System.out.println("4. Delete Room");
+                System.out.println("5. Restore Room");
+                System.out.println("6. Delete All Rooms");
+                System.out.println("7. Restore All Rooms");
+                System.out.println("8. Return to main menu");
+                System.out.print("Enter your choice (1-8): ");
+                int choice = getValidatedChoice(scanner, 1, 8);
         
                 if (choice == 1) {
                     addRoom(scanner);
                 } else if (choice == 2) {
-                    updateRoom(scanner);
+                    updateRoomStatus(scanner);
                 } else if (choice == 3) {
-                    deleteRoom(scanner);
+                    updateRoomType(scanner);
                 } else if (choice == 4) {
-                    restoreRoom(scanner);
+                    deleteRoom(scanner);
                 } else if (choice == 5) {
-                    deleteAllRooms(scanner);
+                    restoreRoom(scanner);
                 } else if (choice == 6) {
-                    restoreAllRooms(scanner);
+                    deleteAllRooms(scanner);
                 } else if (choice == 7) {
+                    restoreAllRooms(scanner);
+                } else if (choice == 8) {
                     break;
                 }
             }
@@ -1480,26 +1483,31 @@ public class APUHostelManagement {
             String roomId = "RM" + String.format("%02d", rooms.size() + 1);
             int roomNumber = 101 + rooms.size();
         
-            System.out.println("Available Fee Rates:");
-            List<FeeRate> activeFeeRates = new ArrayList<>();
-            for (int i = 0; i < feeRates.size(); i++) {
-                if (feeRates.get(i).getIsActive()) {
-                    activeFeeRates.add(feeRates.get(i));
-                    System.out.println((activeFeeRates.size()) + ". " + feeRates.get(i));
-                }
+            System.out.println("Available Room Types:");
+            List<String> roomTypes = feeRates.stream()
+                    .map(FeeRate::getRoomType)
+                    .distinct()
+                    .collect(Collectors.toList());
+            for (int i = 0; i < roomTypes.size(); i++) {
+                System.out.println((i + 1) + ". " + roomTypes.get(i));
             }
         
-            if (activeFeeRates.isEmpty()) {
-                System.out.println("No active fee rates available.");
+            System.out.print("Enter the number of the room type to use: ");
+            int roomTypeChoice = getValidatedChoice(scanner, 1, roomTypes.size());
+            String selectedRoomType = roomTypes.get(roomTypeChoice - 1);
+        
+            FeeRate selectedFeeRate = feeRates.stream()
+                    .filter(rate -> rate.getRoomType().equalsIgnoreCase(selectedRoomType))
+                    .findFirst()
+                    .orElse(null);
+        
+            if (selectedFeeRate == null) {
+                System.out.println("No fee rate found for the selected room type.");
                 return;
             }
         
-            System.out.print("Enter the number of the fee rate to use: ");
-            int feeRateChoice = getValidatedChoice(scanner, 1, activeFeeRates.size());
-            FeeRate selectedFeeRate = activeFeeRates.get(feeRateChoice - 1);
-        
             int roomCapacity;
-            switch (selectedFeeRate.getRoomType().toLowerCase()) {
+            switch (selectedRoomType.toLowerCase()) {
                 case "standard":
                     roomCapacity = 1;
                     break;
@@ -1514,7 +1522,7 @@ public class APUHostelManagement {
                     return;
             }
         
-            Room newRoom = new Room(roomId, selectedFeeRate.getFeeRateID(), selectedFeeRate.getRoomType(), roomNumber, "available", roomCapacity, true);
+            Room newRoom = new Room(roomId, selectedFeeRate.getFeeRateID(), selectedRoomType, roomNumber, "available", roomCapacity, true);
         
             // Confirmation before adding the room
             System.out.println("Room Details:");
@@ -1542,7 +1550,7 @@ public class APUHostelManagement {
             }
         }
         
-        private void updateRoom(Scanner scanner) {
+        private void updateRoomStatus(Scanner scanner) {
             List<Room> rooms = readRoomsFromFile("rooms.txt");
         
             System.out.println("Existing Rooms:");
@@ -1561,71 +1569,9 @@ public class APUHostelManagement {
             System.out.println("Room Status: " + roomToUpdate.getRoomStatus());
             System.out.println("Room Capacity: " + roomToUpdate.getRoomCapacity());
         
-            System.out.println("Which attribute do you want to update?");
-            System.out.println("1. Fee Rate");
-            System.out.println("2. Room Status");
-            System.out.print("Enter your choice (1-2): ");
-            int attributeChoice = getValidatedChoice(scanner, 1, 2);
-        
-            if (attributeChoice == 1) {
-                List<FeeRate> feeRates = new ArrayList<>();
-                try {
-                    feeRates = readRatesFromFile("fee_rates.txt");
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    return;
-                }
-        
-                System.out.println("Available Fee Rates:");
-                List<FeeRate> activeFeeRates = new ArrayList<>();
-                for (int i = 0; i < feeRates.size(); i++) {
-                    if (feeRates.get(i).getIsActive()) {
-                        activeFeeRates.add(feeRates.get(i));
-                        System.out.println((activeFeeRates.size()) + ". " + feeRates.get(i));
-                    }
-                }
-        
-                if (activeFeeRates.isEmpty()) {
-                    System.out.println("No active fee rates available.");
-                    return;
-                }
-        
-                System.out.print("Enter the number of the fee rate to use: ");
-                int feeRateChoice = getValidatedChoice(scanner, 1, activeFeeRates.size());
-                FeeRate selectedFeeRate = activeFeeRates.get(feeRateChoice - 1);
-        
-                if (selectedFeeRate.getFeeRateID().equals(roomToUpdate.getFeeRateID())) {
-                    System.out.println("The selected fee rate ID is the same as the current fee rate ID.");
-                    return;
-                }
-        
-                roomToUpdate.setFeeRateID(selectedFeeRate.getFeeRateID());
-                roomToUpdate.setRoomType(selectedFeeRate.getRoomType());
-        
-                // Update room capacity based on room type
-                int roomCapacity;
-                switch (selectedFeeRate.getRoomType().toLowerCase()) {
-                    case "standard":
-                        roomCapacity = 1;
-                        break;
-                    case "large":
-                        roomCapacity = 3;
-                        break;
-                    case "family":
-                        roomCapacity = 6;
-                        break;
-                    default:
-                        System.out.println("Invalid room type.");
-                        return;
-                }
-                roomToUpdate.setRoomCapacity(roomCapacity);
-        
-                System.out.println("Fee Rate and Room Capacity updated successfully.");
-            } else if (attributeChoice == 2) {
-                String newStatus = roomToUpdate.getRoomStatus().equals("available") ? "unavailable" : "available";
-                roomToUpdate.setRoomStatus(newStatus);
-                System.out.println("Room status updated successfully to " + newStatus + ".");
-            }
+            String newStatus = roomToUpdate.getRoomStatus().equals("available") ? "unavailable" : "available";
+            roomToUpdate.setRoomStatus(newStatus);
+            System.out.println("Room status updated successfully to " + newStatus + ".");
         
             // Confirmation before saving the updated room
             System.out.print("Do you want to save the changes? (yes/no): ");
@@ -1638,6 +1584,61 @@ public class APUHostelManagement {
                 System.out.println("Room update cancelled.");
             }
         }
+        
+        private void updateRoomType(Scanner scanner) {
+            List<FeeRate> feeRates = new ArrayList<>();
+            List<Room> rooms = new ArrayList<>();
+            try {
+                feeRates = readRatesFromFile("fee_rates.txt");
+                rooms = readRoomsFromFile("rooms.txt");
+            } catch (IOException e) {
+                e.printStackTrace();
+                return;
+            }
+        
+            System.out.println("Available Room Types:");
+            List<String> roomTypes = feeRates.stream()
+                    .map(FeeRate::getRoomType)
+                    .distinct()
+                    .collect(Collectors.toList());
+            for (int i = 0; i < roomTypes.size(); i++) {
+                System.out.println((i + 1) + ". " + roomTypes.get(i));
+            }
+        
+            System.out.print("Enter the number of the room type to update: ");
+            int roomTypeChoice = getValidatedChoice(scanner, 1, roomTypes.size());
+            String selectedRoomType = roomTypes.get(roomTypeChoice - 1);
+        
+            System.out.println("Available Fee Rates for " + selectedRoomType + ":");
+            List<FeeRate> selectedFeeRates = feeRates.stream()
+                    .filter(rate -> rate.getRoomType().equalsIgnoreCase(selectedRoomType))
+                    .collect(Collectors.toList());
+            for (int i = 0; i < selectedFeeRates.size(); i++) {
+                System.out.println((i + 1) + ". " + selectedFeeRates.get(i));
+            }
+        
+            System.out.print("Enter the number of the fee rate to use: ");
+            int feeRateChoice = getValidatedChoice(scanner, 1, selectedFeeRates.size());
+            FeeRate selectedFeeRate = selectedFeeRates.get(feeRateChoice - 1);
+        
+            for (Room room : rooms) {
+                if (room.getRoomType().equalsIgnoreCase(selectedRoomType)) {
+                    room.setFeeRateID(selectedFeeRate.getFeeRateID());
+                }
+            }
+        
+            // Confirmation before saving the updated rooms
+            System.out.print("Do you want to save the changes? (yes/no): ");
+            String confirmation = scanner.nextLine().trim().toLowerCase();
+        
+            if (confirmation.equals("yes")) {
+                saveRoomsToFile(rooms);
+                System.out.println("Rooms updated successfully.");
+            } else {
+                System.out.println("Room type update cancelled.");
+            }
+        }
+        
         
         private void deleteRoom(Scanner scanner) {
             List<Room> rooms = readRoomsFromFile("rooms.txt");
@@ -2828,6 +2829,10 @@ public class APUHostelManagement {
 
 
         public void makeBooking() {
+
+            // Display room pricing based on fee rates in rooms.txt
+            displayRoomPricing();
+
             Scanner scanner = new Scanner(System.in);
             System.out.println("Room Pricing");
             System.out.println("Room Type\t\tCapacity");
@@ -2973,6 +2978,54 @@ public class APUHostelManagement {
             System.out.println("Payment Amount : RM " + paymentAmount);
             System.out.println("=========================");
             System.out.println("Please go back to Manage Bookings to make payment for this booking.");
+        }
+
+        private void displayRoomPricing() {
+            Map<String, String> roomTypeToFeeRateID = new HashMap<>();
+            try (BufferedReader roomReader = new BufferedReader(new FileReader("rooms.txt"))) {
+                String line;
+                while ((line = roomReader.readLine()) != null) {
+                    String[] parts = line.split(",");
+                    if (parts.length >= 2) {
+                        roomTypeToFeeRateID.put(parts[2], parts[1]); // Assuming parts[2] is RoomType and parts[1] is FeeRateID
+                    }
+                }
+            } catch (IOException e) {
+                System.out.println("An error occurred while reading the room data.");
+                e.printStackTrace();
+                return;
+            }
+
+            Map<String, double[]> feeRates = new HashMap<>();
+            try (BufferedReader feeRateReader = new BufferedReader(new FileReader("fee_rates.txt"))) {
+                String line;
+                while ((line = feeRateReader.readLine()) != null) {
+                    String[] parts = line.split(",");
+                    if (parts.length >= 5) {
+                        String feeRateID = parts[0];
+                        double dailyRate = Double.parseDouble(parts[1]);
+                        double weeklyRate = Double.parseDouble(parts[2]);
+                        double monthlyRate = Double.parseDouble(parts[3]);
+                        double yearlyRate = Double.parseDouble(parts[4]);
+                        feeRates.put(feeRateID, new double[]{dailyRate, weeklyRate, monthlyRate, yearlyRate});
+                    }
+                }
+            } catch (IOException e) {
+                System.out.println("An error occurred while reading the fee rate data.");
+                e.printStackTrace();
+                return;
+            }
+
+            System.out.println("Room Pricing:");
+            for (Map.Entry<String, String> entry : roomTypeToFeeRateID.entrySet()) {
+                String roomType = entry.getKey();
+                String feeRateID = entry.getValue();
+                double[] rates = feeRates.get(feeRateID);
+                if (rates != null) {
+                    System.out.printf("%s: Daily: RM %.2f, Weekly: RM %.2f, Monthly: RM %.2f, Yearly: RM %.2f%n",
+                            roomType.substring(0, 1).toUpperCase() + roomType.substring(1), rates[0], rates[1], rates[2], rates[3]);
+                }
+            }
         }
 
         private String selectAvailableRoomByType(String roomType) {
