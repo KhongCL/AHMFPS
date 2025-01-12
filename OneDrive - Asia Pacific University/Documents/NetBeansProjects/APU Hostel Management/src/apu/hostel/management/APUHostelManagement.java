@@ -3470,7 +3470,7 @@ public class APUHostelManagement {
         System.out.println("2. Staff");
         System.out.println("3. Resident");
         System.out.print("Enter your choice (1-3): ");
-    
+
         int choice = -1;
         while (choice < 1 || choice > 3) {
             if (scanner.hasNextInt()) {
@@ -3484,10 +3484,17 @@ public class APUHostelManagement {
                 scanner.nextLine(); // Consume invalid input
             }
         }
-    
+
         switch (choice) {
             case 1:
                 System.out.println("You have chosen Manager.");
+                System.out.print("Enter authorization code: ");
+                String authCode = scanner.nextLine();
+                if (!isValidAuthCode(authCode)) {
+                    System.out.println("Invalid authorization code. Access denied.");
+                    displayWelcomePage();
+                    return;
+                }
                 System.out.println("1. Register");
                 System.out.println("2. Login");
                 System.out.print("Enter your choice (1-2): ");
@@ -3704,12 +3711,19 @@ public class APUHostelManagement {
         }
     }
 
+    // Method to validate authorization code
+    private static boolean isValidAuthCode(String authCode) {
+        //check against a predefined list of valid codes
+        List<String> validAuthCodes = Arrays.asList("KhongCL", "AUTH456", "AUTH789");
+        return validAuthCodes.contains(authCode);
+    }
+
     // Method to handle Manager registration
     public static void registerManager() {
         Scanner scanner = new Scanner(System.in);
         String icPassportNumber, username, password, contactNumber;
         boolean isIC = false;
-    
+
         while (true) {
             System.out.println("Do you want to use IC or Passport Number to register?");
             System.out.println("1. IC");
@@ -3726,7 +3740,7 @@ public class APUHostelManagement {
                 System.out.println("Invalid choice. Please enter '1' for IC or '2' for Passport.");
             }
         }
-    
+
         while (true) {
             System.out.print("Enter " + (isIC ? "IC" : "Passport") + " Number: ");
             icPassportNumber = scanner.nextLine();
@@ -3740,7 +3754,7 @@ public class APUHostelManagement {
             }
             break;
         }
-    
+
         while (true) {
             System.out.print("Enter username: ");
             username = scanner.nextLine();
@@ -3754,7 +3768,7 @@ public class APUHostelManagement {
             }
             break;
         }
-    
+
         while (true) {
             System.out.print("Enter password: ");
             password = scanner.nextLine();
@@ -3768,7 +3782,7 @@ public class APUHostelManagement {
             }
             break;
         }
-    
+
         while (true) {
             System.out.print("Enter contact number: ");
             contactNumber = scanner.nextLine();
@@ -3782,7 +3796,7 @@ public class APUHostelManagement {
             }
             break;
         }
-    
+
         try {
             String dateOfRegistration = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
             String userID = generateUserID("U");
@@ -3801,7 +3815,7 @@ public class APUHostelManagement {
     public static void loginManager() {
         Scanner scanner = new Scanner(System.in);
         String username, password;
-    
+
         while (true) {
             System.out.print("Enter username: ");
             username = scanner.nextLine();
@@ -3811,7 +3825,7 @@ public class APUHostelManagement {
             }
             break;
         }
-    
+
         while (true) {
             System.out.print("Enter password: ");
             password = scanner.nextLine();
@@ -3821,7 +3835,7 @@ public class APUHostelManagement {
             }
             break;
         }
-    
+
         try {
             User user = User.findUser(username, password, "managers.txt");
             if (user != null && user.getRole().equals("manager")) {
