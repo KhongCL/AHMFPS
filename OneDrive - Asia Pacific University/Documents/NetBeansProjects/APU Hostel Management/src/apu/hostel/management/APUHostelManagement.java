@@ -848,43 +848,71 @@ public class APUHostelManagement {
                 switch (choice) {
                     case 1:
                         System.out.println("Current IC Passport Number: " + userToUpdate.getIcPassportNumber());
-                        System.out.print("Enter new IC Passport Number: ");
-                        String newIcPassportNumber = scanner.nextLine();
-                        if (!isValidICPassport(newIcPassportNumber)) {
-                            break;
+                        while (true) {
+                            System.out.print("Enter new IC Passport Number: ");
+                            String newIcPassportNumber = scanner.nextLine();
+                            if (!isValidICPassport(newIcPassportNumber)) {
+                                System.out.print("Invalid IC Passport Number. Do you want to try again? (yes/no): ");
+                                if (!scanner.nextLine().equalsIgnoreCase("yes")) {
+                                    return;
+                                }
+                            } else {
+                                userToUpdate.setIcPassportNumber(newIcPassportNumber);
+                                System.out.println("IC Passport Number updated successfully.");
+                                break;
+                            }
                         }
-                        userToUpdate.setIcPassportNumber(newIcPassportNumber);
-                        System.out.println("IC Passport Number updated successfully.");
                         break;
                     case 2:
                         System.out.println("Current Username: " + userToUpdate.getUsername());
-                        System.out.print("Enter new username: ");
-                        String newUsername = scanner.nextLine();
-                        if (!isValidUsername(newUsername)) {
-                            break;
+                        while (true) {
+                            System.out.print("Enter new username: ");
+                            String newUsername = scanner.nextLine();
+                            if (!isValidUsername(newUsername)) {
+                                System.out.print("Invalid Username. Do you want to try again? (yes/no): ");
+                                if (!scanner.nextLine().equalsIgnoreCase("yes")) {
+                                    return;
+                                }
+                            } else {
+                                userToUpdate.setUsername(newUsername);
+                                System.out.println("Username updated successfully.");
+                                break;
+                            }
                         }
-                        userToUpdate.setUsername(newUsername);
-                        System.out.println("Username updated successfully.");
                         break;
                     case 3:
                         System.out.println("Current Password: " + userToUpdate.getPassword());
-                        System.out.print("Enter new password: ");
-                        String newPassword = scanner.nextLine();
-                        if (!isValidPassword(newPassword, userToUpdate.getUsername())) {
-                            break;
+                        while (true) {
+                            System.out.print("Enter new password: ");
+                            String newPassword = scanner.nextLine();
+                            if (!isValidPassword(newPassword, userToUpdate.getUsername())) {
+                                System.out.print("Invalid Password. Do you want to try again? (yes/no): ");
+                                if (!scanner.nextLine().equalsIgnoreCase("yes")) {
+                                    return;
+                                }
+                            } else {
+                                userToUpdate.setPassword(newPassword);
+                                System.out.println("Password updated successfully.");
+                                break;
+                            }
                         }
-                        userToUpdate.setPassword(newPassword);
-                        System.out.println("Password updated successfully.");
                         break;
                     case 4:
                         System.out.println("Current Contact Number: " + userToUpdate.getContactNumber());
-                        System.out.print("Enter new contact number: ");
-                        String newContactNumber = scanner.nextLine();
-                        if (!isValidContactNumber(newContactNumber)) {
-                            break;
+                        while (true) {
+                            System.out.print("Enter new contact number: ");
+                            String newContactNumber = scanner.nextLine();
+                            if (!isValidContactNumber(newContactNumber)) {
+                                System.out.print("Invalid Contact Number. Do you want to try again? (yes/no): ");
+                                if (!scanner.nextLine().equalsIgnoreCase("yes")) {
+                                    return;
+                                }
+                            } else {
+                                userToUpdate.setContactNumber(newContactNumber);
+                                System.out.println("Contact number updated successfully.");
+                                break;
+                            }
                         }
-                        userToUpdate.setContactNumber(newContactNumber);
-                        System.out.println("Contact number updated successfully.");
                         break;
                     case 0:
                         System.out.println("Returning to main menu...");
@@ -1402,12 +1430,14 @@ public class APUHostelManagement {
             }
         }
 
+
         private double getValidatedRate(Scanner scanner, String rateType) {
             double rate = -1;
             while (rate < 0) {
                 System.out.print("Enter " + rateType + ": ");
                 if (scanner.hasNextDouble()) {
                     rate = scanner.nextDouble();
+                    scanner.nextLine(); // Consume newline
                     if (rate < 0) {
                         System.out.println(rateType + " cannot be negative. Please enter a valid rate.");
                     }
@@ -1416,7 +1446,6 @@ public class APUHostelManagement {
                     scanner.nextLine(); // Consume invalid input
                 }
             }
-            scanner.nextLine(); // Consume newline
             return rate;
         }
         
@@ -1426,7 +1455,6 @@ public class APUHostelManagement {
                     writer.write(rate.toString());
                     writer.newLine();
                 }
-                System.out.println("Rates updated successfully.");
             } catch (IOException e) {
                 e.printStackTrace();
             }
