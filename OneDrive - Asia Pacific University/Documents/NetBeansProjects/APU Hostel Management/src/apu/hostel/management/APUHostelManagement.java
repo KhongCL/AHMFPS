@@ -3014,13 +3014,14 @@ public class APUHostelManagement {
         }
 
         private void displayRoomPricing() {
+            // Map to store room type to fee rate ID
             Map<String, String> roomTypeToFeeRateID = new HashMap<>();
             try (BufferedReader roomReader = new BufferedReader(new FileReader("rooms.txt"))) {
                 String line;
                 while ((line = roomReader.readLine()) != null) {
                     String[] parts = line.split(",");
-                    if (parts.length >= 2) {
-                        roomTypeToFeeRateID.put(parts[2], parts[1]); // Assuming parts[2] is RoomType and parts[1] is FeeRateID
+                    if (parts.length >= 3) {
+                        roomTypeToFeeRateID.put(parts[2].toLowerCase(), parts[1]); // Assuming parts[2] is RoomType and parts[1] is FeeRateID
                     }
                 }
             } catch (IOException e) {
@@ -3028,18 +3029,19 @@ public class APUHostelManagement {
                 e.printStackTrace();
                 return;
             }
-
+        
+            // Map to store fee rates
             Map<String, double[]> feeRates = new HashMap<>();
             try (BufferedReader feeRateReader = new BufferedReader(new FileReader("fee_rates.txt"))) {
                 String line;
                 while ((line = feeRateReader.readLine()) != null) {
                     String[] parts = line.split(",");
-                    if (parts.length >= 5) {
+                    if (parts.length >= 6 && parts[6].equalsIgnoreCase("true")) { // Check if the fee rate is active
                         String feeRateID = parts[0];
-                        double dailyRate = Double.parseDouble(parts[1]);
-                        double weeklyRate = Double.parseDouble(parts[2]);
-                        double monthlyRate = Double.parseDouble(parts[3]);
-                        double yearlyRate = Double.parseDouble(parts[4]);
+                        double dailyRate = Double.parseDouble(parts[2]);
+                        double weeklyRate = Double.parseDouble(parts[3]);
+                        double monthlyRate = Double.parseDouble(parts[4]);
+                        double yearlyRate = Double.parseDouble(parts[5]);
                         feeRates.put(feeRateID, new double[]{dailyRate, weeklyRate, monthlyRate, yearlyRate});
                     }
                 }
@@ -3048,15 +3050,19 @@ public class APUHostelManagement {
                 e.printStackTrace();
                 return;
             }
-
+        
+            // Display room pricing
             System.out.println("Room Pricing:");
+            System.out.printf("%-10s\t%-12s\t%-12s\t%-12s\t%-12s%n", "Room Type", "Daily Rate", "Weekly Rate", "Monthly Rate", "Yearly Rate");
             for (Map.Entry<String, String> entry : roomTypeToFeeRateID.entrySet()) {
                 String roomType = entry.getKey();
                 String feeRateID = entry.getValue();
                 double[] rates = feeRates.get(feeRateID);
                 if (rates != null) {
-                    System.out.printf("%s: Daily: RM %.2f, Weekly: RM %.2f, Monthly: RM %.2f, Yearly: RM %.2f%n",
+                    System.out.printf("%-10s\tRM %-10.2f\tRM %-10.2f\tRM %-10.2f\tRM %-10.2f%n",
                             roomType.substring(0, 1).toUpperCase() + roomType.substring(1), rates[0], rates[1], rates[2], rates[3]);
+                } else {
+                    System.out.printf("%-10s\tNo rates found%n", roomType);
                 }
             }
         }
@@ -4246,4 +4252,4 @@ public class APUHostelManagement {
 
 //test netbean pull push
 
-//test again
+//test again bruh
