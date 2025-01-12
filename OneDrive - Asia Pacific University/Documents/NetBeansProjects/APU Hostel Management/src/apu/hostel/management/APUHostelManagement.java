@@ -1224,6 +1224,20 @@ public class APUHostelManagement {
             System.out.print("Enter your choice (1-5): ");
             int attributeChoice = getValidatedChoice(scanner, 1, 5);
         
+            // Extract fee rate IDs from rooms.txt
+            List<String> restrictedFeeRateIDs = new ArrayList<>();
+            List<Room> rooms = readRoomsFromFile("rooms.txt");
+            for (Room room : rooms) {
+                if (!restrictedFeeRateIDs.contains(room.getFeeRateID())) {
+                    restrictedFeeRateIDs.add(room.getFeeRateID());
+                }
+            }
+        
+            if (attributeChoice == 1 && restrictedFeeRateIDs.contains(rateToUpdate.getFeeRateID())) {
+                System.out.println("Cannot update room type for fee rate ID: " + rateToUpdate.getFeeRateID() + " as it exists in rooms.txt.");
+                return;
+            }
+        
             if (attributeChoice == 1) {
                 System.out.println("Available Room Types:");
                 System.out.println("1. Standard");
@@ -1262,7 +1276,6 @@ public class APUHostelManagement {
                     rateToUpdate.setRoomType(roomType);
         
                     // Update room type in rooms.txt
-                    List<Room> rooms = readRoomsFromFile("rooms.txt");
                     for (Room room : rooms) {
                         if (room.getFeeRateID().equals(rateToUpdate.getFeeRateID())) {
                             room.setRoomType(roomType);
@@ -1328,16 +1341,32 @@ public class APUHostelManagement {
                 return;
             }
         
-            System.out.println("Existing Fee Rates:");
-            for (int i = 0; i < rates.size(); i++) {
-                if (rates.get(i).isActive()) {
-                    System.out.println((i + 1) + ". " + rates.get(i));
+            // Extract fee rate IDs from rooms.txt
+            List<String> usedFeeRateIDs = new ArrayList<>();
+            List<Room> rooms = readRoomsFromFile("rooms.txt");
+            for (Room room : rooms) {
+                if (!usedFeeRateIDs.contains(room.getFeeRateID())) {
+                    usedFeeRateIDs.add(room.getFeeRateID());
                 }
             }
         
+            System.out.println("Existing Fee Rates:");
+            List<FeeRate> deletableRates = new ArrayList<>();
+            for (int i = 0; i < rates.size(); i++) {
+                if (rates.get(i).isActive() && !usedFeeRateIDs.contains(rates.get(i).getFeeRateID())) {
+                    deletableRates.add(rates.get(i));
+                    System.out.println((deletableRates.size()) + ". " + rates.get(i));
+                }
+            }
+        
+            if (deletableRates.isEmpty()) {
+                System.out.println("No deletable rates available.");
+                return;
+            }
+        
             System.out.print("Enter the number of the fee rate to delete: ");
-            int rateChoice = getValidatedChoice(scanner, 1, rates.size());
-            FeeRate rateToDelete = rates.get(rateChoice - 1);
+            int rateChoice = getValidatedChoice(scanner, 1, deletableRates.size());
+            FeeRate rateToDelete = deletableRates.get(rateChoice - 1);
         
             System.out.println("Rate Details:");
             System.out.println(rateToDelete);
@@ -1393,13 +1422,24 @@ public class APUHostelManagement {
                 return;
             }
         
-            System.out.print("Are you sure you want to delete all rates? This action cannot be undone. You can retore all rates on the menu. (yes/no): ");
+            // Extract fee rate IDs from rooms.txt
+            List<String> usedFeeRateIDs = new ArrayList<>();
+            List<Room> rooms = readRoomsFromFile("rooms.txt");
+            for (Room room : rooms) {
+                if (!usedFeeRateIDs.contains(room.getFeeRateID())) {
+                    usedFeeRateIDs.add(room.getFeeRateID());
+                }
+            }
+        
+            System.out.print("Are you sure you want to delete all rates? This action cannot be undone. You can restore all rates on the menu. (yes/no): ");
             String confirm = scanner.nextLine();
             if (confirm.equalsIgnoreCase("yes")) {
                 for (FeeRate rate : rates) {
-                    rate.setActive(false);
+                    if (!usedFeeRateIDs.contains(rate.getFeeRateID())) {
+                        rate.setActive(false);
+                    }
                 }
-                System.out.println("All rates deleted successfully.");
+                System.out.println("All deletable rates deleted successfully.");
             } else {
                 System.out.println("Delete all rates cancelled.");
             }
@@ -1637,15 +1677,24 @@ public class APUHostelManagement {
             int roomTypeChoice = getValidatedChoice(scanner, 1, roomTypes.size());
             String selectedRoomType = roomTypes.get(roomTypeChoice - 1);
         
+            // Find the current fee rate ID used by the selected room type
+            String currentFeeRateID = rooms.stream()
+                    .filter(room -> room.getRoomType().equalsIgnoreCase(selectedRoomType))
+                    .map(Room::getFeeRateID)
+                    .findFirst()
+                    .orElse(null);
+        
+            System.out.println("Current Fee Rate ID for " + selectedRoomType + ": " + currentFeeRateID);
+        
             System.out.println("Available Fee Rates for " + selectedRoomType + ":");
             List<FeeRate> selectedFeeRates = feeRates.stream()
-                    .filter(rate -> rate.getRoomType().equalsIgnoreCase(selectedRoomType))
+                    .filter(rate -> rate.getRoomType().equalsIgnoreCase(selectedRoomType) && !rate.getFeeRateID().equals(currentFeeRateID) && rate.getIsActive())
                     .collect(Collectors.toList());
             for (int i = 0; i < selectedFeeRates.size(); i++) {
                 System.out.println((i + 1) + ". " + selectedFeeRates.get(i));
             }
         
-            if (selectedFeeRates.size() <= 1) {
+            if (selectedFeeRates.size() < 1) {
                 System.out.println("Not enough fee rates available for this room type. You can add fee rates in another section of the main menu.");
                 return;
             }
