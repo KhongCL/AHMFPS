@@ -1617,6 +1617,11 @@ public class APUHostelManagement {
                 System.out.println((i + 1) + ". " + selectedFeeRates.get(i));
             }
         
+            if (selectedFeeRates.size() <= 1) {
+                System.out.println("Not enough fee rates available for this room type. You can add fee rates in another section of the main menu.");
+                return;
+            }
+        
             System.out.print("Enter the number of the fee rate to use: ");
             int feeRateChoice = getValidatedChoice(scanner, 1, selectedFeeRates.size());
             FeeRate selectedFeeRate = selectedFeeRates.get(feeRateChoice - 1);
