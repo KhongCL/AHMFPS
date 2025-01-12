@@ -514,167 +514,181 @@ public class APUHostelManagement {
                 e.printStackTrace();
                 return;
             }
-        
-            // Filter options
-            System.out.println("Filter options:");
-            System.out.println("1. Approved/Unapproved");
-            System.out.println("2. Role");
-            System.out.println("3. IsActive");
-            System.out.println("4. No filter");
-            System.out.print("Enter your choice (1-4): ");
-        
-            int filterChoice = -1;
-            while (filterChoice < 1 || filterChoice > 4) {
-                if (scanner.hasNextInt()) {
-                    filterChoice = scanner.nextInt();
-                    scanner.nextLine(); // Consume newline
-                    if (filterChoice < 1 || filterChoice > 4) {
-                        System.out.println("Invalid choice. Please enter a number between 1 and 4.");
-                    }
-                } else {
-                    System.out.println("Invalid input. Please enter a number between 1 and 4.");
-                    scanner.nextLine(); // Consume invalid input
-                }
-            }
-        
-            List<User> filteredUsers = new ArrayList<>(users);
-        
-            if (filterChoice == 1) {
-                System.out.println("1. Approved");
-                System.out.println("2. Unapproved");
-                System.out.print("Enter your choice (1-2): ");
-                int approvalChoice = -1;
-                while (approvalChoice < 1 || approvalChoice > 2) {
+
+            while (true) {
+                // Filter options
+                System.out.println("Filter options:");
+                System.out.println("1. Approved/Unapproved");
+                System.out.println("2. Role");
+                System.out.println("3. IsActive");
+                System.out.println("4. No filter");
+                System.out.print("Enter your choice (1-4): ");
+
+                int filterChoice = -1;
+                while (filterChoice < 1 || filterChoice > 4) {
                     if (scanner.hasNextInt()) {
-                        approvalChoice = scanner.nextInt();
+                        filterChoice = scanner.nextInt();
                         scanner.nextLine(); // Consume newline
-                        if (approvalChoice < 1 || approvalChoice > 2) {
-                            System.out.println("Invalid choice. Please enter 1 for Approved or 2 for Unapproved.");
+                        if (filterChoice < 1 || filterChoice > 4) {
+                            System.out.println("Invalid choice. Please enter a number between 1 and 4.");
                         }
                     } else {
-                        System.out.println("Invalid input. Please enter 1 for Approved or 2 for Unapproved.");
+                        System.out.println("Invalid input. Please enter a number between 1 and 4.");
                         scanner.nextLine(); // Consume invalid input
                     }
                 }
-                try {
-                    if (approvalChoice == 1) {
-                        // Filter approved users
-                        filteredUsers = readApprovedUsers();
-                    } else {
-                        // Filter unapproved users
-                        filteredUsers = readUnapprovedUsers();
+
+                List<User> filteredUsers = new ArrayList<>(users);
+
+                if (filterChoice == 1) {
+                    System.out.println("1. Approved");
+                    System.out.println("2. Unapproved");
+                    System.out.print("Enter your choice (1-2): ");
+                    int approvalChoice = -1;
+                    while (approvalChoice < 1 || approvalChoice > 2) {
+                        if (scanner.hasNextInt()) {
+                            approvalChoice = scanner.nextInt();
+                            scanner.nextLine(); // Consume newline
+                            if (approvalChoice < 1 || approvalChoice > 2) {
+                                System.out.println("Invalid choice. Please enter 1 for Approved or 2 for Unapproved.");
+                            }
+                        } else {
+                            System.out.println("Invalid input. Please enter 1 for Approved or 2 for Unapproved.");
+                            scanner.nextLine(); // Consume invalid input
+                        }
                     }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    return;
+                    try {
+                        if (approvalChoice == 1) {
+                            // Filter approved users
+                            filteredUsers = readApprovedUsers();
+                        } else {
+                            // Filter unapproved users
+                            filteredUsers = readUnapprovedUsers();
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        return;
+                    }
+                } else if (filterChoice == 2) {
+                    System.out.println("1. Manager");
+                    System.out.println("2. Staff");
+                    System.out.println("3. Resident");
+                    System.out.print("Enter your choice (1-3): ");
+                    int roleChoice = -1;
+                    while (roleChoice < 1 || roleChoice > 3) {
+                        if (scanner.hasNextInt()) {
+                            roleChoice = scanner.nextInt();
+                            scanner.nextLine(); // Consume newline
+                            if (roleChoice < 1 || roleChoice > 3) {
+                                System.out.println("Invalid choice. Please enter a number between 1 and 3.");
+                            }
+                        } else {
+                            System.out.println("Invalid input. Please enter a number between 1 and 3.");
+                            scanner.nextLine(); // Consume invalid input
+                        }
+                    }
+                    final String[] role = {""};
+                    switch (roleChoice) {
+                        case 1:
+                            role[0] = "manager";
+                            break;
+                        case 2:
+                            role[0] = "staff";
+                            break;
+                        case 3:
+                            role[0] = "resident";
+                            break;
+                    }
+                    filteredUsers = filteredUsers.stream()
+                            .filter(user -> user.getRole().equalsIgnoreCase(role[0]))
+                            .collect(Collectors.toList());
+                } else if (filterChoice == 3) {
+                    System.out.println("1. Active");
+                    System.out.println("2. Inactive");
+                    System.out.print("Enter your choice (1-2): ");
+                    int activeChoice = -1;
+                    while (activeChoice < 1 || activeChoice > 2) {
+                        if (scanner.hasNextInt()) {
+                            activeChoice = scanner.nextInt();
+                            scanner.nextLine(); // Consume newline
+                            if (activeChoice < 1 || activeChoice > 2) {
+                                System.out.println("Invalid choice. Please enter 1 for Active or 2 for Inactive.");
+                            }
+                        } else {
+                            System.out.println("Invalid input. Please enter 1 for Active or 2 for Inactive.");
+                            scanner.nextLine(); // Consume invalid input
+                        }
+                    }
+                    boolean isActive = (activeChoice == 1);
+                    filteredUsers = filteredUsers.stream()
+                            .filter(user -> user.getIsActive() == isActive)
+                            .collect(Collectors.toList());
                 }
-            } else if (filterChoice == 2) {
-                System.out.println("1. Manager");
-                System.out.println("2. Staff");
-                System.out.println("3. Resident");
-                System.out.print("Enter your choice (1-3): ");
-                int roleChoice = -1;
-                while (roleChoice < 1 || roleChoice > 3) {
+
+                // Sort options
+                System.out.println("Sort options:");
+                System.out.println("1. Primary Key Ascending");
+                System.out.println("2. Primary Key Descending");
+                System.out.println("3. Username Ascending");
+                System.out.println("4. Username Descending");
+                System.out.print("Enter your choice (1-4): ");
+
+                int sortChoice = -1;
+                while (sortChoice < 1 || sortChoice > 4) {
                     if (scanner.hasNextInt()) {
-                        roleChoice = scanner.nextInt();
+                        sortChoice = scanner.nextInt();
                         scanner.nextLine(); // Consume newline
-                        if (roleChoice < 1 || roleChoice > 3) {
-                            System.out.println("Invalid choice. Please enter a number between 1 and 3.");
+                        if (sortChoice < 1 || sortChoice > 4) {
+                            System.out.println("Invalid choice. Please enter a number between 1 and 4.");
                         }
                     } else {
-                        System.out.println("Invalid input. Please enter a number between 1 and 3.");
+                        System.out.println("Invalid input. Please enter a number between 1 and 4.");
                         scanner.nextLine(); // Consume invalid input
                     }
                 }
-                final String[] role = {""};
-                switch (roleChoice) {
-                    case 1:
-                        role[0] = "manager";
-                        break;
-                    case 2:
-                        role[0] = "staff";
-                        break;
-                    case 3:
-                        role[0] = "resident";
-                        break;
+
+                if (sortChoice == 1) {
+                    filteredUsers.sort(Comparator.comparing(User::getUserID));
+                } else if (sortChoice == 2) {
+                    filteredUsers.sort(Comparator.comparing(User::getUserID).reversed());
+                } else if (sortChoice == 3) {
+                    filteredUsers.sort(Comparator.comparing(User::getUsername));
+                } else if (sortChoice == 4) {
+                    filteredUsers.sort(Comparator.comparing(User::getUsername).reversed());
                 }
-                filteredUsers = filteredUsers.stream()
-                        .filter(user -> user.getRole().equalsIgnoreCase(role[0]))
-                        .collect(Collectors.toList());
-            } else if (filterChoice == 3) {
-                System.out.println("1. Active");
-                System.out.println("2. Inactive");
-                System.out.print("Enter your choice (1-2): ");
-                int activeChoice = -1;
-                while (activeChoice < 1 || activeChoice > 2) {
-                    if (scanner.hasNextInt()) {
-                        activeChoice = scanner.nextInt();
-                        scanner.nextLine(); // Consume newline
-                        if (activeChoice < 1 || activeChoice > 2) {
-                            System.out.println("Invalid choice. Please enter 1 for Active or 2 for Inactive.");
-                        }
+
+                // Search by username
+                System.out.print("Enter username to search (or press Enter to skip): ");
+                String usernameSearch = scanner.nextLine();
+                if (!usernameSearch.isEmpty()) {
+                    filteredUsers = filteredUsers.stream()
+                            .filter(user -> user.getUsername().toLowerCase().contains(usernameSearch.toLowerCase()))
+                            .collect(Collectors.toList());
+                }
+
+                // Display filtered and sorted users with index numbers
+                System.out.println("Filtered and Sorted Users:");
+                int index = 1;
+                for (User user : filteredUsers) {
+                    System.out.println(index + ". " + user);
+                    index++;
+                }
+                System.out.println("Total users: " + filteredUsers.size());
+                System.out.println("Search completed.");
+
+                if (filteredUsers.size() == 0) {
+                    System.out.print("No users found. Do you want to search again? (yes/no): ");
+                    String retryChoice = scanner.nextLine();
+                    if (retryChoice.equalsIgnoreCase("yes")) {
+                        continue; // Loop back to search again
                     } else {
-                        System.out.println("Invalid input. Please enter 1 for Active or 2 for Inactive.");
-                        scanner.nextLine(); // Consume invalid input
+                        return; // Go back to manager main menu
                     }
                 }
-                boolean isActive = (activeChoice == 1);
-                filteredUsers = filteredUsers.stream()
-                        .filter(user -> user.getIsActive() == isActive)
-                        .collect(Collectors.toList());
+
+                updateDeleteOrRestoreUser(filteredUsers);
+                break; // Exit the loop after processing
             }
-        
-            // Sort options
-            System.out.println("Sort options:");
-            System.out.println("1. Primary Key Ascending");
-            System.out.println("2. Primary Key Descending");
-            System.out.println("3. Username Ascending");
-            System.out.println("4. Username Descending");
-            System.out.print("Enter your choice (1-4): ");
-        
-            int sortChoice = -1;
-            while (sortChoice < 1 || sortChoice > 4) {
-                if (scanner.hasNextInt()) {
-                    sortChoice = scanner.nextInt();
-                    scanner.nextLine(); // Consume newline
-                    if (sortChoice < 1 || sortChoice > 4) {
-                        System.out.println("Invalid choice. Please enter a number between 1 and 4.");
-                    }
-                } else {
-                    System.out.println("Invalid input. Please enter a number between 1 and 4.");
-                    scanner.nextLine(); // Consume invalid input
-                }
-            }
-        
-            if (sortChoice == 1) {
-                filteredUsers.sort(Comparator.comparing(User::getUserID));
-            } else if (sortChoice == 2) {
-                filteredUsers.sort(Comparator.comparing(User::getUserID).reversed());
-            } else if (sortChoice == 3) {
-                filteredUsers.sort(Comparator.comparing(User::getUsername));
-            } else if (sortChoice == 4) {
-                filteredUsers.sort(Comparator.comparing(User::getUsername).reversed());
-            }
-        
-            // Search by username
-            System.out.print("Enter username to search (or press Enter to skip): ");
-            String usernameSearch = scanner.nextLine();
-            if (!usernameSearch.isEmpty()) {
-                filteredUsers = filteredUsers.stream()
-                        .filter(user -> user.getUsername().toLowerCase().contains(usernameSearch.toLowerCase()))
-                        .collect(Collectors.toList());
-            }
-        
-            // Display filtered and sorted users with index numbers
-            System.out.println("Filtered and Sorted Users:");
-            int index = 1;
-            for (User user : filteredUsers) {
-                System.out.println(index + ". " + user);
-                index++;
-            }
-            System.out.println("Total users: " + filteredUsers.size());
-            System.out.println("Search completed.");
-            updateDeleteOrRestoreUser(filteredUsers);
         }
         
         
@@ -2816,53 +2830,51 @@ public class APUHostelManagement {
         public void makeBooking() {
             Scanner scanner = new Scanner(System.in);
             System.out.println("Room Pricing");
-            System.out.println("Room Type\t\tCapacity\tDaily Rate\tWeekly Rate\tMonthly Rate\tYearly Rate");
-            System.out.println("1. Standard\t\t1\t\tRM 40/day\tRM 270/week\tRM 1040/month\tRM 12000/year");
-            System.out.println("2. Large\t\t3\t\tRM 60/day\tRM 410/week\tRM 1600/month\tRM 18000/year");
-            System.out.println("3. Family\t\t6\t\tRM 120/day\tRM 750/week\tRM 3000/month\tRM 36000/year");
+            System.out.println("Room Type\t\tCapacity");
+            System.out.println("1. Standard\t\t1");
+            System.out.println("2. Large\t\t3");
+            System.out.println("3. Family\t\t6");
             System.out.print("Enter your choice: ");
             int roomTypeChoice = scanner.nextInt();
             scanner.nextLine(); // Consume newline
 
             String roomType = null;
-            String feeRateID = null;
-            boolean feeRateActive = false;
             switch (roomTypeChoice) {
                 case 1:
-                    roomType = "Standard";
-                    feeRateID = "FR01";
+                    roomType = "standard";
                     break;
                 case 2:
-                    roomType = "Large";
-                    feeRateID = "FR02";
+                    roomType = "large";
                     break;
                 case 3:
-                    roomType = "Family";
-                    feeRateID = "FR03";
+                    roomType = "family";
                     break;
                 default:
                     System.out.println("Invalid choice. Please try again.");
                     return;
             }
 
-            // Check if the selected fee rate is active
-            try (BufferedReader rateReader = new BufferedReader(new FileReader("fee_rates.txt"))) {
+            // Select an available room based on roomType
+            String roomID = selectAvailableRoomByType(roomType);
+            if (roomID == null) {
+                System.out.println("No available rooms of the selected type.");
+                return;
+            }
+
+            // Get the fee rate ID from the selected room
+            String feeRateID = null;
+            try (BufferedReader roomReader = new BufferedReader(new FileReader("rooms.txt"))) {
                 String line;
-                while ((line = rateReader.readLine()) != null) {
+                while ((line = roomReader.readLine()) != null) {
                     String[] parts = line.split(",");
-                    if (parts[0].equals(feeRateID)) {
-                        feeRateActive = Boolean.parseBoolean(parts[6]); // Assuming the 7th element is isActive
+                    if (parts[0].equals(roomID)) {
+                        feeRateID = parts[1]; // Assuming parts[1] is FeeRateID
                         break;
                     }
                 }
             } catch (IOException e) {
-                System.out.println("An error occurred while reading the fee rate data.");
+                System.out.println("An error occurred while reading the room data.");
                 e.printStackTrace();
-                return;
-            }
-
-            if (!feeRateActive) {
-                System.out.println(roomType + " rooms cannot currently be booked.");
                 return;
             }
 
@@ -2878,23 +2890,12 @@ public class APUHostelManagement {
                 String startDateInput = scanner.nextLine();
                 if (startDateInput.matches(datePattern)) {
                     try {
-                        String[] dateParts = startDateInput.split("-");
-                        int year = Integer.parseInt(dateParts[0]);
-                        int month = Integer.parseInt(dateParts[1]);
-                        int day = Integer.parseInt(dateParts[2]);
-                        if (year == 0 || month == 0 || day == 0) {
-                            throw new DateTimeParseException("Invalid date components", startDateInput, 0);
-                        }
-                        if (isInvalidDate(year, month, day)) {
-                            throw new DateTimeParseException("Invalid day for the month", startDateInput, 0);
-                        }
-                        LocalDate parsedDate = LocalDate.of(year, month, day);
-                        startDate = parsedDate;
+                        startDate = LocalDate.parse(startDateInput, dateFormatter);
                         if (startDate.isBefore(currentDate)) {
                             System.out.println("You cannot travel back in time. Please enter a valid start date.");
                             startDate = null;
                         }
-                    } catch (DateTimeParseException | NumberFormatException e) {
+                    } catch (DateTimeParseException e) {
                         System.out.println("This date does not exist, please input a valid date.");
                         startDate = null;
                     }
@@ -2909,23 +2910,12 @@ public class APUHostelManagement {
                 String endDateInput = scanner.nextLine();
                 if (endDateInput.matches(datePattern)) {
                     try {
-                        String[] dateParts = endDateInput.split("-");
-                        int year = Integer.parseInt(dateParts[0]);
-                        int month = Integer.parseInt(dateParts[1]);
-                        int day = Integer.parseInt(dateParts[2]);
-                        if (year == 0 || month == 0 || day == 0) {
-                            throw new DateTimeParseException("Invalid date components", endDateInput, 0);
-                        }
-                        if (isInvalidDate(year, month, day)) {
-                            throw new DateTimeParseException("Invalid day for the month", endDateInput, 0);
-                        }
-                        LocalDate parsedDate = LocalDate.of(year, month, day);
-                        endDate = parsedDate;
+                        endDate = LocalDate.parse(endDateInput, dateFormatter);
                         if (!endDate.isAfter(startDate)) {
                             System.out.println("The end date must be after the start date.");
                             endDate = null;
                         }
-                    } catch (DateTimeParseException | NumberFormatException e) {
+                    } catch (DateTimeParseException e) {
                         System.out.println("This date does not exist, please input a valid date.");
                         endDate = null;
                     }
@@ -2939,35 +2929,6 @@ public class APUHostelManagement {
 
             // Get the ResidentID of the logged-in user
             String residentID = this.getResidentID();
-
-            // Select an available room based on feeRateID
-            String roomID = selectAvailableRoom(feeRateID);
-            if (roomID == null) {
-                System.out.println("No available rooms of the selected type.");
-                return;
-            }
-
-            // Check if the selected room is active
-            boolean roomActive = false;
-            try (BufferedReader roomReader = new BufferedReader(new FileReader("rooms.txt"))) {
-                String line;
-                while ((line = roomReader.readLine()) != null) {
-                    String[] parts = line.split(",");
-                    if (parts[0].equals(roomID)) {
-                        roomActive = Boolean.parseBoolean(parts[6]); // Assuming the 7th element is isActive
-                        break;
-                    }
-                }
-            } catch (IOException e) {
-                System.out.println("An error occurred while reading the room data.");
-                e.printStackTrace();
-                return;
-            }
-
-            if (!roomActive) {
-                System.out.println("The selected room cannot currently be booked.");
-                return;
-            }
 
             // Calculate the payment amount
             double paymentAmount = calculatePaymentAmount(startDate, endDate, feeRateID);
@@ -3012,6 +2973,28 @@ public class APUHostelManagement {
             System.out.println("Payment Amount : RM " + paymentAmount);
             System.out.println("=========================");
             System.out.println("Please go back to Manage Bookings to make payment for this booking.");
+        }
+
+        private String selectAvailableRoomByType(String roomType) {
+            List<String> availableRooms = new ArrayList<>();
+            try (BufferedReader roomReader = new BufferedReader(new FileReader("rooms.txt"))) {
+                String line;
+                while ((line = roomReader.readLine()) != null) {
+                    String[] parts = line.split(",");
+                    if (parts.length >= 7 && parts[2].equalsIgnoreCase(roomType) && parts[4].equals("available") && Boolean.parseBoolean(parts[6])) {
+                        availableRooms.add(parts[0]); // Assuming parts[0] is RoomID
+                    }
+                }
+            } catch (IOException e) {
+                System.out.println("An error occurred while reading the room data.");
+                e.printStackTrace();
+            }
+
+            if (!availableRooms.isEmpty()) {
+                Random random = new Random();
+                return availableRooms.get(random.nextInt(availableRooms.size())); // Randomly select an available room
+            }
+            return null;
         }
 
         private boolean isInvalidDate(int year, int month, int day) {
