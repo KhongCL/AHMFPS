@@ -824,17 +824,7 @@ public class APUHostelManagement {
                         System.out.println("Current IC Passport Number: " + userToUpdate.getIcPassportNumber());
                         System.out.print("Enter new IC Passport Number: ");
                         String newIcPassportNumber = scanner.nextLine();
-                        if (newIcPassportNumber.isEmpty()) {
-                            System.out.println("IC Passport Number cannot be empty. Please try again.");
-                            break;
-                        }
-                        try {
-                            if (!User.isUnique(newIcPassportNumber, "", "")) {
-                                System.out.println("Error: IC Passport Number already exists.");
-                                break;
-                            }
-                        } catch (IOException e) {
-                            e.printStackTrace();
+                        if (!isValidICPassport(newIcPassportNumber)) {
                             break;
                         }
                         userToUpdate.setIcPassportNumber(newIcPassportNumber);
@@ -844,17 +834,7 @@ public class APUHostelManagement {
                         System.out.println("Current Username: " + userToUpdate.getUsername());
                         System.out.print("Enter new username: ");
                         String newUsername = scanner.nextLine();
-                        if (newUsername.isEmpty()) {
-                            System.out.println("Username cannot be empty. Please try again.");
-                            break;
-                        }
-                        try {
-                            if (!User.isUnique("", newUsername, "")) {
-                                System.out.println("Error: Username already exists.");
-                                break;
-                            }
-                        } catch (IOException e) {
-                            e.printStackTrace();
+                        if (!isValidUsername(newUsername)) {
                             break;
                         }
                         userToUpdate.setUsername(newUsername);
@@ -864,8 +844,7 @@ public class APUHostelManagement {
                         System.out.println("Current Password: " + userToUpdate.getPassword());
                         System.out.print("Enter new password: ");
                         String newPassword = scanner.nextLine();
-                        if (newPassword.isEmpty()) {
-                            System.out.println("Password cannot be empty. Please try again.");
+                        if (!isValidPassword(newPassword, userToUpdate.getUsername())) {
                             break;
                         }
                         userToUpdate.setPassword(newPassword);
@@ -875,17 +854,7 @@ public class APUHostelManagement {
                         System.out.println("Current Contact Number: " + userToUpdate.getContactNumber());
                         System.out.print("Enter new contact number: ");
                         String newContactNumber = scanner.nextLine();
-                        if (newContactNumber.isEmpty()) {
-                            System.out.println("Contact number cannot be empty. Please try again.");
-                            break;
-                        }
-                        try {
-                            if (!User.isUnique("", "", newContactNumber)) {
-                                System.out.println("Error: Contact Number already exists.");
-                                break;
-                            }
-                        } catch (IOException e) {
-                            e.printStackTrace();
+                        if (!isValidContactNumber(newContactNumber)) {
                             break;
                         }
                         userToUpdate.setContactNumber(newContactNumber);
@@ -3714,7 +3683,7 @@ public class APUHostelManagement {
     // Method to validate authorization code
     private static boolean isValidAuthCode(String authCode) {
         //check against a predefined list of valid codes
-        List<String> validAuthCodes = Arrays.asList("KhongCL", "AUTH456", "AUTH789");
+        List<String> validAuthCodes = Arrays.asList("KhongCL", "kcl", "AUTH789");
         return validAuthCodes.contains(authCode);
     }
 
