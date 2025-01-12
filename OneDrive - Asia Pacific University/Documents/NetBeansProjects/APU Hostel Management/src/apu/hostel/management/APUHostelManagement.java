@@ -430,11 +430,23 @@ public class APUHostelManagement {
                     System.out.println((i + 1 + unapprovedStaffs.size()) + ". " + user.getUsername() + " (" + user.getIcPassportNumber() + ")");
                 }
         
-                System.out.print("Enter the number of the user to approve: ");
                 Scanner scanner = new Scanner(System.in);
-                int userIndex = scanner.nextInt() - 1;
+                int userIndex = -1;
+                while (userIndex < 0 || userIndex >= (unapprovedStaffs.size() + unapprovedResidents.size())) {
+                    System.out.print("Enter the number of the user to approve: ");
+                    if (scanner.hasNextInt()) {
+                        userIndex = scanner.nextInt() - 1;
+                        scanner.nextLine(); // Consume newline
+                        if (userIndex < 0 || userIndex >= (unapprovedStaffs.size() + unapprovedResidents.size())) {
+                            System.out.println("Invalid user number. Please enter a valid number.");
+                        }
+                    } else {
+                        System.out.println("Invalid input. Please enter a number.");
+                        scanner.nextLine(); // Consume invalid input
+                    }
+                }
+        
                 String currentDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-                scanner.nextLine(); // Consume newline
         
                 if (userIndex >= 0 && userIndex < unapprovedStaffs.size()) {
                     Staff staffToApprove = (Staff) unapprovedStaffs.get(userIndex);
