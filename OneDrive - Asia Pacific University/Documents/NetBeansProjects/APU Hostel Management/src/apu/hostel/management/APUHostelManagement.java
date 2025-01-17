@@ -749,7 +749,12 @@ public class APUHostelManagement {
         private void deleteAllUsers(List<User> users) {
             Scanner scanner = new Scanner(System.in);
         
-            System.out.print("Are you sure you want to delete all users? This action cannot be undone. You can retore all users on the menu. (yes/no): ");
+            System.out.println("Users that will be deleted:");
+            for (int i = 0; i < users.size(); i++) {
+                System.out.println((i + 1) + ". " + users.get(i));
+            }
+        
+            System.out.print("Are you sure you want to delete all users? This action cannot be undone. You can restore all users on the menu. (yes/no): ");
             String confirm = scanner.nextLine().trim().toLowerCase();
             if (confirm.equals("yes")) {
                 for (User user : users) {
@@ -772,6 +777,11 @@ public class APUHostelManagement {
         
         private void restoreAllUsers(List<User> users) {
             Scanner scanner = new Scanner(System.in);
+        
+            System.out.println("Users that will be restored:");
+            for (int i = 0; i < users.size(); i++) {
+                System.out.println((i + 1) + ". " + users.get(i));
+            }
         
             System.out.print("Are you sure you want to restore all users? (yes/no): ");
             String confirm = scanner.nextLine().trim().toLowerCase();
