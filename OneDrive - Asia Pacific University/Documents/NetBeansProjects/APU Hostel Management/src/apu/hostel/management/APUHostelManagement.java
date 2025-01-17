@@ -247,143 +247,137 @@ public class APUHostelManagement {
             }
         }
 
+        // Define a single Scanner instance at the class level
+        private static final Scanner scanner = new Scanner(System.in);
+
         @Override
         public void displayMenu() {
-            // Manager-specific menu implementation
-            System.out.println("Manager Menu:");
-            System.out.println("1. Approve User Registration");
-            System.out.println("2. Search, Update, Delete or Restore User");
-            System.out.println("3. Fix, Update, Delete or Restore Rate");
-            System.out.println("4. Manage Rooms");
-            System.out.println("5. Update Personal Information");
-            System.out.println("6. Logout");
-            System.out.print("Enter your choice: ");
+            while (true) {
+                // Manager-specific menu implementation
+                System.out.println("Manager Menu:");
+                System.out.println("1. Approve User Registration");
+                System.out.println("2. Search, Update, Delete or Restore User");
+                System.out.println("3. Fix, Update, Delete or Restore Rate");
+                System.out.println("4. Manage Rooms");
+                System.out.println("5. Update Personal Information");
+                System.out.println("6. Logout");
+                System.out.print("Enter your choice: ");
         
-            try (Scanner scanner = new Scanner(System.in)) {
                 int choice = getValidatedChoice(scanner, 1, 6);
-      
+        
                 switch (choice) {
-                    case 1 -> // Approve User Registration logic
-                        approveUserRegistration();
-                    case 2 -> // Search, Update, or Delete User logic
-                        searchUsers();
-                    case 3 -> // Fix/Update Rate logic
-                        fixOrUpdateRate();
-                    case 4 -> // Manage Rooms logic
-                        manageRooms();
-                    case 5 -> // Update Personal Information logic
-                        updatePersonalInformation();
+                    case 1 -> approveUserRegistration();
+                    case 2 -> searchUsers();
+                    case 3 -> fixOrUpdateRate();
+                    case 4 -> manageRooms();
+                    case 5 -> updatePersonalInformation();
                     case 6 -> {
                         System.out.println("Logging out...");
                         displayWelcomePage();
+                        return; // Exit the loop after logging out
                     }
-                    default -> {
-                        System.out.println("Invalid choice. Please try again.");
-                        displayMenu(); // Recursively call to retry
-                    }
+                    default -> System.out.println("Invalid choice. Please try again.");
                 }
             }
-            displayMenu();
         }
         
+        
         public void updatePersonalInformation() {
-            try (Scanner scanner = new Scanner(System.in)) {
-                int choice;
-      
-                do {
-                    System.out.println("Update Personal Information:");
-                    System.out.println("1. Update IC Passport Number");
-                    System.out.println("2. Update Username");
-                    System.out.println("3. Update Password");
-                    System.out.println("4. Update Contact Number");
-                    System.out.println("0. Go Back to Manager Menu");
-                    System.out.print("Enter your choice: ");
-                    choice = scanner.nextInt();
-                    scanner.nextLine(); // Consume newline
-      
-                    switch (choice) {
-                        case 1 -> {
-                            System.out.println("Current IC Passport Number: " + this.icPassportNumber);
-                            while (true) {
-                                System.out.print("Enter new IC Passport Number: ");
-                                String newIcPassportNumber = scanner.nextLine();
-                                if (!isValidICPassport(newIcPassportNumber)) {
-                                    System.out.print("Do you want to try again? (yes/no): ");
-                                    if (!scanner.nextLine().equalsIgnoreCase("yes")) {
-                                        return;
-                                    }
-                                    continue;
+            int choice;
+        
+            do {
+                System.out.println("Update Personal Information:");
+                System.out.println("1. Update IC Passport Number");
+                System.out.println("2. Update Username");
+                System.out.println("3. Update Password");
+                System.out.println("4. Update Contact Number");
+                System.out.println("0. Go Back to Manager Menu");
+                System.out.print("Enter your choice: ");
+                choice = scanner.nextInt();
+                scanner.nextLine(); // Consume newline
+        
+                switch (choice) {
+                    case 1 -> {
+                        System.out.println("Current IC Passport Number: " + this.icPassportNumber);
+                        while (true) {
+                            System.out.print("Enter new IC Passport Number: ");
+                            String newIcPassportNumber = scanner.nextLine();
+                            if (!isValidICPassport(newIcPassportNumber)) {
+                                System.out.print("Do you want to try again? (yes/no): ");
+                                if (!scanner.nextLine().equalsIgnoreCase("yes")) {
+                                    return;
                                 }
-                                this.icPassportNumber = newIcPassportNumber;
-                                System.out.println("IC Passport Number updated successfully.");
-                                break;
+                                continue;
                             }
+                            this.icPassportNumber = newIcPassportNumber;
+                            System.out.println("IC Passport Number updated successfully.");
+                            break;
                         }
-                        case 2 -> {
-                            System.out.println("Current Username: " + this.username);
-                            while (true) {
-                                System.out.print("Enter new username: ");
-                                String newUsername = scanner.nextLine();
-                                if (!isValidUsername(newUsername)) {
-                                    System.out.print("Do you want to try again? (yes/no): ");
-                                    if (!scanner.nextLine().equalsIgnoreCase("yes")) {
-                                        return;
-                                    }
-                                    continue;
-                                }
-                                this.username = newUsername;
-                                System.out.println("Username updated successfully.");
-                                break;
-                            }
-                        }
-                        case 3 -> {
-                            System.out.println("Current Password: " + this.password);
-                            while (true) {
-                                System.out.print("Enter new password: ");
-                                String newPassword = scanner.nextLine();
-                                if (!isValidPassword(newPassword, this.username)) {
-                                    System.out.print("Do you want to try again? (yes/no): ");
-                                    if (!scanner.nextLine().equalsIgnoreCase("yes")) {
-                                        return;
-                                    }
-                                    continue;
-                                }
-                                this.password = newPassword;
-                                System.out.println("Password updated successfully.");
-                                break;
-                            }
-                        }
-                        case 4 -> {
-                            System.out.println("Current Contact Number: " + this.contactNumber);
-                            while (true) {
-                                System.out.print("Enter new contact number: ");
-                                String newContactNumber = scanner.nextLine();
-                                if (!isValidContactNumber(newContactNumber)) {
-                                    System.out.print("Do you want to try again? (yes/no): ");
-                                    if (!scanner.nextLine().equalsIgnoreCase("yes")) {
-                                        return;
-                                    }
-                                    continue;
-                                }
-                                this.contactNumber = newContactNumber;
-                                System.out.println("Contact number updated successfully.");
-                                break;
-                            }
-                        }
-                        case 0 -> {
-                            System.out.println("Returning to Manager Menu...");
-                            return;
-                        }
-                        default -> System.out.println("Invalid choice. Please try again.");
                     }
-      
-                    try {
-                        updateFile("managers.txt", this);
-                        updateFile("users.txt", this);
-                    } catch (IOException e) {
+                    case 2 -> {
+                        System.out.println("Current Username: " + this.username);
+                        while (true) {
+                            System.out.print("Enter new username: ");
+                            String newUsername = scanner.nextLine();
+                            if (!isValidUsername(newUsername)) {
+                                System.out.print("Do you want to try again? (yes/no): ");
+                                if (!scanner.nextLine().equalsIgnoreCase("yes")) {
+                                    return;
+                                }
+                                continue;
+                            }
+                            this.username = newUsername;
+                            System.out.println("Username updated successfully.");
+                            break;
+                        }
                     }
-                } while (choice != 0);
-            }
+                    case 3 -> {
+                        System.out.println("Current Password: " + this.password);
+                        while (true) {
+                            System.out.print("Enter new password: ");
+                            String newPassword = scanner.nextLine();
+                            if (!isValidPassword(newPassword, this.username)) {
+                                System.out.print("Do you want to try again? (yes/no): ");
+                                if (!scanner.nextLine().equalsIgnoreCase("yes")) {
+                                    return;
+                                }
+                                continue;
+                            }
+                            this.password = newPassword;
+                            System.out.println("Password updated successfully.");
+                            break;
+                        }
+                    }
+                    case 4 -> {
+                        System.out.println("Current Contact Number: " + this.contactNumber);
+                        while (true) {
+                            System.out.print("Enter new contact number: ");
+                            String newContactNumber = scanner.nextLine();
+                            if (!isValidContactNumber(newContactNumber)) {
+                                System.out.print("Do you want to try again? (yes/no): ");
+                                if (!scanner.nextLine().equalsIgnoreCase("yes")) {
+                                    return;
+                                }
+                                continue;
+                            }
+                            this.contactNumber = newContactNumber;
+                            System.out.println("Contact number updated successfully.");
+                            break;
+                        }
+                    }
+                    case 0 -> {
+                        System.out.println("Returning to Manager Menu...");
+                        return;
+                    }
+                    default -> System.out.println("Invalid choice. Please try again.");
+                }
+        
+                try {
+                    updateFile("managers.txt", this);
+                    updateFile("users.txt", this);
+                } catch (IOException e) {
+                }
+            } while (choice != 0);
         }
 
         private void approveUserRegistration() {
@@ -408,7 +402,6 @@ public class APUHostelManagement {
                     System.out.println((i + 1 + unapprovedStaffs.size()) + ". " + user.getUsername() + " (" + user.getIcPassportNumber() + ")");
                 }
         
-                Scanner scanner = new Scanner(System.in);
                 int userIndex = -1;
                 while (userIndex < 0 || userIndex >= (unapprovedStaffs.size() + unapprovedResidents.size())) {
                     System.out.print("Enter the number of the user to approve: ");
@@ -464,17 +457,14 @@ public class APUHostelManagement {
         private void saveUnapprovedUsers(List<User> users, String filename) throws IOException {
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
                 for (User user : users) {
-                    switch (user) {
-                        case Staff staff -> {
-                            staff.setIsActive(true);
-                            writer.write(staff.getStaffID() + "," + staff.getUserID() + "," + staff.getIcPassportNumber() + "," + staff.getUsername() + "," + staff.getPassword() + "," + staff.getContactNumber() + "," + staff.getDateOfRegistration() + "," + staff.getRole() + "," + staff.getIsActive() + "," + null);
-                        }
-                        case Resident resident -> {
-                            resident.setIsActive(true);
-                            writer.write(resident.getResidentID() + "," + resident.getUserID() + "," + resident.getIcPassportNumber() + "," + resident.getUsername() + "," + resident.getPassword() + "," + resident.getContactNumber() + "," + resident.getDateOfRegistration() + "," + resident.getRole() + "," + resident.getIsActive() + "," + null);
-                        }
-                        default -> {
-                        }
+                    if (user instanceof Staff) {
+                        Staff staff = (Staff) user;
+                        staff.setIsActive(true);
+                        writer.write(staff.getStaffID() + "," + staff.getUserID() + "," + staff.getIcPassportNumber() + "," + staff.getUsername() + "," + staff.getPassword() + "," + staff.getContactNumber() + "," + staff.getDateOfRegistration() + "," + staff.getRole() + "," + staff.getIsActive() + "," + null);
+                    } else if (user instanceof Resident) {
+                        Resident resident = (Resident) user;
+                        resident.setIsActive(true);
+                        writer.write(resident.getResidentID() + "," + resident.getUserID() + "," + resident.getIcPassportNumber() + "," + resident.getUsername() + "," + resident.getPassword() + "," + resident.getContactNumber() + "," + resident.getDateOfRegistration() + "," + resident.getRole() + "," + resident.getIsActive() + "," + null);
                     }
                     writer.newLine();
                 }
@@ -484,186 +474,188 @@ public class APUHostelManagement {
 
         // Method to search users
         public void searchUsers() {
-            try (Scanner scanner = new Scanner(System.in)) {
-                List<User> users = new ArrayList<>();
-
-                // Read users for search
-                try {
-                    users = readUsersForSearch();
-                } catch (IOException e) {
-                    return;
+            List<User> users = new ArrayList<>();
+        
+            // Read users for search
+            try {
+                users = readUsersForSearch();
+            } catch (IOException e) {
+                e.printStackTrace();
+                return;
+            }
+        
+            while (true) {
+                // Filter options
+                System.out.println("Filter options:");
+                System.out.println("1. Approved/Unapproved");
+                System.out.println("2. Role");
+                System.out.println("3. IsActive");
+                System.out.println("4. No filter");
+                System.out.print("Enter your choice (1-4): ");
+        
+                int filterChoice = -1;
+                while (filterChoice < 1 || filterChoice > 4) {
+                    if (scanner.hasNextInt()) {
+                        filterChoice = scanner.nextInt();
+                        scanner.nextLine(); // Consume newline
+                        if (filterChoice < 1 || filterChoice > 4) {
+                            System.out.println("Invalid choice. Please enter a number between 1 and 4.");
+                        }
+                    } else {
+                        System.out.println("Invalid input. Please enter a number between 1 and 4.");
+                        scanner.nextLine(); // Consume invalid input
+                    }
                 }
-
-                while (true) {
-                    // Filter options
-                    System.out.println("Filter options:");
-                    System.out.println("1. Approved/Unapproved");
-                    System.out.println("2. Role");
-                    System.out.println("3. IsActive");
-                    System.out.println("4. No filter");
-                    System.out.print("Enter your choice (1-4): ");
-
-                    int filterChoice = -1;
-                    while (filterChoice < 1 || filterChoice > 4) {
-                        if (scanner.hasNextInt()) {
-                            filterChoice = scanner.nextInt();
-                            scanner.nextLine(); // Consume newline
-                            if (filterChoice < 1 || filterChoice > 4) {
-                                System.out.println("Invalid choice. Please enter a number between 1 and 4.");
-                            }
-                        } else {
-                            System.out.println("Invalid input. Please enter a number between 1 and 4.");
-                            scanner.nextLine(); // Consume invalid input
-                        }
-                    }
-
-                    List<User> filteredUsers = new ArrayList<>(users);
-
-                    switch (filterChoice) {
-                        case 1 -> {
-                            System.out.println("1. Approved");
-                            System.out.println("2. Unapproved");
-                            System.out.print("Enter your choice (1-2): ");
-                            int approvalChoice = -1;
-                            while (approvalChoice < 1 || approvalChoice > 2) {
-                                if (scanner.hasNextInt()) {
-                                    approvalChoice = scanner.nextInt();
-                                    scanner.nextLine(); // Consume newline
-                                    if (approvalChoice < 1 || approvalChoice > 2) {
-                                        System.out.println("Invalid choice. Please enter 1 for Approved or 2 for Unapproved.");
-                                    }
-                                } else {
-                                    System.out.println("Invalid input. Please enter 1 for Approved or 2 for Unapproved.");
-                                    scanner.nextLine(); // Consume invalid input
+        
+                List<User> filteredUsers = new ArrayList<>(users);
+        
+                switch (filterChoice) {
+                    case 1 -> {
+                        System.out.println("1. Approved");
+                        System.out.println("2. Unapproved");
+                        System.out.print("Enter your choice (1-2): ");
+                        int approvalChoice = -1;
+                        while (approvalChoice < 1 || approvalChoice > 2) {
+                            if (scanner.hasNextInt()) {
+                                approvalChoice = scanner.nextInt();
+                                scanner.nextLine(); // Consume newline
+                                if (approvalChoice < 1 || approvalChoice > 2) {
+                                    System.out.println("Invalid choice. Please enter 1 for Approved or 2 for Unapproved.");
                                 }
-                            }   try {
-                                if (approvalChoice == 1) {
-                                    // Filter approved users
-                                    filteredUsers = readApprovedUsers();
-                                } else {
-                                    // Filter unapproved users
-                                    filteredUsers = readUnapprovedUsers();
-                                }
-                            } catch (IOException e) {
-                                return;
+                            } else {
+                                System.out.println("Invalid input. Please enter 1 for Approved or 2 for Unapproved.");
+                                scanner.nextLine(); // Consume invalid input
                             }
                         }
-                        case 2 -> {
-                            System.out.println("1. Manager");
-                            System.out.println("2. Staff");
-                            System.out.println("3. Resident");
-                            System.out.print("Enter your choice (1-3): ");
-                            int roleChoice = -1;
-                            while (roleChoice < 1 || roleChoice > 3) {
-                                if (scanner.hasNextInt()) {
-                                    roleChoice = scanner.nextInt();
-                                    scanner.nextLine(); // Consume newline
-                                    if (roleChoice < 1 || roleChoice > 3) {
-                                        System.out.println("Invalid choice. Please enter a number between 1 and 3.");
-                                    }
-                                } else {
-                                    System.out.println("Invalid input. Please enter a number between 1 and 3.");
-                                    scanner.nextLine(); // Consume invalid input
-                                }
-                            }   final String[] role = {""};
-                            switch (roleChoice) {
-                                case 1 -> role[0] = "manager";
-                                case 2 -> role[0] = "staff";
-                                case 3 -> role[0] = "resident";
+                        try {
+                            if (approvalChoice == 1) {
+                                // Filter approved users
+                                filteredUsers = readApprovedUsers();
+                            } else {
+                                // Filter unapproved users
+                                filteredUsers = readUnapprovedUsers();
                             }
-                            filteredUsers = filteredUsers.stream()
-                                    .filter(user -> user.getRole().equalsIgnoreCase(role[0]))
-                                    .collect(Collectors.toList());
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                            return;
                         }
-
-                        case 3 -> {
-                            System.out.println("1. Active");
-                            System.out.println("2. Inactive");
-                            System.out.print("Enter your choice (1-2): ");
-                            int activeChoice = -1;
-                            while (activeChoice < 1 || activeChoice > 2) {
-                                if (scanner.hasNextInt()) {
-                                    activeChoice = scanner.nextInt();
-                                    scanner.nextLine(); // Consume newline
-                                    if (activeChoice < 1 || activeChoice > 2) {
-                                        System.out.println("Invalid choice. Please enter 1 for Active or 2 for Inactive.");
-                                    }
-                                } else {
-                                    System.out.println("Invalid input. Please enter 1 for Active or 2 for Inactive.");
-                                    scanner.nextLine(); // Consume invalid input
+                    }
+                    case 2 -> {
+                        System.out.println("1. Manager");
+                        System.out.println("2. Staff");
+                        System.out.println("3. Resident");
+                        System.out.print("Enter your choice (1-3): ");
+                        int roleChoice = -1;
+                        while (roleChoice < 1 || roleChoice > 3) {
+                            if (scanner.hasNextInt()) {
+                                roleChoice = scanner.nextInt();
+                                scanner.nextLine(); // Consume newline
+                                if (roleChoice < 1 || roleChoice > 3) {
+                                    System.out.println("Invalid choice. Please enter a number between 1 and 3.");
                                 }
-                            }   boolean isActive = (activeChoice == 1);
-                            filteredUsers = filteredUsers.stream()
-                                    .filter(user -> user.getIsActive() == isActive)
-                                    .collect(Collectors.toList());
-                        }
-                        default -> {
-                        }
-                    }
-
-                    // Sort options
-                    System.out.println("Sort options:");
-                    System.out.println("1. Primary Key Ascending");
-                    System.out.println("2. Primary Key Descending");
-                    System.out.println("3. Username Ascending");
-                    System.out.println("4. Username Descending");
-                    System.out.print("Enter your choice (1-4): ");
-
-                    int sortChoice = -1;
-                    while (sortChoice < 1 || sortChoice > 4) {
-                        if (scanner.hasNextInt()) {
-                            sortChoice = scanner.nextInt();
-                            scanner.nextLine(); // Consume newline
-                            if (sortChoice < 1 || sortChoice > 4) {
-                                System.out.println("Invalid choice. Please enter a number between 1 and 4.");
+                            } else {
+                                System.out.println("Invalid input. Please enter a number between 1 and 3.");
+                                scanner.nextLine(); // Consume invalid input
                             }
-                        } else {
-                            System.out.println("Invalid input. Please enter a number between 1 and 4.");
-                            scanner.nextLine(); // Consume invalid input
                         }
-                    }
-
-                    switch (sortChoice) {
-                        case 1 -> filteredUsers.sort(Comparator.comparing(User::getUserID));
-                        case 2 -> filteredUsers.sort(Comparator.comparing(User::getUserID).reversed());
-                        case 3 -> filteredUsers.sort(Comparator.comparing(User::getUsername));
-                        case 4 -> filteredUsers.sort(Comparator.comparing(User::getUsername).reversed());
-                        default -> {
+                        final String[] role = {""};
+                        switch (roleChoice) {
+                            case 1 -> role[0] = "manager";
+                            case 2 -> role[0] = "staff";
+                            case 3 -> role[0] = "resident";
                         }
-                    }
-
-                    // Search by username
-                    System.out.print("Enter username to search (or press Enter to skip): ");
-                    String usernameSearch = scanner.nextLine();
-                    if (!usernameSearch.isEmpty()) {
                         filteredUsers = filteredUsers.stream()
-                                .filter(user -> user.getUsername().toLowerCase().contains(usernameSearch.toLowerCase()))
+                                .filter(user -> user.getRole().equalsIgnoreCase(role[0]))
                                 .collect(Collectors.toList());
                     }
-
-                    // Display filtered and sorted users with index numbers
-                    System.out.println("Filtered and Sorted Users:");
-                    int index = 1;
-                    for (User user : filteredUsers) {
-                        System.out.println(index + ". " + user);
-                        index++;
-                    }
-                    System.out.println("Total users: " + filteredUsers.size());
-                    System.out.println("Search completed.");
-
-                    if (filteredUsers.isEmpty()) {
-                        System.out.print("No users found. Do you want to search again? (yes/no): ");
-                        String retryChoice = scanner.nextLine();
-                        if (retryChoice.equalsIgnoreCase("yes")) {
-                            continue; // Loop back to search again
-                        } else {
-                            return; // Go back to manager main menu
+                    case 3 -> {
+                        System.out.println("1. Active");
+                        System.out.println("2. Inactive");
+                        System.out.print("Enter your choice (1-2): ");
+                        int activeChoice = -1;
+                        while (activeChoice < 1 || activeChoice > 2) {
+                            if (scanner.hasNextInt()) {
+                                activeChoice = scanner.nextInt();
+                                scanner.nextLine(); // Consume newline
+                                if (activeChoice < 1 || activeChoice > 2) {
+                                    System.out.println("Invalid choice. Please enter 1 for Active or 2 for Inactive.");
+                                }
+                            } else {
+                                System.out.println("Invalid input. Please enter 1 for Active or 2 for Inactive.");
+                                scanner.nextLine(); // Consume invalid input
+                            }
                         }
+                        boolean isActive = (activeChoice == 1);
+                        filteredUsers = filteredUsers.stream()
+                                .filter(user -> user.getIsActive() == isActive)
+                                .collect(Collectors.toList());
                     }
-
-                    updateDeleteOrRestoreUser(filteredUsers);
-                    break; // Exit the loop after processing
+                    default -> {
+                    }
                 }
+        
+                // Sort options
+                System.out.println("Sort options:");
+                System.out.println("1. Primary Key Ascending");
+                System.out.println("2. Primary Key Descending");
+                System.out.println("3. Username Ascending");
+                System.out.println("4. Username Descending");
+                System.out.print("Enter your choice (1-4): ");
+        
+                int sortChoice = -1;
+                while (sortChoice < 1 || sortChoice > 4) {
+                    if (scanner.hasNextInt()) {
+                        sortChoice = scanner.nextInt();
+                        scanner.nextLine(); // Consume newline
+                        if (sortChoice < 1 || sortChoice > 4) {
+                            System.out.println("Invalid choice. Please enter a number between 1 and 4.");
+                        }
+                    } else {
+                        System.out.println("Invalid input. Please enter a number between 1 and 4.");
+                        scanner.nextLine(); // Consume invalid input
+                    }
+                }
+        
+                switch (sortChoice) {
+                    case 1 -> filteredUsers.sort(Comparator.comparing(User::getUserID));
+                    case 2 -> filteredUsers.sort(Comparator.comparing(User::getUserID).reversed());
+                    case 3 -> filteredUsers.sort(Comparator.comparing(User::getUsername));
+                    case 4 -> filteredUsers.sort(Comparator.comparing(User::getUsername).reversed());
+                    default -> {
+                    }
+                }
+        
+                // Search by username
+                System.out.print("Enter username to search (or press Enter to skip): ");
+                String usernameSearch = scanner.nextLine();
+                if (!usernameSearch.isEmpty()) {
+                    filteredUsers = filteredUsers.stream()
+                            .filter(user -> user.getUsername().toLowerCase().contains(usernameSearch.toLowerCase()))
+                            .collect(Collectors.toList());
+                }
+        
+                // Display filtered and sorted users with index numbers
+                System.out.println("Filtered and Sorted Users:");
+                int index = 1;
+                for (User user : filteredUsers) {
+                    System.out.println(index + ". " + user);
+                    index++;
+                }
+                System.out.println("Total users: " + filteredUsers.size());
+                System.out.println("Search completed.");
+        
+                if (filteredUsers.isEmpty()) {
+                    System.out.print("No users found. Do you want to search again? (yes/no): ");
+                    String retryChoice = scanner.nextLine();
+                    if (retryChoice.equalsIgnoreCase("yes")) {
+                        continue; // Loop back to search again
+                    } else {
+                        return; // Go back to manager main menu
+                    }
+                }
+        
+                updateDeleteOrRestoreUser(filteredUsers);
+                break; // Exit the loop after processing
             }
         }
         
@@ -680,73 +672,65 @@ public class APUHostelManagement {
         }
 
         public void updateDeleteOrRestoreUser(List<User> users) {
-            try (Scanner scanner = new Scanner(System.in)) {
-                OUTER:
-                while (true) {
-                    System.out.println("User Management:");
-                    System.out.println("1. Choose user to update or delete");
-                    System.out.println("2. Delete all users");
-                    System.out.println("3. Restore all users");
-                    System.out.println("4. Return to main menu");
-                    System.out.print("Enter your choice (1-4): ");
-                    int choice = getValidatedChoice(scanner, 1, 4);
-                    switch (choice) {
-                        case 1 -> {
-                            // Select user to update or delete
-                            System.out.print("Enter the number of the user to update or delete (or 0 to cancel): ");
-                            int userChoice = -1;
-                            while (userChoice < 0 || userChoice > users.size()) {
-                                if (scanner.hasNextInt()) {
-                                    userChoice = scanner.nextInt();
-                                    scanner.nextLine(); // Consume newline
-                                    if (userChoice < 0 || userChoice > users.size()) {
-                                        System.out.println("Invalid choice. Please enter a number between 0 and " + users.size() + ".");
-                                    }
-                                } else {
-                                    System.out.println("Invalid input. Please enter a number between 0 and " + users.size() + ".");
-                                    scanner.nextLine(); // Consume invalid input
+            OUTER:
+            while (true) {
+                System.out.println("User Management:");
+                System.out.println("1. Choose user to update or delete");
+                System.out.println("2. Delete all users");
+                System.out.println("3. Restore all users");
+                System.out.println("4. Return to main menu");
+                System.out.print("Enter your choice (1-4): ");
+                int choice = getValidatedChoice(scanner, 1, 4);
+                switch (choice) {
+                    case 1 -> {
+                        // Select user to update or delete
+                        System.out.print("Enter the number of the user to update or delete (or 0 to cancel): ");
+                        int userChoice = -1;
+                        while (userChoice < 0 || userChoice > users.size()) {
+                            if (scanner.hasNextInt()) {
+                                userChoice = scanner.nextInt();
+                                scanner.nextLine(); // Consume newline
+                                if (userChoice < 0 || userChoice > users.size()) {
+                                    System.out.println("Invalid choice. Please enter a number between 0 and " + users.size() + ".");
                                 }
-                            }   if (userChoice == 0) {
-                                System.out.println("Operation cancelled.");
-                                continue;
-                            }   User userToUpdate = users.get(userChoice - 1);
-                            // Choose to update, delete, or restore
-                            System.out.println("1. Update User");
-                            System.out.println("2. Delete User");
-                            System.out.println("3. Restore User");
-                            System.out.println("4. Return to main menu");
-                            System.out.print("Enter your choice: ");
-                            int actionChoice = getValidatedChoice(scanner, 1, 4);
-                            switch (actionChoice) {
-                                case 1:
-                                    updateUser(userToUpdate);
-                                    break;
-                                case 2:
-                                    deleteUser(userToUpdate);
-                                    break;
-                                case 3:
-                                    restoreUser(userToUpdate);
-                                    break;
-                                default:
-                                    System.out.println("Returning to main menu...");
-                                    break OUTER;
+                            } else {
+                                System.out.println("Invalid input. Please enter a number between 0 and " + users.size() + ".");
+                                scanner.nextLine(); // Consume invalid input
                             }
                         }
-
-                        case 2 -> deleteAllUsers(users);
-                        case 3 -> restoreAllUsers(users);
-                        default -> {
-                            System.out.println("Returning to main menu...");
-                            return;
+                        if (userChoice == 0) {
+                            System.out.println("Operation cancelled.");
+                            continue;
                         }
+                        User userToUpdate = users.get(userChoice - 1);
+                        // Choose to update, delete, or restore
+                        System.out.println("1. Update User");
+                        System.out.println("2. Delete User");
+                        System.out.println("3. Restore User");
+                        System.out.println("4. Return to main menu");
+                        System.out.print("Enter your choice: ");
+                        int actionChoice = getValidatedChoice(scanner, 1, 4);
+                        switch (actionChoice) {
+                            case 1 -> updateUser(userToUpdate);
+                            case 2 -> deleteUser(userToUpdate);
+                            case 3 -> restoreUser(userToUpdate);
+                            default -> {
+                                System.out.println("Returning to main menu...");
+                                break OUTER;
+                            }
+                        }
+                    }
+                    case 2 -> deleteAllUsers(users);
+                    case 3 -> restoreAllUsers(users);
+                    default -> {
+                        System.out.println("Returning to main menu...");
+                        return;
                     }
                 }
             }
         }
         
         private void deleteAllUsers(List<User> users) {
-            Scanner scanner = new Scanner(System.in);
-        
             System.out.println("Users that will be deleted:");
             for (int i = 0; i < users.size(); i++) {
                 System.out.println((i + 1) + ". " + users.get(i));
@@ -766,6 +750,7 @@ public class APUHostelManagement {
                         }
                     }
                 } catch (IOException e) {
+                    e.printStackTrace();
                 }
             } else {
                 System.out.println("Delete all users cancelled.");
@@ -773,8 +758,6 @@ public class APUHostelManagement {
         }
         
         private void restoreAllUsers(List<User> users) {
-            Scanner scanner = new Scanner(System.in);
-        
             System.out.println("Users that will be restored:");
             for (int i = 0; i < users.size(); i++) {
                 System.out.println((i + 1) + ". " + users.get(i));
@@ -794,6 +777,7 @@ public class APUHostelManagement {
                         }
                     }
                 } catch (IOException e) {
+                    e.printStackTrace();
                 }
             } else {
                 System.out.println("Restore all users cancelled.");
@@ -805,106 +789,135 @@ public class APUHostelManagement {
         }
         
         public void updateUser(User userToUpdate) {
-            try (Scanner scanner = new Scanner(System.in)) {
-                int choice;
-                do {
-                    System.out.println("Update User Information:");
-                    System.out.println("1. Update IC Passport Number");
-                    System.out.println("2. Update Username");
-                    System.out.println("3. Update Password");
-                    System.out.println("4. Update Contact Number");
-                    System.out.println("0. Go Back");
-                    System.out.print("Enter your choice: ");
-                    choice = -1;
-                    while (choice < 0 || choice > 4) {
-                        if (scanner.hasNextInt()) {
-                            choice = scanner.nextInt();
-                            scanner.nextLine(); // Consume newline
-                            if (choice < 0 || choice > 4) {
-                                System.out.println("Invalid choice. Please enter a number between 0 and 4.");
+            int choice;
+            do {
+                System.out.println("Update User Information:");
+                System.out.println("1. Update IC Passport Number");
+                System.out.println("2. Update Username");
+                System.out.println("3. Update Password");
+                System.out.println("4. Update Contact Number");
+                System.out.println("0. Go Back");
+                System.out.print("Enter your choice: ");
+                choice = -1;
+                while (choice < 0 || choice > 4) {
+                    if (scanner.hasNextInt()) {
+                        choice = scanner.nextInt();
+                        scanner.nextLine(); // Consume newline
+                        if (choice < 0 || choice > 4) {
+                            System.out.println("Invalid choice. Please enter a number between 0 and 4.");
+                        }
+                    } else {
+                        System.out.println("Invalid input. Please enter a number between 0 and 4.");
+                        scanner.nextLine(); // Consume invalid input
+                    }
+                }
+        
+                switch (choice) {
+                    case 1 -> {
+                        System.out.println("Current IC Passport Number: " + userToUpdate.getIcPassportNumber());
+                        while (true) {
+                            System.out.print("Enter new IC Passport Number: ");
+                            String newIcPassportNumber = scanner.nextLine();
+                            if (!isValidICPassport(newIcPassportNumber)) {
+                                System.out.print("Invalid IC Passport Number. Do you want to try again? (yes/no): ");
+                                if (!scanner.nextLine().equalsIgnoreCase("yes")) {
+                                    return;
+                                }
+                            } else {
+                                userToUpdate.setIcPassportNumber(newIcPassportNumber);
+                                System.out.println("IC Passport Number updated successfully.");
+                                break;
                             }
-                        } else {
-                            System.out.println("Invalid input. Please enter a number between 0 and 4.");
-                            scanner.nextLine(); // Consume invalid input
                         }
                     }
-      
-                    switch (choice) {
-                        case 1 -> {
-                            System.out.println("Current IC Passport Number: " + userToUpdate.getIcPassportNumber());
-                            while (true) {
-                                System.out.print("Enter new IC Passport Number: ");
-                                String newIcPassportNumber = scanner.nextLine();
-                                if (!isValidICPassport(newIcPassportNumber)) {
-                                    System.out.print("Invalid IC Passport Number. Do you want to try again? (yes/no): ");
-                                    if (!scanner.nextLine().equalsIgnoreCase("yes")) {
-                                        return;
-                                    }
-                                } else {
-                                    userToUpdate.setIcPassportNumber(newIcPassportNumber);
-                                    System.out.println("IC Passport Number updated successfully.");
-                                    break;
+                    case 2 -> {
+                        System.out.println("Current Username: " + userToUpdate.getUsername());
+                        while (true) {
+                            System.out.print("Enter new username: ");
+                            String newUsername = scanner.nextLine();
+                            if (!isValidUsername(newUsername)) {
+                                System.out.print("Invalid Username. Do you want to try again? (yes/no): ");
+                                if (!scanner.nextLine().equalsIgnoreCase("yes")) {
+                                    return;
                                 }
+                            } else {
+                                userToUpdate.setUsername(newUsername);
+                                System.out.println("Username updated successfully.");
+                                break;
                             }
                         }
-                        case 2 -> {
-                            System.out.println("Current Username: " + userToUpdate.getUsername());
-                            while (true) {
-                                System.out.print("Enter new username: ");
-                                String newUsername = scanner.nextLine();
-                                if (!isValidUsername(newUsername)) {
-                                    System.out.print("Invalid Username. Do you want to try again? (yes/no): ");
-                                    if (!scanner.nextLine().equalsIgnoreCase("yes")) {
-                                        return;
-                                    }
-                                } else {
-                                    userToUpdate.setUsername(newUsername);
-                                    System.out.println("Username updated successfully.");
-                                    break;
-                                }
-                            }
-                        }
-                        case 3 -> {
-                            System.out.println("Current Password: " + userToUpdate.getPassword());
-                            while (true) {
-                                System.out.print("Enter new password: ");
-                                String newPassword = scanner.nextLine();
-                                if (!isValidPassword(newPassword, userToUpdate.getUsername())) {
-                                    System.out.print("Invalid Password. Do you want to try again? (yes/no): ");
-                                    if (!scanner.nextLine().equalsIgnoreCase("yes")) {
-                                        return;
-                                    }
-                                } else {
-                                    userToUpdate.setPassword(newPassword);
-                                    System.out.println("Password updated successfully.");
-                                    break;
-                                }
-                            }
-                        }
-                        case 4 -> {
-                            System.out.println("Current Contact Number: " + userToUpdate.getContactNumber());
-                            while (true) {
-                                System.out.print("Enter new contact number: ");
-                                String newContactNumber = scanner.nextLine();
-                                if (!isValidContactNumber(newContactNumber)) {
-                                    System.out.print("Invalid Contact Number. Do you want to try again? (yes/no): ");
-                                    if (!scanner.nextLine().equalsIgnoreCase("yes")) {
-                                        return;
-                                    }
-                                } else {
-                                    userToUpdate.setContactNumber(newContactNumber);
-                                    System.out.println("Contact number updated successfully.");
-                                    break;
-                                }
-                            }
-                        }
-                        case 0 -> {
-                            System.out.println("Returning to main menu...");
-                            return;
-                        }
-                        default -> System.out.println("Invalid choice. Please try again.");
                     }
-      
+                    case 3 -> {
+                        System.out.println("Current Password: " + userToUpdate.getPassword());
+                        while (true) {
+                            System.out.print("Enter new password: ");
+                            String newPassword = scanner.nextLine();
+                            if (!isValidPassword(newPassword, userToUpdate.getUsername())) {
+                                System.out.print("Invalid Password. Do you want to try again? (yes/no): ");
+                                if (!scanner.nextLine().equalsIgnoreCase("yes")) {
+                                    return;
+                                }
+                            } else {
+                                userToUpdate.setPassword(newPassword);
+                                System.out.println("Password updated successfully.");
+                                break;
+                            }
+                        }
+                    }
+                    case 4 -> {
+                        System.out.println("Current Contact Number: " + userToUpdate.getContactNumber());
+                        while (true) {
+                            System.out.print("Enter new contact number: ");
+                            String newContactNumber = scanner.nextLine();
+                            if (!isValidContactNumber(newContactNumber)) {
+                                System.out.print("Invalid Contact Number. Do you want to try again? (yes/no): ");
+                                if (!scanner.nextLine().equalsIgnoreCase("yes")) {
+                                    return;
+                                }
+                            } else {
+                                userToUpdate.setContactNumber(newContactNumber);
+                                System.out.println("Contact number updated successfully.");
+                                break;
+                            }
+                        }
+                    }
+                    case 0 -> {
+                        System.out.println("Returning to main menu...");
+                        return;
+                    }
+                    default -> System.out.println("Invalid choice. Please try again.");
+                }
+        
+                try {
+                    updateFile("approved_staffs.txt", userToUpdate);
+                    updateFile("approved_residents.txt", userToUpdate);
+                    updateFile("users.txt", userToUpdate);
+                    updateFile("managers.txt", userToUpdate);
+                    updateFile("unapproved_staffs.txt", userToUpdate);
+                    updateFile("unapproved_residents.txt", userToUpdate);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            } while (choice != 0);
+        }
+        
+        public void deleteUser(User userToUpdate) {
+            if (!userToUpdate.getIsActive()) {
+                System.out.println("This user is already deactivated.");
+            } else {
+                System.out.println("User Details:");
+                System.out.println("IC Passport Number: " + userToUpdate.getIcPassportNumber());
+                System.out.println("Username: " + userToUpdate.getUsername());
+                System.out.println("Password: " + userToUpdate.getPassword());
+                System.out.println("Contact Number: " + userToUpdate.getContactNumber());
+                System.out.print("Are you sure you want to delete this user? (yes/no): ");
+                String confirmation = scanner.nextLine().trim().toLowerCase();
+        
+                if (confirmation.equals("yes")) {
+                    // Soft delete user
+                    userToUpdate.setIsActive(false);
+                    System.out.println("User deactivated successfully.");
+        
                     try {
                         updateFile("approved_staffs.txt", userToUpdate);
                         updateFile("approved_residents.txt", userToUpdate);
@@ -913,78 +926,46 @@ public class APUHostelManagement {
                         updateFile("unapproved_staffs.txt", userToUpdate);
                         updateFile("unapproved_residents.txt", userToUpdate);
                     } catch (IOException e) {
+                        e.printStackTrace();
                     }
-                } while (choice != 0);
-            }
-        }
-        
-        public void deleteUser(User userToUpdate) {
-            try (Scanner scanner = new Scanner(System.in)) {
-                if (!userToUpdate.getIsActive()) {
-                    System.out.println("This user is already deactivated.");
                 } else {
-                    System.out.println("User Details:");
-                    System.out.println("IC Passport Number: " + userToUpdate.getIcPassportNumber());
-                    System.out.println("Username: " + userToUpdate.getUsername());
-                    System.out.println("Password: " + userToUpdate.getPassword());
-                    System.out.println("Contact Number: " + userToUpdate.getContactNumber());
-                    System.out.print("Are you sure you want to delete this user? (yes/no): ");
-                    String confirmation = scanner.nextLine().trim().toLowerCase();
-      
-                    if (confirmation.equals("yes")) {
-                        // Soft delete user
-                        userToUpdate.setIsActive(false);
-                        System.out.println("User deactivated successfully.");
-      
-                        try {
-                            updateFile("approved_staffs.txt", userToUpdate);
-                            updateFile("approved_residents.txt", userToUpdate);
-                            updateFile("users.txt", userToUpdate);
-                            updateFile("managers.txt", userToUpdate);
-                            updateFile("unapproved_staffs.txt", userToUpdate);
-                            updateFile("unapproved_residents.txt", userToUpdate);
-                        } catch (IOException e) {
-                        }
-                    } else {
-                        System.out.println("User deletion cancelled.");
-                    }
+                    System.out.println("User deletion cancelled.");
                 }
             }
         }
         
         public void restoreUser(User userToRestore) {
-            try (Scanner scanner = new Scanner(System.in)) {
-                if (userToRestore.getIsActive()) {
-                    System.out.println("This user is already active.");
-                    return;
+            if (userToRestore.getIsActive()) {
+                System.out.println("This user is already active.");
+                return;
+            }
+        
+            // Confirm restoration
+            System.out.println("User Details:");
+            System.out.println("IC Passport Number: " + userToRestore.getIcPassportNumber());
+            System.out.println("Username: " + userToRestore.getUsername());
+            System.out.println("Password: " + userToRestore.getPassword());
+            System.out.println("Contact Number: " + userToRestore.getContactNumber());
+            System.out.print("Are you sure you want to restore this user? (yes/no): ");
+            String confirmation = scanner.nextLine().trim().toLowerCase();
+        
+            if (confirmation.equals("yes")) {
+                // Restore user
+                userToRestore.setIsActive(true);
+                System.out.println("User restored successfully.");
+        
+                try {
+                    updateFile("approved_staffs.txt", userToRestore);
+                    updateFile("approved_residents.txt", userToRestore);
+                    updateFile("users.txt", userToRestore);
+                    updateFile("managers.txt", userToRestore);
+                    updateFile("unapproved_staffs.txt", userToRestore);
+                    updateFile("unapproved_residents.txt", userToRestore);
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-      
-                // Confirm restoration
-                System.out.println("User Details:");
-                System.out.println("IC Passport Number: " + userToRestore.getIcPassportNumber());
-                System.out.println("Username: " + userToRestore.getUsername());
-                System.out.println("Password: " + userToRestore.getPassword());
-                System.out.println("Contact Number: " + userToRestore.getContactNumber());
-                System.out.print("Are you sure you want to restore this user? (yes/no): ");
-                String confirmation = scanner.nextLine().trim().toLowerCase();
-      
-                if (confirmation.equals("yes")) {
-                    // Restore user
-                    userToRestore.setIsActive(true);
-                    System.out.println("User restored successfully.");
-      
-                    try {
-                        updateFile("approved_staffs.txt", userToRestore);
-                        updateFile("approved_residents.txt", userToRestore);
-                        updateFile("users.txt", userToRestore);
-                        updateFile("managers.txt", userToRestore);
-                        updateFile("unapproved_staffs.txt", userToRestore);
-                        updateFile("unapproved_residents.txt", userToRestore);
-                    } catch (IOException e) {
-                    }
-                } else {
-                    System.out.println("User restoration cancelled.");
-                }
+            } else {
+                System.out.println("User restoration cancelled.");
             }
         }
         
@@ -1055,13 +1036,13 @@ public class APUHostelManagement {
         }
         
         public void fixOrUpdateRate() {
-            Scanner scanner = new Scanner(System.in);
             List<FeeRate> rates = new ArrayList<>();
         
             // Load existing rates from file
             try {
                 rates = readRatesFromFile("fee_rates.txt");
             } catch (IOException e) {
+                e.printStackTrace();
             }
         
             OUTER:
@@ -1105,6 +1086,7 @@ public class APUHostelManagement {
                         break OUTER;
                     }
                     default -> {
+                        System.out.println("Invalid choice. Please try again.");
                     }
                 }
             }
@@ -1496,8 +1478,6 @@ public class APUHostelManagement {
         }
 
         private void manageRooms() {
-            Scanner scanner = new Scanner(System.in);
-        
             OUTER:
             while (true) {
                 System.out.println("Manage Rooms:");
@@ -1523,6 +1503,7 @@ public class APUHostelManagement {
                         break OUTER;
                     }
                     default -> {
+                        System.out.println("Invalid choice. Please try again.");
                     }
                 }
             }
@@ -1908,6 +1889,9 @@ public class APUHostelManagement {
             }
         }
 
+        // Define a single Scanner instance at the Staff class level
+        private static final Scanner scanner = new Scanner(System.in);
+
         @Override
         public void displayMenu() {
             System.out.println("Staff Menu:");
@@ -1916,17 +1900,14 @@ public class APUHostelManagement {
             System.out.println("3. Generate Receipt");
             System.out.println("4. Logout");
             System.out.print("Enter your choice: ");
-    
-            Scanner scanner = new Scanner(System.in);
+
             int choice = scanner.nextInt();
             scanner.nextLine(); // Consume newline
-    
+
             switch (choice) {
                 case 1 -> updatePersonalInformation();
-                case 2 -> // Make Payment for Resident logic
-                    makePayment();
-                case 3 -> // Generate Receipt logic
-                    generateReceipt();
+                case 2 -> makePayment(); // Make Payment for Resident logic
+                case 3 -> generateReceipt(); // Generate Receipt logic
                 case 4 -> {
                     System.out.println("Logging out...");
                     System.out.println("You have been logged out successfully.");
@@ -1938,7 +1919,6 @@ public class APUHostelManagement {
         }
 
         public void updatePersonalInformation() {
-            Scanner scanner = new Scanner(System.in);
             int choice;
         
             do {
@@ -2032,6 +2012,7 @@ public class APUHostelManagement {
                     updateFile("approved_staffs.txt");
                     updateFile("users.txt");
                 } catch (IOException e) {
+                    e.printStackTrace();
                 }
             } while (choice != 0);
         }
@@ -2064,7 +2045,6 @@ public class APUHostelManagement {
         }
 
         public void makePayment() {
-            Scanner scanner = new Scanner(System.in);
             List<String[]> payments = new ArrayList<>();
         
             // Read payments from file
@@ -2074,6 +2054,7 @@ public class APUHostelManagement {
                     payments.add(line.split(","));
                 }
             } catch (IOException e) {
+                e.printStackTrace();
                 return;
             }
         
@@ -2161,6 +2142,7 @@ public class APUHostelManagement {
                     writer.newLine();
                 }
             } catch (IOException e) {
+                e.printStackTrace();
             }
         
             System.out.println("Payment updated successfully.");
@@ -2194,7 +2176,6 @@ public class APUHostelManagement {
         }
 
         public void generateReceipt() {
-            Scanner scanner = new Scanner(System.in);
             List<String[]> payments = new ArrayList<>();
             List<String[]> receipts = new ArrayList<>();
         
@@ -2205,6 +2186,7 @@ public class APUHostelManagement {
                     payments.add(line.split(","));
                 }
             } catch (IOException e) {
+                e.printStackTrace();
                 return;
             }
         
@@ -2215,6 +2197,7 @@ public class APUHostelManagement {
                     receipts.add(line.split(","));
                 }
             } catch (IOException e) {
+                e.printStackTrace();
                 return;
             }
         
@@ -2302,6 +2285,7 @@ public class APUHostelManagement {
                     writer.newLine();
                 }
             } catch (IOException e) {
+                e.printStackTrace();
             }
         
             // Write updated payments back to file
@@ -2311,6 +2295,7 @@ public class APUHostelManagement {
                     writer.newLine();
                 }
             } catch (IOException e) {
+                e.printStackTrace();
             }
         
             System.out.println("Receipt generated successfully.");
@@ -2361,6 +2346,9 @@ public class APUHostelManagement {
             }
         }
 
+        // Define a single Scanner instance at the Resident class level
+        private static final Scanner scanner = new Scanner(System.in);
+
         @Override
         public void displayMenu() {
             // Resident-specific menu implementation
@@ -2371,7 +2359,6 @@ public class APUHostelManagement {
             System.out.println("4. Logout");
             System.out.print("Enter your choice: ");
 
-            Scanner scanner = new Scanner(System.in);
             int choice = -1;
 
             while (choice < 1 || choice > 4) {
@@ -2401,20 +2388,19 @@ public class APUHostelManagement {
         }
 
         public void updatePersonalInformation() {
-            Scanner scanner = new Scanner(System.in);
             int choice;
-        
+
             do {
                 System.out.println("Update Personal Information:");
                 System.out.println("1. Update IC Passport Number");
                 System.out.println("2. Update Username");
                 System.out.println("3. Update Password");
                 System.out.println("4. Update Contact Number");
-                System.out.println("0. Go Back to Staff Menu");
+                System.out.println("0. Go Back to Resident Menu");
                 System.out.print("Enter your choice: ");
                 choice = scanner.nextInt();
                 scanner.nextLine(); // Consume newline
-        
+
                 switch (choice) {
                     case 1 -> {
                         System.out.println("Current IC Passport Number: " + this.icPassportNumber);
@@ -2490,11 +2476,12 @@ public class APUHostelManagement {
                     }
                     default -> System.out.println("Invalid choice. Please try again.");
                 }
-        
+
                 try {
                     updateFile("approved_residents.txt");
                     updateFile("users.txt");
                 } catch (IOException e) {
+                    e.printStackTrace();
                 }
             } while (choice != 0);
         }
@@ -2572,9 +2559,8 @@ public class APUHostelManagement {
         }
 
         public void manageBookings() {
-            Scanner scanner = new Scanner(System.in);
             int choice;
-
+        
             do {
                 System.out.println("Manage Bookings:");
                 System.out.println("1. Make Booking");
@@ -2589,7 +2575,7 @@ public class APUHostelManagement {
                 }
                 choice = scanner.nextInt();
                 scanner.nextLine(); // Consume newline
-
+        
                 switch (choice) {
                     case 1 -> makeBooking();
                     case 2 -> makePaymentForBooking();
@@ -2604,10 +2590,9 @@ public class APUHostelManagement {
         }
 
         public void makePaymentForBooking() {
-            Scanner scanner = new Scanner(System.in);
             List<String[]> payments = new ArrayList<>();
             String residentID = this.getResidentID(); // Get the currently logged-in resident's ID
-
+        
             // Read payments from file
             try (BufferedReader reader = new BufferedReader(new FileReader("payments.txt"))) {
                 String line;
@@ -2615,9 +2600,10 @@ public class APUHostelManagement {
                     payments.add(line.split(","));
                 }
             } catch (IOException e) {
+                e.printStackTrace();
                 return;
             }
-
+        
             // Filter unpaid bookings for the current resident
             List<String[]> unpaidBookings = new ArrayList<>();
             for (String[] payment : payments) {
@@ -2625,12 +2611,12 @@ public class APUHostelManagement {
                     unpaidBookings.add(payment);
                 }
             }
-
+        
             if (unpaidBookings.isEmpty()) {
                 System.out.println("No unpaid bookings found.");
                 return;
             }
-
+        
             // Display unpaid bookings
             System.out.println("Unpaid Bookings:");
             for (int i = 0; i < unpaidBookings.size(); i++) {
@@ -2642,7 +2628,7 @@ public class APUHostelManagement {
                 System.out.println("Payment Amount : RM " + booking[6]);
                 System.out.println();
             }
-
+        
             // Select booking to pay for
             int bookingIndex = -1;
             while (true) {
@@ -2660,7 +2646,7 @@ public class APUHostelManagement {
                     scanner.nextLine(); // Consume invalid input
                 }
             }
-
+        
             // Select payment method
             String paymentMethod = "";
             while (true) {
@@ -2672,7 +2658,7 @@ public class APUHostelManagement {
                 if (scanner.hasNextInt()) {
                     int paymentMethodChoice = scanner.nextInt();
                     scanner.nextLine(); // Consume newline
-
+        
                     switch (paymentMethodChoice) {
                         case 1 -> paymentMethod = "credit_card";
                         case 2 -> paymentMethod = "bank_transfer";
@@ -2688,7 +2674,7 @@ public class APUHostelManagement {
                     scanner.nextLine(); // Consume invalid input
                 }
             }
-
+        
             // Confirm payment
             String confirmation = "";
             while (true) {
@@ -2700,17 +2686,17 @@ public class APUHostelManagement {
                     System.out.println("Invalid input. Please enter 'yes' or 'no'.");
                 }
             }
-
+        
             if (!confirmation.equalsIgnoreCase("yes")) {
                 System.out.println("Payment cancelled.");
                 return;
             }
-
+        
             // Update payment status and method
             String[] selectedBooking = unpaidBookings.get(bookingIndex);
             selectedBooking[7] = "pending"; // Update payment status to pending
             selectedBooking[9] = paymentMethod; // Update payment method
-
+        
             // Write updated payments back to file
             try (BufferedWriter writer = new BufferedWriter(new FileWriter("payments.txt"))) {
                 for (String[] payment : payments) {
@@ -2718,16 +2704,16 @@ public class APUHostelManagement {
                     writer.newLine();
                 }
             } catch (IOException e) {
+                e.printStackTrace();
             }
-
+        
             System.out.println("Your payment is successful.");
         }
 
         public void cancelBooking() {
-            Scanner scanner = new Scanner(System.in);
             List<String[]> payments = new ArrayList<>();
             String residentID = this.getResidentID(); // Get the currently logged-in resident's ID
-
+        
             // Read payments from file
             try (BufferedReader reader = new BufferedReader(new FileReader("payments.txt"))) {
                 String line;
@@ -2735,9 +2721,10 @@ public class APUHostelManagement {
                     payments.add(line.split(","));
                 }
             } catch (IOException e) {
+                e.printStackTrace();
                 return;
             }
-
+        
             // Filter unpaid bookings for the current resident
             List<String[]> unpaidBookings = new ArrayList<>();
             for (String[] payment : payments) {
@@ -2745,12 +2732,12 @@ public class APUHostelManagement {
                     unpaidBookings.add(payment);
                 }
             }
-
+        
             if (unpaidBookings.isEmpty()) {
                 System.out.println("No unpaid bookings found.");
                 return;
             }
-
+        
             // Display unpaid bookings
             System.out.println("Unpaid Bookings:");
             for (int i = 0; i < unpaidBookings.size(); i++) {
@@ -2762,7 +2749,7 @@ public class APUHostelManagement {
                 System.out.println("Payment Amount : RM " + booking[6]);
                 System.out.println();
             }
-
+        
             // Select booking to cancel
             int bookingIndex = -1;
             while (true) {
@@ -2780,7 +2767,7 @@ public class APUHostelManagement {
                     scanner.nextLine(); // Consume invalid input
                 }
             }
-
+        
             // Confirm cancellation
             String confirmation = "";
             while (true) {
@@ -2792,16 +2779,16 @@ public class APUHostelManagement {
                     System.out.println("Invalid input. Please enter 'yes' or 'no'.");
                 }
             }
-
+        
             if (!confirmation.equalsIgnoreCase("yes")) {
                 System.out.println("Cancellation cancelled.");
                 return;
             }
-
+        
             // Remove the selected booking from the list
             String[] selectedBooking = unpaidBookings.get(bookingIndex);
             payments.remove(selectedBooking);
-
+        
             // Write updated payments back to file
             try (BufferedWriter writer = new BufferedWriter(new FileWriter("payments.txt"))) {
                 for (String[] payment : payments) {
@@ -2809,8 +2796,9 @@ public class APUHostelManagement {
                     writer.newLine();
                 }
             } catch (IOException e) {
+                e.printStackTrace();
             }
-
+        
             // Update room status to available
             String roomID = selectedBooking[5]; // Assuming roomID is at index 5
             List<String[]> rooms = new ArrayList<>();
@@ -2826,7 +2814,7 @@ public class APUHostelManagement {
             } catch (IOException e) {
                 System.out.println("An error occurred while reading the room data.");
             }
-
+        
             try (BufferedWriter writer = new BufferedWriter(new FileWriter("rooms.txt"))) {
                 for (String[] room : rooms) {
                     writer.write(String.join(",", room));
@@ -2835,7 +2823,7 @@ public class APUHostelManagement {
             } catch (IOException e) {
                 System.out.println("An error occurred while updating the room data.");
             }
-
+        
             System.out.println("This booking has been successfully cancelled.");
         }
 
@@ -2844,8 +2832,7 @@ public class APUHostelManagement {
 
             // Display room pricing based on fee rates in rooms.txt
             displayRoomPricing();
-
-            Scanner scanner = new Scanner(System.in);
+        
             System.out.println("Room Pricing");
             System.out.println("Room Type\t\tCapacity");
             System.out.println("1. Standard\t\t1");
@@ -2854,7 +2841,7 @@ public class APUHostelManagement {
             System.out.print("Enter your choice: ");
             int roomTypeChoice = scanner.nextInt();
             scanner.nextLine(); // Consume newline
-
+        
             String roomType = null;
             switch (roomTypeChoice) {
                 case 1 -> roomType = "standard";
@@ -2865,14 +2852,14 @@ public class APUHostelManagement {
                     return;
                 }
             }
-
+        
             // Select an available room based on roomType
             String roomID = selectAvailableRoomByType(roomType);
             if (roomID == null) {
                 System.out.println("No available rooms of the selected type.");
                 return;
             }
-
+        
             // Get the fee rate ID from the selected room
             String feeRateID = null;
             try (BufferedReader roomReader = new BufferedReader(new FileReader("rooms.txt"))) {
@@ -2888,13 +2875,13 @@ public class APUHostelManagement {
                 System.out.println("An error occurred while reading the room data.");
                 return;
             }
-
+        
             LocalDate startDate = null;
             LocalDate endDate = null;
             DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
             String datePattern = "\\d{4}-\\d{2}-\\d{2}";
             LocalDate currentDate = LocalDate.now();
-
+        
             // Prompt for start date
             while (startDate == null) {
                 System.out.print("Enter start date of your stay (yyyy-MM-dd): ");
@@ -2914,7 +2901,7 @@ public class APUHostelManagement {
                     System.out.println("Invalid date format. Please enter the date in yyyy-MM-dd format.");
                 }
             }
-
+        
             // Prompt for end date
             while (endDate == null) {
                 System.out.print("Enter end date of your stay (yyyy-MM-dd): ");
@@ -2934,19 +2921,19 @@ public class APUHostelManagement {
                     System.out.println("Invalid date format. Please enter the date in yyyy-MM-dd format.");
                 }
             }
-
+        
             // Generate a new PaymentID
             String paymentID = generatePaymentID();
-
+        
             // Get the ResidentID of the logged-in user
             String residentID = this.getResidentID();
-
+        
             // Calculate the payment amount
             double paymentAmount = calculatePaymentAmount(startDate, endDate, feeRateID);
-
+        
             // Get the current date and time for BookingDateTime
             String bookingDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-
+        
             // Add a new line to payments.txt
             try (BufferedWriter writer = new BufferedWriter(new FileWriter("payments.txt", true))) {
                 writer.write(paymentID + "," + residentID + "," + null + "," + startDate + "," + endDate + "," + roomID + "," + paymentAmount + ",unpaid," + bookingDateTime + "," + null + ",active");
@@ -2955,10 +2942,10 @@ public class APUHostelManagement {
             } catch (IOException e) {
                 System.out.println("An error occurred while saving the booking.");
             }
-
+        
             // Update room status to unavailable
             updateRoomStatus(roomID, "unavailable");
-
+        
             // Map room IDs to room numbers
             Map<String, String> roomMap = new HashMap<>();
             try (BufferedReader roomReader = new BufferedReader(new FileReader("rooms.txt"))) {
@@ -2972,7 +2959,7 @@ public class APUHostelManagement {
             } catch (IOException e) {
                 System.out.println("An error occurred while reading the room data.");
             }
-
+        
             // Print confirmation message
             long daysBetween = ChronoUnit.DAYS.between(startDate, endDate) + 1;
             String roomNumber = roomMap.getOrDefault(roomID, "Unknown Room");
@@ -3458,9 +3445,12 @@ public class APUHostelManagement {
 
 
 
+
+    // Define a single Scanner instance at the APUHostelManagement class level
+    private static final Scanner scanner = new Scanner(System.in);
+
     // Method to display the welcome page
     public static void displayWelcomePage() {
-        Scanner scanner = new Scanner(System.in);
         System.out.println("Welcome to APU Hostel Management Fees Payment System (AHMFPS)");
         System.out.println("Please choose your role:");
         System.out.println("1. Manager");
@@ -3714,10 +3704,9 @@ public class APUHostelManagement {
 
     // Method to handle Manager registration
     public static void registerManager() {
-        Scanner scanner = new Scanner(System.in);
         String icPassportNumber, username, password, contactNumber;
         boolean isIC = false;
-
+    
         OUTER:
         while (true) {
             System.out.println("Do you want to use IC or Passport Number to register?");
@@ -3737,7 +3726,7 @@ public class APUHostelManagement {
                 default -> System.out.println("Invalid choice. Please enter '1' for IC or '2' for Passport.");
             }
         }
-
+    
         while (true) {
             System.out.print("Enter " + (isIC ? "IC" : "Passport") + " Number: ");
             icPassportNumber = scanner.nextLine();
@@ -3751,7 +3740,7 @@ public class APUHostelManagement {
             }
             break;
         }
-
+    
         while (true) {
             System.out.print("Enter username: ");
             username = scanner.nextLine();
@@ -3765,7 +3754,7 @@ public class APUHostelManagement {
             }
             break;
         }
-
+    
         while (true) {
             System.out.print("Enter password: ");
             password = scanner.nextLine();
@@ -3779,7 +3768,7 @@ public class APUHostelManagement {
             }
             break;
         }
-
+    
         while (true) {
             System.out.print("Enter contact number: ");
             contactNumber = scanner.nextLine();
@@ -3793,7 +3782,7 @@ public class APUHostelManagement {
             }
             break;
         }
-
+    
         try {
             String dateOfRegistration = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
             String userID = generateUserID("U");
@@ -3804,14 +3793,14 @@ public class APUHostelManagement {
             System.out.println("Manager registered successfully.");
             displayWelcomePage();
         } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
     // Method to handle Manager login
     public static void loginManager() {
-        Scanner scanner = new Scanner(System.in);
         String username, password;
-
+    
         while (true) {
             System.out.print("Enter username: ");
             username = scanner.nextLine();
@@ -3821,7 +3810,7 @@ public class APUHostelManagement {
             }
             break;
         }
-
+    
         while (true) {
             System.out.print("Enter password: ");
             password = scanner.nextLine();
@@ -3831,7 +3820,7 @@ public class APUHostelManagement {
             }
             break;
         }
-
+    
         try {
             User user = User.findUser(username, password, "managers.txt");
             if (user != null && user.getRole().equals("manager")) {
@@ -3854,15 +3843,15 @@ public class APUHostelManagement {
                 }
             }
         } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
     // Method to handle Staff registration
     public static void registerStaff() {
-        Scanner scanner = new Scanner(System.in);
         String icPassportNumber, username, password, contactNumber;
         boolean isIC = false;
-    
+
         OUTER:
         while (true) {
             System.out.println("Do you want to use IC or Passport Number to register?");
@@ -3882,7 +3871,7 @@ public class APUHostelManagement {
                 default -> System.out.println("Invalid choice. Please enter '1' for IC or '2' for Passport.");
             }
         }
-    
+
         while (true) {
             System.out.print("Enter " + (isIC ? "IC" : "Passport") + " Number: ");
             icPassportNumber = scanner.nextLine();
@@ -3896,7 +3885,7 @@ public class APUHostelManagement {
             }
             break;
         }
-    
+
         while (true) {
             System.out.print("Enter username: ");
             username = scanner.nextLine();
@@ -3910,7 +3899,7 @@ public class APUHostelManagement {
             }
             break;
         }
-    
+
         while (true) {
             System.out.print("Enter password: ");
             password = scanner.nextLine();
@@ -3924,7 +3913,7 @@ public class APUHostelManagement {
             }
             break;
         }
-    
+
         while (true) {
             System.out.print("Enter contact number: ");
             contactNumber = scanner.nextLine();
@@ -3938,7 +3927,7 @@ public class APUHostelManagement {
             }
             break;
         }
-    
+
         try {
             String dateOfRegistration = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
             String userID = generateUserID("U");
@@ -3948,14 +3937,14 @@ public class APUHostelManagement {
             System.out.println("Staff registered successfully.");
             displayWelcomePage();
         } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
     // Method to handle Staff login
     public static void loginStaff() {
-        Scanner scanner = new Scanner(System.in);
         String username, password;
-    
+
         while (true) {
             System.out.print("Enter username: ");
             username = scanner.nextLine();
@@ -3965,7 +3954,7 @@ public class APUHostelManagement {
             }
             break;
         }
-    
+
         while (true) {
             System.out.print("Enter password: ");
             password = scanner.nextLine();
@@ -3975,7 +3964,7 @@ public class APUHostelManagement {
             }
             break;
         }
-    
+
         try {
             User user = User.findUser(username, password, "approved_staffs.txt");
             if (user != null && user.getRole().equals("staff")) {
@@ -3998,15 +3987,15 @@ public class APUHostelManagement {
                 }
             }
         } catch (IOException e) {
+            e.printStackTrace();
         }
     }
     
     // Method to handle Resident registration
     public static void registerResident() {
-        Scanner scanner = new Scanner(System.in);
         String icPassportNumber, username, password, contactNumber;
         boolean isIC = false;
-    
+
         OUTER:
         while (true) {
             System.out.println("Do you want to use IC or Passport Number to register?");
@@ -4026,7 +4015,7 @@ public class APUHostelManagement {
                 default -> System.out.println("Invalid choice. Please enter '1' for IC or '2' for Passport.");
             }
         }
-    
+
         while (true) {
             System.out.print("Enter " + (isIC ? "IC" : "Passport") + " Number: ");
             icPassportNumber = scanner.nextLine();
@@ -4040,7 +4029,7 @@ public class APUHostelManagement {
             }
             break;
         }
-    
+
         while (true) {
             System.out.print("Enter username: ");
             username = scanner.nextLine();
@@ -4054,7 +4043,7 @@ public class APUHostelManagement {
             }
             break;
         }
-    
+
         while (true) {
             System.out.print("Enter password: ");
             password = scanner.nextLine();
@@ -4068,7 +4057,7 @@ public class APUHostelManagement {
             }
             break;
         }
-    
+
         while (true) {
             System.out.print("Enter contact number: ");
             contactNumber = scanner.nextLine();
@@ -4082,7 +4071,7 @@ public class APUHostelManagement {
             }
             break;
         }
-    
+
         try {
             String dateOfRegistration = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
             String userID = generateUserID("U");
@@ -4092,14 +4081,14 @@ public class APUHostelManagement {
             System.out.println("Resident registered successfully.");
             displayWelcomePage();
         } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
     // Method to handle Resident login
     public static void loginResident() {
-        Scanner scanner = new Scanner(System.in);
         String username, password;
-    
+
         while (true) {
             System.out.print("Enter username: ");
             username = scanner.nextLine();
@@ -4109,7 +4098,7 @@ public class APUHostelManagement {
             }
             break;
         }
-    
+
         while (true) {
             System.out.print("Enter password: ");
             password = scanner.nextLine();
@@ -4119,7 +4108,7 @@ public class APUHostelManagement {
             }
             break;
         }
-    
+
         try {
             User user = User.findUser(username, password, "approved_residents.txt");
             if (user != null && user.getRole().equals("resident")) {
@@ -4142,6 +4131,7 @@ public class APUHostelManagement {
                 }
             }
         } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
