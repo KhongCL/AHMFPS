@@ -1409,14 +1409,30 @@ public class APUHostelManagement {
                 }
             }
         
-            System.out.print("Are you sure you want to delete all rates? This action cannot be undone. You can restore all rates on the menu. (yes/no): ");
-            String confirm = scanner.nextLine();
-            if (confirm.equalsIgnoreCase("yes")) {
-                for (FeeRate rate : rates) {
-                    if (!usedFeeRateIDs.contains(rate.getFeeRateID())) {
-                        rate.setActive(false);
-                    }
+            List<FeeRate> deletableRates = new ArrayList<>();
+            for (FeeRate rate : rates) {
+                if (!usedFeeRateIDs.contains(rate.getFeeRateID())) {
+                    deletableRates.add(rate);
                 }
+            }
+        
+            if (deletableRates.isEmpty()) {
+                System.out.println("No deletable rates available.");
+                return;
+            }
+        
+            System.out.println("Rates that will be deleted:");
+            for (int i = 0; i < deletableRates.size(); i++) {
+                System.out.println((i + 1) + ". " + deletableRates.get(i));
+            }
+        
+            System.out.print("Are you sure you want to delete all these rates? This action cannot be undone. You can restore all rates on the menu. (yes/no): ");
+            String confirm = scanner.nextLine().trim().toLowerCase();
+            if (confirm.equals("yes")) {
+                for (FeeRate rate : deletableRates) {
+                    rate.setActive(false);
+                }
+                saveRatesToFile(rates);
                 System.out.println("All deletable rates deleted successfully.");
             } else {
                 System.out.println("Delete all rates cancelled.");
@@ -1436,12 +1452,18 @@ public class APUHostelManagement {
                 return;
             }
         
-            System.out.print("Are you sure you want to restore all rates? (yes/no): ");
+            System.out.println("Rates that will be restored:");
+            for (int i = 0; i < deletedRates.size(); i++) {
+                System.out.println((i + 1) + ". " + deletedRates.get(i));
+            }
+        
+            System.out.print("Are you sure you want to restore all these rates? (yes/no): ");
             String confirm = scanner.nextLine();
             if (confirm.equalsIgnoreCase("yes")) {
                 for (FeeRate rate : deletedRates) {
                     rate.setActive(true);
                 }
+                saveRatesToFile(rates);
                 System.out.println("All rates restored successfully.");
             } else {
                 System.out.println("Restore all rates cancelled.");
@@ -1451,13 +1473,13 @@ public class APUHostelManagement {
 
         private double getValidatedRate(Scanner scanner, String rateType) {
             double rate = -1;
-            while (rate < 0) {
+            while (rate <= 0) {
                 System.out.print("Enter " + rateType + ": ");
                 if (scanner.hasNextDouble()) {
                     rate = scanner.nextDouble();
                     scanner.nextLine(); // Consume newline
-                    if (rate < 0) {
-                        System.out.println(rateType + " cannot be negative. Please enter a valid rate.");
+                    if (rate <= 0) {
+                        System.out.println(rateType + " must be greater than zero. Please enter a valid rate.");
                     }
                 } else {
                     System.out.println("Invalid input. Please enter a valid " + rateType + ".");
@@ -1703,23 +1725,23 @@ public class APUHostelManagement {
         private void deleteRoom(Scanner scanner) {
             List<Room> rooms = readRoomsFromFile("rooms.txt");
         
-            System.out.println("Existing Active Rooms:");
-            List<Room> activeRooms = new ArrayList<>();
+            System.out.println("Existing Active and Available Rooms:");
+            List<Room> deletableRooms = new ArrayList<>();
             for (int i = 0; i < rooms.size(); i++) {
-                if (rooms.get(i).isActive()) {
-                    activeRooms.add(rooms.get(i));
-                    System.out.println((activeRooms.size()) + ". " + rooms.get(i));
+                if (rooms.get(i).isActive() && rooms.get(i).getRoomStatus().equalsIgnoreCase("available")) {
+                    deletableRooms.add(rooms.get(i));
+                    System.out.println((deletableRooms.size()) + ". " + rooms.get(i));
                 }
             }
         
-            if (activeRooms.isEmpty()) {
-                System.out.println("No active rooms available.");
+            if (deletableRooms.isEmpty()) {
+                System.out.println("No active and available rooms to delete.");
                 return;
             }
         
             System.out.print("Enter the number of the room to delete: ");
-            int roomChoice = getValidatedChoice(scanner, 1, activeRooms.size());
-            Room roomToDelete = activeRooms.get(roomChoice - 1);
+            int roomChoice = getValidatedChoice(scanner, 1, deletableRooms.size());
+            Room roomToDelete = deletableRooms.get(roomChoice - 1);
         
             System.out.print("Are you sure you want to delete this room? (yes/no): ");
             String confirm = scanner.nextLine().trim().toLowerCase();
@@ -1767,28 +1789,28 @@ public class APUHostelManagement {
         private void deleteAllRooms(Scanner scanner) {
             List<Room> rooms = readRoomsFromFile("rooms.txt");
         
-            System.out.println("Existing Active Rooms:");
-            List<Room> activeRooms = new ArrayList<>();
+            System.out.println("Existing Active and Available Rooms:");
+            List<Room> deletableRooms = new ArrayList<>();
             for (Room room : rooms) {
-                if (room.isActive()) {
-                    activeRooms.add(room);
-                    System.out.println(activeRooms.size() + ". " + room);
+                if (room.isActive() && room.getRoomStatus().equalsIgnoreCase("available")) {
+                    deletableRooms.add(room);
+                    System.out.println(deletableRooms.size() + ". " + room);
                 }
             }
         
-            if (activeRooms.isEmpty()) {
-                System.out.println("No active rooms available.");
+            if (deletableRooms.isEmpty()) {
+                System.out.println("No active and available rooms to delete.");
                 return;
             }
         
-            System.out.print("Are you sure you want to delete all active rooms? This action cannot be undone. You can restore all rooms from the menu. (yes/no): ");
+            System.out.print("Are you sure you want to delete all active and available rooms? This action cannot be undone. You can restore all rooms from the menu. (yes/no): ");
             String confirm = scanner.nextLine().trim().toLowerCase();
             if (confirm.equals("yes")) {
-                for (Room room : activeRooms) {
+                for (Room room : deletableRooms) {
                     room.setActive(false);
                 }
                 saveRoomsToFile(rooms);
-                System.out.println("All active rooms deleted successfully.");
+                System.out.println("All active and available rooms deleted successfully.");
             } else {
                 System.out.println("Delete all rooms cancelled.");
             }
@@ -1811,7 +1833,8 @@ public class APUHostelManagement {
                 return;
             }
         
-            System.out.print("Are you sure you want to restore all inactive rooms? (yes/no): ");
+            System.out.print("Are you sure you want to restore all inactive rooms? This action will restore the following rooms: ");
+            System.out.print("(yes/no): ");
             String confirm = scanner.nextLine().trim().toLowerCase();
             if (confirm.equals("yes")) {
                 for (Room room : inactiveRooms) {
