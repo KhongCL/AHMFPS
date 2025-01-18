@@ -3467,74 +3467,74 @@ public class APUHostelManagement {
             return choice;
         }
     
-        // Method to display the welcome page
-        public static void displayWelcomePage() {
-            System.out.println("Welcome to APU Hostel Management Fees Payment System (AHMFPS)");
-            System.out.println("Please choose your role:");
-            System.out.println("1. Manager");
-            System.out.println("2. Staff");
-            System.out.println("3. Resident");
-            System.out.print("Enter your choice (1-3): ");
-        
-            int choice = getValidatedChoice(scanner, 1, 3);
-        
-            switch (choice) {
-                case 1 -> {
-                    System.out.println("You have chosen Manager.");
-                    System.out.print("Enter authorization code: ");
-                    String authCode = scanner.nextLine();
-                    if (!isValidAuthCode(authCode, "manager")) {
-                        System.out.println("Invalid authorization code. Access denied.");
-                        displayWelcomePage();
-                        return;
-                    }
-                    System.out.println("1. Register");
-                    System.out.println("2. Login");
-                    System.out.print("Enter your choice (1-2): ");
-                    int managerChoice = getValidatedChoice(scanner, 1, 2);
-                    if (managerChoice == 1) {
-                        registerManager();
-                    } else {
-                        loginManager();
-                    }
+    // Method to display the welcome page
+    public static void displayWelcomePage() {
+        System.out.println("Welcome to APU Hostel Management Fees Payment System (AHMFPS)");
+        System.out.println("Please choose your role:");
+        System.out.println("1. Manager");
+        System.out.println("2. Staff");
+        System.out.println("3. Resident");
+        System.out.print("Enter your choice (1-3): ");
+    
+        int choice = getValidatedChoice(scanner, 1, 3);
+    
+        switch (choice) {
+            case 1 -> {
+                System.out.println("You have chosen Manager.");
+                System.out.print("Enter authorization code: ");
+                String authCode = scanner.nextLine();
+                if (!isValidAuthCode(authCode, "manager")) {
+                    System.out.println("Invalid authorization code. Access denied.");
+                    displayWelcomePage();
+                    return;
                 }
-                case 2 -> {
-                    System.out.println("You have chosen Staff.");
-                    System.out.print("Enter authorization code: ");
-                    String authCode = scanner.nextLine();
-                    if (!isValidAuthCode(authCode, "staff")) {
-                        System.out.println("Invalid authorization code. Access denied.");
-                        displayWelcomePage();
-                        return;
-                    }
-                    System.out.println("1. Register");
-                    System.out.println("2. Login");
-                    System.out.print("Enter your choice (1-2): ");
-                    int staffChoice = getValidatedChoice(scanner, 1, 2);
-                    if (staffChoice == 1) {
-                        registerStaff();
-                    } else {
-                        loginStaff();
-                    }
-                }
-                case 3 -> {
-                    System.out.println("You have chosen Resident.");
-                    System.out.println("1. Register");
-                    System.out.println("2. Login");
-                    System.out.print("Enter your choice (1-2): ");
-                    int residentChoice = getValidatedChoice(scanner, 1, 2);
-                    if (residentChoice == 1) {
-                        registerResident();
-                    } else {
-                        loginResident();
-                    }
-                }
-                default -> {
-                    System.out.println("Invalid choice. Please try again.");
-                    displayWelcomePage(); // Recursively call to retry
+                System.out.println("1. Register");
+                System.out.println("2. Login");
+                System.out.print("Enter your choice (1-2): ");
+                int managerChoice = getValidatedChoice(scanner, 1, 2);
+                if (managerChoice == 1) {
+                    registerManager();
+                } else {
+                    loginManager();
                 }
             }
+            case 2 -> {
+                System.out.println("You have chosen Staff.");
+                System.out.print("Enter authorization code: ");
+                String authCode = scanner.nextLine();
+                if (!isValidAuthCode(authCode, "staff")) {
+                    System.out.println("Invalid authorization code. Access denied.");
+                    displayWelcomePage();
+                    return;
+                }
+                System.out.println("1. Register");
+                System.out.println("2. Login");
+                System.out.print("Enter your choice (1-2): ");
+                int staffChoice = getValidatedChoice(scanner, 1, 2);
+                if (staffChoice == 1) {
+                    registerStaff();
+                } else {
+                    loginStaff();
+                }
+            }
+            case 3 -> {
+                System.out.println("You have chosen Resident.");
+                System.out.println("1. Register");
+                System.out.println("2. Login");
+                System.out.print("Enter your choice (1-2): ");
+                int residentChoice = getValidatedChoice(scanner, 1, 2);
+                if (residentChoice == 1) {
+                    registerResident();
+                } else {
+                    loginResident();
+                }
+            }
+            default -> {
+                System.out.println("Invalid choice. Please try again.");
+                displayWelcomePage(); // Recursively call to retry
+            }
         }
+    }
 
     // Method to check if IC/Passport Number, Username, or Contact Number is unique
     public static boolean isUnique(String icPassportNumber, String username, String contactNumber) throws IOException {
@@ -3674,7 +3674,7 @@ public class APUHostelManagement {
     }
 
     // Method to validate authorization code
-    private static boolean isValidAuthCode(String authCode, String role) {
+    public static boolean isValidAuthCode(String authCode, String role) {
         // Check against a predefined list of valid codes for each role
         Map<String, List<String>> validAuthCodes = new HashMap<>();
         validAuthCodes.put("manager", Arrays.asList("KhongCL", "kcl", "AUTH789"));
