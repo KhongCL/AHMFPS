@@ -15,3 +15,4 @@ RM14,FR01,standard,114,unavailable,1,true
 RM15,FR02,large,115,unavailable,3,true
 RM16,FR03,family,116,unavailable,6,true
 RM17,FR01,standard,117,unavailable,1,true
+RM18,FR03,family,118,available,6,true

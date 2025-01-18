@@ -401,20 +401,8 @@ public class APUHostelManagement {
                     System.out.println((i + 1 + unapprovedStaffs.size()) + ". " + user.getUsername() + " (" + user.getIcPassportNumber() + ")");
                 }
         
-                int userIndex = -1;
-                while (userIndex < 0 || userIndex >= (unapprovedStaffs.size() + unapprovedResidents.size())) {
-                    System.out.print("Enter the number of the user to approve: ");
-                    if (scanner.hasNextInt()) {
-                        userIndex = scanner.nextInt() - 1;
-                        scanner.nextLine(); // Consume newline
-                        if (userIndex < 0 || userIndex >= (unapprovedStaffs.size() + unapprovedResidents.size())) {
-                            System.out.println("Invalid user number. Please enter a valid number.");
-                        }
-                    } else {
-                        System.out.println("Invalid input. Please enter a number.");
-                        scanner.nextLine(); // Consume invalid input
-                    }
-                }
+                System.out.print("Enter the number of the user to approve: ");
+                int userIndex = getValidatedChoice(scanner, 1, unapprovedStaffs.size() + unapprovedResidents.size()) - 1;
         
                 String currentDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         
@@ -470,7 +458,6 @@ public class APUHostelManagement {
             }
         }
         
-
         // Method to search users
         public void searchUsers() {
             List<User> users = new ArrayList<>();
@@ -624,19 +611,7 @@ public class APUHostelManagement {
                     case 1 -> {
                         // Select user to update or delete
                         System.out.print("Enter the number of the user to update or delete (or 0 to cancel): ");
-                        int userChoice = -1;
-                        while (userChoice < 0 || userChoice > users.size()) {
-                            if (scanner.hasNextInt()) {
-                                userChoice = scanner.nextInt();
-                                scanner.nextLine(); // Consume newline
-                                if (userChoice < 0 || userChoice > users.size()) {
-                                    System.out.println("Invalid choice. Please enter a number between 0 and " + users.size() + ".");
-                                }
-                            } else {
-                                System.out.println("Invalid input. Please enter a number between 0 and " + users.size() + ".");
-                                scanner.nextLine(); // Consume invalid input
-                            }
-                        }
+                        int userChoice = getValidatedChoice(scanner, 0, users.size());
                         if (userChoice == 0) {
                             System.out.println("Operation cancelled.");
                             continue;
@@ -1823,10 +1798,9 @@ public class APUHostelManagement {
             System.out.println("3. Generate Receipt");
             System.out.println("4. Logout");
             System.out.print("Enter your choice: ");
-
-            int choice = scanner.nextInt();
-            scanner.nextLine(); // Consume newline
-
+        
+            int choice = getValidatedChoice(scanner, 1, 4);
+        
             switch (choice) {
                 case 1 -> updatePersonalInformation();
                 case 2 -> makePayment(); // Make Payment for Resident logic
@@ -1996,22 +1970,8 @@ public class APUHostelManagement {
             }
         
             // Select payment to update
-            int paymentIndex = -1;
-            while (true) {
-                System.out.print("Enter the number of the payment to update: ");
-                if (scanner.hasNextInt()) {
-                    paymentIndex = scanner.nextInt() - 1;
-                    scanner.nextLine(); // Consume newline
-                    if (paymentIndex >= 0 && paymentIndex < pendingPayments.size()) {
-                        break; // Valid input, exit loop
-                    } else {
-                        System.out.println("Invalid input. Please enter a number between 1 and " + pendingPayments.size() + ".");
-                    }
-                } else {
-                    System.out.println("Invalid input. Please enter a number.");
-                    scanner.nextLine(); // Consume invalid input
-                }
-            }
+            System.out.print("Enter the number of the payment to update: ");
+            int paymentIndex = getValidatedChoice(scanner, 1, pendingPayments.size()) - 1;
         
             // Show selected payment in detail
             String[] selectedPayment = pendingPayments.get(paymentIndex);
@@ -2144,22 +2104,8 @@ public class APUHostelManagement {
             }
         
             // Select payment to generate receipt
-            int paymentIndex = -1;
-            while (true) {
-                System.out.print("Enter the number of the payment to generate receipt: ");
-                if (scanner.hasNextInt()) {
-                    paymentIndex = scanner.nextInt() - 1;
-                    scanner.nextLine(); // Consume newline
-                    if (paymentIndex >= 0 && paymentIndex < eligiblePayments.size()) {
-                        break; // Valid input, exit loop
-                    } else {
-                        System.out.println("Invalid input. Please enter a number between 1 and " + eligiblePayments.size() + ".");
-                    }
-                } else {
-                    System.out.println("Invalid input. Please enter a number.");
-                    scanner.nextLine(); // Consume invalid input
-                }
-            }
+            System.out.print("Enter the number of the payment to generate receipt: ");
+            int paymentIndex = getValidatedChoice(scanner, 1, eligiblePayments.size()) - 1;
         
             // Show selected payment in detail
             String[] selectedPayment = eligiblePayments.get(paymentIndex);
@@ -2297,22 +2243,9 @@ public class APUHostelManagement {
             System.out.println("3. Manage Bookings");
             System.out.println("4. Logout");
             System.out.print("Enter your choice: ");
-
-            int choice = -1;
-
-            while (choice < 1 || choice > 4) {
-                if (scanner.hasNextInt()) {
-                    choice = scanner.nextInt();
-                    scanner.nextLine(); // Consume newline
-                    if (choice < 1 || choice > 4) {
-                        System.out.println("Invalid choice. Please enter a number between 1 and 4.");
-                    }
-                } else {
-                    System.out.println("Invalid input. Please enter a number between 1 and 4.");
-                    scanner.nextLine(); // Consume invalid input
-                }
-            }
-
+        
+            int choice = getValidatedChoice(scanner, 1, 4);
+        
             switch (choice) {
                 case 1 -> updatePersonalInformation();
                 case 2 -> viewPaymentRecords();
@@ -2453,8 +2386,7 @@ public class APUHostelManagement {
 
         public void viewPaymentRecords() {
             System.out.println("Payment Records:");
-            String residentID = this.getResidentID(); // Assuming there's a method to get the current resident's ID
-
+            String residentID = this.getResidentID(); 
             // Read room data from rooms.txt and store it in a map
             Map<String, String> roomMap = new HashMap<>();
             try (BufferedReader roomReader = new BufferedReader(new FileReader("rooms.txt"))) {
@@ -2510,12 +2442,7 @@ public class APUHostelManagement {
                 System.out.println("0. Go Back to Resident Menu");
                 System.out.print("Enter your choice: ");
                 
-                while (!scanner.hasNextInt()) {
-                    System.out.println("Invalid input. Please enter a number between 0 and 3.");
-                    scanner.next(); // Consume invalid input
-                }
-                choice = scanner.nextInt();
-                scanner.nextLine(); // Consume newline
+                choice = getValidatedChoice(scanner, 0, 3);
         
                 switch (choice) {
                     case 1 -> makeBooking();
@@ -2529,6 +2456,7 @@ public class APUHostelManagement {
                 }
             } while (choice != 0);
         }
+        
 
         public void makePaymentForBooking() {
             List<String[]> payments = new ArrayList<>();
@@ -2571,22 +2499,8 @@ public class APUHostelManagement {
             }
         
             // Select booking to pay for
-            int bookingIndex = -1;
-            while (true) {
-                System.out.print("Enter the number of the booking to pay for: ");
-                if (scanner.hasNextInt()) {
-                    bookingIndex = scanner.nextInt() - 1;
-                    scanner.nextLine(); // Consume newline
-                    if (bookingIndex >= 0 && bookingIndex < unpaidBookings.size()) {
-                        break; // Valid input, exit loop
-                    } else {
-                        System.out.println("Invalid input. Please enter a number between 1 and " + unpaidBookings.size() + ".");
-                    }
-                } else {
-                    System.out.println("Invalid input. Please enter a number.");
-                    scanner.nextLine(); // Consume invalid input
-                }
-            }
+            System.out.print("Enter the number of the booking to pay for: ");
+            int bookingIndex = getValidatedChoice(scanner, 1, unpaidBookings.size()) - 1;
         
             // Select payment method
             String paymentMethod = "";
@@ -2596,34 +2510,26 @@ public class APUHostelManagement {
                 System.out.println("2. Bank Transfer");
                 System.out.println("3. Cash");
                 System.out.print("Enter your choice: ");
-                if (scanner.hasNextInt()) {
-                    int paymentMethodChoice = scanner.nextInt();
-                    scanner.nextLine(); // Consume newline
+                int paymentMethodChoice = getValidatedChoice(scanner, 1, 3);
         
-                    switch (paymentMethodChoice) {
-                        case 1 -> paymentMethod = "credit_card";
-                        case 2 -> paymentMethod = "bank_transfer";
-                        case 3 -> paymentMethod = "cash";
-                        default -> {
-                            System.out.println("Invalid choice. Please try again.");
-                            continue;
-                        }
+                switch (paymentMethodChoice) {
+                    case 1 -> paymentMethod = "credit_card";
+                    case 2 -> paymentMethod = "bank_transfer";
+                    case 3 -> paymentMethod = "cash";
+                    default -> {
+                        System.out.println("Invalid choice. Please try again.");
+                        continue;
                     }
-                    break;
-                } else {
-                    System.out.println("Invalid input. Please enter a number.");
-                    scanner.nextLine(); // Consume invalid input
                 }
+                break;
             }
         
             // Confirm payment
             String confirmation = "";
-            while (true) {
+            while (!confirmation.equalsIgnoreCase("yes") && !confirmation.equalsIgnoreCase("no")) {
                 System.out.print("Do you want to proceed with the payment? (yes/no): ");
                 confirmation = scanner.nextLine();
-                if (confirmation.equalsIgnoreCase("yes") || confirmation.equalsIgnoreCase("no")) {
-                    break; // Valid input, exit loop
-                } else {
+                if (!confirmation.equalsIgnoreCase("yes") && !confirmation.equalsIgnoreCase("no")) {
                     System.out.println("Invalid input. Please enter 'yes' or 'no'.");
                 }
             }
@@ -2692,31 +2598,15 @@ public class APUHostelManagement {
             }
         
             // Select booking to cancel
-            int bookingIndex = -1;
-            while (true) {
-                System.out.print("Enter the number of the booking to cancel: ");
-                if (scanner.hasNextInt()) {
-                    bookingIndex = scanner.nextInt() - 1;
-                    scanner.nextLine(); // Consume newline
-                    if (bookingIndex >= 0 && bookingIndex < unpaidBookings.size()) {
-                        break; // Valid input, exit loop
-                    } else {
-                        System.out.println("Invalid input. Please enter a number between 1 and " + unpaidBookings.size() + ".");
-                    }
-                } else {
-                    System.out.println("Invalid input. Please enter a number.");
-                    scanner.nextLine(); // Consume invalid input
-                }
-            }
+            System.out.print("Enter the number of the booking to cancel: ");
+            int bookingIndex = getValidatedChoice(scanner, 1, unpaidBookings.size()) - 1;
         
             // Confirm cancellation
             String confirmation = "";
-            while (true) {
+            while (!confirmation.equalsIgnoreCase("yes") && !confirmation.equalsIgnoreCase("no")) {
                 System.out.print("Do you want to proceed with the cancellation? (yes/no): ");
                 confirmation = scanner.nextLine();
-                if (confirmation.equalsIgnoreCase("yes") || confirmation.equalsIgnoreCase("no")) {
-                    break; // Valid input, exit loop
-                } else {
+                if (!confirmation.equalsIgnoreCase("yes") && !confirmation.equalsIgnoreCase("no")) {
                     System.out.println("Invalid input. Please enter 'yes' or 'no'.");
                 }
             }
@@ -2770,7 +2660,6 @@ public class APUHostelManagement {
 
 
         public void makeBooking() {
-
             // Display room pricing based on fee rates in rooms.txt
             displayRoomPricing();
         
@@ -2780,8 +2669,7 @@ public class APUHostelManagement {
             System.out.println("2. Large\t\t3");
             System.out.println("3. Family\t\t6");
             System.out.print("Enter your choice: ");
-            int roomTypeChoice = scanner.nextInt();
-            scanner.nextLine(); // Consume newline
+            int roomTypeChoice = getValidatedChoice(scanner, 1, 3);
         
             String roomType = null;
             switch (roomTypeChoice) {
@@ -2852,7 +2740,7 @@ public class APUHostelManagement {
                     System.out.println("Invalid date format. Please enter the date in yyyy-MM-dd format.");
                 }
             }
-
+        
             // Prompt for end date
             while (endDate == null) {
                 System.out.print("Enter end date of your stay (yyyy-MM-dd): ");
