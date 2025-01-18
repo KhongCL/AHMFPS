@@ -121,13 +121,11 @@ public class APUHostelManagement {
                             case "staff" -> user = new Staff(parts);
                             case "resident" -> user = new Resident(parts);
                         }
-                    } else if (parts.length == 9 && "manager".equals(parts[7])) {
-                        user = new Manager(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], parts[7], Boolean.parseBoolean(parts[8]));
                     } else if (parts.length == 10) {
-                        if ("staff".equals(parts[7])) {
-                            user = new Staff(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], parts[7], Boolean.parseBoolean(parts[8]), parts[9]);
-                        } else if ("resident".equals(parts[7])) {
-                            user = new Resident(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], parts[7], Boolean.parseBoolean(parts[8]), parts[9]);
+                        switch (parts[7]) {
+                            case "manager" -> user = new Manager(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], parts[7], Boolean.parseBoolean(parts[8]), parts[9]);
+                            case "staff" -> user = new Staff(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], parts[7], Boolean.parseBoolean(parts[8]), parts[9]);
+                            case "resident" -> user = new Resident(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], parts[7], Boolean.parseBoolean(parts[8]), parts[9]);
                         }
                     }
                     if (user != null) {
@@ -157,7 +155,8 @@ public class APUHostelManagement {
             users.addAll(User.readFromFile("approved_residents.txt"));
             users.addAll(User.readFromFile("unapproved_staffs.txt"));
             users.addAll(User.readFromFile("approved_staffs.txt"));
-            users.addAll(User.readFromFile("managers.txt"));
+            users.addAll(User.readFromFile("approved_managers.txt"));
+            users.addAll(User.readFromFile("unapproved_managers.txt"));
         
             for (User user : users) {
                 if ((icPassportNumber != null && !icPassportNumber.isEmpty() && user.getIcPassportNumber().equals(icPassportNumber)) ||
@@ -192,10 +191,10 @@ public class APUHostelManagement {
                             case "resident" -> user = new Resident(parts);
                         }
                     } else if (parts.length == 10) {
-                        if ("staff".equalsIgnoreCase(parts[7])) {
-                            user = new Staff(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], parts[7],Boolean.parseBoolean(parts[8]), parts[9]);
-                        } else if ("resident".equalsIgnoreCase(parts[7])) {
-                            user = new Resident(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], parts[7], Boolean.parseBoolean(parts[8]), parts[9]);
+                        switch (parts[7]) {
+                            case "manager" -> user = new Manager(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], parts[7],Boolean.parseBoolean(parts[8]), parts[9]);
+                            case "staff" -> user = new Staff(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], parts[7],Boolean.parseBoolean(parts[8]), parts[9]);
+                            case "resident" -> user = new Resident(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], parts[7],Boolean.parseBoolean(parts[8]), parts[9]);
                         }
                     }
                     if (user != null) {
@@ -209,6 +208,7 @@ public class APUHostelManagement {
         public List<User> readUsersForSearch() throws IOException {
             List<User> users = new ArrayList<>();
             users.addAll(User.readFromFileForSearch("users.txt"));
+            users.addAll(User.readFromFileForSearch("unapproved_managers.txt"));
             users.addAll(User.readFromFileForSearch("unapproved_staffs.txt"));
             users.addAll(User.readFromFileForSearch("unapproved_residents.txt"));
             return users;
@@ -220,14 +220,17 @@ public class APUHostelManagement {
     // Manager class
     public static class Manager extends User {
         private String managerID;
+        private String dateOfApproval;
 
-        public Manager(String managerID, String userID, String icPassportNumber, String username, String password, String contactNumber, String dateOfRegistration, String role, boolean isActive) {
+        public Manager(String managerID, String userID, String icPassportNumber, String username, String password, String contactNumber, String dateOfRegistration, String role, boolean isActive, String dateOfApproval) {
             super(userID, icPassportNumber, username, password, contactNumber, dateOfRegistration, role, isActive);
             this.managerID = managerID;
+            this.dateOfApproval = dateOfApproval;
         }
 
         public Manager(String[] parts) {
             super(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], Boolean.parseBoolean(parts[7]));
+            this.dateOfApproval = parts[5];
         }
 
         public String getManagerID() {
@@ -238,10 +241,22 @@ public class APUHostelManagement {
             this.managerID = managerID;
         }
 
-        
-        public void saveToManagerFile() throws IOException {
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter("managers.txt", true))) {
-                writer.write(managerID + "," + userID + "," + icPassportNumber + "," + username + "," + password + "," + contactNumber + "," + dateOfRegistration + "," + role + "," + isActive);
+        public String getDateOfApproval() {
+            return dateOfApproval;
+        }
+
+        public void setDateOfApproval(String dateOfApproval) {
+            this.dateOfApproval = dateOfApproval;
+        }
+
+        @Override
+        public String toString() {
+            return "UserID: " + getUserID() + ", IC/Passport Number: " + getIcPassportNumber() + ", Username: " + getUsername() + ", Contact Number: " + getContactNumber() + ", Date of Registration: " + getDateOfRegistration() + ", Role: " + getRole() + ", IsActive: " + getIsActive() + ", Date of Approval: " + dateOfApproval;
+        }
+
+        public void saveToManagerFile(String managerID, String userID, String filename) throws IOException {
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename, true))) {
+                writer.write(managerID + "," + userID + "," + getIcPassportNumber() + "," + getUsername() + "," + getPassword() + "," + getContactNumber() + "," + getDateOfRegistration() + "," + getRole() + "," + getIsActive() + "," + dateOfApproval);
                 writer.newLine();
             }
         }
@@ -371,7 +386,7 @@ public class APUHostelManagement {
                 }
         
                 try {
-                    updateFile("managers.txt", this);
+                    updateFile("approved_managers.txt", this);
                     updateFile("users.txt", this);
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -381,33 +396,75 @@ public class APUHostelManagement {
 
         private void approveUserRegistration() {
             try {
+                List<User> unapprovedManagers = User.readFromFile("unapproved_managers.txt");
                 List<User> unapprovedStaffs = User.readFromFile("unapproved_staffs.txt");
                 List<User> unapprovedResidents = User.readFromFile("unapproved_residents.txt");
         
-                if (unapprovedStaffs.isEmpty() && unapprovedResidents.isEmpty()) {
+                if (unapprovedManagers.isEmpty() && unapprovedStaffs.isEmpty() && unapprovedResidents.isEmpty()) {
                     System.out.println("No users to approve.");
                     return;
                 }
         
-                System.out.println("Unapproved Staffs:");
-                for (int i = 0; i < unapprovedStaffs.size(); i++) {
-                    User user = unapprovedStaffs.get(i);
+                System.out.println("Choose the role to approve:");
+                System.out.println("1. Manager");
+                System.out.println("2. Staff");
+                System.out.println("3. Resident");
+                System.out.print("Enter your choice (1-3): ");
+                int roleChoice = getValidatedChoice(scanner, 1, 3);
+        
+                List<User> selectedRoleList = new ArrayList<>();
+                String role = "";
+        
+                switch (roleChoice) {
+                    case 1 -> {
+                        selectedRoleList = unapprovedManagers;
+                        role = "Manager";
+                    }
+                    case 2 -> {
+                        selectedRoleList = unapprovedStaffs;
+                        role = "Staff";
+                    }
+                    case 3 -> {
+                        selectedRoleList = unapprovedResidents;
+                        role = "Resident";
+                    }
+                    default -> {
+                        System.out.println("Invalid choice. Returning to menu.");
+                        return;
+                    }
+                }
+        
+                if (selectedRoleList.isEmpty()) {
+                    System.out.println("No unapproved " + role.toLowerCase() + "s found.");
+                    return;
+                }
+        
+                System.out.println("Unapproved " + role + "s:");
+                for (int i = 0; i < selectedRoleList.size(); i++) {
+                    User user = selectedRoleList.get(i);
                     System.out.println((i + 1) + ". " + user.getUsername() + " (" + user.getIcPassportNumber() + ")");
                 }
         
-                System.out.println("Unapproved Residents:");
-                for (int i = 0; i < unapprovedResidents.size(); i++) {
-                    User user = unapprovedResidents.get(i);
-                    System.out.println((i + 1 + unapprovedStaffs.size()) + ". " + user.getUsername() + " (" + user.getIcPassportNumber() + ")");
-                }
-        
-                System.out.print("Enter the number of the user to approve: ");
-                int userIndex = getValidatedChoice(scanner, 1, unapprovedStaffs.size() + unapprovedResidents.size()) - 1;
+                System.out.print("Enter the number of the " + role.toLowerCase() + " to approve: ");
+                int userIndex = getValidatedChoice(scanner, 1, selectedRoleList.size()) - 1;
         
                 String currentDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         
-                if (userIndex >= 0 && userIndex < unapprovedStaffs.size()) {
-                    Staff staffToApprove = (Staff) unapprovedStaffs.get(userIndex);
+                if (role.equals("Manager")) {
+                    Manager managerToApprove = (Manager) selectedRoleList.get(userIndex);
+                    String userID = generateUserID("U");
+                    String managerID = generateUserID("M");
+                    managerToApprove.setUserID(userID);
+                    managerToApprove.setManagerID(managerID);
+                    managerToApprove.setDateOfApproval(currentDate);
+                    managerToApprove.setIsActive(true);
+                    managerToApprove.saveToFile("users.txt");
+                    managerToApprove.saveToManagerFile(managerID, userID, "approved_managers.txt");
+                    selectedRoleList.remove(userIndex);
+                    saveUnapprovedUsers(selectedRoleList, "unapproved_managers.txt");
+                    System.out.println("Manager approved successfully.");
+                } else if (role.equals("Staff")) {
+                    Staff staffToApprove = (Staff) selectedRoleList.get(userIndex);
                     String userID = generateUserID("U");
                     String staffID = generateUserID("S");
                     staffToApprove.setUserID(userID);
@@ -416,11 +473,11 @@ public class APUHostelManagement {
                     staffToApprove.setIsActive(true);
                     staffToApprove.saveToFile("users.txt");
                     staffToApprove.saveToStaffFile(staffID, userID, "approved_staffs.txt");
-                    unapprovedStaffs.remove(userIndex);
-                    saveUnapprovedUsers(unapprovedStaffs, "unapproved_staffs.txt");
+                    selectedRoleList.remove(userIndex);
+                    saveUnapprovedUsers(selectedRoleList, "unapproved_staffs.txt");
                     System.out.println("Staff approved successfully.");
-                } else if (userIndex >= unapprovedStaffs.size() && userIndex < unapprovedStaffs.size() + unapprovedResidents.size()) {
-                    Resident residentToApprove = (Resident) unapprovedResidents.get(userIndex - unapprovedStaffs.size());
+                } else if (role.equals("Resident")) {
+                    Resident residentToApprove = (Resident) selectedRoleList.get(userIndex);
                     String userID = generateUserID("U");
                     String residentID = generateUserID("R");
                     residentToApprove.setUserID(userID);
@@ -429,8 +486,8 @@ public class APUHostelManagement {
                     residentToApprove.setIsActive(true);
                     residentToApprove.saveToFile("users.txt");
                     residentToApprove.saveToResidentFile(residentID, userID, "approved_residents.txt");
-                    unapprovedResidents.remove(userIndex - unapprovedStaffs.size());
-                    saveUnapprovedUsers(unapprovedResidents, "unapproved_residents.txt");
+                    selectedRoleList.remove(userIndex);
+                    saveUnapprovedUsers(selectedRoleList, "unapproved_residents.txt");
                     System.out.println("Resident approved successfully.");
                 } else {
                     System.out.println("Invalid user number.");
@@ -439,12 +496,16 @@ public class APUHostelManagement {
                 System.out.println("An error occurred while approving the user.");
             }
         }
-
+        
         // Method to save unapproved users to file
         private void saveUnapprovedUsers(List<User> users, String filename) throws IOException {
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
                 for (User user : users) {
-                    if (user instanceof Staff) {
+                    if (user instanceof Manager) {
+                        Manager manager = (Manager) user;
+                        manager.setIsActive(true);
+                        writer.write(manager.getManagerID() + "," + manager.getUserID() + "," + manager.getIcPassportNumber() + "," + manager.getUsername() + "," + manager.getPassword() + "," + manager.getContactNumber() + "," + manager.getDateOfRegistration() + "," + manager.getRole() + "," + manager.getIsActive() + "," + null);
+                    } else if (user instanceof Staff) {
                         Staff staff = (Staff) user;
                         staff.setIsActive(true);
                         writer.write(staff.getStaffID() + "," + staff.getUserID() + "," + staff.getIcPassportNumber() + "," + staff.getUsername() + "," + staff.getPassword() + "," + staff.getContactNumber() + "," + staff.getDateOfRegistration() + "," + staff.getRole() + "," + staff.getIsActive() + "," + null);
@@ -699,7 +760,7 @@ public class APUHostelManagement {
         }
         
         private List<String> getAllFilenames() {
-            return Arrays.asList("approved_staffs.txt", "approved_residents.txt", "users.txt", "managers.txt", "unapproved_staffs.txt", "unapproved_residents.txt");
+            return Arrays.asList("approved_staffs.txt", "approved_residents.txt", "users.txt", "approved_managers.txt", "unapproved_managers.txt", "unapproved_staffs.txt", "unapproved_residents.txt");
         }
         
         public void updateUser(User userToUpdate) {
@@ -794,7 +855,8 @@ public class APUHostelManagement {
                     updateFile("approved_staffs.txt", userToUpdate);
                     updateFile("approved_residents.txt", userToUpdate);
                     updateFile("users.txt", userToUpdate);
-                    updateFile("managers.txt", userToUpdate);
+                    updateFile("approved_managers.txt", userToUpdate);
+                    updateFile("unapproved_managers.txt", userToUpdate);
                     updateFile("unapproved_staffs.txt", userToUpdate);
                     updateFile("unapproved_residents.txt", userToUpdate);
                 } catch (IOException e) {
@@ -824,7 +886,8 @@ public class APUHostelManagement {
                         updateFile("approved_staffs.txt", userToUpdate);
                         updateFile("approved_residents.txt", userToUpdate);
                         updateFile("users.txt", userToUpdate);
-                        updateFile("managers.txt", userToUpdate);
+                        updateFile("approved_managers.txt", userToUpdate);
+                        updateFile("unapproved_managers.txt", userToUpdate);
                         updateFile("unapproved_staffs.txt", userToUpdate);
                         updateFile("unapproved_residents.txt", userToUpdate);
                     } catch (IOException e) {
@@ -860,7 +923,8 @@ public class APUHostelManagement {
                     updateFile("approved_staffs.txt", userToRestore);
                     updateFile("approved_residents.txt", userToRestore);
                     updateFile("users.txt", userToRestore);
-                    updateFile("managers.txt", userToRestore);
+                    updateFile("approved_managers.txt", userToRestore);
+                    updateFile("unapproved_managers.txt", userToRestore);
                     updateFile("unapproved_staffs.txt", userToRestore);
                     updateFile("unapproved_residents.txt", userToRestore);
                 } catch (IOException e) {
@@ -876,24 +940,26 @@ public class APUHostelManagement {
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
                 for (User user : users) {
                     boolean isMatch = user.getUserID().equals(updatedUser.getUserID());
-                    if (filename.equals("unapproved_staffs.txt") || filename.equals("unapproved_residents.txt")) {
+                    if (filename.equals("unapproved_staffs.txt") || filename.equals("unapproved_residents.txt") || filename.equals("unapproved_managers.txt")) {
                         isMatch = user.getIcPassportNumber().equals(updatedUser.getIcPassportNumber()) ||
                                   user.getUsername().equals(updatedUser.getUsername()) ||
                                   user.getContactNumber().equals(updatedUser.getContactNumber());
                     }
-                    
+        
                     if (isMatch) {
                         if (filename.equals("users.txt")) {
                             writer.write(updatedUser.getUserID() + "," + updatedUser.getIcPassportNumber() + "," + updatedUser.getUsername() + "," + updatedUser.getPassword() + "," + updatedUser.getContactNumber() + "," + updatedUser.getDateOfRegistration() + "," + updatedUser.getRole() + "," + updatedUser.getIsActive());
-                        } else if (filename.equals("managers.txt") && user instanceof Manager) {
+                        } else if (filename.equals("approved_managers.txt") && user instanceof Manager) {
                             Manager manager = (Manager) user;
-                            writer.write(manager.getManagerID() + "," + updatedUser.getUserID() + "," + updatedUser.getIcPassportNumber() + "," + updatedUser.getUsername() + "," + updatedUser.getPassword() + "," + updatedUser.getContactNumber() + "," + updatedUser.getDateOfRegistration() + "," + updatedUser.getRole() + "," + updatedUser.getIsActive());
+                            writer.write(manager.getManagerID() + "," + updatedUser.getUserID() + "," + updatedUser.getIcPassportNumber() + "," + updatedUser.getUsername() + "," + updatedUser.getPassword() + "," + updatedUser.getContactNumber() + "," + updatedUser.getDateOfRegistration() + "," + updatedUser.getRole() + "," + updatedUser.getIsActive() + "," + manager.getDateOfApproval());
                         } else if (filename.equals("approved_staffs.txt") && user instanceof Staff) {
                             Staff staff = (Staff) user;
                             writer.write(staff.getStaffID() + "," + updatedUser.getUserID() + "," + updatedUser.getIcPassportNumber() + "," + updatedUser.getUsername() + "," + updatedUser.getPassword() + "," + updatedUser.getContactNumber() + "," + updatedUser.getDateOfRegistration() + "," + updatedUser.getRole() + "," + updatedUser.getIsActive() + "," + staff.getDateOfApproval());
                         } else if (filename.equals("approved_residents.txt") && user instanceof Resident) {
                             Resident resident = (Resident) user;
                             writer.write(resident.getResidentID() + "," + updatedUser.getUserID() + "," + updatedUser.getIcPassportNumber() + "," + updatedUser.getUsername() + "," + updatedUser.getPassword() + "," + updatedUser.getContactNumber() + "," + updatedUser.getDateOfRegistration() + "," + updatedUser.getRole() + "," + updatedUser.getIsActive() + "," + resident.getDateOfApproval());
+                        } else if (filename.equals("unapproved_managers.txt") && user instanceof Manager) {
+                            writer.write("null,null," + updatedUser.getIcPassportNumber() + "," + updatedUser.getUsername() + "," + updatedUser.getPassword() + "," + updatedUser.getContactNumber() + "," + updatedUser.getDateOfRegistration() + "," + updatedUser.getRole() + "," + updatedUser.getIsActive() + ",null");
                         } else if (filename.equals("unapproved_staffs.txt") && user instanceof Staff) {
                             writer.write("null,null," + updatedUser.getIcPassportNumber() + "," + updatedUser.getUsername() + "," + updatedUser.getPassword() + "," + updatedUser.getContactNumber() + "," + updatedUser.getDateOfRegistration() + "," + updatedUser.getRole() + "," + updatedUser.getIsActive() + ",null");
                         } else if (filename.equals("unapproved_residents.txt") && user instanceof Resident) {
@@ -902,15 +968,17 @@ public class APUHostelManagement {
                     } else {
                         if (filename.equals("users.txt")) {
                             writer.write(user.getUserID() + "," + user.getIcPassportNumber() + "," + user.getUsername() + "," + user.getPassword() + "," + user.getContactNumber() + "," + user.getDateOfRegistration() + "," + user.getRole() + "," + user.getIsActive());
-                        } else if (filename.equals("managers.txt") && user instanceof Manager) {
+                        } else if (filename.equals("approved_managers.txt") && user instanceof Manager) {
                             Manager manager = (Manager) user;
-                            writer.write(manager.getManagerID() + "," + user.getUserID() + "," + user.getIcPassportNumber() + "," + user.getUsername() + "," + user.getPassword() + "," + user.getContactNumber() + "," + user.getDateOfRegistration() + "," + user.getRole() + "," + user.getIsActive());
+                            writer.write(manager.getManagerID() + "," + user.getUserID() + "," + user.getIcPassportNumber() + "," + user.getUsername() + "," + user.getPassword() + "," + user.getContactNumber() + "," + user.getDateOfRegistration() + "," + user.getRole() + "," + user.getIsActive() + "," + manager.getDateOfApproval());
                         } else if (filename.equals("approved_staffs.txt") && user instanceof Staff) {
                             Staff staff = (Staff) user;
                             writer.write(staff.getStaffID() + "," + staff.getUserID() + "," + staff.getIcPassportNumber() + "," + staff.getUsername() + "," + staff.getPassword() + "," + staff.getContactNumber() + "," + staff.getDateOfRegistration() + "," + staff.getRole() + "," + staff.getIsActive() + "," + staff.getDateOfApproval());
                         } else if (filename.equals("approved_residents.txt") && user instanceof Resident) {
                             Resident resident = (Resident) user;
                             writer.write(resident.getResidentID() + "," + resident.getUserID() + "," + resident.getIcPassportNumber() + "," + resident.getUsername() + "," + resident.getPassword() + "," + resident.getContactNumber() + "," + resident.getDateOfRegistration() + "," + resident.getRole() + "," + resident.getIsActive() + "," + resident.getDateOfApproval());
+                        } else if (filename.equals("unapproved_managers.txt") && user instanceof Manager) {
+                            writer.write("null,null," + user.getIcPassportNumber() + "," + user.getUsername() + "," + user.getPassword() + "," + user.getContactNumber() + "," + user.getDateOfRegistration() + "," + user.getRole() + "," + user.getIsActive() + ",null");
                         } else if (filename.equals("unapproved_staffs.txt") && user instanceof Staff) {
                             writer.write("null,null," + user.getIcPassportNumber() + "," + user.getUsername() + "," + user.getPassword() + "," + user.getContactNumber() + "," + user.getDateOfRegistration() + "," + user.getRole() + "," + user.getIsActive() + ",null");
                         } else if (filename.equals("unapproved_residents.txt") && user instanceof Resident) {
@@ -3476,7 +3544,8 @@ public class APUHostelManagement {
         users.addAll(User.readFromFile("approved_residents.txt"));
         users.addAll(User.readFromFile("unapproved_staffs.txt"));
         users.addAll(User.readFromFile("approved_staffs.txt"));
-        users.addAll(User.readFromFile("managers.txt"));
+        users.addAll(User.readFromFile("approved_managers.txt"));
+        users.addAll(User.readFromFile("unapproved_managers.txt"));
 
         for (User user : users) {
             if ((icPassportNumber != null && !icPassportNumber.isEmpty() && user.getIcPassportNumber().equals(icPassportNumber)) ||
@@ -3608,7 +3677,7 @@ public class APUHostelManagement {
     private static boolean isValidAuthCode(String authCode, String role) {
         // Check against a predefined list of valid codes for each role
         Map<String, List<String>> validAuthCodes = new HashMap<>();
-        validAuthCodes.put("manager", Arrays.asList("KhongCL", "kcla", "AUTH789"));
+        validAuthCodes.put("manager", Arrays.asList("KhongCL", "kcl", "AUTH789"));
         validAuthCodes.put("staff", Arrays.asList("kcls", "kynax", "AUTH456"));
     
         return validAuthCodes.getOrDefault(role, Collections.emptyList()).contains(authCode);
@@ -3699,9 +3768,8 @@ public class APUHostelManagement {
             String dateOfRegistration = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
             String userID = generateUserID("U");
             String managerID = generateUserID("M");
-            Manager manager = new Manager(managerID, userID, icPassportNumber, username, password, contactNumber, dateOfRegistration, "manager", true);
-            manager.saveToFile("users.txt");
-            manager.saveToManagerFile();
+            Manager manager = new Manager(managerID, userID, icPassportNumber, username, password, contactNumber, dateOfRegistration, "manager", false, null);
+            manager.saveToManagerFile(null, null, "unapproved_managers.txt");
             System.out.println("Manager registered successfully.");
             displayWelcomePage();
         } catch (IOException e) {
@@ -3734,7 +3802,7 @@ public class APUHostelManagement {
         }
     
         try {
-            User user = User.findUser(username, password, "managers.txt");
+            User user = User.findUser(username, password, "approved_managers.txt");
             if (user != null && user.getRole().equals("manager")) {
                 if (user.getIsActive()) {
                     System.out.println("Login successful.");
@@ -4053,7 +4121,7 @@ public class APUHostelManagement {
         String filename = null;
         switch (prefix) {
             case "U" -> filename = "users.txt";
-            case "M" -> filename = "managers.txt";
+            case "M" -> filename = "approved_managers.txt";
             case "S" -> filename = "approved_staffs.txt";
             case "R" -> filename = "approved_residents.txt";
             default -> {
