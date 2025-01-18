@@ -492,19 +492,7 @@ public class APUHostelManagement {
                 System.out.println("4. No filter");
                 System.out.print("Enter your choice (1-4): ");
         
-                int filterChoice = -1;
-                while (filterChoice < 1 || filterChoice > 4) {
-                    if (scanner.hasNextInt()) {
-                        filterChoice = scanner.nextInt();
-                        scanner.nextLine(); // Consume newline
-                        if (filterChoice < 1 || filterChoice > 4) {
-                            System.out.println("Invalid choice. Please enter a number between 1 and 4.");
-                        }
-                    } else {
-                        System.out.println("Invalid input. Please enter a number between 1 and 4.");
-                        scanner.nextLine(); // Consume invalid input
-                    }
-                }
+                int filterChoice = getValidatedChoice(scanner, 1, 4);
         
                 List<User> filteredUsers = new ArrayList<>(users);
         
@@ -513,19 +501,7 @@ public class APUHostelManagement {
                         System.out.println("1. Approved");
                         System.out.println("2. Unapproved");
                         System.out.print("Enter your choice (1-2): ");
-                        int approvalChoice = -1;
-                        while (approvalChoice < 1 || approvalChoice > 2) {
-                            if (scanner.hasNextInt()) {
-                                approvalChoice = scanner.nextInt();
-                                scanner.nextLine(); // Consume newline
-                                if (approvalChoice < 1 || approvalChoice > 2) {
-                                    System.out.println("Invalid choice. Please enter 1 for Approved or 2 for Unapproved.");
-                                }
-                            } else {
-                                System.out.println("Invalid input. Please enter 1 for Approved or 2 for Unapproved.");
-                                scanner.nextLine(); // Consume invalid input
-                            }
-                        }
+                        int approvalChoice = getValidatedChoice(scanner, 1, 2);
                         try {
                             if (approvalChoice == 1) {
                                 // Filter approved users
@@ -544,19 +520,7 @@ public class APUHostelManagement {
                         System.out.println("2. Staff");
                         System.out.println("3. Resident");
                         System.out.print("Enter your choice (1-3): ");
-                        int roleChoice = -1;
-                        while (roleChoice < 1 || roleChoice > 3) {
-                            if (scanner.hasNextInt()) {
-                                roleChoice = scanner.nextInt();
-                                scanner.nextLine(); // Consume newline
-                                if (roleChoice < 1 || roleChoice > 3) {
-                                    System.out.println("Invalid choice. Please enter a number between 1 and 3.");
-                                }
-                            } else {
-                                System.out.println("Invalid input. Please enter a number between 1 and 3.");
-                                scanner.nextLine(); // Consume invalid input
-                            }
-                        }
+                        int roleChoice = getValidatedChoice(scanner, 1, 3);
                         final String[] role = {""};
                         switch (roleChoice) {
                             case 1 -> role[0] = "manager";
@@ -571,19 +535,7 @@ public class APUHostelManagement {
                         System.out.println("1. Active");
                         System.out.println("2. Inactive");
                         System.out.print("Enter your choice (1-2): ");
-                        int activeChoice = -1;
-                        while (activeChoice < 1 || activeChoice > 2) {
-                            if (scanner.hasNextInt()) {
-                                activeChoice = scanner.nextInt();
-                                scanner.nextLine(); // Consume newline
-                                if (activeChoice < 1 || activeChoice > 2) {
-                                    System.out.println("Invalid choice. Please enter 1 for Active or 2 for Inactive.");
-                                }
-                            } else {
-                                System.out.println("Invalid input. Please enter 1 for Active or 2 for Inactive.");
-                                scanner.nextLine(); // Consume invalid input
-                            }
-                        }
+                        int activeChoice = getValidatedChoice(scanner, 1, 2);
                         boolean isActive = (activeChoice == 1);
                         filteredUsers = filteredUsers.stream()
                                 .filter(user -> user.getIsActive() == isActive)
@@ -601,19 +553,7 @@ public class APUHostelManagement {
                 System.out.println("4. Username Descending");
                 System.out.print("Enter your choice (1-4): ");
         
-                int sortChoice = -1;
-                while (sortChoice < 1 || sortChoice > 4) {
-                    if (scanner.hasNextInt()) {
-                        sortChoice = scanner.nextInt();
-                        scanner.nextLine(); // Consume newline
-                        if (sortChoice < 1 || sortChoice > 4) {
-                            System.out.println("Invalid choice. Please enter a number between 1 and 4.");
-                        }
-                    } else {
-                        System.out.println("Invalid input. Please enter a number between 1 and 4.");
-                        scanner.nextLine(); // Consume invalid input
-                    }
-                }
+                int sortChoice = getValidatedChoice(scanner, 1, 4);
         
                 switch (sortChoice) {
                     case 1 -> filteredUsers.sort(Comparator.comparing(User::getUserID));
@@ -797,19 +737,7 @@ public class APUHostelManagement {
                 System.out.println("4. Update Contact Number");
                 System.out.println("0. Go Back");
                 System.out.print("Enter your choice: ");
-                choice = -1;
-                while (choice < 0 || choice > 4) {
-                    if (scanner.hasNextInt()) {
-                        choice = scanner.nextInt();
-                        scanner.nextLine(); // Consume newline
-                        if (choice < 0 || choice > 4) {
-                            System.out.println("Invalid choice. Please enter a number between 0 and 4.");
-                        }
-                    } else {
-                        System.out.println("Invalid input. Please enter a number between 0 and 4.");
-                        scanner.nextLine(); // Consume invalid input
-                    }
-                }
+                choice = getValidatedChoice(scanner, 0, 4);
         
                 switch (choice) {
                     case 1 -> {
@@ -1090,23 +1018,6 @@ public class APUHostelManagement {
                 }
             }
             displayMenu();
-        }
-
-        private int getValidatedChoice(Scanner scanner, int min, int max) {
-            int choice = -1;
-            while (choice < min || choice > max) {
-                if (scanner.hasNextInt()) {
-                    choice = scanner.nextInt();
-                    scanner.nextLine(); // Consume newline
-                    if (choice < min || choice > max) {
-                        System.out.println("Invalid choice. Please enter a number between " + min + " and " + max + ".");
-                    }
-                } else {
-                    System.out.println("Invalid input. Please enter a number between " + min + " and " + max + ".");
-                    scanner.nextLine(); // Consume invalid input
-                }
-            }
-            return choice;
         }
         
         private void setInitialRates(Scanner scanner, List<FeeRate> rates) {
@@ -1839,9 +1750,22 @@ public class APUHostelManagement {
             }
         }
 
-
-
-        
+        private int getValidatedChoice(Scanner scanner, int min, int max) {
+            int choice = -1;
+            while (choice < min || choice > max) {
+                if (scanner.hasNextInt()) {
+                    choice = scanner.nextInt();
+                    scanner.nextLine(); // Consume newline
+                    if (choice < min || choice > max) {
+                        System.out.println("Invalid choice. Please enter a number between " + min + " and " + max + ".");
+                    }
+                } else {
+                    System.out.println("Invalid input. Please enter a number between " + min + " and " + max + ".");
+                    scanner.nextLine(); // Consume invalid input
+                }
+            }
+            return choice;
+        }   
     }
 
     // Staff class
@@ -2529,7 +2453,7 @@ public class APUHostelManagement {
 
         public void viewPaymentRecords() {
             System.out.println("Payment Records:");
-            String userID = this.getUserID(); // Assuming there's a method to get the current user's ID
+            String residentID = this.getResidentID(); // Assuming there's a method to get the current resident's ID
 
             // Read room data from rooms.txt and store it in a map
             Map<String, String> roomMap = new HashMap<>();
@@ -2537,8 +2461,8 @@ public class APUHostelManagement {
                 String line;
                 while ((line = roomReader.readLine()) != null) {
                     String[] parts = line.split(",");
-                    if (parts.length >= 2) {
-                        roomMap.put(parts[0], parts[1]); // Assuming parts[0] is RoomID and parts[1] is RoomNumber
+                    if (parts.length >= 4) {
+                        roomMap.put(parts[0], parts[3]); // Assuming parts[0] is RoomID and parts[3] is RoomNumber
                     }
                 }
             } catch (IOException e) {
@@ -2550,16 +2474,19 @@ public class APUHostelManagement {
                 String line;
                 while ((line = br.readLine()) != null) {
                     String[] details = line.split(",");
-                    if (details[1].equals(userID)) { // Assuming the second element is the residentID
+                    if (details[1].equals(residentID) && !details[7].equals("unpaid") && !details[10].equals("null")) { // Assuming the second element is the residentID, eighth is PaymentStatus, and eleventh is PaymentMethod
                         hasRecords = true;
                         String roomNumber = roomMap.getOrDefault(details[5], "Unknown Room"); // Assuming the sixth element is RoomID
+                        LocalDate startDate = LocalDate.parse(details[3]); // Assuming the fourth element is StartDate
+                        LocalDate endDate = LocalDate.parse(details[4]); // Assuming the fifth element is EndDate
+                        long stayDuration = ChronoUnit.DAYS.between(startDate, endDate);
                         System.out.println("Payment ID: " + details[0]);
-                        System.out.println("Resident ID: " + details[1]);
-                        System.out.println("Staff ID: " + (details[2].equals("NULL") ? "N/A" : details[2]));
-                        System.out.println("Payment Amount: " + details[3]);
-                        System.out.println("Booking Date: " + details[4]);
+                        System.out.println("Payment Status: " + details[7]);
+                        System.out.println("Stay Duration: " + stayDuration + " days");
+                        System.out.println("Payment Amount: " + details[6]);
+                        System.out.println("Booking Date: " + details[8]);
                         System.out.println("Room Number: " + roomNumber);
-                        System.out.println("Payment Method: " + (details[6].equals("NULL") ? "N/A" : details[6]));
+                        System.out.println("Payment Method: " + details[9]);
                         System.out.println("-----------------------------");
                     }
                 }
