@@ -3034,14 +3034,14 @@ public class APUHostelManagement {
             return "P" + String.format("%02d", id);
         }
 
-
         private double calculatePaymentAmount(LocalDate startDate, LocalDate endDate, String feeRateID) {
-            long totalDays = ChronoUnit.DAYS.between(startDate, endDate);
+            long totalDays = ChronoUnit.DAYS.between(startDate, endDate.plusDays(1)); // Include the end date
+        
             double dailyRate = 0;
             double weeklyRate = 0;
             double monthlyRate = 0;
             double yearlyRate = 0;
-
+        
             try (BufferedReader rateReader = new BufferedReader(new FileReader("fee_rates.txt"))) {
                 String line;
                 while ((line = rateReader.readLine()) != null) {
@@ -3057,17 +3057,16 @@ public class APUHostelManagement {
             } catch (IOException e) {
                 System.out.println("An error occurred while reading the fee rate data.");
             }
-
+        
             long years = totalDays / 365;
             long remainingDaysAfterYears = totalDays % 365;
             long months = remainingDaysAfterYears / 30;
             long remainingDaysAfterMonths = remainingDaysAfterYears % 30;
             long weeks = remainingDaysAfterMonths / 7;
             long remainingDays = remainingDaysAfterMonths % 7;
-
+        
             return (years * yearlyRate) + (months * monthlyRate) + (weeks * weeklyRate) + (remainingDays * dailyRate);
         }
-
 
         public void residentLogout() {
             System.out.println("Logging out...");
