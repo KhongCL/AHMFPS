@@ -2387,6 +2387,7 @@ public class APUHostelManagement {
         public void viewPaymentRecords() {
             System.out.println("Payment Records:");
             String residentID = this.getResidentID(); 
+        
             // Read room data from rooms.txt and store it in a map
             Map<String, String> roomMap = new HashMap<>();
             try (BufferedReader roomReader = new BufferedReader(new FileReader("rooms.txt"))) {
@@ -2400,35 +2401,52 @@ public class APUHostelManagement {
             } catch (IOException e) {
                 System.out.println("An error occurred while reading the room data.");
             }
-
-            boolean hasRecords = false;
+        
+            List<String[]> relevantPayments = new ArrayList<>();
             try (BufferedReader br = new BufferedReader(new FileReader("payments.txt"))) {
                 String line;
                 while ((line = br.readLine()) != null) {
                     String[] details = line.split(",");
                     if (details[1].equals(residentID) && !details[7].equals("unpaid") && !details[10].equals("null")) { // Assuming the second element is the residentID, eighth is PaymentStatus, and eleventh is PaymentMethod
-                        hasRecords = true;
-                        String roomNumber = roomMap.getOrDefault(details[5], "Unknown Room"); // Assuming the sixth element is RoomID
-                        LocalDate startDate = LocalDate.parse(details[3]); // Assuming the fourth element is StartDate
-                        LocalDate endDate = LocalDate.parse(details[4]); // Assuming the fifth element is EndDate
-                        long stayDuration = ChronoUnit.DAYS.between(startDate, endDate);
-                        System.out.println("Payment ID: " + details[0]);
-                        System.out.println("Payment Status: " + details[7]);
-                        System.out.println("Stay Duration: " + stayDuration + " days");
-                        System.out.println("Payment Amount: " + details[6]);
-                        System.out.println("Booking Date: " + details[8]);
-                        System.out.println("Room Number: " + roomNumber);
-                        System.out.println("Payment Method: " + details[9]);
-                        System.out.println("-----------------------------");
+                        relevantPayments.add(details);
                     }
                 }
             } catch (IOException e) {
                 System.out.println("An error occurred while reading the payment records.");
             }
-
-            if (!hasRecords) {
+        
+            if (relevantPayments.isEmpty()) {
                 System.out.println("No payment records found for your account.");
+                return;
             }
+        
+            // Display the list of relevant payment records
+            System.out.println("Choose which Payment Record to view:");
+            for (int i = 0; i < relevantPayments.size(); i++) {
+                String[] details = relevantPayments.get(i);
+                System.out.printf("%d. Payment ID: %s, Payment Amount: RM %s, Booking Date: %s%n", i + 1, details[0], details[6], details[8]);
+            }
+        
+            // Get the user's choice
+            System.out.printf("Enter your choice (1-%d): ", relevantPayments.size());
+            int choice = getValidatedChoice(scanner, 1, relevantPayments.size());
+        
+            // Display the selected payment record in detail
+            String[] selectedDetails = relevantPayments.get(choice - 1);
+            String roomNumber = roomMap.getOrDefault(selectedDetails[5], "Unknown Room"); // Assuming the sixth element is RoomID
+            LocalDate startDate = LocalDate.parse(selectedDetails[3]); // Assuming the fourth element is StartDate
+            LocalDate endDate = LocalDate.parse(selectedDetails[4]); // Assuming the fifth element is EndDate
+            long stayDuration = ChronoUnit.DAYS.between(startDate, endDate);
+            System.out.println("Payment ID: " + selectedDetails[0]);
+            System.out.println("Payment Status: " + selectedDetails[7]);
+            System.out.println("Start Date: " + startDate);
+            System.out.println("End Date: " + endDate);
+            System.out.println("Stay Duration: " + stayDuration + " days");
+            System.out.println("Payment Amount: " + selectedDetails[6]);
+            System.out.println("Booking Date: " + selectedDetails[8]);
+            System.out.println("Room Number: " + roomNumber);
+            System.out.println("Payment Method: " + selectedDetails[9]);
+            System.out.println("-----------------------------");
         }
 
         public void manageBookings() {
@@ -2461,7 +2479,7 @@ public class APUHostelManagement {
         public void makePaymentForBooking() {
             List<String[]> payments = new ArrayList<>();
             String residentID = this.getResidentID(); // Get the currently logged-in resident's ID
-        
+
             // Read payments from file
             try (BufferedReader reader = new BufferedReader(new FileReader("payments.txt"))) {
                 String line;
@@ -2472,7 +2490,21 @@ public class APUHostelManagement {
                 e.printStackTrace();
                 return;
             }
-        
+
+            // Read room data from rooms.txt and store it in a map
+            Map<String, String> roomMap = new HashMap<>();
+            try (BufferedReader roomReader = new BufferedReader(new FileReader("rooms.txt"))) {
+                String line;
+                while ((line = roomReader.readLine()) != null) {
+                    String[] parts = line.split(",");
+                    if (parts.length >= 4) {
+                        roomMap.put(parts[0], parts[3]); // Assuming parts[0] is RoomID and parts[3] is RoomNumber
+                    }
+                }
+            } catch (IOException e) {
+                System.out.println("An error occurred while reading the room data.");
+            }
+
             // Filter unpaid bookings for the current resident
             List<String[]> unpaidBookings = new ArrayList<>();
             for (String[] payment : payments) {
@@ -2480,28 +2512,42 @@ public class APUHostelManagement {
                     unpaidBookings.add(payment);
                 }
             }
-        
+
             if (unpaidBookings.isEmpty()) {
                 System.out.println("No unpaid bookings found.");
                 return;
             }
-        
+
             // Display unpaid bookings
             System.out.println("Unpaid Bookings:");
             for (int i = 0; i < unpaidBookings.size(); i++) {
                 String[] booking = unpaidBookings.get(i);
                 long daysBetween = ChronoUnit.DAYS.between(LocalDate.parse(booking[3]), LocalDate.parse(booking[4]));
-                System.out.println("Booking " + (i + 1) + " :");
-                System.out.println("Room Number : " + booking[5]);
-                System.out.println("Stay Duration : " + daysBetween + " Days");
-                System.out.println("Payment Amount : RM " + booking[6]);
-                System.out.println();
+                String roomNumber = roomMap.getOrDefault(booking[5], "Unknown Room"); // Assuming the sixth element is RoomID
+                System.out.printf("%d. PaymentID: %s, ResidentID: %s, Room Number: %s, Stay Duration: %d days, Payment Amount: RM %s%n", 
+                                  i + 1, booking[0], booking[1], roomNumber, daysBetween, booking[6]);
             }
-        
+
             // Select booking to pay for
-            System.out.print("Enter the number of the booking to pay for: ");
+            System.out.printf("Enter the number of the booking to pay for (1-%d): ", unpaidBookings.size());
             int bookingIndex = getValidatedChoice(scanner, 1, unpaidBookings.size()) - 1;
-        
+
+            // Display selected booking details
+            String[] selectedBooking = unpaidBookings.get(bookingIndex);
+            System.out.println("Payment Details:");
+            System.out.println("PaymentID: " + selectedBooking[0]);
+            System.out.println("ResidentID: " + selectedBooking[1]);
+            System.out.println("StaffID: " + selectedBooking[2]);
+            System.out.println("Start Date: " + selectedBooking[3]);
+            System.out.println("End Date: " + selectedBooking[4]);
+            System.out.println("RoomID: " + selectedBooking[5]);
+            System.out.println("Payment Amount: " + selectedBooking[6]);
+            System.out.println("Payment Status: " + selectedBooking[7]);
+            System.out.println("Booking Date and Time: " + selectedBooking[8]);
+            System.out.println("Payment Method: " + selectedBooking[9]);
+            System.out.println("Booking Status: " + selectedBooking[10]);
+            System.out.println("=====================");
+
             // Select payment method
             String paymentMethod = "";
             while (true) {
@@ -2511,7 +2557,7 @@ public class APUHostelManagement {
                 System.out.println("3. Cash");
                 System.out.print("Enter your choice: ");
                 int paymentMethodChoice = getValidatedChoice(scanner, 1, 3);
-        
+
                 switch (paymentMethodChoice) {
                     case 1 -> paymentMethod = "credit_card";
                     case 2 -> paymentMethod = "bank_transfer";
@@ -2523,7 +2569,7 @@ public class APUHostelManagement {
                 }
                 break;
             }
-        
+
             // Confirm payment
             String confirmation = "";
             while (!confirmation.equalsIgnoreCase("yes") && !confirmation.equalsIgnoreCase("no")) {
@@ -2533,17 +2579,16 @@ public class APUHostelManagement {
                     System.out.println("Invalid input. Please enter 'yes' or 'no'.");
                 }
             }
-        
+
             if (!confirmation.equalsIgnoreCase("yes")) {
                 System.out.println("Payment cancelled.");
                 return;
             }
-        
+
             // Update payment status and method
-            String[] selectedBooking = unpaidBookings.get(bookingIndex);
             selectedBooking[7] = "pending"; // Update payment status to pending
             selectedBooking[9] = paymentMethod; // Update payment method
-        
+
             // Write updated payments back to file
             try (BufferedWriter writer = new BufferedWriter(new FileWriter("payments.txt"))) {
                 for (String[] payment : payments) {
@@ -2553,7 +2598,7 @@ public class APUHostelManagement {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        
+
             System.out.println("Your payment is successful.");
         }
 
@@ -2572,10 +2617,10 @@ public class APUHostelManagement {
                 return;
             }
         
-            // Filter unpaid bookings for the current resident
+            // Filter unpaid bookings for the current resident, excluding cancelled bookings
             List<String[]> unpaidBookings = new ArrayList<>();
             for (String[] payment : payments) {
-                if (payment[1].equals(residentID) && payment[7].equals("unpaid")) {
+                if (payment[1].equals(residentID) && payment[7].equals("unpaid") && !payment[10].equals("cancelled")) {
                     unpaidBookings.add(payment);
                 }
             }
@@ -2590,16 +2635,28 @@ public class APUHostelManagement {
             for (int i = 0; i < unpaidBookings.size(); i++) {
                 String[] booking = unpaidBookings.get(i);
                 long daysBetween = ChronoUnit.DAYS.between(LocalDate.parse(booking[3]), LocalDate.parse(booking[4]));
-                System.out.println("Booking " + (i + 1) + " :");
-                System.out.println("Room Number : " + booking[5]);
-                System.out.println("Stay Duration : " + daysBetween + " Days");
-                System.out.println("Payment Amount : RM " + booking[6]);
-                System.out.println();
+                System.out.printf("Booking %d: Payment ID: %s, Room Number: %s, Stay Duration: %d Days, Payment Amount: RM %s, Booking DateTime: %s%n",
+                        i + 1, booking[0], booking[5], daysBetween, booking[6], booking[8]);
             }
         
             // Select booking to cancel
             System.out.print("Enter the number of the booking to cancel: ");
             int bookingIndex = getValidatedChoice(scanner, 1, unpaidBookings.size()) - 1;
+        
+            // Show selected booking in detail
+            String[] selectedBooking = unpaidBookings.get(bookingIndex);
+            System.out.println("Selected Booking Details:");
+            System.out.println("Payment ID: " + selectedBooking[0]);
+            System.out.println("Resident ID: " + selectedBooking[1]);
+            System.out.println("Staff ID: " + selectedBooking[2]);
+            System.out.println("Start Date: " + selectedBooking[3]);
+            System.out.println("End Date: " + selectedBooking[4]);
+            System.out.println("Room ID: " + selectedBooking[5]);
+            System.out.println("Payment Amount: " + selectedBooking[6]);
+            System.out.println("Payment Status: " + selectedBooking[7]);
+            System.out.println("Booking DateTime: " + selectedBooking[8]);
+            System.out.println("Payment Method: " + selectedBooking[9]);
+            System.out.println("Booking Status: " + selectedBooking[10]);
         
             // Confirm cancellation
             String confirmation = "";
@@ -2616,9 +2673,8 @@ public class APUHostelManagement {
                 return;
             }
         
-            // Remove the selected booking from the list
-            String[] selectedBooking = unpaidBookings.get(bookingIndex);
-            payments.remove(selectedBooking);
+            // Update the selected booking's status to "cancelled"
+            selectedBooking[10] = "cancelled"; // Assuming the last element is Booking Status
         
             // Write updated payments back to file
             try (BufferedWriter writer = new BufferedWriter(new FileWriter("payments.txt"))) {
@@ -2656,8 +2712,7 @@ public class APUHostelManagement {
             }
         
             System.out.println("This booking has been successfully cancelled.");
-        }
-
+        }      
 
         public void makeBooking() {
             // Display room pricing based on fee rates in rooms.txt
@@ -2814,11 +2869,18 @@ public class APUHostelManagement {
             long daysBetween = ChronoUnit.DAYS.between(startDate, endDate);
             String roomNumber = roomMap.getOrDefault(roomID, "Unknown Room");
             System.out.println("Your Booking :");
-            System.out.println("Room Number : " + roomNumber);
+            System.out.println("Payment ID : " + paymentID);
+            System.out.println("Resident ID : " + residentID);
+            System.out.println("Staff ID : null");
             System.out.println("Start Date : " + startDate);
             System.out.println("End Date : " + endDate);
-            System.out.println("Stay Duration : " + daysBetween + " Days");
+            System.out.println("Stay Duration : " + daysBetween + " days");
+            System.out.println("Room Number : " + roomNumber);
             System.out.println("Payment Amount : RM " + paymentAmount);
+            System.out.println("Payment Status : unpaid");
+            System.out.println("Booking DateTime : " + bookingDateTime);
+            System.out.println("Payment Method : null");
+            System.out.println("Booking Status : active");
             System.out.println("=========================");
             System.out.println("Please go back to Manage Bookings to make payment for this booking.");
         }
