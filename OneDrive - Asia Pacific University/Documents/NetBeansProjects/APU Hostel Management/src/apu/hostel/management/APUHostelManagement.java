@@ -287,7 +287,7 @@ public class APUHostelManagement {
                     case 5 -> updatePersonalInformation();
                     case 6 -> {
                         System.out.println("Logging out...");
-                        displayWelcomePage();
+
                         return; // Exit the loop after logging out
                     }
                     default -> System.out.println("Invalid choice. Please try again.");
@@ -1876,7 +1876,7 @@ public class APUHostelManagement {
                 case 4 -> {
                     System.out.println("Logging out...");
                     System.out.println("You have been logged out successfully.");
-                    displayWelcomePage();
+
                 }
                 default -> System.out.println("Invalid choice. Please try again.");
             }
@@ -3157,7 +3157,7 @@ public class APUHostelManagement {
             System.out.println("You have been logged out successfully.");
             
             // Route back to the main menu
-            displayWelcomePage();
+
         }
 
         private int getValidatedChoice(Scanner scanner, int min, int max) {
@@ -3466,75 +3466,6 @@ public class APUHostelManagement {
             }
             return choice;
         }
-    
-    // Method to display the welcome page
-    public static void displayWelcomePage() {
-        System.out.println("Welcome to APU Hostel Management Fees Payment System (AHMFPS)");
-        System.out.println("Please choose your role:");
-        System.out.println("1. Manager");
-        System.out.println("2. Staff");
-        System.out.println("3. Resident");
-        System.out.print("Enter your choice (1-3): ");
-    
-        int choice = getValidatedChoice(scanner, 1, 3);
-    
-        switch (choice) {
-            case 1 -> {
-                System.out.println("You have chosen Manager.");
-                System.out.print("Enter authorization code: ");
-                String authCode = scanner.nextLine();
-                if (!isValidAuthCode(authCode, "manager")) {
-                    System.out.println("Invalid authorization code. Access denied.");
-                    displayWelcomePage();
-                    return;
-                }
-                System.out.println("1. Register");
-                System.out.println("2. Login");
-                System.out.print("Enter your choice (1-2): ");
-                int managerChoice = getValidatedChoice(scanner, 1, 2);
-                if (managerChoice == 1) {
-                    registerManager();
-                } else {
-                    loginManager();
-                }
-            }
-            case 2 -> {
-                System.out.println("You have chosen Staff.");
-                System.out.print("Enter authorization code: ");
-                String authCode = scanner.nextLine();
-                if (!isValidAuthCode(authCode, "staff")) {
-                    System.out.println("Invalid authorization code. Access denied.");
-                    displayWelcomePage();
-                    return;
-                }
-                System.out.println("1. Register");
-                System.out.println("2. Login");
-                System.out.print("Enter your choice (1-2): ");
-                int staffChoice = getValidatedChoice(scanner, 1, 2);
-                if (staffChoice == 1) {
-                    registerStaff();
-                } else {
-                    loginStaff();
-                }
-            }
-            case 3 -> {
-                System.out.println("You have chosen Resident.");
-                System.out.println("1. Register");
-                System.out.println("2. Login");
-                System.out.print("Enter your choice (1-2): ");
-                int residentChoice = getValidatedChoice(scanner, 1, 2);
-                if (residentChoice == 1) {
-                    registerResident();
-                } else {
-                    loginResident();
-                }
-            }
-            default -> {
-                System.out.println("Invalid choice. Please try again.");
-                displayWelcomePage(); // Recursively call to retry
-            }
-        }
-    }
 
     // Method to check if IC/Passport Number, Username, or Contact Number is unique
     public static boolean isUnique(String icPassportNumber, String username, String contactNumber) throws IOException {
@@ -3684,86 +3615,24 @@ public class APUHostelManagement {
     }
 
     // Method to handle Manager registration
-    public static void registerManager() {
-        String icPassportNumber, username, password, contactNumber;
-        boolean isIC = false;
-    
-        OUTER:
-        while (true) {
-            System.out.println("Do you want to use IC or Passport Number to register?");
-            System.out.println("1. IC");
-            System.out.println("2. Passport");
-            System.out.print("Enter your choice (1-2): ");
-            String choice = scanner.nextLine();
-            switch (choice) {
-                case "1" -> {
-                    isIC = true;
-                    break OUTER;
-                }
-                case "2" -> {
-                    isIC = false;
-                    break OUTER;
-                }
-                default -> System.out.println("Invalid choice. Please enter '1' for IC or '2' for Passport.");
-            }
+    public static boolean registerManager(String icPassportNumber, String username, String password, String contactNumber) {
+        if (!isValidICPassport(icPassportNumber)) {
+            System.out.println("Invalid IC/Passport Number.");
+            return false;
         }
-    
-        while (true) {
-            System.out.print("Enter " + (isIC ? "IC" : "Passport") + " Number: ");
-            icPassportNumber = scanner.nextLine();
-            if (!isValidICPassport(icPassportNumber)) {
-                System.out.print("Do you want to try again? (yes/no): ");
-                if (!scanner.nextLine().equalsIgnoreCase("yes")) {
-                    displayWelcomePage();
-                    return;
-                }
-                continue;
-            }
-            break;
+        if (!isValidUsername(username)) {
+            System.out.println("Invalid Username.");
+            return false;
         }
-    
-        while (true) {
-            System.out.print("Enter username: ");
-            username = scanner.nextLine();
-            if (!isValidUsername(username)) {
-                System.out.print("Do you want to try again? (yes/no): ");
-                if (!scanner.nextLine().equalsIgnoreCase("yes")) {
-                    displayWelcomePage();
-                    return;
-                }
-                continue;
-            }
-            break;
+        if (!isValidPassword(password, username)) {
+            System.out.println("Invalid Password.");
+            return false;
         }
-    
-        while (true) {
-            System.out.print("Enter password: ");
-            password = scanner.nextLine();
-            if (!isValidPassword(password, username)) {
-                System.out.print("Do you want to try again? (yes/no): ");
-                if (!scanner.nextLine().equalsIgnoreCase("yes")) {
-                    displayWelcomePage();
-                    return;
-                }
-                continue;
-            }
-            break;
+        if (!isValidContactNumber(contactNumber)) {
+            System.out.println("Invalid Contact Number.");
+            return false;
         }
-    
-        while (true) {
-            System.out.print("Enter contact number: ");
-            contactNumber = scanner.nextLine();
-            if (!isValidContactNumber(contactNumber)) {
-                System.out.print("Do you want to try again? (yes/no): ");
-                if (!scanner.nextLine().equalsIgnoreCase("yes")) {
-                    displayWelcomePage();
-                    return;
-                }
-                continue;
-            }
-            break;
-        }
-    
+
         try {
             String dateOfRegistration = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
             String userID = generateUserID("U");
@@ -3771,141 +3640,53 @@ public class APUHostelManagement {
             Manager manager = new Manager(managerID, userID, icPassportNumber, username, password, contactNumber, dateOfRegistration, "manager", false, null);
             manager.saveToManagerFile(null, null, "unapproved_managers.txt");
             System.out.println("Manager registered successfully.");
-            displayWelcomePage();
+            return true;
         } catch (IOException e) {
             e.printStackTrace();
+            return false;
         }
     }
 
     // Method to handle Manager login
-    public static void loginManager() {
-        String username, password;
-    
-        while (true) {
-            System.out.print("Enter username: ");
-            username = scanner.nextLine();
-            if (username.isEmpty()) {
-                System.out.println("Username cannot be empty. Please try again.");
-                continue;
-            }
-            break;
-        }
-    
-        while (true) {
-            System.out.print("Enter password: ");
-            password = scanner.nextLine();
-            if (password.isEmpty()) {
-                System.out.println("Password cannot be empty. Please try again.");
-                continue;
-            }
-            break;
-        }
-    
+    public static boolean loginManager(String username, String password) {
         try {
             User user = User.findUser(username, password, "approved_managers.txt");
             if (user != null && user.getRole().equals("manager")) {
                 if (user.getIsActive()) {
                     System.out.println("Login successful.");
                     user.displayMenu();
+                    return true;
                 } else {
                     System.out.println("Your account is deactivated. Please contact the administrator.");
-                    displayWelcomePage();
+                    return false;
                 }
             } else {
                 System.out.println("Invalid username or password.");
-                System.out.print("Do you want to retry? (yes/no): ");
-                String choice = scanner.nextLine();
-                if (choice.equalsIgnoreCase("yes")) {
-                    loginManager(); // Retry login
-                } else {
-                    System.out.println("Exiting login process.");
-                    displayWelcomePage();
-                }
+                return false;
             }
         } catch (IOException e) {
             e.printStackTrace();
+            return false;
         }
     }
 
     // Method to handle Staff registration
-    public static void registerStaff() {
-        String icPassportNumber, username, password, contactNumber;
-        boolean isIC = false;
-
-        OUTER:
-        while (true) {
-            System.out.println("Do you want to use IC or Passport Number to register?");
-            System.out.println("1. IC");
-            System.out.println("2. Passport");
-            System.out.print("Enter your choice (1-2): ");
-            String choice = scanner.nextLine();
-            switch (choice) {
-                case "1" -> {
-                    isIC = true;
-                    break OUTER;
-                }
-                case "2" -> {
-                    isIC = false;
-                    break OUTER;
-                }
-                default -> System.out.println("Invalid choice. Please enter '1' for IC or '2' for Passport.");
-            }
+    public static boolean registerStaff(String icPassportNumber, String username, String password, String contactNumber) {
+        if (!isValidICPassport(icPassportNumber)) {
+            System.out.println("Invalid IC/Passport Number.");
+            return false;
         }
-
-        while (true) {
-            System.out.print("Enter " + (isIC ? "IC" : "Passport") + " Number: ");
-            icPassportNumber = scanner.nextLine();
-            if (!isValidICPassport(icPassportNumber)) {
-                System.out.print("Do you want to try again? (yes/no): ");
-                if (!scanner.nextLine().equalsIgnoreCase("yes")) {
-                    displayWelcomePage();
-                    return;
-                }
-                continue;
-            }
-            break;
+        if (!isValidUsername(username)) {
+            System.out.println("Invalid Username.");
+            return false;
         }
-
-        while (true) {
-            System.out.print("Enter username: ");
-            username = scanner.nextLine();
-            if (!isValidUsername(username)) {
-                System.out.print("Do you want to try again? (yes/no): ");
-                if (!scanner.nextLine().equalsIgnoreCase("yes")) {
-                    displayWelcomePage();
-                    return;
-                }
-                continue;
-            }
-            break;
+        if (!isValidPassword(password, username)) {
+            System.out.println("Invalid Password.");
+            return false;
         }
-
-        while (true) {
-            System.out.print("Enter password: ");
-            password = scanner.nextLine();
-            if (!isValidPassword(password, username)) {
-                System.out.print("Do you want to try again? (yes/no): ");
-                if (!scanner.nextLine().equalsIgnoreCase("yes")) {
-                    displayWelcomePage();
-                    return;
-                }
-                continue;
-            }
-            break;
-        }
-
-        while (true) {
-            System.out.print("Enter contact number: ");
-            contactNumber = scanner.nextLine();
-            if (!isValidContactNumber(contactNumber)) {
-                System.out.print("Do you want to try again? (yes/no): ");
-                if (!scanner.nextLine().equalsIgnoreCase("yes")) {
-                    displayWelcomePage();
-                    return;
-                }
-                continue;
-            }
-            break;
+        if (!isValidContactNumber(contactNumber)) {
+            System.out.println("Invalid Contact Number.");
+            return false;
         }
 
         try {
@@ -3915,141 +3696,53 @@ public class APUHostelManagement {
             Staff staff = new Staff(staffID, userID, icPassportNumber, username, password, contactNumber, dateOfRegistration, "staff", true, null);
             staff.saveToStaffFile(null, null, "unapproved_staffs.txt");
             System.out.println("Staff registered successfully.");
-            displayWelcomePage();
+            return true;
         } catch (IOException e) {
             e.printStackTrace();
+            return false;
         }
     }
 
     // Method to handle Staff login
-    public static void loginStaff() {
-        String username, password;
-
-        while (true) {
-            System.out.print("Enter username: ");
-            username = scanner.nextLine();
-            if (username.isEmpty()) {
-                System.out.println("Username cannot be empty. Please try again.");
-                continue;
-            }
-            break;
-        }
-
-        while (true) {
-            System.out.print("Enter password: ");
-            password = scanner.nextLine();
-            if (password.isEmpty()) {
-                System.out.println("Password cannot be empty. Please try again.");
-                continue;
-            }
-            break;
-        }
-
+    public static boolean loginStaff(String username, String password) {
         try {
             User user = User.findUser(username, password, "approved_staffs.txt");
             if (user != null && user.getRole().equals("staff")) {
                 if (user.getIsActive()) {
                     System.out.println("Login successful.");
                     user.displayMenu();
+                    return true;
                 } else {
                     System.out.println("Your account is deactivated. Please contact the administrator.");
-                    displayWelcomePage();
+                    return false;
                 }
             } else {
                 System.out.println("Invalid username or password.");
-                System.out.print("Do you want to retry? (yes/no): ");
-                String choice = scanner.nextLine();
-                if (choice.equalsIgnoreCase("yes")) {
-                    loginStaff(); // Retry login
-                } else {
-                    System.out.println("Exiting login process.");
-                    displayWelcomePage();
-                }
+                return false;
             }
         } catch (IOException e) {
             e.printStackTrace();
+            return false;
         }
     }
-    
+
     // Method to handle Resident registration
-    public static void registerResident() {
-        String icPassportNumber, username, password, contactNumber;
-        boolean isIC = false;
-
-        OUTER:
-        while (true) {
-            System.out.println("Do you want to use IC or Passport Number to register?");
-            System.out.println("1. IC");
-            System.out.println("2. Passport");
-            System.out.print("Enter your choice (1-2): ");
-            String choice = scanner.nextLine();
-            switch (choice) {
-                case "1" -> {
-                    isIC = true;
-                    break OUTER;
-                }
-                case "2" -> {
-                    isIC = false;
-                    break OUTER;
-                }
-                default -> System.out.println("Invalid choice. Please enter '1' for IC or '2' for Passport.");
-            }
+    public static boolean registerResident(String icPassportNumber, String username, String password, String contactNumber) {
+        if (!isValidICPassport(icPassportNumber)) {
+            System.out.println("Invalid IC/Passport Number.");
+            return false;
         }
-
-        while (true) {
-            System.out.print("Enter " + (isIC ? "IC" : "Passport") + " Number: ");
-            icPassportNumber = scanner.nextLine();
-            if (!isValidICPassport(icPassportNumber)) {
-                System.out.print("Do you want to try again? (yes/no): ");
-                if (!scanner.nextLine().equalsIgnoreCase("yes")) {
-                    displayWelcomePage();
-                    return;
-                }
-                continue;
-            }
-            break;
+        if (!isValidUsername(username)) {
+            System.out.println("Invalid Username.");
+            return false;
         }
-
-        while (true) {
-            System.out.print("Enter username: ");
-            username = scanner.nextLine();
-            if (!isValidUsername(username)) {
-                System.out.print("Do you want to try again? (yes/no): ");
-                if (!scanner.nextLine().equalsIgnoreCase("yes")) {
-                    displayWelcomePage();
-                    return;
-                }
-                continue;
-            }
-            break;
+        if (!isValidPassword(password, username)) {
+            System.out.println("Invalid Password.");
+            return false;
         }
-
-        while (true) {
-            System.out.print("Enter password: ");
-            password = scanner.nextLine();
-            if (!isValidPassword(password, username)) {
-                System.out.print("Do you want to try again? (yes/no): ");
-                if (!scanner.nextLine().equalsIgnoreCase("yes")) {
-                    displayWelcomePage();
-                    return;
-                }
-                continue;
-            }
-            break;
-        }
-
-        while (true) {
-            System.out.print("Enter contact number: ");
-            contactNumber = scanner.nextLine();
-            if (!isValidContactNumber(contactNumber)) {
-                System.out.print("Do you want to try again? (yes/no): ");
-                if (!scanner.nextLine().equalsIgnoreCase("yes")) {
-                    displayWelcomePage();
-                    return;
-                }
-                continue;
-            }
-            break;
+        if (!isValidContactNumber(contactNumber)) {
+            System.out.println("Invalid Contact Number.");
+            return false;
         }
 
         try {
@@ -4059,59 +3752,33 @@ public class APUHostelManagement {
             Resident resident = new Resident(residentID, userID, icPassportNumber, username, password, contactNumber, dateOfRegistration, "resident", true, null);
             resident.saveToResidentFile(null, null, "unapproved_residents.txt");
             System.out.println("Resident registered successfully.");
-            displayWelcomePage();
+            return true;
         } catch (IOException e) {
             e.printStackTrace();
+            return false;
         }
     }
 
     // Method to handle Resident login
-    public static void loginResident() {
-        String username, password;
-
-        while (true) {
-            System.out.print("Enter username: ");
-            username = scanner.nextLine();
-            if (username.isEmpty()) {
-                System.out.println("Username cannot be empty. Please try again.");
-                continue;
-            }
-            break;
-        }
-
-        while (true) {
-            System.out.print("Enter password: ");
-            password = scanner.nextLine();
-            if (password.isEmpty()) {
-                System.out.println("Password cannot be empty. Please try again.");
-                continue;
-            }
-            break;
-        }
-
+    public static boolean loginResident(String username, String password) {
         try {
             User user = User.findUser(username, password, "approved_residents.txt");
             if (user != null && user.getRole().equals("resident")) {
                 if (user.getIsActive()) {
                     System.out.println("Login successful.");
                     user.displayMenu();
+                    return true;
                 } else {
                     System.out.println("Your account is deactivated. Please contact the administrator.");
-                    displayWelcomePage();
+                    return false;
                 }
             } else {
                 System.out.println("Invalid username or password.");
-                System.out.print("Do you want to retry? (yes/no): ");
-                String choice = scanner.nextLine();
-                if (choice.equalsIgnoreCase("yes")) {
-                    loginResident(); // Retry login
-                } else {
-                    System.out.println("Exiting login process.");
-                    displayWelcomePage();
-                }
+                return false;
             }
         } catch (IOException e) {
             e.printStackTrace();
+            return false;
         }
     }
 
@@ -4151,13 +3818,10 @@ public class APUHostelManagement {
         }
         return prefix + String.format("%02d", id);
     }
-
-        // Main method to launch the application
-    public static void main(String[] args) {
-        displayWelcomePage();
-    }
 }
 
 //test netbean pull push
 
-//test again bruhhellllojj
+//test again bruhhellllojjhfwehkfhwjhf
+//we;kfjlkwj
+//I am newest
