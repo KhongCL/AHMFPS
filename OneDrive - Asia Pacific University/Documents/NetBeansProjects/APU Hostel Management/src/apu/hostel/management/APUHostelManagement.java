@@ -292,8 +292,7 @@ public class APUHostelManagement {
                 System.out.println("4. Update Contact Number");
                 System.out.println("0. Go Back to Manager Menu");
                 System.out.print("Enter your choice: ");
-                choice = scanner.nextInt();
-                scanner.nextLine(); // Consume newline
+                choice = getValidatedChoice(scanner, 0, 4);
         
                 switch (choice) {
                     case 1 -> {
@@ -375,6 +374,7 @@ public class APUHostelManagement {
                     updateFile("managers.txt", this);
                     updateFile("users.txt", this);
                 } catch (IOException e) {
+                    e.printStackTrace();
                 }
             } while (choice != 0);
         }
@@ -1928,8 +1928,7 @@ public class APUHostelManagement {
                 System.out.println("4. Update Contact Number");
                 System.out.println("0. Go Back to Staff Menu");
                 System.out.print("Enter your choice: ");
-                choice = scanner.nextInt();
-                scanner.nextLine(); // Consume newline
+                choice = getValidatedChoice(scanner, 0, 4);
         
                 switch (choice) {
                     case 1 -> {
@@ -2299,6 +2298,23 @@ public class APUHostelManagement {
         
             System.out.println("Receipt generated successfully.");
         }
+
+        private int getValidatedChoice(Scanner scanner, int min, int max) {
+            int choice = -1;
+            while (choice < min || choice > max) {
+                if (scanner.hasNextInt()) {
+                    choice = scanner.nextInt();
+                    scanner.nextLine(); // Consume newline
+                    if (choice < min || choice > max) {
+                        System.out.println("Invalid choice. Please enter a number between " + min + " and " + max + ".");
+                    }
+                } else {
+                    System.out.println("Invalid input. Please enter a number between " + min + " and " + max + ".");
+                    scanner.nextLine(); // Consume invalid input
+                }
+            }
+            return choice;
+        }
     }
 
     // Resident class
@@ -2388,7 +2404,7 @@ public class APUHostelManagement {
 
         public void updatePersonalInformation() {
             int choice;
-
+        
             do {
                 System.out.println("Update Personal Information:");
                 System.out.println("1. Update IC Passport Number");
@@ -2397,9 +2413,8 @@ public class APUHostelManagement {
                 System.out.println("4. Update Contact Number");
                 System.out.println("0. Go Back to Resident Menu");
                 System.out.print("Enter your choice: ");
-                choice = scanner.nextInt();
-                scanner.nextLine(); // Consume newline
-
+                choice = getValidatedChoice(scanner, 0, 4);
+        
                 switch (choice) {
                     case 1 -> {
                         System.out.println("Current IC Passport Number: " + this.icPassportNumber);
@@ -2475,7 +2490,7 @@ public class APUHostelManagement {
                     }
                     default -> System.out.println("Invalid choice. Please try again.");
                 }
-
+        
                 try {
                     updateFile("approved_residents.txt");
                     updateFile("users.txt");
@@ -2620,7 +2635,7 @@ public class APUHostelManagement {
             System.out.println("Unpaid Bookings:");
             for (int i = 0; i < unpaidBookings.size(); i++) {
                 String[] booking = unpaidBookings.get(i);
-                long daysBetween = ChronoUnit.DAYS.between(LocalDate.parse(booking[3]), LocalDate.parse(booking[4])) + 1;
+                long daysBetween = ChronoUnit.DAYS.between(LocalDate.parse(booking[3]), LocalDate.parse(booking[4]));
                 System.out.println("Booking " + (i + 1) + " :");
                 System.out.println("Room Number : " + booking[5]);
                 System.out.println("Stay Duration : " + daysBetween + " Days");
@@ -2741,7 +2756,7 @@ public class APUHostelManagement {
             System.out.println("Unpaid Bookings:");
             for (int i = 0; i < unpaidBookings.size(); i++) {
                 String[] booking = unpaidBookings.get(i);
-                long daysBetween = ChronoUnit.DAYS.between(LocalDate.parse(booking[3]), LocalDate.parse(booking[4])) + 1;
+                long daysBetween = ChronoUnit.DAYS.between(LocalDate.parse(booking[3]), LocalDate.parse(booking[4]));
                 System.out.println("Booking " + (i + 1) + " :");
                 System.out.println("Room Number : " + booking[5]);
                 System.out.println("Stay Duration : " + daysBetween + " Days");
@@ -2877,7 +2892,6 @@ public class APUHostelManagement {
         
             LocalDate startDate = null;
             LocalDate endDate = null;
-            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
             String datePattern = "\\d{4}-\\d{2}-\\d{2}";
             LocalDate currentDate = LocalDate.now();
         
@@ -3198,6 +3212,23 @@ public class APUHostelManagement {
             // Route back to the main menu
             displayWelcomePage();
         }
+
+        private int getValidatedChoice(Scanner scanner, int min, int max) {
+            int choice = -1;
+            while (choice < min || choice > max) {
+                if (scanner.hasNextInt()) {
+                    choice = scanner.nextInt();
+                    scanner.nextLine(); // Consume newline
+                    if (choice < min || choice > max) {
+                        System.out.println("Invalid choice. Please enter a number between " + min + " and " + max + ".");
+                    }
+                } else {
+                    System.out.println("Invalid input. Please enter a number between " + min + " and " + max + ".");
+                    scanner.nextLine(); // Consume invalid input
+                }
+            }
+            return choice;
+        }
     }
 
     // Payment class
@@ -3472,29 +3503,34 @@ public class APUHostelManagement {
     // Define a single Scanner instance at the APUHostelManagement class level
     private static final Scanner scanner = new Scanner(System.in);
 
-    // Method to display the welcome page
-    public static void displayWelcomePage() {
-        System.out.println("Welcome to APU Hostel Management Fees Payment System (AHMFPS)");
-        System.out.println("Please choose your role:");
-        System.out.println("1. Manager");
-        System.out.println("2. Staff");
-        System.out.println("3. Resident");
-        System.out.print("Enter your choice (1-3): ");
-
-        int choice = -1;
-        while (choice < 1 || choice > 3) {
-            if (scanner.hasNextInt()) {
-                choice = scanner.nextInt();
-                scanner.nextLine(); // Consume newline
-                if (choice < 1 || choice > 3) {
-                    System.out.println("Invalid choice. Please enter a number between 1 and 3.");
+    private static int getValidatedChoice(Scanner scanner, int min, int max) {
+            int choice = -1;
+            while (choice < min || choice > max) {
+                if (scanner.hasNextInt()) {
+                    choice = scanner.nextInt();
+                    scanner.nextLine(); // Consume newline
+                    if (choice < min || choice > max) {
+                        System.out.println("Invalid choice. Please enter a number between " + min + " and " + max + ".");
+                    }
+                } else {
+                    System.out.println("Invalid input. Please enter a number between " + min + " and " + max + ".");
+                    scanner.nextLine(); // Consume invalid input
                 }
-            } else {
-                System.out.println("Invalid input. Please enter a number between 1 and 3.");
-                scanner.nextLine(); // Consume invalid input
             }
+            return choice;
         }
-
+    
+        // Method to display the welcome page
+        public static void displayWelcomePage() {
+            System.out.println("Welcome to APU Hostel Management Fees Payment System (AHMFPS)");
+            System.out.println("Please choose your role:");
+            System.out.println("1. Manager");
+            System.out.println("2. Staff");
+            System.out.println("3. Resident");
+            System.out.print("Enter your choice (1-3): ");
+        
+            int choice = getValidatedChoice(scanner, 1, 3);
+    
         switch (choice) {
             case 1 -> {
                 System.out.println("You have chosen Manager.");
@@ -3508,19 +3544,7 @@ public class APUHostelManagement {
                 System.out.println("1. Register");
                 System.out.println("2. Login");
                 System.out.print("Enter your choice (1-2): ");
-                int managerChoice = -1;
-                while (managerChoice < 1 || managerChoice > 2) {
-                    if (scanner.hasNextInt()) {
-                        managerChoice = scanner.nextInt();
-                        scanner.nextLine(); // Consume newline
-                        if (managerChoice < 1 || managerChoice > 2) {
-                            System.out.println("Invalid choice. Please enter a number between 1 and 2.");
-                        }
-                    } else {
-                        System.out.println("Invalid input. Please enter a number between 1 and 2.");
-                        scanner.nextLine(); // Consume invalid input
-                    }
-                }
+                int managerChoice = getValidatedChoice(scanner, 1, 2);
                 if (managerChoice == 1) {
                     registerManager();
                 } else {
@@ -3532,19 +3556,7 @@ public class APUHostelManagement {
                 System.out.println("1. Register");
                 System.out.println("2. Login");
                 System.out.print("Enter your choice (1-2): ");
-                int staffChoice = -1;
-                while (staffChoice < 1 || staffChoice > 2) {
-                    if (scanner.hasNextInt()) {
-                        staffChoice = scanner.nextInt();
-                        scanner.nextLine(); // Consume newline
-                        if (staffChoice < 1 || staffChoice > 2) {
-                            System.out.println("Invalid choice. Please enter a number between 1 and 2.");
-                        }
-                    } else {
-                        System.out.println("Invalid input. Please enter a number between 1 and 2.");
-                        scanner.nextLine(); // Consume invalid input
-                    }
-                }
+                int staffChoice = getValidatedChoice(scanner, 1, 2);
                 if (staffChoice == 1) {
                     registerStaff();
                 } else {
@@ -3556,19 +3568,7 @@ public class APUHostelManagement {
                 System.out.println("1. Register");
                 System.out.println("2. Login");
                 System.out.print("Enter your choice (1-2): ");
-                int residentChoice = -1;
-                while (residentChoice < 1 || residentChoice > 2) {
-                    if (scanner.hasNextInt()) {
-                        residentChoice = scanner.nextInt();
-                        scanner.nextLine(); // Consume newline
-                        if (residentChoice < 1 || residentChoice > 2) {
-                            System.out.println("Invalid choice. Please enter a number between 1 and 2.");
-                        }
-                    } else {
-                        System.out.println("Invalid input. Please enter a number between 1 and 2.");
-                        scanner.nextLine(); // Consume invalid input
-                    }
-                }
+                int residentChoice = getValidatedChoice(scanner, 1, 2);
                 if (residentChoice == 1) {
                     registerResident();
                 } else {
