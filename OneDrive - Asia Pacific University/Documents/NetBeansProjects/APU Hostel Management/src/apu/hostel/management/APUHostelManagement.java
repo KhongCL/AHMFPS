@@ -2,7 +2,6 @@ package apu.hostel.management;
 import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Year;
@@ -1483,7 +1482,7 @@ public class APUHostelManagement {
                 System.out.println("Manage Rooms:");
                 System.out.println("1. Add Room");
                 System.out.println("2. Update Room Status");
-                System.out.println("3. Update Room Type");
+                System.out.println("3. Update Fee Rate for Room Type");
                 System.out.println("4. Delete Room");
                 System.out.println("5. Restore Room");
                 System.out.println("6. Delete All Rooms");
@@ -1895,7 +1894,7 @@ public class APUHostelManagement {
         @Override
         public void displayMenu() {
             System.out.println("Staff Menu:");
-            System.out.println("1. Update Individual Login Account");
+            System.out.println("1. Update Personal Information");
             System.out.println("2. Make Payment for Resident");
             System.out.println("3. Generate Receipt");
             System.out.println("4. Logout");
@@ -2353,7 +2352,7 @@ public class APUHostelManagement {
         public void displayMenu() {
             // Resident-specific menu implementation
             System.out.println("Resident Menu:");
-            System.out.println("1. Update Individual Information");
+            System.out.println("1. Update Personal Information");
             System.out.println("2. View Payment Records");
             System.out.println("3. Manage Bookings");
             System.out.println("4. Logout");
@@ -2888,12 +2887,23 @@ public class APUHostelManagement {
                 String startDateInput = scanner.nextLine();
                 if (startDateInput.matches(datePattern)) {
                     try {
-                        startDate = LocalDate.parse(startDateInput, dateFormatter);
+                        String[] dateParts = startDateInput.split("-");
+                        int year = Integer.parseInt(dateParts[0]);
+                        int month = Integer.parseInt(dateParts[1]);
+                        int day = Integer.parseInt(dateParts[2]);
+                        if (year == 0 || month == 0 || day == 0) {
+                            throw new DateTimeParseException("Invalid date components", startDateInput, 0);
+                        }
+                        if (isInvalidDate(year, month, day)) {
+                            throw new DateTimeParseException("Invalid day for the month", startDateInput, 0);
+                        }
+                        LocalDate parsedDate = LocalDate.of(year, month, day);
+                        startDate = parsedDate;
                         if (startDate.isBefore(currentDate)) {
                             System.out.println("You cannot travel back in time. Please enter a valid start date.");
                             startDate = null;
                         }
-                    } catch (DateTimeParseException e) {
+                    } catch (DateTimeParseException | NumberFormatException e) {
                         System.out.println("This date does not exist, please input a valid date.");
                         startDate = null;
                     }
@@ -2901,19 +2911,30 @@ public class APUHostelManagement {
                     System.out.println("Invalid date format. Please enter the date in yyyy-MM-dd format.");
                 }
             }
-        
+
             // Prompt for end date
             while (endDate == null) {
                 System.out.print("Enter end date of your stay (yyyy-MM-dd): ");
                 String endDateInput = scanner.nextLine();
                 if (endDateInput.matches(datePattern)) {
                     try {
-                        endDate = LocalDate.parse(endDateInput, dateFormatter);
+                        String[] dateParts = endDateInput.split("-");
+                        int year = Integer.parseInt(dateParts[0]);
+                        int month = Integer.parseInt(dateParts[1]);
+                        int day = Integer.parseInt(dateParts[2]);
+                        if (year == 0 || month == 0 || day == 0) {
+                            throw new DateTimeParseException("Invalid date components", endDateInput, 0);
+                        }
+                        if (isInvalidDate(year, month, day)) {
+                            throw new DateTimeParseException("Invalid day for the month", endDateInput, 0);
+                        }
+                        LocalDate parsedDate = LocalDate.of(year, month, day);
+                        endDate = parsedDate;
                         if (!endDate.isAfter(startDate)) {
                             System.out.println("The end date must be after the start date.");
                             endDate = null;
                         }
-                    } catch (DateTimeParseException e) {
+                    } catch (DateTimeParseException | NumberFormatException e) {
                         System.out.println("This date does not exist, please input a valid date.");
                         endDate = null;
                     }
@@ -2961,10 +2982,12 @@ public class APUHostelManagement {
             }
         
             // Print confirmation message
-            long daysBetween = ChronoUnit.DAYS.between(startDate, endDate) + 1;
+            long daysBetween = ChronoUnit.DAYS.between(startDate, endDate);
             String roomNumber = roomMap.getOrDefault(roomID, "Unknown Room");
             System.out.println("Your Booking :");
             System.out.println("Room Number : " + roomNumber);
+            System.out.println("Start Date : " + startDate);
+            System.out.println("End Date : " + endDate);
             System.out.println("Stay Duration : " + daysBetween + " Days");
             System.out.println("Payment Amount : RM " + paymentAmount);
             System.out.println("=========================");
@@ -3119,7 +3142,7 @@ public class APUHostelManagement {
 
 
         private double calculatePaymentAmount(LocalDate startDate, LocalDate endDate, String feeRateID) {
-            long totalDays = ChronoUnit.DAYS.between(startDate, endDate) + 1;
+            long totalDays = ChronoUnit.DAYS.between(startDate, endDate);
             double dailyRate = 0;
             double weeklyRate = 0;
             double monthlyRate = 0;
