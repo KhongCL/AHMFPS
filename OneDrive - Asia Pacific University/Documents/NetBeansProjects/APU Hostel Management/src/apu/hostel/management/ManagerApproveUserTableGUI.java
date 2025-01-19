@@ -32,6 +32,21 @@ public class ManagerApproveUserTableGUI {
         frame.setSize(1024, 768);
         frame.setLayout(new BorderLayout());
 
+        // Top panel with back button
+        JPanel topPanel = new JPanel(new BorderLayout());
+        topPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); // Add padding
+        JButton backButton = new JButton("Back");
+        backButton.setPreferredSize(new Dimension(100, 40));
+        backButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                System.out.println("Back button in table page clicked");
+                new ManagerApproveUserRegistrationGUI();
+                frame.dispose();
+            }
+        });
+        topPanel.add(backButton, BorderLayout.WEST);
+        frame.add(topPanel, BorderLayout.NORTH);
+
         // User list panel
         userPanel = new JPanel(new BorderLayout());
         userPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); // Add padding
@@ -60,9 +75,11 @@ public class ManagerApproveUserTableGUI {
             });
         }
 
+        // Approve button panel
         JPanel approveButtonPanel = new JPanel();
         approveButtonPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0)); // Add spacing above the button
         JButton approveButton = new JButton("Approve");
+        approveButton.setPreferredSize(new Dimension(150, 40));
         approveButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 approveSelectedUser();
@@ -70,17 +87,6 @@ public class ManagerApproveUserTableGUI {
         });
         approveButtonPanel.add(approveButton);
         userPanel.add(approveButtonPanel, BorderLayout.SOUTH);
-
-        // Back button for userPanel to return to rolePanel
-        JButton userPanelBackButton = new JButton("Back");
-        userPanelBackButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                System.out.println("Back button in table page clicked");
-                new ManagerApproveUserRegistrationGUI();
-                frame.dispose();
-            }
-        });
-        userPanel.add(userPanelBackButton, BorderLayout.SOUTH);
 
         frame.add(userPanel, BorderLayout.CENTER);
         frame.setVisible(true);
