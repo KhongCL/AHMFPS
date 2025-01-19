@@ -23,11 +23,11 @@ public class APUHostelManagement {
 
         public static List<String[]> viewPaymentRecords(String residentID) {
             List<String[]> paymentRecords = new ArrayList<>();
-            try (BufferedReader reader = new BufferedReader(new FileReader("payment_records.txt"))) {
+            try (BufferedReader reader = new BufferedReader(new FileReader("payments.txt"))) { // Update file name
                 String line;
                 while ((line = reader.readLine()) != null) {
                     String[] details = line.split(",");
-                    if (details.length > 0 && details[1].equals(residentID)) {
+                    if (details.length > 0 && details[1].equals(residentID)) { // Assuming residentID is at index 1
                         paymentRecords.add(details);
                     }
                 }
