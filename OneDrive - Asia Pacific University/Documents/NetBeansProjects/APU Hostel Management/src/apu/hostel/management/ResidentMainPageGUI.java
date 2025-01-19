@@ -2,13 +2,13 @@ package apu.hostel.management;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -106,7 +106,22 @@ public class ResidentMainPageGUI {
 
         // Create table model and table
         DefaultTableModel tableModel = new DefaultTableModel(new Object[]{"Payment ID", "Payment Amount", "Booking Date", "Action"}, 0);
-        JTable table = new JTable(tableModel);
+        JTable table = new JTable(tableModel) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return column == 3; // Only the "Action" column is editable
+            }
+
+            @Override
+            public TableCellRenderer getCellRenderer(int row, int column) {
+                if (column == 3) {
+                    return new ButtonRenderer();
+                }
+                return super.getCellRenderer(row, column);
+            }
+        };
+        table.getColumn("Action").setCellEditor(new ButtonEditor(new JCheckBox()));
+        table.setRowHeight(30); // Increase row height
         JScrollPane scrollPane = new JScrollPane(table);
         viewPaymentRecordsPanel.add(scrollPane, BorderLayout.CENTER);
 
@@ -193,5 +208,68 @@ public class ResidentMainPageGUI {
         SwingUtilities.invokeLater(() -> {
             new ResidentMainPageGUI();
         });
+    }
+
+    // Custom renderer for the "Action" column
+    class ButtonRenderer extends JButton implements TableCellRenderer {
+        public ButtonRenderer() {
+            setOpaque(true);
+        }
+
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            if (value instanceof JButton) {
+                JButton button = (JButton) value;
+                return button;
+            }
+            return this;
+        }
+    }
+
+    // Custom editor for the "Action" column
+    class ButtonEditor extends DefaultCellEditor {
+        private JButton button;
+        private String label;
+        private boolean isPushed;
+
+        public ButtonEditor(JCheckBox checkBox) {
+            super(checkBox);
+            button = new JButton();
+            button.setOpaque(true);
+            button.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    fireEditingStopped();
+                }
+            });
+        }
+
+        @Override
+        public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
+            if (value instanceof JButton) {
+                button = (JButton) value;
+                button.addActionListener(new ActionListener() {
+                    public void actionPerformed(ActionEvent e) {
+                        showPaymentDetailsPopup((String[]) table.getValueAt(row, 0));
+                    }
+                });
+            }
+            return button;
+        }
+
+        @Override
+        public Object getCellEditorValue() {
+            return button;
+        }
+
+        @Override
+        public boolean stopCellEditing() {
+            isPushed = false;
+            return super.stopCellEditing();
+        }
+
+        @Override
+        protected void fireEditingStopped() {
+            super.fireEditingStopped();
+        }
     }
 }

@@ -23,11 +23,11 @@ public class APUHostelManagement {
 
         public static List<String[]> viewPaymentRecords(String residentID) {
             List<String[]> paymentRecords = new ArrayList<>();
-            try (BufferedReader reader = new BufferedReader(new FileReader("payments.txt"))) { // Update file name
+            try (BufferedReader reader = new BufferedReader(new FileReader("payments.txt"))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
                     String[] details = line.split(",");
-                    if (details.length > 0 && details[1].equals(residentID)) { // Assuming residentID is at index 1
+                    if (details.length > 0 && details[1].equals(residentID) && !details[7].equals("unpaid") && !details[9].equals("null")) {
                         paymentRecords.add(details);
                     }
                 }
@@ -1418,6 +1418,17 @@ public class APUHostelManagement {
             }
         }
 
+        public static List<String> getRestrictedFeeRateIDs() {
+            List<String> restrictedFeeRateIDs = new ArrayList<>();
+            List<Room> rooms = readRoomsFromFile("rooms.txt");
+            for (Room room : rooms) {
+                if (!restrictedFeeRateIDs.contains(room.getFeeRateID())) {
+                    restrictedFeeRateIDs.add(room.getFeeRateID());
+                }
+            }
+            return restrictedFeeRateIDs;
+        }
+
 
         private double getValidatedRate(Scanner scanner, String rateType) {
             double rate = -1;
@@ -1783,7 +1794,7 @@ public class APUHostelManagement {
             }
         }
 
-        private List<Room> readRoomsFromFile(String filename) {
+        private static List<Room> readRoomsFromFile(String filename) {
             List<Room> rooms = new ArrayList<>();
             try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
                 String line;
