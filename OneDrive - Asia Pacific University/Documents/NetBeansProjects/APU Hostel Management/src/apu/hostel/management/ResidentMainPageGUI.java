@@ -111,8 +111,8 @@ public class ResidentMainPageGUI {
         viewPaymentRecordsPanel.add(scrollPane, BorderLayout.CENTER);
 
         // Load payment records and populate table
-        String residentID = APUHostelManagement.getResidentID();
-        List<String[]> relevantPayments = APUHostelManagement.viewPaymentRecords(residentID);
+        String residentID = WelcomePageGUI.getCurrentResidentID(); // Retrieve residentID
+        List<String[]> relevantPayments = APUHostelManagement.Resident.viewPaymentRecords(residentID);
         for (String[] details : relevantPayments) {
             JButton viewButton = new JButton("View");
             viewButton.addActionListener(new ActionListener() {

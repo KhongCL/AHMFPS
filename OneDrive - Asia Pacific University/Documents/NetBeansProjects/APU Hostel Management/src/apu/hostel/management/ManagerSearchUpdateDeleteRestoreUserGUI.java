@@ -11,13 +11,13 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class ManagerSearchUpdateDeleteRestoreUser {
+public class ManagerSearchUpdateDeleteRestoreUserGUI {
     private JFrame frame;
     private JTable userTable;
     private DefaultTableModel tableModel;
     private List<APUHostelManagement.User> userList;
 
-    public ManagerSearchUpdateDeleteRestoreUser() {
+    public ManagerSearchUpdateDeleteRestoreUserGUI() {
         initialize();
     }
 
@@ -586,7 +586,7 @@ public class ManagerSearchUpdateDeleteRestoreUser {
         EventQueue.invokeLater(new Runnable() {
             public void run() {
                 try {
-                    ManagerSearchUpdateDeleteRestoreUser window = new ManagerSearchUpdateDeleteRestoreUser();
+                    ManagerSearchUpdateDeleteRestoreUserGUI window = new ManagerSearchUpdateDeleteRestoreUserGUI();
                     window.frame.setVisible(true);
                 } catch (Exception e) {
                     e.printStackTrace();

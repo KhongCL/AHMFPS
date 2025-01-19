@@ -20,6 +20,22 @@ public class APUHostelManagement {
         protected String dateOfRegistration;
         protected String role;
         protected boolean isActive;
+
+        public static List<String[]> viewPaymentRecords(String residentID) {
+            List<String[]> paymentRecords = new ArrayList<>();
+            try (BufferedReader reader = new BufferedReader(new FileReader("payment_records.txt"))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    String[] details = line.split(",");
+                    if (details.length > 0 && details[1].equals(residentID)) {
+                        paymentRecords.add(details);
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return paymentRecords;
+        }
         
 
         public User(String userID, String icPassportNumber, String username, String password, String contactNumber, String dateOfRegistration, String role, boolean isActive) {
@@ -1421,7 +1437,7 @@ public class APUHostelManagement {
             return rate;
         }
         
-        private void saveRatesToFile(List<FeeRate> rates) {
+        static void saveRatesToFile(List<FeeRate> rates) {
             try (BufferedWriter writer = new BufferedWriter(new FileWriter("fee_rates.txt"))) {
                 for (FeeRate rate : rates) {
                     writer.write(rate.toString());

@@ -45,7 +45,7 @@ public class ManagerMainPageGUI {
         searchUserButton.setPreferredSize(new Dimension(300, 50)); // Set button size
         searchUserButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                new ManagerSearchUpdateDeleteRestoreUser();
+                new ManagerSearchUpdateDeleteRestoreUserGUI();
                 frame.dispose(); // Close the current window
             }
         });
@@ -56,7 +56,8 @@ public class ManagerMainPageGUI {
         fixRateButton.setPreferredSize(new Dimension(300, 50)); // Set button size
         fixRateButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                fixOrUpdateRate();
+                new ManagerFixUpdateDeleteRestoreRateGUI();
+                frame.dispose(); // Close the current window
             }
         });
         buttonPanel.add(fixRateButton, gbc);
@@ -93,11 +94,6 @@ public class ManagerMainPageGUI {
 
         frame.add(buttonPanel, BorderLayout.CENTER);
         frame.setVisible(true);
-    }
-
-    private void fixOrUpdateRate() {
-        // Implement the logic for fixing, updating, deleting, or restoring rates
-        JOptionPane.showMessageDialog(frame, "Fix, Update, Delete or Restore Rate functionality to be implemented.");
     }
 
     private void manageRooms() {
