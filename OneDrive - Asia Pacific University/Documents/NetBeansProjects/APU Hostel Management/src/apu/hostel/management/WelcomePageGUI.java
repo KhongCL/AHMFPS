@@ -4,209 +4,471 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.io.IOException;
 
-public class WelcomePageGUI {
-    private JFrame frame;
-    private JTextField authCodeField;
-    private String selectedRole;
+public class WelcomePageGUI extends JFrame {
+    private CardLayout cardLayout;
+    private JPanel mainPanel;
+    private APUHostelManagement management;
 
     public WelcomePageGUI() {
-        initialize();
+        management = new APUHostelManagement();
+
+        setTitle("APU Hostel Management System");
+        setSize(1024, 768); // Adjusted size
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+
+        cardLayout = new CardLayout();
+        mainPanel = new JPanel(cardLayout);
+
+        JPanel roleSelectionPanel = createRoleSelectionPanel();
+        JPanel staffAuthCodePanel = createAuthCodePanel("Staff Authorization Code", "StaffLogin");
+        JPanel managerAuthCodePanel = createAuthCodePanel("Manager Authorization Code", "ManagerLogin");
+        JPanel residentLoginPanel = createLoginPanel("Resident Login Page", "ResidentMenu");
+        JPanel staffLoginPanel = createLoginPanel("Staff Login Page", "StaffMenu");
+        JPanel residentRegistrationPanel = createRegistrationPanel("Resident Registration", "registerResident");
+        JPanel staffRegistrationPanel = createRegistrationPanel("Staff Registration", "registerStaff");
+        JPanel residentMenuPanel = createMenuPanel("Resident Menu");
+        JPanel staffMenuPanel = createMenuPanel("Staff Menu");
+
+        mainPanel.add(roleSelectionPanel, "RoleSelection");
+        mainPanel.add(staffAuthCodePanel, "StaffAuthCode");
+        mainPanel.add(managerAuthCodePanel, "ManagerAuthCode");
+        mainPanel.add(residentLoginPanel, "ResidentLogin");
+        mainPanel.add(staffLoginPanel, "StaffLogin");
+        mainPanel.add(residentRegistrationPanel, "ResidentRegistration");
+        mainPanel.add(staffRegistrationPanel, "StaffRegistration");
+        mainPanel.add(residentMenuPanel, "ResidentMenu");
+        mainPanel.add(staffMenuPanel, "StaffMenu");
+
+        add(mainPanel);
+        cardLayout.show(mainPanel, "RoleSelection");
     }
 
-    private void initialize() {
-        frame = new JFrame("APU Hostel Management Fees Payment System (AHMFPS)");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(400, 300);
-        frame.setLayout(new GridLayout(5, 1));
+    private JPanel createRoleSelectionPanel() {
+        JPanel panel = new JPanel(new BorderLayout());
 
-        JLabel welcomeLabel = new JLabel("Welcome to APU Hostel Management Fees Payment System (AHMFPS)", JLabel.CENTER);
-        frame.add(welcomeLabel);
+        JLabel welcomeLabel = new JLabel("Welcome to APU Hostel Management Fees Payment System (AHMFPS)", SwingConstants.CENTER);
+        welcomeLabel.setFont(new Font("Arial", Font.BOLD, 28)); // Adjusted font size
+        welcomeLabel.setBorder(BorderFactory.createEmptyBorder(48, 0, 0, 0)); // Adjusted space above the welcome message
+        panel.add(welcomeLabel, BorderLayout.NORTH);
 
-        JLabel roleLabel = new JLabel("Please choose your role:", JLabel.CENTER);
-        frame.add(roleLabel);
+        JPanel centerPanel = new JPanel(new GridLayout(5, 1, 19, 19)); // Adjusted to 5 rows
+        centerPanel.setBorder(BorderFactory.createEmptyBorder(38, 38, 38, 38)); // Adjusted border
 
-        JPanel buttonPanel = new JPanel();
-        buttonPanel.setLayout(new GridLayout(1, 3));
-
+        JLabel label = new JLabel("Select Your Role:", SwingConstants.CENTER);
+        label.setFont(new Font("Arial", Font.PLAIN, 24)); // Adjusted font size
         JButton managerButton = new JButton("Manager");
-        managerButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                handleRoleSelection("manager");
-            }
-        });
-        buttonPanel.add(managerButton);
-
         JButton staffButton = new JButton("Staff");
-        staffButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                handleRoleSelection("staff");
-            }
-        });
-        buttonPanel.add(staffButton);
-
         JButton residentButton = new JButton("Resident");
-        residentButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                handleRoleSelection("resident");
+
+        managerButton.setFont(new Font("Arial", Font.PLAIN, 24)); // Adjusted font size
+        staffButton.setFont(new Font("Arial", Font.PLAIN, 24)); // Adjusted font size
+        residentButton.setFont(new Font("Arial", Font.PLAIN, 24)); // Adjusted font size
+
+        managerButton.setPreferredSize(new Dimension(171, 57)); // Adjusted button size
+        staffButton.setPreferredSize(new Dimension(171, 57)); // Adjusted button size
+        residentButton.setPreferredSize(new Dimension(171, 57)); // Adjusted button size
+
+        managerButton.addActionListener(e -> cardLayout.show(mainPanel, "ManagerAuthCode"));
+        staffButton.addActionListener(e -> cardLayout.show(mainPanel, "StaffAuthCode"));
+        residentButton.addActionListener(e -> cardLayout.show(mainPanel, "ResidentLogin"));
+
+        centerPanel.add(label);
+        centerPanel.add(managerButton);
+        centerPanel.add(staffButton);
+        centerPanel.add(residentButton);
+        centerPanel.add(Box.createVerticalStrut(38)); // Adjusted space below the buttons
+
+        panel.add(centerPanel, BorderLayout.CENTER);
+
+        return panel;
+    }
+
+    private JPanel createAuthCodePanel(String title, String nextCard) {
+        JPanel panel = new JPanel(new BorderLayout());
+
+        JPanel topPanel = new JPanel(new BorderLayout());
+        JButton backButton = new JButton("Back");
+        backButton.setFont(new Font("Arial", Font.PLAIN, 21)); // Adjusted font size
+        backButton.setPreferredSize(new Dimension(102, 57)); // Adjusted button size
+        backButton.setMaximumSize(new Dimension(102, 57)); // Adjusted button size
+        backButton.setMinimumSize(new Dimension(102, 57)); // Adjusted button size
+        backButton.addActionListener(e -> cardLayout.show(mainPanel, "RoleSelection"));
+        topPanel.add(backButton, BorderLayout.WEST);
+        panel.add(topPanel, BorderLayout.NORTH);
+
+        JPanel centerPanel = new JPanel(new GridLayout(3, 1, 19, 19)); // Adjusted grid layout
+        centerPanel.setBorder(BorderFactory.createEmptyBorder(38, 38, 38, 38)); // Adjusted border
+
+        JLabel titleLabel = new JLabel(title, SwingConstants.CENTER);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 28)); // Adjusted font size
+
+        JTextField authCodeField = new JTextField();
+        authCodeField.setFont(new Font("Arial", Font.PLAIN, 24)); // Adjusted font size
+        authCodeField.setForeground(Color.GRAY);
+        authCodeField.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                if (authCodeField.getText().equals(title)) {
+                    authCodeField.setText("");
+                    authCodeField.setForeground(Color.BLACK);
+                }
+            }
+
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                if (authCodeField.getText().isEmpty()) {
+                    authCodeField.setForeground(Color.GRAY);
+                    authCodeField.setText(title);
+                }
             }
         });
-        buttonPanel.add(residentButton);
-
-        frame.add(buttonPanel);
-
-        authCodeField = new JTextField();
-        frame.add(authCodeField);
 
         JButton submitButton = new JButton("Submit");
-        submitButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                handleAuthCodeSubmission();
+        submitButton.setFont(new Font("Arial", Font.PLAIN, 24)); // Adjusted font size
+        submitButton.setPreferredSize(new Dimension(171, 57)); // Adjusted button size
+        submitButton.addActionListener(e -> {
+            String authCode = authCodeField.getText();
+            String role = title.contains("Staff") ? "staff" : "manager";
+            if (APUHostelManagement.isValidAuthCode(authCode, role)) {
+                cardLayout.show(mainPanel, nextCard);
+            } else {
+                JOptionPane.showMessageDialog(this, "Invalid authorization code. Access denied.", "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
-        frame.add(submitButton);
-
-        frame.setVisible(true);
-    }
-
-    private void handleRoleSelection(String role) {
-        selectedRole = role;
-        if (role.equals("manager") || role.equals("staff")) {
-            authCodeField.setVisible(true);
-        } else {
-            authCodeField.setVisible(false);
-            showRegisterOrLoginDialog(role);
-        }
-    }
-
-    private void handleAuthCodeSubmission() {
-        String authCode = authCodeField.getText();
-        if (APUHostelManagement.isValidAuthCode(authCode, selectedRole)) {
-            showRegisterOrLoginDialog(selectedRole);
-        } else {
-            JOptionPane.showMessageDialog(frame, "Invalid authorization code. Access denied.", "Error", JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
-    private void showRegisterOrLoginDialog(String role) {
-        JDialog dialog = new JDialog(frame, "Choose Action", true);
-        dialog.setLayout(new GridLayout(3, 1));
-        dialog.setSize(300, 200);
-
-        JLabel label = new JLabel("You have chosen " + role + ". Please choose an action:", JLabel.CENTER);
-        dialog.add(label);
-
-        JButton registerButton = new JButton("Register");
-        registerButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                dialog.dispose();
-                showRegistrationForm(role);
+        
+        centerPanel.add(titleLabel);
+        centerPanel.add(authCodeField);
+        centerPanel.add(submitButton);
+        
+        panel.add(centerPanel, BorderLayout.CENTER);
+        
+        // Add a component listener to reset the auth code field when the panel is shown
+        panel.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentShown(ComponentEvent e) {
+                authCodeField.setText(title);
+                authCodeField.setForeground(Color.GRAY);
             }
         });
-        dialog.add(registerButton);
+        
+        return panel;
+        }
+
+    private JPanel createLoginPanel(String title, String menuCard) {
+        JPanel panel = new JPanel(new BorderLayout());
+
+        JPanel topPanel = new JPanel(new BorderLayout());
+        JButton backButton = new JButton("Back");
+        backButton.setFont(new Font("Arial", Font.PLAIN, 21)); // Adjusted font size
+        backButton.setPreferredSize(new Dimension(102, 57)); // Adjusted button size
+        backButton.setMaximumSize(new Dimension(102, 57)); // Adjusted button size
+        backButton.setMinimumSize(new Dimension(102, 57)); // Adjusted button size
+        backButton.addActionListener(e -> cardLayout.show(mainPanel, "RoleSelection"));
+        topPanel.add(backButton, BorderLayout.WEST);
+        panel.add(topPanel, BorderLayout.NORTH);
+
+        JPanel centerPanel = new JPanel(new GridLayout(6, 1, 19, 19)); // Adjusted grid layout
+        centerPanel.setBorder(BorderFactory.createEmptyBorder(38, 38, 38, 38)); // Adjusted border
+
+        JLabel titleLabel = new JLabel(title, SwingConstants.CENTER);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 28)); // Adjusted font size
+
+        JTextField usernameField = new JTextField("Username");
+        usernameField.setFont(new Font("Arial", Font.PLAIN, 24)); // Adjusted font size
+        usernameField.setForeground(Color.GRAY);
+        usernameField.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                if (usernameField.getText().equals("Username")) {
+                    usernameField.setText("");
+                    usernameField.setForeground(Color.BLACK);
+                }
+            }
+
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                if (usernameField.getText().isEmpty()) {
+                    usernameField.setForeground(Color.GRAY);
+                    usernameField.setText("Username");
+                }
+            }
+        });
+
+        JPasswordField passwordField = new JPasswordField("Password");
+        passwordField.setFont(new Font("Arial", Font.PLAIN, 24)); // Adjusted font size
+        passwordField.setForeground(Color.GRAY);
+        passwordField.setEchoChar((char) 0);
+        passwordField.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                if (String.valueOf(passwordField.getPassword()).equals("Password")) {
+                    passwordField.setText("");
+                    passwordField.setForeground(Color.BLACK);
+                    passwordField.setEchoChar('*');
+                }
+            }
+
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                if (String.valueOf(passwordField.getPassword()).isEmpty()) {
+                    passwordField.setForeground(Color.GRAY);
+                    passwordField.setText("Password");
+                    passwordField.setEchoChar((char) 0);
+                }
+            }
+        });
 
         JButton loginButton = new JButton("Login");
-        loginButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                dialog.dispose();
-                showLoginForm(role);
+        loginButton.setFont(new Font("Arial", Font.PLAIN, 24)); // Adjusted font size
+        loginButton.setPreferredSize(new Dimension(171, 57)); // Adjusted button size
+        loginButton.addActionListener(e -> {
+            String username = usernameField.getText();
+            String password = new String(passwordField.getPassword());
+            boolean loginSuccess = false;
+            try {
+                if (title.equals("Resident Login Page")) {
+                    APUHostelManagement.User user = APUHostelManagement.User.findUser(username, password, "approved_residents.txt");
+                    if (user != null && user.getRole().equals("resident")) {
+                        loginSuccess = true;
+                    }
+                } else if (title.equals("Staff Login Page")) {
+                    APUHostelManagement.User user = APUHostelManagement.User.findUser(username, password, "approved_staffs.txt");
+                    if (user != null && user.getRole().equals("staff")) {
+                        loginSuccess = true;
+                    }
+                }
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+            if (loginSuccess) {
+                cardLayout.show(mainPanel, menuCard);
+            } else {
+                JOptionPane.showMessageDialog(this, "Invalid username or password", "Login Error", JOptionPane.ERROR_MESSAGE);
             }
         });
-        dialog.add(loginButton);
 
-        dialog.setVisible(true);
+        JLabel registerLabel = new JLabel("<html>Don't have an account? <a href=''>Register here</a></html>", SwingConstants.CENTER);
+        registerLabel.setFont(new Font("Arial", Font.PLAIN, 24)); // Adjusted font size
+        registerLabel.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        registerLabel.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                if (title.equals("Resident Login Page")) {
+                    cardLayout.show(mainPanel, "ResidentRegistration");
+                } else if (title.equals("Staff Login Page")) {
+                    cardLayout.show(mainPanel, "StaffRegistration");
+                }
+            }
+        });
+
+        centerPanel.add(titleLabel);
+        centerPanel.add(usernameField);
+        centerPanel.add(passwordField);
+        centerPanel.add(loginButton);
+        centerPanel.add(registerLabel);
+
+        panel.add(centerPanel, BorderLayout.CENTER);
+
+        return panel;
     }
 
-    private void showRegistrationForm(String role) {
-        JDialog registrationDialog = new JDialog(frame, "Register " + role, true);
-        registrationDialog.setLayout(new GridLayout(5, 2));
-        registrationDialog.setSize(400, 300);
-
-        JLabel icPassportLabel = new JLabel("IC/Passport Number:");
-        JTextField icPassportField = new JTextField();
-        registrationDialog.add(icPassportLabel);
-        registrationDialog.add(icPassportField);
-
-        JLabel usernameLabel = new JLabel("Username:");
-        JTextField usernameField = new JTextField();
-        registrationDialog.add(usernameLabel);
-        registrationDialog.add(usernameField);
-
-        JLabel passwordLabel = new JLabel("Password:");
-        JPasswordField passwordField = new JPasswordField();
-        registrationDialog.add(passwordLabel);
-        registrationDialog.add(passwordField);
-
-        JLabel contactNumberLabel = new JLabel("Contact Number:");
-        JTextField contactNumberField = new JTextField();
-        registrationDialog.add(contactNumberLabel);
-        registrationDialog.add(contactNumberField);
-
-        JButton submitButton = new JButton("Submit");
-        submitButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                // Call the appropriate registration method from APUHostelManagement
-                if (role.equals("manager")) {
-                    APUHostelManagement.registerManager(icPassportField.getText(), usernameField.getText(), new String(passwordField.getPassword()), contactNumberField.getText());
-                } else if (role.equals("staff")) {
-                    APUHostelManagement.registerStaff(icPassportField.getText(), usernameField.getText(), new String(passwordField.getPassword()), contactNumberField.getText());
-                } else if (role.equals("resident")) {
-                    APUHostelManagement.registerResident(icPassportField.getText(), usernameField.getText(), new String(passwordField.getPassword()), contactNumberField.getText());
-                }
-                registrationDialog.dispose();
-            }
-        });
-        registrationDialog.add(submitButton);
-
-        registrationDialog.setVisible(true);
+    private JPanel createMenuPanel(String title) {
+        JPanel panel = new JPanel(new BorderLayout());
+        JLabel titleLabel = new JLabel(title, SwingConstants.CENTER);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 28)); // Adjusted font size
+        panel.add(titleLabel, BorderLayout.CENTER);
+        return panel;
     }
 
-    private void showLoginForm(String role) {
-        JDialog loginDialog = new JDialog(frame, "Login " + role, true);
-        loginDialog.setLayout(new GridLayout(3, 2));
-        loginDialog.setSize(400, 200);
+    private JPanel createRegistrationPanel(String title, String registerMethod) {
+        JPanel panel = new JPanel(new BorderLayout());
 
-        JLabel usernameLabel = new JLabel("Username:");
-        JTextField usernameField = new JTextField();
-        loginDialog.add(usernameLabel);
-        loginDialog.add(usernameField);
-
-        JLabel passwordLabel = new JLabel("Password:");
-        JPasswordField passwordField = new JPasswordField();
-        loginDialog.add(passwordLabel);
-        loginDialog.add(passwordField);
-
-        JButton submitButton = new JButton("Submit");
-        submitButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                // Call the appropriate login method from APUHostelManagement
-                if (role.equals("manager")) {
-                    APUHostelManagement.loginManager(usernameField.getText(), new String(passwordField.getPassword()));
-                } else if (role.equals("staff")) {
-                    APUHostelManagement.loginStaff(usernameField.getText(), new String(passwordField.getPassword()));
-                } else if (role.equals("resident")) {
-                    APUHostelManagement.loginResident(usernameField.getText(), new String(passwordField.getPassword()));
-                }
-                loginDialog.dispose();
+        JPanel topPanel = new JPanel(new BorderLayout());
+        JButton backButton = new JButton("Back");
+        backButton.setFont(new Font("Arial", Font.PLAIN, 21)); // Adjusted font size
+        backButton.setPreferredSize(new Dimension(102, 57)); // Adjusted button size
+        backButton.setMaximumSize(new Dimension(102, 57)); // Adjusted button size
+        backButton.setMinimumSize(new Dimension(102, 57)); // Adjusted button size
+        backButton.addActionListener(e -> {
+            if (registerMethod.equals("registerResident")) {
+                cardLayout.show(mainPanel, "ResidentLogin");
+            } else if (registerMethod.equals("registerStaff")) {
+                cardLayout.show(mainPanel, "StaffLogin");
             }
         });
-        loginDialog.add(submitButton);
+        topPanel.add(backButton, BorderLayout.WEST);
+        panel.add(topPanel, BorderLayout.NORTH);
 
-        loginDialog.setVisible(true);
+        JPanel centerPanel = new JPanel(new GridLayout(6, 1, 19, 19)); // Adjusted grid layout
+        centerPanel.setBorder(BorderFactory.createEmptyBorder(38, 38, 38, 38)); // Adjusted border
+
+        JLabel titleLabel = new JLabel(title, SwingConstants.CENTER);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 28)); // Adjusted font size
+
+        JTextField icPassportField = new JTextField("IC/Passport Number");
+        icPassportField.setFont(new Font("Arial", Font.PLAIN, 24)); // Adjusted font size
+        icPassportField.setForeground(Color.GRAY);
+        icPassportField.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                if (icPassportField.getText().equals("IC/Passport Number")) {
+                    icPassportField.setText("");
+                    icPassportField.setForeground(Color.BLACK);
+                }
+            }
+
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                if (icPassportField.getText().isEmpty()) {
+                    icPassportField.setForeground(Color.GRAY);
+                    icPassportField.setText("IC/Passport Number");
+                }
+            }
+        });
+
+        JTextField usernameField = new JTextField("Create Username");
+        usernameField.setFont(new Font("Arial", Font.PLAIN, 24)); // Adjusted font size
+        usernameField.setForeground(Color.GRAY);
+        usernameField.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                if (usernameField.getText().equals("Create Username")) {
+                    usernameField.setText("");
+                    usernameField.setForeground(Color.BLACK);
+                }
+            }
+
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                if (usernameField.getText().isEmpty()) {
+                    usernameField.setForeground(Color.GRAY);
+                    usernameField.setText("Create Username");
+                }
+            }
+        });
+
+        JPasswordField passwordField = new JPasswordField("Create Password");
+        passwordField.setFont(new Font("Arial", Font.PLAIN, 24)); // Adjusted font size
+        passwordField.setForeground(Color.GRAY);
+        passwordField.setEchoChar((char) 0);
+        passwordField.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                if (String.valueOf(passwordField.getPassword()).equals("Create Password")) {
+                    passwordField.setText("");
+                    passwordField.setForeground(Color.BLACK);
+                    passwordField.setEchoChar('*');
+                }
+            }
+
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                if (String.valueOf(passwordField.getPassword()).isEmpty()) {
+                    passwordField.setForeground(Color.GRAY);
+                    passwordField.setText("Create Password");
+                    passwordField.setEchoChar((char) 0);
+                }
+            }
+        });
+
+        JTextField contactNumberField = new JTextField("Contact Number");
+        contactNumberField.setFont(new Font("Arial", Font.PLAIN, 24)); // Adjusted font size
+        contactNumberField.setForeground(Color.GRAY);
+        contactNumberField.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                if (contactNumberField.getText().equals("Contact Number")) {
+                    contactNumberField.setText("");
+                    contactNumberField.setForeground(Color.BLACK);
+                }
+            }
+
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                if (contactNumberField.getText().isEmpty()) {
+                    contactNumberField.setForeground(Color.GRAY);
+                    contactNumberField.setText("Contact Number");
+                }
+            }
+        });
+
+        JButton registerButton = new JButton("Register");
+        registerButton.setFont(new Font("Arial", Font.PLAIN, 24)); // Adjusted font size
+        registerButton.setPreferredSize(new Dimension(171, 57)); // Adjusted button size
+        registerButton.addActionListener(e -> {
+            String icPassportNumber = icPassportField.getText();
+            String username = usernameField.getText();
+            String password = new String(passwordField.getPassword());
+            String contactNumber = contactNumberField.getText();
+
+            // Scenario 1: Check if all fields are filled
+            if (icPassportNumber.isEmpty() || username.isEmpty() || password.isEmpty() || contactNumber.isEmpty()) {
+                showErrorDialog("Please fill in all fields.");
+                return;
+            }
+
+            // Scenario 2: Validate format of each field
+            if (!APUHostelManagement.isValidICPassport(icPassportNumber)) {
+                showErrorDialog("Invalid IC/Passport Number. IC format: xxxxxx-xx-xxxx, Passport format: one alphabet followed by 8 numbers.");
+                return;
+            }
+            if (!APUHostelManagement.isValidUsername(username)) {
+                showErrorDialog("Invalid Username. Username must be between 3 and 12 characters long, contain only letters, numbers, and underscores, and must contain at least one letter.");
+                return;
+            }
+            if (!APUHostelManagement.isValidPassword(password, username)) {
+                showErrorDialog("Invalid Password. Password must be between 8 and 12 characters long, contain at least one number, one special character (!@#$%^&*()), and one uppercase letter, and cannot be similar to the username.");
+                return;
+            }
+            if (!APUHostelManagement.isValidContactNumber(contactNumber)) {
+                showErrorDialog("Invalid Contact Number. The correct format is 01X-XXX-XXXX.");
+                return;
+            }
+
+            // Scenario 3: Check for existing data
+            try {
+                if (!APUHostelManagement.isUnique(icPassportNumber, "", "")) {
+                    showErrorDialog(icPassportNumber.length() == 14 ? "IC number already exists. Please use a different IC number." : "Passport number already exists. Please use a different Passport number.");
+                    return;
+                }
+                if (!APUHostelManagement.isUnique("", username, "")) {
+                    showErrorDialog("Username already exists. Please use a different Username.");
+                    return;
+                }
+                if (!APUHostelManagement.isUnique("", "", contactNumber)) {
+                    showErrorDialog("Contact Number already exists. Please use a different Contact Number.");
+                    return;
+                }
+            } catch (IOException ex) {
+                showErrorDialog("An error occurred while checking the existing data. Please try again.");
+                return;
+            }
+
+            boolean success = false;
+            if (registerMethod.equals("registerResident")) {
+                success = APUHostelManagement.registerResident(icPassportNumber, username, password, contactNumber);
+            } else if (registerMethod.equals("registerStaff")) {
+                success = APUHostelManagement.registerStaff(icPassportNumber, username, password, contactNumber);
+            }
+
+            if (success) {
+                JOptionPane.showMessageDialog(this, "Registration successful.");
+                cardLayout.show(mainPanel, "RoleSelection");
+            } else {
+                showErrorDialog("Registration failed. Please try again.");
+            }
+        });
+
+        centerPanel.add(titleLabel);
+        centerPanel.add(icPassportField);
+        centerPanel.add(usernameField);
+        centerPanel.add(passwordField);
+        centerPanel.add(contactNumberField);
+        centerPanel.add(registerButton);
+
+        panel.add(centerPanel, BorderLayout.CENTER);
+
+        return panel;
+    }
+
+    private void showErrorDialog(String message) {
+        JOptionPane.showMessageDialog(this, message, "Error", JOptionPane.ERROR_MESSAGE);
     }
 
     public static void main(String[] args) {
-        EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                try {
-                    WelcomePageGUI window = new WelcomePageGUI();
-                    window.frame.setVisible(true);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
+        SwingUtilities.invokeLater(() -> {
+            WelcomePageGUI frame = new WelcomePageGUI();
+            frame.setVisible(true);
         });
     }
 }
-
-//test
