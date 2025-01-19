@@ -498,7 +498,7 @@ public class APUHostelManagement {
         }
         
         // Method to save unapproved users to file
-        private void saveUnapprovedUsers(List<User> users, String filename) throws IOException {
+        static void saveUnapprovedUsers(List<User> users, String filename) throws IOException {
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
                 for (User user : users) {
                     if (user instanceof Manager) {
@@ -3783,7 +3783,7 @@ public class APUHostelManagement {
     }
 
     // Method to generate unique IDs with a prefix
-    private static String generateUserID(String prefix) {
+    static String generateUserID(String prefix) {
         int id = 1;
         String filename = null;
         switch (prefix) {

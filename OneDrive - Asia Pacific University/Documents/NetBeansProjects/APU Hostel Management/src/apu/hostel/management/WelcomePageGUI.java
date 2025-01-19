@@ -15,15 +15,15 @@ public class WelcomePageGUI extends JFrame {
 
     public WelcomePageGUI() {
         management = new APUHostelManagement();
-
+    
         setTitle("APU Hostel Management System");
         setSize(1024, 768); // Adjusted size
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
-
+    
         cardLayout = new CardLayout();
         mainPanel = new JPanel(cardLayout);
-
+    
         JPanel roleSelectionPanel = createRoleSelectionPanel();
         JPanel staffAuthCodePanel = createAuthCodePanel("Staff Authorization Code", "StaffLogin");
         JPanel managerAuthCodePanel = createAuthCodePanel("Manager Authorization Code", "ManagerLogin");
@@ -31,9 +31,10 @@ public class WelcomePageGUI extends JFrame {
         JPanel staffLoginPanel = createLoginPanel("Staff Login Page", "StaffMenu");
         JPanel residentRegistrationPanel = createRegistrationPanel("Resident Registration", "registerResident");
         JPanel staffRegistrationPanel = createRegistrationPanel("Staff Registration", "registerStaff");
-        JPanel residentMenuPanel = createMenuPanel("Resident Menu");
-        JPanel staffMenuPanel = createMenuPanel("Staff Menu");
+        JPanel managerLoginPanel = createLoginPanel("Manager Login Page", "ManagerMenu");
+        JPanel managerRegistrationPanel = createRegistrationPanel("Manager Registration", "registerManager");
 
+    
         mainPanel.add(roleSelectionPanel, "RoleSelection");
         mainPanel.add(staffAuthCodePanel, "StaffAuthCode");
         mainPanel.add(managerAuthCodePanel, "ManagerAuthCode");
@@ -41,9 +42,10 @@ public class WelcomePageGUI extends JFrame {
         mainPanel.add(staffLoginPanel, "StaffLogin");
         mainPanel.add(residentRegistrationPanel, "ResidentRegistration");
         mainPanel.add(staffRegistrationPanel, "StaffRegistration");
-        mainPanel.add(residentMenuPanel, "ResidentMenu");
-        mainPanel.add(staffMenuPanel, "StaffMenu");
+        mainPanel.add(managerLoginPanel, "ManagerLogin");
+        mainPanel.add(managerRegistrationPanel, "ManagerRegistration"); // Ensure this line is correct
 
+    
         add(mainPanel);
         cardLayout.show(mainPanel, "RoleSelection");
     }
@@ -159,7 +161,7 @@ public class WelcomePageGUI extends JFrame {
 
     private JPanel createLoginPanel(String title, String menuCard) {
         JPanel panel = new JPanel(new BorderLayout());
-
+    
         JPanel topPanel = new JPanel(new BorderLayout());
         JButton backButton = new JButton("Back");
         backButton.setFont(new Font("Arial", Font.PLAIN, 21)); // Adjusted font size
@@ -169,13 +171,13 @@ public class WelcomePageGUI extends JFrame {
         backButton.addActionListener(e -> cardLayout.show(mainPanel, "RoleSelection"));
         topPanel.add(backButton, BorderLayout.WEST);
         panel.add(topPanel, BorderLayout.NORTH);
-
+    
         JPanel centerPanel = new JPanel(new GridLayout(6, 1, 19, 19)); // Adjusted grid layout
         centerPanel.setBorder(BorderFactory.createEmptyBorder(38, 38, 38, 38)); // Adjusted border
-
+    
         JLabel titleLabel = new JLabel(title, SwingConstants.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 28)); // Adjusted font size
-
+    
         JTextField usernameField = new JTextField("Username");
         usernameField.setFont(new Font("Arial", Font.PLAIN, 24)); // Adjusted font size
         usernameField.setForeground(Color.GRAY);
@@ -186,7 +188,7 @@ public class WelcomePageGUI extends JFrame {
                     usernameField.setForeground(Color.BLACK);
                 }
             }
-
+    
             public void focusLost(java.awt.event.FocusEvent evt) {
                 if (usernameField.getText().isEmpty()) {
                     usernameField.setForeground(Color.GRAY);
@@ -194,7 +196,7 @@ public class WelcomePageGUI extends JFrame {
                 }
             }
         });
-
+    
         JPasswordField passwordField = new JPasswordField("Password");
         passwordField.setFont(new Font("Arial", Font.PLAIN, 24)); // Adjusted font size
         passwordField.setForeground(Color.GRAY);
@@ -207,7 +209,7 @@ public class WelcomePageGUI extends JFrame {
                     passwordField.setEchoChar('*');
                 }
             }
-
+    
             public void focusLost(java.awt.event.FocusEvent evt) {
                 if (String.valueOf(passwordField.getPassword()).isEmpty()) {
                     passwordField.setForeground(Color.GRAY);
@@ -216,7 +218,7 @@ public class WelcomePageGUI extends JFrame {
                 }
             }
         });
-
+    
         JButton loginButton = new JButton("Login");
         loginButton.setFont(new Font("Arial", Font.PLAIN, 24)); // Adjusted font size
         loginButton.setPreferredSize(new Dimension(171, 57)); // Adjusted button size
@@ -229,23 +231,32 @@ public class WelcomePageGUI extends JFrame {
                     APUHostelManagement.User user = APUHostelManagement.User.findUser(username, password, "approved_residents.txt");
                     if (user != null && user.getRole().equals("resident")) {
                         loginSuccess = true;
+                        new ResidentMainPageGUI(); // Launch ResidentMainPageGUI
+                        dispose(); // Close current window
                     }
                 } else if (title.equals("Staff Login Page")) {
                     APUHostelManagement.User user = APUHostelManagement.User.findUser(username, password, "approved_staffs.txt");
                     if (user != null && user.getRole().equals("staff")) {
                         loginSuccess = true;
+                        new StaffMainPageGUI(); // Launch StaffMainPageGUI
+                        dispose(); // Close current window
+                    }
+                } else if (title.equals("Manager Login Page")) {
+                    APUHostelManagement.User user = APUHostelManagement.User.findUser(username, password, "approved_managers.txt");
+                    if (user != null && user.getRole().equals("manager")) {
+                        loginSuccess = true;
+                        new ManagerMainPageGUI(); // Launch ManagerMainPageGUI
+                        dispose(); // Close current window
                     }
                 }
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
-            if (loginSuccess) {
-                cardLayout.show(mainPanel, menuCard);
-            } else {
+            if (!loginSuccess) {
                 JOptionPane.showMessageDialog(this, "Invalid username or password", "Login Error", JOptionPane.ERROR_MESSAGE);
             }
         });
-
+    
         JLabel registerLabel = new JLabel("<html>Don't have an account? <a href=''>Register here</a></html>", SwingConstants.CENTER);
         registerLabel.setFont(new Font("Arial", Font.PLAIN, 24)); // Adjusted font size
         registerLabel.setCursor(new Cursor(Cursor.HAND_CURSOR));
@@ -255,32 +266,38 @@ public class WelcomePageGUI extends JFrame {
                     cardLayout.show(mainPanel, "ResidentRegistration");
                 } else if (title.equals("Staff Login Page")) {
                     cardLayout.show(mainPanel, "StaffRegistration");
+                } else if (title.equals("Manager Login Page")) {
+                    cardLayout.show(mainPanel, "ManagerRegistration");
                 }
             }
         });
-
+    
         centerPanel.add(titleLabel);
         centerPanel.add(usernameField);
         centerPanel.add(passwordField);
         centerPanel.add(loginButton);
         centerPanel.add(registerLabel);
-
+    
         panel.add(centerPanel, BorderLayout.CENTER);
-
-        return panel;
-    }
-
-    private JPanel createMenuPanel(String title) {
-        JPanel panel = new JPanel(new BorderLayout());
-        JLabel titleLabel = new JLabel(title, SwingConstants.CENTER);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 28)); // Adjusted font size
-        panel.add(titleLabel, BorderLayout.CENTER);
+    
+        // Add a component listener to reset the fields when the panel is shown
+        panel.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentShown(ComponentEvent e) {
+                usernameField.setText("Username");
+                usernameField.setForeground(Color.GRAY);
+                passwordField.setText("Password");
+                passwordField.setForeground(Color.GRAY);
+                passwordField.setEchoChar((char) 0);
+            }
+        });
+    
         return panel;
     }
 
     private JPanel createRegistrationPanel(String title, String registerMethod) {
         JPanel panel = new JPanel(new BorderLayout());
-
+    
         JPanel topPanel = new JPanel(new BorderLayout());
         JButton backButton = new JButton("Back");
         backButton.setFont(new Font("Arial", Font.PLAIN, 21)); // Adjusted font size
@@ -288,7 +305,9 @@ public class WelcomePageGUI extends JFrame {
         backButton.setMaximumSize(new Dimension(102, 57)); // Adjusted button size
         backButton.setMinimumSize(new Dimension(102, 57)); // Adjusted button size
         backButton.addActionListener(e -> {
-            if (registerMethod.equals("registerResident")) {
+            if (registerMethod.equals("registerManager")) {
+                cardLayout.show(mainPanel, "ManagerLogin");
+            } else if (registerMethod.equals("registerResident")) {
                 cardLayout.show(mainPanel, "ResidentLogin");
             } else if (registerMethod.equals("registerStaff")) {
                 cardLayout.show(mainPanel, "StaffLogin");
@@ -296,13 +315,13 @@ public class WelcomePageGUI extends JFrame {
         });
         topPanel.add(backButton, BorderLayout.WEST);
         panel.add(topPanel, BorderLayout.NORTH);
-
+    
         JPanel centerPanel = new JPanel(new GridLayout(6, 1, 19, 19)); // Adjusted grid layout
         centerPanel.setBorder(BorderFactory.createEmptyBorder(38, 38, 38, 38)); // Adjusted border
-
+    
         JLabel titleLabel = new JLabel(title, SwingConstants.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 28)); // Adjusted font size
-
+    
         JTextField icPassportField = new JTextField("IC/Passport Number");
         icPassportField.setFont(new Font("Arial", Font.PLAIN, 24)); // Adjusted font size
         icPassportField.setForeground(Color.GRAY);
@@ -313,7 +332,7 @@ public class WelcomePageGUI extends JFrame {
                     icPassportField.setForeground(Color.BLACK);
                 }
             }
-
+    
             public void focusLost(java.awt.event.FocusEvent evt) {
                 if (icPassportField.getText().isEmpty()) {
                     icPassportField.setForeground(Color.GRAY);
@@ -321,7 +340,7 @@ public class WelcomePageGUI extends JFrame {
                 }
             }
         });
-
+    
         JTextField usernameField = new JTextField("Create Username");
         usernameField.setFont(new Font("Arial", Font.PLAIN, 24)); // Adjusted font size
         usernameField.setForeground(Color.GRAY);
@@ -332,7 +351,7 @@ public class WelcomePageGUI extends JFrame {
                     usernameField.setForeground(Color.BLACK);
                 }
             }
-
+    
             public void focusLost(java.awt.event.FocusEvent evt) {
                 if (usernameField.getText().isEmpty()) {
                     usernameField.setForeground(Color.GRAY);
@@ -340,7 +359,7 @@ public class WelcomePageGUI extends JFrame {
                 }
             }
         });
-
+    
         JPasswordField passwordField = new JPasswordField("Create Password");
         passwordField.setFont(new Font("Arial", Font.PLAIN, 24)); // Adjusted font size
         passwordField.setForeground(Color.GRAY);
@@ -353,7 +372,7 @@ public class WelcomePageGUI extends JFrame {
                     passwordField.setEchoChar('*');
                 }
             }
-
+    
             public void focusLost(java.awt.event.FocusEvent evt) {
                 if (String.valueOf(passwordField.getPassword()).isEmpty()) {
                     passwordField.setForeground(Color.GRAY);
@@ -362,7 +381,7 @@ public class WelcomePageGUI extends JFrame {
                 }
             }
         });
-
+    
         JTextField contactNumberField = new JTextField("Contact Number");
         contactNumberField.setFont(new Font("Arial", Font.PLAIN, 24)); // Adjusted font size
         contactNumberField.setForeground(Color.GRAY);
@@ -373,7 +392,7 @@ public class WelcomePageGUI extends JFrame {
                     contactNumberField.setForeground(Color.BLACK);
                 }
             }
-
+    
             public void focusLost(java.awt.event.FocusEvent evt) {
                 if (contactNumberField.getText().isEmpty()) {
                     contactNumberField.setForeground(Color.GRAY);
@@ -381,7 +400,7 @@ public class WelcomePageGUI extends JFrame {
                 }
             }
         });
-
+    
         JButton registerButton = new JButton("Register");
         registerButton.setFont(new Font("Arial", Font.PLAIN, 24)); // Adjusted font size
         registerButton.setPreferredSize(new Dimension(171, 57)); // Adjusted button size
@@ -390,13 +409,13 @@ public class WelcomePageGUI extends JFrame {
             String username = usernameField.getText();
             String password = new String(passwordField.getPassword());
             String contactNumber = contactNumberField.getText();
-
+    
             // Scenario 1: Check if all fields are filled
             if (icPassportNumber.isEmpty() || username.isEmpty() || password.isEmpty() || contactNumber.isEmpty()) {
                 showErrorDialog("Please fill in all fields.");
                 return;
             }
-
+    
             // Scenario 2: Validate format of each field
             if (!APUHostelManagement.isValidICPassport(icPassportNumber)) {
                 showErrorDialog("Invalid IC/Passport Number. IC format: xxxxxx-xx-xxxx, Passport format: one alphabet followed by 8 numbers.");
@@ -414,7 +433,7 @@ public class WelcomePageGUI extends JFrame {
                 showErrorDialog("Invalid Contact Number. The correct format is 01X-XXX-XXXX.");
                 return;
             }
-
+    
             // Scenario 3: Check for existing data
             try {
                 if (!APUHostelManagement.isUnique(icPassportNumber, "", "")) {
@@ -433,14 +452,16 @@ public class WelcomePageGUI extends JFrame {
                 showErrorDialog("An error occurred while checking the existing data. Please try again.");
                 return;
             }
-
+    
             boolean success = false;
-            if (registerMethod.equals("registerResident")) {
+            if (registerMethod.equals("registerManager")) {
+                success = APUHostelManagement.registerManager(icPassportNumber, username, password, contactNumber);
+            } else if (registerMethod.equals("registerResident")) {
                 success = APUHostelManagement.registerResident(icPassportNumber, username, password, contactNumber);
             } else if (registerMethod.equals("registerStaff")) {
                 success = APUHostelManagement.registerStaff(icPassportNumber, username, password, contactNumber);
             }
-
+    
             if (success) {
                 JOptionPane.showMessageDialog(this, "Registration successful.");
                 cardLayout.show(mainPanel, "RoleSelection");
@@ -448,16 +469,32 @@ public class WelcomePageGUI extends JFrame {
                 showErrorDialog("Registration failed. Please try again.");
             }
         });
-
+    
         centerPanel.add(titleLabel);
         centerPanel.add(icPassportField);
         centerPanel.add(usernameField);
         centerPanel.add(passwordField);
         centerPanel.add(contactNumberField);
         centerPanel.add(registerButton);
-
+    
         panel.add(centerPanel, BorderLayout.CENTER);
-
+    
+        // Add a component listener to reset the fields when the panel is shown
+        panel.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentShown(ComponentEvent e) {
+                icPassportField.setText("IC/Passport Number");
+                icPassportField.setForeground(Color.GRAY);
+                usernameField.setText("Create Username");
+                usernameField.setForeground(Color.GRAY);
+                passwordField.setText("Create Password");
+                passwordField.setForeground(Color.GRAY);
+                passwordField.setEchoChar((char) 0);
+                contactNumberField.setText("Contact Number");
+                contactNumberField.setForeground(Color.GRAY);
+            }
+        });
+    
         return panel;
     }
 
