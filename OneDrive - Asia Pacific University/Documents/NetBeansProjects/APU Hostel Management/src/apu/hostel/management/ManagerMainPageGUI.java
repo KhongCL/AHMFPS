@@ -45,7 +45,8 @@ public class ManagerMainPageGUI {
         searchUserButton.setPreferredSize(new Dimension(300, 50)); // Set button size
         searchUserButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                searchUsers();
+                new ManagerSearchUpdateDeleteRestoreUser();
+                frame.dispose(); // Close the current window
             }
         });
         buttonPanel.add(searchUserButton, gbc);
@@ -92,11 +93,6 @@ public class ManagerMainPageGUI {
 
         frame.add(buttonPanel, BorderLayout.CENTER);
         frame.setVisible(true);
-    }
-
-    private void searchUsers() {
-        // Implement the logic for searching, updating, deleting, or restoring users
-        JOptionPane.showMessageDialog(frame, "Search, Update, Delete or Restore User functionality to be implemented.");
     }
 
     private void fixOrUpdateRate() {

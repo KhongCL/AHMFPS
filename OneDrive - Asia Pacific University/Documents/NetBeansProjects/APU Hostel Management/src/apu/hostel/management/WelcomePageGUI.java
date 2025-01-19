@@ -409,32 +409,14 @@ public class WelcomePageGUI extends JFrame {
             String username = usernameField.getText();
             String password = new String(passwordField.getPassword());
             String contactNumber = contactNumberField.getText();
-    
+
             // Scenario 1: Check if all fields are filled
             if (icPassportNumber.isEmpty() || username.isEmpty() || password.isEmpty() || contactNumber.isEmpty()) {
                 showErrorDialog("Please fill in all fields.");
                 return;
             }
-    
-            // Scenario 2: Validate format of each field
-            if (!APUHostelManagement.isValidICPassport(icPassportNumber)) {
-                showErrorDialog("Invalid IC/Passport Number. IC format: xxxxxx-xx-xxxx, Passport format: one alphabet followed by 8 numbers.");
-                return;
-            }
-            if (!APUHostelManagement.isValidUsername(username)) {
-                showErrorDialog("Invalid Username. Username must be between 3 and 12 characters long, contain only letters, numbers, and underscores, and must contain at least one letter.");
-                return;
-            }
-            if (!APUHostelManagement.isValidPassword(password, username)) {
-                showErrorDialog("Invalid Password. Password must be between 8 and 12 characters long, contain at least one number, one special character (!@#$%^&*()), and one uppercase letter, and cannot be similar to the username.");
-                return;
-            }
-            if (!APUHostelManagement.isValidContactNumber(contactNumber)) {
-                showErrorDialog("Invalid Contact Number. The correct format is 01X-XXX-XXXX.");
-                return;
-            }
-    
-            // Scenario 3: Check for existing data
+
+            // Scenario 2: Check for existing data
             try {
                 if (!APUHostelManagement.isUnique(icPassportNumber, "", "")) {
                     showErrorDialog(icPassportNumber.length() == 14 ? "IC number already exists. Please use a different IC number." : "Passport number already exists. Please use a different Passport number.");
@@ -452,7 +434,25 @@ public class WelcomePageGUI extends JFrame {
                 showErrorDialog("An error occurred while checking the existing data. Please try again.");
                 return;
             }
-    
+
+            // Scenario 3: Validate format of each field
+            if (!APUHostelManagement.isValidICPassport(icPassportNumber)) {
+                showErrorDialog("Invalid IC/Passport Number. IC format: xxxxxx-xx-xxxx, Passport format: one alphabet followed by 8 numbers.");
+                return;
+            }
+            if (!APUHostelManagement.isValidUsername(username)) {
+                showErrorDialog("Invalid Username. Username must be between 3 and 12 characters long, contain only letters, numbers, and underscores, and must contain at least one letter.");
+                return;
+            }
+            if (!APUHostelManagement.isValidPassword(password, username)) {
+                showErrorDialog("Invalid Password. Password must be between 8 and 12 characters long, contain at least one number, one special character (!@#$%^&*()), and one uppercase letter, and cannot be similar to the username.");
+                return;
+            }
+            if (!APUHostelManagement.isValidContactNumber(contactNumber)) {
+                showErrorDialog("Invalid Contact Number. The correct format is 01X-XXX-XXXX.");
+                return;
+            }
+
             boolean success = false;
             if (registerMethod.equals("registerManager")) {
                 success = APUHostelManagement.registerManager(icPassportNumber, username, password, contactNumber);
@@ -461,7 +461,7 @@ public class WelcomePageGUI extends JFrame {
             } else if (registerMethod.equals("registerStaff")) {
                 success = APUHostelManagement.registerStaff(icPassportNumber, username, password, contactNumber);
             }
-    
+
             if (success) {
                 JOptionPane.showMessageDialog(this, "Registration successful.");
                 cardLayout.show(mainPanel, "RoleSelection");

@@ -647,12 +647,13 @@ public class APUHostelManagement {
         }
         
         
-        public List<User> readApprovedUsers() throws IOException {
+        public static List<User> readApprovedUsers() throws IOException {
             return User.readFromFileForSearch("users.txt");
         }
         
-        public List<User> readUnapprovedUsers() throws IOException {
+        public static List<User> readUnapprovedUsers() throws IOException {
             List<User> unapprovedUsers = new ArrayList<>();
+            unapprovedUsers.addAll(User.readFromFileForSearch("unapproved_managers.txt"));
             unapprovedUsers.addAll(User.readFromFileForSearch("unapproved_staffs.txt"));
             unapprovedUsers.addAll(User.readFromFileForSearch("unapproved_residents.txt"));
             return unapprovedUsers;
@@ -935,7 +936,7 @@ public class APUHostelManagement {
             }
         }
         
-        private void updateFile(String filename, User updatedUser) throws IOException {
+        static void updateFile(String filename, User updatedUser) throws IOException {
             List<User> users = User.readFromFile(filename);
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
                 for (User user : users) {
