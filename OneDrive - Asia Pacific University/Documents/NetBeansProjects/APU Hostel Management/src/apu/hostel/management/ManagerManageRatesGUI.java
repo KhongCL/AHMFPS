@@ -9,13 +9,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ManagerFixUpdateDeleteRestoreRateGUI {
+public class ManagerManageRatesGUI {
     private JFrame frame;
     private JTable rateTable;
     private DefaultTableModel tableModel;
     private List<APUHostelManagement.FeeRate> rateList;
 
-    public ManagerFixUpdateDeleteRestoreRateGUI() {
+    public ManagerManageRatesGUI() {
         initialize();
     }
 
@@ -336,7 +336,7 @@ public class ManagerFixUpdateDeleteRestoreRateGUI {
         EventQueue.invokeLater(new Runnable() {
             public void run() {
                 try {
-                    ManagerFixUpdateDeleteRestoreRateGUI window = new ManagerFixUpdateDeleteRestoreRateGUI();
+                    ManagerManageRatesGUI window = new ManagerManageRatesGUI();
                     window.frame.setVisible(true);
                 } catch (Exception e) {
                     e.printStackTrace();

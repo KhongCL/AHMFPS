@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-public class ManagerApproveUserTableGUI {
+public class ManagerApproveUsersTableGUI {
     private JFrame frame;
     private JPanel userPanel;
     private JTable userTable;
@@ -20,7 +20,7 @@ public class ManagerApproveUserTableGUI {
     private JLabel tableTitleLabel;
     private String role;
 
-    public ManagerApproveUserTableGUI(String role, List<APUHostelManagement.User> selectedRoleList) {
+    public ManagerApproveUsersTableGUI(String role, List<APUHostelManagement.User> selectedRoleList) {
         this.role = role;
         this.selectedRoleList = selectedRoleList;
         initialize();
@@ -40,7 +40,7 @@ public class ManagerApproveUserTableGUI {
         backButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 System.out.println("Back button in table page clicked");
-                new ManagerApproveUserRegistrationGUI();
+                new ManagerApproveUsersRegistrationGUI();
                 frame.dispose();
             }
         });
@@ -155,7 +155,7 @@ public class ManagerApproveUserTableGUI {
             JOptionPane.showMessageDialog(frame, "An error occurred while approving the user.", "Error", JOptionPane.ERROR_MESSAGE);
         }
 
-        new ManagerApproveUserRegistrationGUI();
+        new ManagerApproveUsersRegistrationGUI();
         frame.dispose();
     }
 
@@ -165,7 +165,7 @@ public class ManagerApproveUserTableGUI {
                 try {
                     // Example usage
                     List<APUHostelManagement.User> users = APUHostelManagement.User.readFromFile("unapproved_managers.txt");
-                    new ManagerApproveUserTableGUI("Manager", users);
+                    new ManagerApproveUsersTableGUI("Manager", users);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

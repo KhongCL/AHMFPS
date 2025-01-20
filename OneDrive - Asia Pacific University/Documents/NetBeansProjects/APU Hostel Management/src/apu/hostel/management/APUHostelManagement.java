@@ -1794,7 +1794,7 @@ public class APUHostelManagement {
             }
         }
 
-        private static List<Room> readRoomsFromFile(String filename) {
+        static List<Room> readRoomsFromFile(String filename) {
             List<Room> rooms = new ArrayList<>();
             try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
                 String line;
@@ -1810,7 +1810,7 @@ public class APUHostelManagement {
             return rooms;
         }
 
-        private void saveRoomsToFile(List<Room> rooms) {
+        static void saveRoomsToFile(List<Room> rooms) {
             try (BufferedWriter writer = new BufferedWriter(new FileWriter("rooms.txt"))) {
                 for (Room room : rooms) {
                     writer.write(room.toString());

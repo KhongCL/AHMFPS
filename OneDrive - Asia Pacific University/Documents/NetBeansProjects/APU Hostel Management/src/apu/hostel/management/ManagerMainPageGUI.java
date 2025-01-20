@@ -34,7 +34,7 @@ public class ManagerMainPageGUI {
         approveUserButton.setPreferredSize(new Dimension(300, 50)); // Set button size
         approveUserButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                new ManagerApproveUserRegistrationGUI();
+                new ManagerApproveUsersRegistrationGUI();
                 frame.dispose(); // Close the current window
             }
         });
@@ -45,7 +45,7 @@ public class ManagerMainPageGUI {
         searchUserButton.setPreferredSize(new Dimension(300, 50)); // Set button size
         searchUserButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                new ManagerSearchUpdateDeleteRestoreUserGUI();
+                new ManagerManageUsersGUI();
                 frame.dispose(); // Close the current window
             }
         });
@@ -56,7 +56,7 @@ public class ManagerMainPageGUI {
         fixRateButton.setPreferredSize(new Dimension(300, 50)); // Set button size
         fixRateButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                new ManagerFixUpdateDeleteRestoreRateGUI();
+                new ManagerManageRatesGUI();
                 frame.dispose(); // Close the current window
             }
         });
@@ -67,7 +67,8 @@ public class ManagerMainPageGUI {
         manageRoomsButton.setPreferredSize(new Dimension(300, 50)); // Set button size
         manageRoomsButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                manageRooms();
+                new ManagerManageRoomsGUI();
+                frame.dispose(); // Close the current window
             }
         });
         buttonPanel.add(manageRoomsButton, gbc);
@@ -94,11 +95,6 @@ public class ManagerMainPageGUI {
 
         frame.add(buttonPanel, BorderLayout.CENTER);
         frame.setVisible(true);
-    }
-
-    private void manageRooms() {
-        // Implement the logic for managing rooms
-        JOptionPane.showMessageDialog(frame, "Manage Rooms functionality to be implemented.");
     }
 
     private void updatePersonalInformation() {
