@@ -1893,17 +1893,17 @@ public class APUHostelManagement {
         }
 
         public static List<Staff> readStaffsFromFile(String filename) throws IOException {
-            List<Staff> staffList = new ArrayList<>();
+            List<Staff> staffs = new ArrayList<>();
             try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
                     String[] parts = line.split(",");
                     if (parts.length == 10) {
-                        staffList.add(new Staff(parts));
+                        staffs.add(new Staff(parts));
                     }
                 }
             }
-            return staffList;
+            return staffs;
         }
 
         // Define a single Scanner instance at the Staff class level
@@ -2350,6 +2350,20 @@ public class APUHostelManagement {
                 writer.write(residentID + "," + userID + "," + icPassportNumber + "," + username + "," + password + "," + contactNumber + "," + dateOfRegistration + "," + role + "," + isActive + "," + dateOfApproval);
                 writer.newLine();
             }
+        }
+
+        public static List<Resident> readResidentsFromFile(String filename) throws IOException {
+            List<Resident> residents = new ArrayList<>();
+            try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    String[] parts = line.split(",");
+                    if (parts.length == 10) {
+                        residents.add(new Resident(parts));
+                    }
+                }
+            }
+            return residents;
         }
 
         public static List<String[]> viewPaymentRecords(String residentID) {

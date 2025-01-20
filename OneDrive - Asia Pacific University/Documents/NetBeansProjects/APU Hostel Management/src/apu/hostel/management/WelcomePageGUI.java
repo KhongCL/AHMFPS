@@ -236,8 +236,8 @@ public class WelcomePageGUI extends JFrame {
                     APUHostelManagement.User user = APUHostelManagement.User.findUser(username, password, "approved_residents.txt");
                     if (user != null && user.getRole().equals("resident")) {
                         loginSuccess = true;
-                        currentResidentID = ((APUHostelManagement.Resident) user).getResidentID(); // Store residentID
-                        new ResidentMainPageGUI(); // Launch ResidentMainPageGUI
+                        APUHostelManagement.Resident resident = (APUHostelManagement.Resident) user; // Cast to Resident
+                        new ResidentMainPageGUI(resident); // Launch ResidentMainPageGUI with resident info
                         dispose(); // Close current window
                     }
                 } else if (title.equals("Staff Login Page")) {

@@ -14,6 +14,10 @@ public class StaffMainPageGUI {
         initialize();
     }
 
+    public StaffMainPageGUI() {
+        initialize();
+    }
+
     private void initialize() {
         frame = new JFrame("Staff Main Page");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -37,14 +41,39 @@ public class StaffMainPageGUI {
         updateProfileButton.setPreferredSize(new Dimension(300, 50)); // Set button size
         updateProfileButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                new StaffManageProfileGUI(staff); // Launch StaffManageProfileGUI with staff info
-                frame.dispose();
+                if (staff == null) {
+                    JOptionPane.showMessageDialog(frame, "Please login to update personal information.", "Error", JOptionPane.ERROR_MESSAGE);
+                } else {
+                    new StaffManageProfileGUI(staff); // Launch StaffManageProfileGUI with staff info
+                    frame.dispose();
+                }
             }
         });
         buttonPanel.add(updateProfileButton, gbc);
 
-        // Add other buttons and components here as needed
+        // Make Payment for Resident button
+        gbc.gridy++;
+        JButton makePaymentButton = new JButton("Make Payment for Resident");
+        makePaymentButton.setPreferredSize(new Dimension(300, 50)); // Set button size
+        makePaymentButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                // Implement the action for making payment for resident
+            }
+        });
+        buttonPanel.add(makePaymentButton, gbc);
 
+        // Generate Receipt button
+        gbc.gridy++;
+        JButton generateReceiptButton = new JButton("Generate Receipt");
+        generateReceiptButton.setPreferredSize(new Dimension(300, 50)); // Set button size
+        generateReceiptButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                // Implement the action for generating receipt
+            }
+        });
+        buttonPanel.add(generateReceiptButton, gbc);
+
+        // Logout button
         gbc.gridy++;
         JButton logoutButton = new JButton("Logout");
         logoutButton.setPreferredSize(new Dimension(300, 50)); // Set button size

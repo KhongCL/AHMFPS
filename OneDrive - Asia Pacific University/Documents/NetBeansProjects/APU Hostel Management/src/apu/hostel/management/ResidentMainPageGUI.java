@@ -10,6 +10,12 @@ import java.util.Map;
 public class ResidentMainPageGUI {
     private JFrame frame;
     private JPanel mainPanel;
+    private APUHostelManagement.Resident resident;
+
+    public ResidentMainPageGUI(APUHostelManagement.Resident resident) {
+        this.resident = resident;
+        initialize();
+    }
 
     public ResidentMainPageGUI() {
         initialize();
@@ -36,13 +42,17 @@ public class ResidentMainPageGUI {
         gbc.gridx = 0;
         gbc.gridy = 0;
 
-        // Add Update Personal Information button
+        // Update Personal Information button
         JButton updateInfoButton = new JButton("Update Personal Information");
         updateInfoButton.setPreferredSize(new Dimension(300, 50)); // Set button size
         updateInfoButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                new ResidentUpdatePersonalInformationGUI();
-                frame.dispose();
+                if (resident == null) {
+                    JOptionPane.showMessageDialog(frame, "Please login to update personal information.", "Error", JOptionPane.ERROR_MESSAGE);
+                } else {
+                    new ResidentManageProfileGUI(resident); // Launch ResidentManageProfileGUI with resident info
+                    frame.dispose();
+                }
             }
         });
         buttonPanel.add(updateInfoButton, gbc);
