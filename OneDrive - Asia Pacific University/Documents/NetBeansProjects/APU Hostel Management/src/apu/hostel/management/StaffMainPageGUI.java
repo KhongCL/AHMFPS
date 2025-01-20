@@ -1,20 +1,16 @@
 package apu.hostel.management;
 
 import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableColumnModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
 
 public class StaffMainPageGUI {
     private JFrame frame;
+    private APUHostelManagement.Staff staff;
 
-    public StaffMainPageGUI() {
+    public StaffMainPageGUI(APUHostelManagement.Staff staff) {
+        this.staff = staff;
         initialize();
     }
 
@@ -35,6 +31,17 @@ public class StaffMainPageGUI {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.gridx = 0;
         gbc.gridy = 0;
+
+        // Update Personal Information button
+        JButton updateProfileButton = new JButton("Update Personal Information");
+        updateProfileButton.setPreferredSize(new Dimension(300, 50)); // Set button size
+        updateProfileButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                new StaffManageProfileGUI(staff); // Launch StaffManageProfileGUI with staff info
+                frame.dispose();
+            }
+        });
+        buttonPanel.add(updateProfileButton, gbc);
 
         // Add other buttons and components here as needed
 
@@ -61,7 +68,7 @@ public class StaffMainPageGUI {
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            new StaffMainPageGUI();
+            new StaffMainPageGUI(null); // For testing purposes, pass null or a mock staff object
         });
     }
 }

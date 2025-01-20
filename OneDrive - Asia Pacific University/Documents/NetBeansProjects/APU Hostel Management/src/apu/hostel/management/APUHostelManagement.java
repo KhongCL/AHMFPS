@@ -1892,6 +1892,20 @@ public class APUHostelManagement {
             }
         }
 
+        public static List<Staff> readStaffsFromFile(String filename) throws IOException {
+            List<Staff> staffList = new ArrayList<>();
+            try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    String[] parts = line.split(",");
+                    if (parts.length == 10) {
+                        staffList.add(new Staff(parts));
+                    }
+                }
+            }
+            return staffList;
+        }
+
         // Define a single Scanner instance at the Staff class level
         private static final Scanner scanner = new Scanner(System.in);
 
@@ -2418,6 +2432,158 @@ public class APUHostelManagement {
                 default:
                     return "Unknown";
             }
+        }
+
+                public static String selectAvailableRoomByType1(String roomType) {
+            List<String> availableRooms = new ArrayList<>();
+            try (BufferedReader roomReader = new BufferedReader(new FileReader("rooms.txt"))) {
+                String line;
+                while ((line = roomReader.readLine()) != null) {
+                    String[] parts = line.split(",");
+                    if (parts.length >= 7 && parts[2].equalsIgnoreCase(roomType) && parts[4].equals("available") && Boolean.parseBoolean(parts[6])) {
+                        availableRooms.add(parts[0]); // Assuming parts[0] is RoomID
+                    }
+                }
+            } catch (IOException e) {
+                System.out.println("An error occurred while reading the room data.");
+            }
+    
+            if (!availableRooms.isEmpty()) {
+                Random random = new Random();
+                return availableRooms.get(random.nextInt(availableRooms.size())); // Randomly select an available room
+            }
+            return null;
+        }
+
+        public static String generatePaymentID1() {
+            int id = 1;
+            String filename = "payments.txt";
+            File file = new File(filename);
+            if (!file.exists()) {
+                try {
+                    file.createNewFile();
+                } catch (IOException e) {
+                }
+            }
+    
+            try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    String[] parts = line.split(",");
+                    if (parts[0].startsWith("P")) {
+                        int currentId = Integer.parseInt(parts[0].substring(1));
+                        if (currentId >= id) {
+                            id = currentId + 1;
+                        }
+                    }
+                }
+            } catch (IOException e) {
+            }
+            return "P" + String.format("%02d", id);
+        }
+
+        public static String getFeeRateID(String roomID) {
+            String feeRateID = null;
+            try (BufferedReader roomReader = new BufferedReader(new FileReader("rooms.txt"))) {
+                String line;
+                while ((line = roomReader.readLine()) != null) {
+                    String[] parts = line.split(",");
+                    if (parts[0].equals(roomID)) {
+                        feeRateID = parts[1]; // Assuming parts[1] is FeeRateID
+                        break;
+                    }
+                }
+            } catch (IOException e) {
+                System.out.println("An error occurred while reading the room data.");
+            }
+            return feeRateID;
+        }
+
+        public static double calculatePaymentAmount1(LocalDate startDate, LocalDate endDate, String feeRateID) {
+            long totalDays = ChronoUnit.DAYS.between(startDate, endDate.plusDays(1)); // Include the end date
+    
+            double dailyRate = 0;
+            double weeklyRate = 0;
+            double monthlyRate = 0;
+            double yearlyRate = 0;
+    
+            try (BufferedReader rateReader = new BufferedReader(new FileReader("fee_rates.txt"))) {
+                String line;
+                while ((line = rateReader.readLine()) != null) {
+                    String[] parts = line.split(",");
+                    if (parts[0].equals(feeRateID)) {
+                        dailyRate = Double.parseDouble(parts[2]);
+                        weeklyRate = Double.parseDouble(parts[3]);
+                        monthlyRate = Double.parseDouble(parts[4]);
+                        yearlyRate = Double.parseDouble(parts[5]);
+                        break;
+                    }
+                }
+            } catch (IOException e) {
+                System.out.println("An error occurred while reading the fee rate data.");
+            }
+    
+            long years = totalDays / 365;
+            long remainingDaysAfterYears = totalDays % 365;
+            long months = remainingDaysAfterYears / 30;
+            long remainingDaysAfterMonths = remainingDaysAfterYears % 30;
+            long weeks = remainingDaysAfterMonths / 7;
+            long remainingDays = remainingDaysAfterMonths % 7;
+    
+            return (years * yearlyRate) + (months * monthlyRate) + (weeks * weeklyRate) + (remainingDays * dailyRate);
+        }
+
+        public static boolean addBookingToFile(String paymentID, String residentID, LocalDate startDate, LocalDate endDate, String roomID, double paymentAmount, String bookingDateTime) {
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter("payments.txt", true))) {
+                writer.write(paymentID + "," + residentID + "," + null + "," + startDate + "," + endDate + "," + roomID + "," + paymentAmount + ",unpaid," + bookingDateTime + "," + null + ",active");
+                writer.newLine();
+                return true;
+            } catch (IOException e) {
+                System.out.println("An error occurred while saving the booking.");
+                return false;
+            }
+        }
+
+        public static void updateRoomStatus1(String roomID, String status) {
+            List<String[]> rooms = new ArrayList<>();
+            try (BufferedReader reader = new BufferedReader(new FileReader("rooms.txt"))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    String[] parts = line.split(",");
+                    if (parts[0].equals(roomID)) {
+                        parts[4] = status; // Assuming parts[4] is RoomStatus
+                    }
+                    rooms.add(parts);
+                }
+            } catch (IOException e) {
+                System.out.println("An error occurred while reading the room data.");
+            }
+    
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter("rooms.txt"))) {
+                for (String[] room : rooms) {
+                    writer.write(String.join(",", room));
+                    writer.newLine();
+                }
+            } catch (IOException e) {
+                System.out.println("An error occurred while updating the room data.");
+            }
+        }
+
+        public static String getRoomNumber(String roomID) {
+            String roomNumber = "Unknown Room";
+            try (BufferedReader roomReader = new BufferedReader(new FileReader("rooms.txt"))) {
+                String line;
+                while ((line = roomReader.readLine()) != null) {
+                    String[] parts = line.split(",");
+                    if (parts[0].equals(roomID)) {
+                        roomNumber = parts[3]; // Assuming parts[3] is RoomNumber
+                        break;
+                    }
+                }
+            } catch (IOException e) {
+                System.out.println("An error occurred while reading the room data.");
+            }
+            return roomNumber;
         }
 
         // Define a single Scanner instance at the Resident class level

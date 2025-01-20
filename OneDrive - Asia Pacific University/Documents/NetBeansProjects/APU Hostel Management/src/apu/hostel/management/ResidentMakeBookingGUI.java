@@ -3,6 +3,12 @@ package apu.hostel.management;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.Year;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 public class ResidentMakeBookingGUI {
@@ -46,13 +52,16 @@ public class ResidentMakeBookingGUI {
         JScrollPane scrollPane = new JScrollPane(pricingTable);
         pricingPanel.add(scrollPane, BorderLayout.CENTER);
 
+        // Adjust the size of the pricing panel
+        pricingPanel.setPreferredSize(new Dimension(1024, 300));
+
         mainPanel.add(pricingPanel, BorderLayout.NORTH);
 
         // Display room pricing
         displayRoomPricing(tableModel);
 
         // Room Type Selection and Date Input Fields
-        JPanel selectionAndDatePanel = new JPanel(new GridLayout(2, 1, 10, 10));
+        JPanel selectionAndDatePanel = new JPanel(new BorderLayout(10, 10));
 
         // Room Type Selection
         JPanel selectionPanel = new JPanel(new BorderLayout());
@@ -80,6 +89,8 @@ public class ResidentMakeBookingGUI {
 
         selectionPanel.add(buttonPanel, BorderLayout.CENTER);
 
+        selectionAndDatePanel.add(selectionPanel, BorderLayout.NORTH);
+
         // Date Input Fields
         JPanel datePanel = new JPanel(new GridLayout(2, 2, 10, 10));
         JLabel startDateLabel = new JLabel("Enter start date of your stay (yyyy-MM-dd): ");
@@ -88,15 +99,15 @@ public class ResidentMakeBookingGUI {
         endDateField = new JTextField();
 
         // Set placeholder text
-        startDateField.setText("Start Date");
-        endDateField.setText("End Date");
+        startDateField.setText("yyyy-MM-dd");
+        endDateField.setText("yyyy-MM-dd");
         startDateField.setForeground(Color.GRAY);
         endDateField.setForeground(Color.GRAY);
 
         // Add focus listeners to clear placeholder text
         startDateField.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusGained(java.awt.event.FocusEvent evt) {
-                if (startDateField.getText().equals("Start Date")) {
+                if (startDateField.getText().equals("yyyy-MM-dd")) {
                     startDateField.setText("");
                     startDateField.setForeground(Color.BLACK);
                 }
@@ -104,7 +115,7 @@ public class ResidentMakeBookingGUI {
 
             public void focusLost(java.awt.event.FocusEvent evt) {
                 if (startDateField.getText().isEmpty()) {
-                    startDateField.setText("Start Date");
+                    startDateField.setText("yyyy-MM-dd");
                     startDateField.setForeground(Color.GRAY);
                 }
             }
@@ -112,7 +123,7 @@ public class ResidentMakeBookingGUI {
 
         endDateField.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusGained(java.awt.event.FocusEvent evt) {
-                if (endDateField.getText().equals("End Date")) {
+                if (endDateField.getText().equals("yyyy-MM-dd")) {
                     endDateField.setText("");
                     endDateField.setForeground(Color.BLACK);
                 }
@@ -120,7 +131,7 @@ public class ResidentMakeBookingGUI {
 
             public void focusLost(java.awt.event.FocusEvent evt) {
                 if (endDateField.getText().isEmpty()) {
-                    endDateField.setText("End Date");
+                    endDateField.setText("yyyy-MM-dd");
                     endDateField.setForeground(Color.GRAY);
                 }
             }
@@ -131,10 +142,20 @@ public class ResidentMakeBookingGUI {
         datePanel.add(endDateLabel);
         datePanel.add(endDateField);
 
-        selectionAndDatePanel.add(selectionPanel);
-        selectionAndDatePanel.add(datePanel);
+        // Add the datePanel to the selectionAndDatePanel
+        selectionAndDatePanel.add(datePanel, BorderLayout.CENTER);
 
-        mainPanel.add(selectionAndDatePanel, BorderLayout.CENTER);
+        // Make Booking Button
+        JButton makeBookingButton = new JButton("Make Booking");
+        makeBookingButton.addActionListener(e -> makeBooking());
+
+        JPanel buttonPanelContainer = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        buttonPanelContainer.add(makeBookingButton);
+
+        selectionAndDatePanel.add(buttonPanelContainer, BorderLayout.SOUTH);
+
+        // Add the selectionAndDatePanel right below the pricing table
+        mainPanel.add(selectionAndDatePanel, BorderLayout.SOUTH);
 
         frame.add(mainPanel, BorderLayout.CENTER);
 
@@ -179,6 +200,126 @@ public class ResidentMakeBookingGUI {
                 familyButton.setBackground(Color.LIGHT_GRAY);
                 break;
         }
+    }
+
+    private void makeBooking() {
+        // Validate room type selection
+        if (selectedRoomType == null) {
+            JOptionPane.showMessageDialog(frame, "Please select a room type.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+    
+        // Validate start date
+        LocalDate startDate = null;
+        try {
+            startDate = LocalDate.parse(startDateField.getText(), DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+            if (startDate.isBefore(LocalDate.now())) {
+                JOptionPane.showMessageDialog(frame, "You cannot travel back in time. Please enter a valid start date.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            String[] dateParts = startDateField.getText().split("-");
+            int year = Integer.parseInt(dateParts[0]);
+            int month = Integer.parseInt(dateParts[1]);
+            int day = Integer.parseInt(dateParts[2]);
+            if (isInvalidDate(year, month, day)) {
+                JOptionPane.showMessageDialog(frame, "This date does not exist, please input a valid date.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+        } catch (DateTimeParseException | NumberFormatException e) {
+            JOptionPane.showMessageDialog(frame, "Invalid date format. Please enter the date in yyyy-MM-dd format.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+    
+        // Validate end date
+        LocalDate endDate = null;
+        try {
+            endDate = LocalDate.parse(endDateField.getText(), DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+            if (!endDate.isAfter(startDate)) {
+                JOptionPane.showMessageDialog(frame, "The end date must be after the start date.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            String[] dateParts = endDateField.getText().split("-");
+            int year = Integer.parseInt(dateParts[0]);
+            int month = Integer.parseInt(dateParts[1]);
+            int day = Integer.parseInt(dateParts[2]);
+            if (isInvalidDate(year, month, day)) {
+                JOptionPane.showMessageDialog(frame, "This date does not exist, please input a valid date.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+        } catch (DateTimeParseException | NumberFormatException e) {
+            JOptionPane.showMessageDialog(frame, "Invalid date format. Please enter the date in yyyy-MM-dd format.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+    
+        // Select an available room based on room type
+        String roomID = APUHostelManagement.Resident.selectAvailableRoomByType1(selectedRoomType);
+        if (roomID == null) {
+            JOptionPane.showMessageDialog(frame, "No available rooms of the selected type.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+    
+        // Generate a new PaymentID
+        String paymentID = APUHostelManagement.Resident.generatePaymentID1();
+    
+        // Get the ResidentID of the logged-in user
+        String residentID = this.residentID;
+    
+        // Calculate the payment amount
+        String feeRateID = APUHostelManagement.Resident.getFeeRateID(roomID);
+        double paymentAmount = APUHostelManagement.Resident.calculatePaymentAmount1(startDate, endDate, feeRateID);
+    
+        // Get the current date and time for BookingDateTime
+        String bookingDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+    
+        // Add a new line to payments.txt
+        boolean bookingSuccess = APUHostelManagement.Resident.addBookingToFile(paymentID, residentID, startDate, endDate, roomID, paymentAmount, bookingDateTime);
+        if (!bookingSuccess) {
+            JOptionPane.showMessageDialog(frame, "An error occurred while saving the booking.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+    
+        // Update room status to unavailable
+        APUHostelManagement.Resident.updateRoomStatus1(roomID, "unavailable");
+    
+        // Print confirmation message
+        long daysBetween = ChronoUnit.DAYS.between(startDate, endDate);
+        String roomNumber = APUHostelManagement.Resident.getRoomNumber(roomID);
+        JOptionPane.showMessageDialog(frame, "Booking successful.\nPayment ID: " + paymentID + "\nResident ID: " + residentID + "\nStart Date: " + startDate + "\nEnd Date: " + endDate + "\nStay Duration: " + daysBetween + " days\nRoom Number: " + roomNumber + "\nPayment Amount: RM " + paymentAmount, "Success", JOptionPane.INFORMATION_MESSAGE);
+
+        // Reset fields after successful booking
+        resetFields();
+    }
+
+    private void resetFields() {
+        selectedRoomType = null;
+        startDateField.setText("yyyy-MM-dd");
+        startDateField.setForeground(Color.GRAY);
+        endDateField.setText("yyyy-MM-dd");
+        endDateField.setForeground(Color.GRAY);
+        standardButton.setBackground(null);
+        largeButton.setBackground(null);
+        familyButton.setBackground(null);
+    }
+
+    private boolean isInvalidDate(int year, int month, int day) {
+        switch (month) {
+            case 2 -> {
+                if (day > 29 || (day == 29 && !Year.isLeap(year))) {
+                    return true;
+                }
+            }
+            case 4, 6, 9, 11 -> {
+                if (day > 30) {
+                    return true;
+                }
+            }
+            default -> {
+                if (day > 31) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     public static void main(String[] args) {

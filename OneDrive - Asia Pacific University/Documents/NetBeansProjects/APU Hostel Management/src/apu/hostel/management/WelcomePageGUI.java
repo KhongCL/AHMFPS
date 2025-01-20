@@ -244,7 +244,8 @@ public class WelcomePageGUI extends JFrame {
                     APUHostelManagement.User user = APUHostelManagement.User.findUser(username, password, "approved_staffs.txt");
                     if (user != null && user.getRole().equals("staff")) {
                         loginSuccess = true;
-                        new StaffMainPageGUI(); // Launch StaffMainPageGUI
+                        APUHostelManagement.Staff staff = (APUHostelManagement.Staff) user; // Cast to Staff
+                        new StaffMainPageGUI(staff); // Launch StaffMainPageGUI with staff info
                         dispose(); // Close current window
                     }
                 } else if (title.equals("Manager Login Page")) {
