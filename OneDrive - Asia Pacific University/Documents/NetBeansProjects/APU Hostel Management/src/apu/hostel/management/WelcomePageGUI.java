@@ -251,7 +251,8 @@ public class WelcomePageGUI extends JFrame {
                     APUHostelManagement.User user = APUHostelManagement.User.findUser(username, password, "approved_managers.txt");
                     if (user != null && user.getRole().equals("manager")) {
                         loginSuccess = true;
-                        new ManagerMainPageGUI(); // Launch ManagerMainPageGUI
+                        APUHostelManagement.Manager manager = (APUHostelManagement.Manager) user; // Cast to Manager
+                        new ManagerMainPageGUI(manager); // Launch ManagerMainPageGUI with manager info
                         dispose(); // Close current window
                     }
                 }

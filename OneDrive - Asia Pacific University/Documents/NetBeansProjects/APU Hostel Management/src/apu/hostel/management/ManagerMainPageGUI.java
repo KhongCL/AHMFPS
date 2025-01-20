@@ -7,6 +7,12 @@ import java.awt.event.ActionListener;
 
 public class ManagerMainPageGUI {
     private JFrame frame;
+    private APUHostelManagement.Manager manager;
+
+    public ManagerMainPageGUI(APUHostelManagement.Manager manager) {
+        this.manager = manager;
+        initialize();
+    }
 
     public ManagerMainPageGUI() {
         initialize();
@@ -78,7 +84,12 @@ public class ManagerMainPageGUI {
         updatePersonalInfoButton.setPreferredSize(new Dimension(300, 50)); // Set button size
         updatePersonalInfoButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                updatePersonalInformation();
+                if (manager == null) {
+                    JOptionPane.showMessageDialog(frame, "Please login to update personal information.", "Error", JOptionPane.ERROR_MESSAGE);
+                } else {
+                    new ManagerManageProfileGUI(manager); // Pass manager info
+                    frame.dispose(); // Close the current window
+                }
             }
         });
         buttonPanel.add(updatePersonalInfoButton, gbc);
@@ -95,11 +106,6 @@ public class ManagerMainPageGUI {
 
         frame.add(buttonPanel, BorderLayout.CENTER);
         frame.setVisible(true);
-    }
-
-    private void updatePersonalInformation() {
-        // Implement the logic for updating personal information
-        JOptionPane.showMessageDialog(frame, "Update Personal Information functionality to be implemented.");
     }
 
     private void logout() {
