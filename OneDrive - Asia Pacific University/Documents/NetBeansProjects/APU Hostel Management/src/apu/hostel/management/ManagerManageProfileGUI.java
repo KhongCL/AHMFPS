@@ -5,7 +5,6 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 public class ManagerManageProfileGUI {
@@ -14,10 +13,10 @@ public class ManagerManageProfileGUI {
     private JTextField usernameField;
     private JPasswordField passwordField;
     private JTextField contactNumberField;
-    private JLabel icPassportErrorLabel;
-    private JLabel usernameErrorLabel;
-    private JLabel passwordErrorLabel;
-    private JLabel contactNumberErrorLabel;
+    private JTextArea icPassportErrorLabel;
+    private JTextArea usernameErrorLabel;
+    private JTextArea passwordErrorLabel;
+    private JTextArea contactNumberErrorLabel;
     private APUHostelManagement.Manager manager;
 
     public ManagerManageProfileGUI(APUHostelManagement.Manager manager) {
@@ -28,7 +27,7 @@ public class ManagerManageProfileGUI {
     private void initialize() {
         frame = new JFrame("Update Personal Information");
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        frame.setSize(400, 500);
+        frame.setSize(1024, 768);
         frame.setLayout(new BorderLayout(10, 10)); // Add spacing between components
     
         JPanel topPanel = new JPanel(new BorderLayout());
@@ -49,32 +48,87 @@ public class ManagerManageProfileGUI {
         frame.add(topPanel, BorderLayout.NORTH);
     
         // Input fields
-        JPanel inputPanel = new JPanel(new GridLayout(5, 2, 10, 10));
+        JPanel inputPanel = new JPanel(new GridBagLayout());
         inputPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); // Add padding
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(10, 10, 10, 10);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.gridx = 0;
+        gbc.gridy = 0;
     
-        inputPanel.add(new JLabel("IC/Passport Number:"));
+        inputPanel.add(new JLabel("IC/Passport Number:"), gbc);
+        gbc.gridx = 1;
         icPassportField = new JTextField(manager.getIcPassportNumber());
-        inputPanel.add(icPassportField);
-        icPassportErrorLabel = new JLabel();
-        inputPanel.add(icPassportErrorLabel);
+        icPassportField.setPreferredSize(new Dimension(300, 30));
+        inputPanel.add(icPassportField, gbc);
+        gbc.gridx = 2;
+        JLabel icPassportIconLabel = new JLabel();
+        icPassportIconLabel.setPreferredSize(new Dimension(30, 30));
+        inputPanel.add(icPassportIconLabel, gbc);
     
-        inputPanel.add(new JLabel("Username:"));
+        gbc.gridx = 1;
+        gbc.gridy++;
+        gbc.gridwidth = 2;
+        icPassportErrorLabel = createErrorLabel();
+        inputPanel.add(icPassportErrorLabel, gbc);
+        gbc.gridwidth = 1;
+    
+        gbc.gridx = 0;
+        gbc.gridy++;
+        inputPanel.add(new JLabel("Username:"), gbc);
+        gbc.gridx = 1;
         usernameField = new JTextField(manager.getUsername());
-        inputPanel.add(usernameField);
-        usernameErrorLabel = new JLabel();
-        inputPanel.add(usernameErrorLabel);
+        usernameField.setPreferredSize(new Dimension(300, 30));
+        inputPanel.add(usernameField, gbc);
+        gbc.gridx = 2;
+        JLabel usernameIconLabel = new JLabel();
+        usernameIconLabel.setPreferredSize(new Dimension(30, 30));
+        inputPanel.add(usernameIconLabel, gbc);
     
-        inputPanel.add(new JLabel("Password:"));
+        gbc.gridx = 1;
+        gbc.gridy++;
+        gbc.gridwidth = 2;
+        usernameErrorLabel = createErrorLabel();
+        inputPanel.add(usernameErrorLabel, gbc);
+        gbc.gridwidth = 1;
+    
+        gbc.gridx = 0;
+        gbc.gridy++;
+        inputPanel.add(new JLabel("Password:"), gbc);
+        gbc.gridx = 1;
         passwordField = new JPasswordField(manager.getPassword());
-        inputPanel.add(passwordField);
-        passwordErrorLabel = new JLabel();
-        inputPanel.add(passwordErrorLabel);
+        passwordField.setPreferredSize(new Dimension(300, 30));
+        inputPanel.add(passwordField, gbc);
+        gbc.gridx = 2;
+        JLabel passwordIconLabel = new JLabel();
+        passwordIconLabel.setPreferredSize(new Dimension(30, 30));
+        inputPanel.add(passwordIconLabel, gbc);
     
-        inputPanel.add(new JLabel("Contact Number:"));
+        gbc.gridx = 1;
+        gbc.gridy++;
+        gbc.gridwidth = 2;
+        passwordErrorLabel = createErrorLabel();
+        inputPanel.add(passwordErrorLabel, gbc);
+        gbc.gridwidth = 1;
+    
+        gbc.gridx = 0;
+        gbc.gridy++;
+        inputPanel.add(new JLabel("Contact Number:"), gbc);
+        gbc.gridx = 1;
         contactNumberField = new JTextField(manager.getContactNumber());
-        inputPanel.add(contactNumberField);
-        contactNumberErrorLabel = new JLabel();
-        inputPanel.add(contactNumberErrorLabel);
+        contactNumberField.setPreferredSize(new Dimension(300, 30));
+        inputPanel.add(contactNumberField, gbc);
+        gbc.gridx = 2;
+        JLabel contactNumberIconLabel = new JLabel();
+        contactNumberIconLabel.setPreferredSize(new Dimension(30, 30));
+        inputPanel.add(contactNumberIconLabel, gbc);
+    
+        gbc.gridx = 1;
+        gbc.gridy++;
+        gbc.gridwidth = 2;
+        contactNumberErrorLabel = createErrorLabel();
+        inputPanel.add(contactNumberErrorLabel, gbc);
+        gbc.gridwidth = 1;
     
         frame.add(inputPanel, BorderLayout.CENTER);
     
@@ -93,91 +147,110 @@ public class ManagerManageProfileGUI {
         frame.add(buttonPanel, BorderLayout.SOUTH);
     
         // Add input validation listeners
-        addValidationListeners();
+        addValidationListeners(icPassportIconLabel, usernameIconLabel, passwordIconLabel, contactNumberIconLabel);
     
         frame.setVisible(true);
     }
 
-    private void addValidationListeners() {
+    private JTextArea createErrorLabel() {
+        JTextArea errorLabel = new JTextArea();
+        errorLabel.setPreferredSize(new Dimension(300, 60));
+        errorLabel.setMaximumSize(new Dimension(300, 60));
+        errorLabel.setLineWrap(true);
+        errorLabel.setWrapStyleWord(true);
+        errorLabel.setEditable(false);
+        errorLabel.setOpaque(false);
+        return errorLabel;
+    }
+    
+    private void addValidationListeners(JLabel icPassportIconLabel, JLabel usernameIconLabel, JLabel passwordIconLabel, JLabel contactNumberIconLabel) {
         icPassportField.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusLost(java.awt.event.FocusEvent evt) {
-                validateICPassport();
+                validateICPassport(icPassportIconLabel);
             }
         });
-        icPassportField.getDocument().addDocumentListener(new ValidationListener(this::validateICPassport));
-
+        icPassportField.getDocument().addDocumentListener(new ValidationListener(() -> validateICPassport(icPassportIconLabel)));
+    
         usernameField.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusLost(java.awt.event.FocusEvent evt) {
-                validateUsername();
+                validateUsername(usernameIconLabel);
             }
         });
-        usernameField.getDocument().addDocumentListener(new ValidationListener(this::validateUsername));
-
+        usernameField.getDocument().addDocumentListener(new ValidationListener(() -> validateUsername(usernameIconLabel)));
+    
         passwordField.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusLost(java.awt.event.FocusEvent evt) {
-                validatePassword();
+                validatePassword(passwordIconLabel);
             }
         });
-        passwordField.getDocument().addDocumentListener(new ValidationListener(this::validatePassword));
-
+        passwordField.getDocument().addDocumentListener(new ValidationListener(() -> validatePassword(passwordIconLabel)));
+    
         contactNumberField.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusLost(java.awt.event.FocusEvent evt) {
-                validateContactNumber();
+                validateContactNumber(contactNumberIconLabel);
             }
         });
-        contactNumberField.getDocument().addDocumentListener(new ValidationListener(this::validateContactNumber));
+        contactNumberField.getDocument().addDocumentListener(new ValidationListener(() -> validateContactNumber(contactNumberIconLabel)));
     }
-
-    private void validateICPassport() {
+    
+    private void validateICPassport(JLabel iconLabel) {
         String icPassport = icPassportField.getText().trim();
-        if (!APUHostelManagement.isValidICPassport(icPassport)) {
+        if (!icPassport.equals(manager.getIcPassportNumber()) && !APUHostelManagement.isValidICPassport(icPassport)) {
             icPassportErrorLabel.setText(getICPassportErrorMessage(icPassport));
             icPassportErrorLabel.setForeground(Color.RED);
             icPassportField.setBorder(BorderFactory.createLineBorder(Color.RED));
+            iconLabel.setIcon(new ImageIcon(new ImageIcon("images/red_warning_icon.png").getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH))); // Add warning icon
         } else {
-            icPassportErrorLabel.setText("\u2713"); // Check mark
+            icPassportErrorLabel.setText(""); // Remove check mark
             icPassportErrorLabel.setForeground(Color.GREEN);
             icPassportField.setBorder(BorderFactory.createLineBorder(Color.GREEN));
+            iconLabel.setIcon(new ImageIcon(new ImageIcon("images/green_check_icon.png").getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH))); // Add check icon
         }
     }
     
-    private void validateUsername() {
+    private void validateUsername(JLabel iconLabel) {
         String username = usernameField.getText().trim();
-        if (!APUHostelManagement.isValidUsername(username)) {
+        if (!username.equals(manager.getUsername()) && !APUHostelManagement.isValidUsername(username)) {
             usernameErrorLabel.setText(getUsernameErrorMessage(username));
             usernameErrorLabel.setForeground(Color.RED);
             usernameField.setBorder(BorderFactory.createLineBorder(Color.RED));
+            iconLabel.setIcon(new ImageIcon(new ImageIcon("images/red_warning_icon.png").getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH))); // Add warning icon
         } else {
-            usernameErrorLabel.setText("\u2713"); // Check mark
+            usernameErrorLabel.setText(""); // Remove check mark
             usernameErrorLabel.setForeground(Color.GREEN);
             usernameField.setBorder(BorderFactory.createLineBorder(Color.GREEN));
+            iconLabel.setIcon(new ImageIcon(new ImageIcon("images/green_check_icon.png").getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH))); // Add check icon
         }
     }
     
-    private void validatePassword() {
+    private void validatePassword(JLabel iconLabel) {
         String password = new String(passwordField.getPassword()).trim();
         String username = usernameField.getText().trim();
-        if (!APUHostelManagement.isValidPassword(password, username)) {
+        if (!password.equals(manager.getPassword()) && !APUHostelManagement.isValidPassword(password, username)) {
             passwordErrorLabel.setText(getPasswordErrorMessage(password, username));
             passwordErrorLabel.setForeground(Color.RED);
             passwordField.setBorder(BorderFactory.createLineBorder(Color.RED));
+            iconLabel.setIcon(new ImageIcon(new ImageIcon("images/red_warning_icon.png").getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH))); // Add warning icon
         } else {
-            passwordErrorLabel.setText("\u2713"); // Check mark
+            passwordErrorLabel.setText(""); // Remove check mark
             passwordErrorLabel.setForeground(Color.GREEN);
             passwordField.setBorder(BorderFactory.createLineBorder(Color.GREEN));
+            iconLabel.setIcon(new ImageIcon(new ImageIcon("images/green_check_icon.png").getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH))); // Add check icon
         }
     }
     
-    private void validateContactNumber() {
+    private void validateContactNumber(JLabel iconLabel) {
         String contactNumber = contactNumberField.getText().trim();
-        if (!APUHostelManagement.isValidContactNumber(contactNumber)) {
+        if (!contactNumber.equals(manager.getContactNumber()) && !APUHostelManagement.isValidContactNumber(contactNumber)) {
             contactNumberErrorLabel.setText(getContactNumberErrorMessage(contactNumber));
             contactNumberErrorLabel.setForeground(Color.RED);
             contactNumberField.setBorder(BorderFactory.createLineBorder(Color.RED));
+            iconLabel.setIcon(new ImageIcon(new ImageIcon("images/red_warning_icon.png").getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH))); // Add warning icon
         } else {
-            contactNumberErrorLabel.setText("\u2713"); // Check mark
+            contactNumberErrorLabel.setText(""); // Remove check mark
             contactNumberErrorLabel.setForeground(Color.GREEN);
             contactNumberField.setBorder(BorderFactory.createLineBorder(Color.GREEN));
+            iconLabel.setIcon(new ImageIcon(new ImageIcon("images/green_check_icon.png").getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH))); // Add check icon
         }
     }
 

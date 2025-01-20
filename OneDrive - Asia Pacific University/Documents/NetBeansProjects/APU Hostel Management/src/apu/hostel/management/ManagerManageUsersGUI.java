@@ -297,6 +297,10 @@ public class ManagerManageUsersGUI {
     
         switch (fieldToUpdate) {
             case "IC/Passport Number":
+                if (newValue.equals(userToUpdate.getIcPassportNumber())) {
+                    JOptionPane.showMessageDialog(frame, "The IC/Passport Number is the same as the original value.", "Information", JOptionPane.INFORMATION_MESSAGE);
+                    return;
+                }
                 while (true) {
                     if (!APUHostelManagement.isValidICPassport(newValue)) {
                         String errorMessage = getICPassportErrorMessage(newValue);
@@ -315,6 +319,10 @@ public class ManagerManageUsersGUI {
                 }
                 break;
             case "Username":
+                if (newValue.equals(userToUpdate.getUsername())) {
+                    JOptionPane.showMessageDialog(frame, "The Username is the same as the original value.", "Information", JOptionPane.INFORMATION_MESSAGE);
+                    return;
+                }
                 while (true) {
                     if (!APUHostelManagement.isValidUsername(newValue)) {
                         String errorMessage = getUsernameErrorMessage(newValue);
@@ -333,6 +341,10 @@ public class ManagerManageUsersGUI {
                 }
                 break;
             case "Password":
+                if (newValue.equals(userToUpdate.getPassword())) {
+                    JOptionPane.showMessageDialog(frame, "The Password is the same as the original value.", "Information", JOptionPane.INFORMATION_MESSAGE);
+                    return;
+                }
                 while (true) {
                     if (!APUHostelManagement.isValidPassword(newValue, userToUpdate.getUsername())) {
                         String errorMessage = getPasswordErrorMessage(newValue, userToUpdate.getUsername());
@@ -351,6 +363,10 @@ public class ManagerManageUsersGUI {
                 }
                 break;
             case "Contact Number":
+                if (newValue.equals(userToUpdate.getContactNumber())) {
+                    JOptionPane.showMessageDialog(frame, "The Contact Number is the same as the original value.", "Information", JOptionPane.INFORMATION_MESSAGE);
+                    return;
+                }
                 while (true) {
                     if (!APUHostelManagement.isValidContactNumber(newValue)) {
                         String errorMessage = getContactNumberErrorMessage(newValue);
