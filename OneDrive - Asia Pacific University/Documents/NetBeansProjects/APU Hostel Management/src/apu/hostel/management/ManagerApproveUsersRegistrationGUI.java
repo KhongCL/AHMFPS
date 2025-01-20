@@ -7,12 +7,12 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.util.List;
 
-public class ManagerApproveUserRegistrationGUI {
+public class ManagerApproveUsersRegistrationGUI {
     private JFrame frame;
     private JPanel rolePanel;
     private List<APUHostelManagement.User> selectedRoleList;
 
-    public ManagerApproveUserRegistrationGUI() {
+    public ManagerApproveUsersRegistrationGUI() {
         initialize();
     }
 
@@ -98,7 +98,7 @@ public class ManagerApproveUserRegistrationGUI {
                 return;
             }
 
-            new ManagerApproveUserTableGUI(role, selectedRoleList);
+            new ManagerApproveUsersTableGUI(role, selectedRoleList);
             frame.dispose();
         } catch (IOException e) {
             JOptionPane.showMessageDialog(frame, "An error occurred while loading users.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -109,7 +109,7 @@ public class ManagerApproveUserRegistrationGUI {
         EventQueue.invokeLater(new Runnable() {
             public void run() {
                 try {
-                    ManagerApproveUserRegistrationGUI window = new ManagerApproveUserRegistrationGUI();
+                    ManagerApproveUsersRegistrationGUI window = new ManagerApproveUsersRegistrationGUI();
                     window.frame.setVisible(true);
                 } catch (Exception e) {
                     e.printStackTrace();
