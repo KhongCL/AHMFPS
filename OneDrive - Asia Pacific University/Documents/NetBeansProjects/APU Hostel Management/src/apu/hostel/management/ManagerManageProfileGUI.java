@@ -30,10 +30,10 @@ public class ManagerManageProfileGUI {
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         frame.setSize(400, 500);
         frame.setLayout(new BorderLayout(10, 10)); // Add spacing between components
-
+    
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); // Add padding
-
+    
         // Back button
         JButton backButton = new JButton("Back");
         backButton.setPreferredSize(new Dimension(100, 40));
@@ -43,41 +43,41 @@ public class ManagerManageProfileGUI {
                 frame.dispose();
             }
         });
-
+    
         topPanel.add(backButton, BorderLayout.WEST);
-
+    
         frame.add(topPanel, BorderLayout.NORTH);
-
+    
         // Input fields
-        JPanel inputPanel = new JPanel(new GridLayout(5, 3, 10, 10));
+        JPanel inputPanel = new JPanel(new GridLayout(5, 2, 10, 10));
         inputPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); // Add padding
-
+    
         inputPanel.add(new JLabel("IC/Passport Number:"));
         icPassportField = new JTextField(manager.getIcPassportNumber());
         inputPanel.add(icPassportField);
         icPassportErrorLabel = new JLabel();
         inputPanel.add(icPassportErrorLabel);
-
+    
         inputPanel.add(new JLabel("Username:"));
         usernameField = new JTextField(manager.getUsername());
         inputPanel.add(usernameField);
         usernameErrorLabel = new JLabel();
         inputPanel.add(usernameErrorLabel);
-
+    
         inputPanel.add(new JLabel("Password:"));
         passwordField = new JPasswordField(manager.getPassword());
         inputPanel.add(passwordField);
         passwordErrorLabel = new JLabel();
         inputPanel.add(passwordErrorLabel);
-
+    
         inputPanel.add(new JLabel("Contact Number:"));
         contactNumberField = new JTextField(manager.getContactNumber());
         inputPanel.add(contactNumberField);
         contactNumberErrorLabel = new JLabel();
         inputPanel.add(contactNumberErrorLabel);
-
+    
         frame.add(inputPanel, BorderLayout.CENTER);
-
+    
         // Update button
         JButton updateButton = new JButton("Update Profile");
         updateButton.setPreferredSize(new Dimension(150, 40));
@@ -86,15 +86,15 @@ public class ManagerManageProfileGUI {
                 updateProfile();
             }
         });
-
+    
         JPanel buttonPanel = new JPanel();
         buttonPanel.add(updateButton);
-
+    
         frame.add(buttonPanel, BorderLayout.SOUTH);
-
+    
         // Add input validation listeners
         addValidationListeners();
-
+    
         frame.setVisible(true);
     }
 
@@ -133,43 +133,51 @@ public class ManagerManageProfileGUI {
         if (!APUHostelManagement.isValidICPassport(icPassport)) {
             icPassportErrorLabel.setText(getICPassportErrorMessage(icPassport));
             icPassportErrorLabel.setForeground(Color.RED);
+            icPassportField.setBorder(BorderFactory.createLineBorder(Color.RED));
         } else {
             icPassportErrorLabel.setText("\u2713"); // Check mark
             icPassportErrorLabel.setForeground(Color.GREEN);
+            icPassportField.setBorder(BorderFactory.createLineBorder(Color.GREEN));
         }
     }
-
+    
     private void validateUsername() {
         String username = usernameField.getText().trim();
         if (!APUHostelManagement.isValidUsername(username)) {
             usernameErrorLabel.setText(getUsernameErrorMessage(username));
             usernameErrorLabel.setForeground(Color.RED);
+            usernameField.setBorder(BorderFactory.createLineBorder(Color.RED));
         } else {
             usernameErrorLabel.setText("\u2713"); // Check mark
             usernameErrorLabel.setForeground(Color.GREEN);
+            usernameField.setBorder(BorderFactory.createLineBorder(Color.GREEN));
         }
     }
-
+    
     private void validatePassword() {
         String password = new String(passwordField.getPassword()).trim();
         String username = usernameField.getText().trim();
         if (!APUHostelManagement.isValidPassword(password, username)) {
             passwordErrorLabel.setText(getPasswordErrorMessage(password, username));
             passwordErrorLabel.setForeground(Color.RED);
+            passwordField.setBorder(BorderFactory.createLineBorder(Color.RED));
         } else {
             passwordErrorLabel.setText("\u2713"); // Check mark
             passwordErrorLabel.setForeground(Color.GREEN);
+            passwordField.setBorder(BorderFactory.createLineBorder(Color.GREEN));
         }
     }
-
+    
     private void validateContactNumber() {
         String contactNumber = contactNumberField.getText().trim();
         if (!APUHostelManagement.isValidContactNumber(contactNumber)) {
             contactNumberErrorLabel.setText(getContactNumberErrorMessage(contactNumber));
             contactNumberErrorLabel.setForeground(Color.RED);
+            contactNumberField.setBorder(BorderFactory.createLineBorder(Color.RED));
         } else {
             contactNumberErrorLabel.setText("\u2713"); // Check mark
             contactNumberErrorLabel.setForeground(Color.GREEN);
+            contactNumberField.setBorder(BorderFactory.createLineBorder(Color.GREEN));
         }
     }
 
@@ -332,7 +340,7 @@ class ValidationListener implements javax.swing.event.DocumentListener {
 
     @Override
     public void insertUpdate(javax.swing.event.DocumentEvent e) {
-        validationFunction.run();
+        validationFunction.run(); 
     }
 
     @Override
