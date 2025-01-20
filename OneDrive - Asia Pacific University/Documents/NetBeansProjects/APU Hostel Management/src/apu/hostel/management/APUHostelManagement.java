@@ -343,6 +343,20 @@ public class APUHostelManagement {
             }
         }
 
+        public static List<Manager> readManagersFromFile(String filename) throws IOException {
+            List<Manager> managers = new ArrayList<>();
+            try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    String[] parts = line.split(",");
+                    if (parts.length == 10) {
+                        managers.add(new Manager(parts));
+                    }
+                }
+            }
+            return managers;
+        }
+
         // Define a single Scanner instance at the class level
         private static final Scanner scanner = new Scanner(System.in);
 
