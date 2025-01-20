@@ -1,15 +1,9 @@
 package apu.hostel.management;
 
 import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableColumnModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
 
 public class ResidentManageBookingsGUI {
     private JFrame frame;
@@ -24,24 +18,65 @@ public class ResidentManageBookingsGUI {
         frame.setSize(1024, 768);
         frame.setLayout(new BorderLayout(10, 10)); // Add spacing between components
 
-        JPanel topPanel = new JPanel(new BorderLayout());
+        JLabel titleLabel = new JLabel("Manage Bookings", JLabel.CENTER);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 24)); // Set font size
+        frame.add(titleLabel, BorderLayout.NORTH);
+
+        JPanel buttonPanel = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(10, 10, 10, 10); // Add spacing between buttons
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+
+        // Add Make Booking button
+        JButton makeBookingButton = new JButton("Make Booking");
+        makeBookingButton.setPreferredSize(new Dimension(300, 50)); // Set button size
+        makeBookingButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                new ResidentMakeBookingGUI();
+                frame.dispose();
+            }
+        });
+        buttonPanel.add(makeBookingButton, gbc);
+
+        // Add Make Payment for Booking button
+        gbc.gridy++;
+        JButton makePaymentButton = new JButton("Make Payment for Booking");
+        makePaymentButton.setPreferredSize(new Dimension(300, 50)); // Set button size
+        makePaymentButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                new ResidentMakePaymentForBookingGUI();
+                frame.dispose();
+            }
+        });
+        buttonPanel.add(makePaymentButton, gbc);
+
+        // Add Cancel Booking button
+        gbc.gridy++;
+        JButton cancelBookingButton = new JButton("Cancel Booking");
+        cancelBookingButton.setPreferredSize(new Dimension(300, 50)); // Set button size
+        cancelBookingButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                new ResidentCancelBookingGUI();
+                frame.dispose();
+            }
+        });
+        buttonPanel.add(cancelBookingButton, gbc);
+
+        // Add Back button
+        gbc.gridy++;
         JButton backButton = new JButton("Back");
-        backButton.setFont(new Font("Arial", Font.PLAIN, 21)); // Adjusted font size
-        backButton.setPreferredSize(new Dimension(102, 57)); // Adjusted button size
-        backButton.setMaximumSize(new Dimension(102, 57)); // Adjusted button size
-        backButton.setMinimumSize(new Dimension(102, 57)); // Adjusted button size
+        backButton.setPreferredSize(new Dimension(300, 50)); // Set button size
         backButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 new ResidentMainPageGUI();
                 frame.dispose();
             }
         });
-        topPanel.add(backButton, BorderLayout.WEST);
-        frame.add(topPanel, BorderLayout.NORTH);
+        buttonPanel.add(backButton, gbc);
 
-        JLabel titleLabel = new JLabel("Manage Bookings", JLabel.CENTER);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 24)); // Set font size
-        frame.add(titleLabel, BorderLayout.CENTER);
+        frame.add(buttonPanel, BorderLayout.CENTER);
 
         frame.setVisible(true);
     }

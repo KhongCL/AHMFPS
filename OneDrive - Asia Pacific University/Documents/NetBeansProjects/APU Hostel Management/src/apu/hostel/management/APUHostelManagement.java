@@ -36,6 +36,72 @@ public class APUHostelManagement {
             }
             return paymentRecords;
         }
+
+        public static List<String[]> getRoomPricing() {
+            List<String[]> roomPricing = new ArrayList<>();
+            Map<String, String> roomTypeToFeeRateID = new HashMap<>();
+            try (BufferedReader roomReader = new BufferedReader(new FileReader("rooms.txt"))) {
+                String line;
+                while ((line = roomReader.readLine()) != null) {
+                    String[] parts = line.split(",");
+                    if (parts.length >= 3) {
+                        roomTypeToFeeRateID.put(parts[2].toLowerCase(), parts[1]); // Assuming parts[2] is RoomType and parts[1] is FeeRateID
+                    }
+                }
+            } catch (IOException e) {
+                System.out.println("An error occurred while reading the room data.");
+                return roomPricing;
+            }
+    
+            Map<String, double[]> feeRates = new HashMap<>();
+            try (BufferedReader feeRateReader = new BufferedReader(new FileReader("fee_rates.txt"))) {
+                String line;
+                while ((line = feeRateReader.readLine()) != null) {
+                    String[] parts = line.split(",");
+                    if (parts.length >= 6 && parts[6].equalsIgnoreCase("true")) { // Check if the fee rate is active
+                        String feeRateID = parts[0];
+                        double dailyRate = Double.parseDouble(parts[2]);
+                        double weeklyRate = Double.parseDouble(parts[3]);
+                        double monthlyRate = Double.parseDouble(parts[4]);
+                        double yearlyRate = Double.parseDouble(parts[5]);
+                        feeRates.put(feeRateID, new double[]{dailyRate, weeklyRate, monthlyRate, yearlyRate});
+                    }
+                }
+            } catch (IOException e) {
+                System.out.println("An error occurred while reading the fee rate data.");
+                return roomPricing;
+            }
+    
+            for (Map.Entry<String, String> entry : roomTypeToFeeRateID.entrySet()) {
+                String roomType = entry.getKey();
+                String feeRateID = entry.getValue();
+                double[] rates = feeRates.get(feeRateID);
+                if (rates != null) {
+                    roomPricing.add(new String[]{
+                            roomType.substring(0, 1).toUpperCase() + roomType.substring(1),
+                            getRoomCapacity(roomType),
+                            String.format("RM %.2f", rates[0]),
+                            String.format("RM %.2f", rates[1]),
+                            String.format("RM %.2f", rates[2]),
+                            String.format("RM %.2f", rates[3])
+                    });
+                }
+            }
+            return roomPricing;
+        }
+    
+        private static String getRoomCapacity(String roomType) {
+            switch (roomType.toLowerCase()) {
+                case "standard":
+                    return "1";
+                case "large":
+                    return "3";
+                case "family":
+                    return "6";
+                default:
+                    return "Unknown";
+            }
+        }
         
 
         public User(String userID, String icPassportNumber, String username, String password, String contactNumber, String dateOfRegistration, String role, boolean isActive) {
