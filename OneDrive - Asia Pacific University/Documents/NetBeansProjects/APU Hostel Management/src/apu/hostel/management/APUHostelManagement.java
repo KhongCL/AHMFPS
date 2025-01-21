@@ -2,6 +2,12 @@ package apu.hostel.management;
 import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import apu.hostel.management.APUHostelManagement.Manager;
+import apu.hostel.management.APUHostelManagement.Resident;
+import apu.hostel.management.APUHostelManagement.Staff;
+import apu.hostel.management.APUHostelManagement.User;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Year;
@@ -2677,6 +2683,81 @@ public class APUHostelManagement {
     
             return true;
         }
+
+                public static List<String[]> getCancellableBookingsForResident(String residentID) {
+            List<String[]> payments = new ArrayList<>();
+            List<String[]> cancellableBookings = new ArrayList<>();
+
+            // Read payments from file
+            try (BufferedReader reader = new BufferedReader(new FileReader("payments.txt"))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    payments.add(line.split(","));
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                return cancellableBookings;
+            }
+
+            // Filter cancellable bookings for the current resident
+            for (String[] payment : payments) {
+                if (payment[1].equals(residentID) && payment[7].equals("unpaid") && !payment[10].equals("cancelled")) {
+                    cancellableBookings.add(payment);
+                }
+            }
+
+            return cancellableBookings;
+        }
+
+        public static boolean cancelBooking(String paymentID) {
+            List<String[]> payments = new ArrayList<>();
+            boolean bookingCancelled = false;
+
+            // Read payments from file
+            try (BufferedReader reader = new BufferedReader(new FileReader("payments.txt"))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    String[] payment = line.split(",");
+                    if (payment[0].equals(paymentID)) {
+                        payment[10] = "cancelled"; // Update booking status to "cancelled"
+                        bookingCancelled = true;
+                    }
+                    payments.add(payment);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                return false;
+            }
+
+            // Write updated payments back to file
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter("payments.txt"))) {
+                for (String[] payment : payments) {
+                    writer.write(String.join(",", payment));
+                    writer.newLine();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                return false;
+            }
+
+            return bookingCancelled;
+        }
+
+        public static Map<String, String> getRoomMap1() {
+            Map<String, String> roomMap = new HashMap<>();
+            // Read room data from file and populate the map
+            try (BufferedReader reader = new BufferedReader(new FileReader("rooms.txt"))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    String[] parts = line.split(",");
+                    roomMap.put(parts[0], parts[1]); // Assuming parts[0] is roomID and parts[1] is roomNumber
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return roomMap;
+        }
+    
 
         // Define a single Scanner instance at the Resident class level
         private static final Scanner scanner = new Scanner(System.in);
