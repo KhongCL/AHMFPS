@@ -1893,17 +1893,17 @@ public class APUHostelManagement {
         }
 
         public static List<Staff> readStaffsFromFile(String filename) throws IOException {
-            List<Staff> staffs = new ArrayList<>();
+            List<Staff> staffList = new ArrayList<>();
             try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
                     String[] parts = line.split(",");
                     if (parts.length == 10) {
-                        staffs.add(new Staff(parts));
+                        staffList.add(new Staff(parts));
                     }
                 }
             }
-            return staffs;
+            return staffList;
         }
 
         // Define a single Scanner instance at the Staff class level
@@ -2351,8 +2351,8 @@ public class APUHostelManagement {
                 writer.newLine();
             }
         }
-
-        public static List<Resident> readResidentsFromFile(String filename) throws IOException {
+		
+		public static List<Resident> readResidentsFromFile(String filename) throws IOException {
             List<Resident> residents = new ArrayList<>();
             try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
                 String line;
@@ -2598,6 +2598,84 @@ public class APUHostelManagement {
                 System.out.println("An error occurred while reading the room data.");
             }
             return roomNumber;
+        }
+
+        public static List<String[]> getUnpaidBookingsForResident(String residentID) {
+            List<String[]> payments = new ArrayList<>();
+            List<String[]> unpaidBookings = new ArrayList<>();
+    
+            // Read payments from file
+            try (BufferedReader reader = new BufferedReader(new FileReader("payments.txt"))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    payments.add(line.split(","));
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                return unpaidBookings;
+            }
+    
+            // Filter unpaid bookings for the current resident, excluding cancelled bookings
+            for (String[] payment : payments) {
+                if (payment[1].equals(residentID) && payment[7].equals("unpaid") && !payment[10].equals("cancelled")) {
+                    unpaidBookings.add(payment);
+                }
+            }
+    
+            return unpaidBookings;
+        }
+    
+        public static Map<String, String> getRoomMap() {
+            Map<String, String> roomMap = new HashMap<>();
+            try (BufferedReader roomReader = new BufferedReader(new FileReader("rooms.txt"))) {
+                String line;
+                while ((line = roomReader.readLine()) != null) {
+                    String[] parts = line.split(",");
+                    if (parts.length >= 4) {
+                        roomMap.put(parts[0], parts[3]); // Assuming parts[0] is RoomID and parts[3] is RoomNumber
+                    }
+                }
+            } catch (IOException e) {
+                System.out.println("An error occurred while reading the room data.");
+            }
+            return roomMap;
+        }
+
+        public static boolean updatePaymentStatusAndMethod(String paymentID, String paymentMethod) {
+            List<String[]> payments = new ArrayList<>();
+    
+            // Read payments from file
+            try (BufferedReader reader = new BufferedReader(new FileReader("payments.txt"))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    payments.add(line.split(","));
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                return false;
+            }
+    
+            // Update payment status and method
+            for (String[] payment : payments) {
+                if (payment[0].equals(paymentID)) {
+                    payment[7] = "pending"; // Update payment status to paid
+                    payment[9] = paymentMethod; // Update payment method
+                    break;
+                }
+            }
+    
+            // Write updated payments back to file
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter("payments.txt"))) {
+                for (String[] payment : payments) {
+                    writer.write(String.join(",", payment));
+                    writer.newLine();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                return false;
+            }
+    
+            return true;
         }
 
         // Define a single Scanner instance at the Resident class level

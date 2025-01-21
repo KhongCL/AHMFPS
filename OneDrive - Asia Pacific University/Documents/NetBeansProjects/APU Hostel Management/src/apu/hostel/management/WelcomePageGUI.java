@@ -7,6 +7,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.io.IOException;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 public class WelcomePageGUI extends JFrame {
     private CardLayout cardLayout;
@@ -236,8 +238,8 @@ public class WelcomePageGUI extends JFrame {
                     APUHostelManagement.User user = APUHostelManagement.User.findUser(username, password, "approved_residents.txt");
                     if (user != null && user.getRole().equals("resident")) {
                         loginSuccess = true;
-                        APUHostelManagement.Resident resident = (APUHostelManagement.Resident) user; // Cast to Resident
-                        new ResidentMainPageGUI(resident); // Launch ResidentMainPageGUI with resident info
+                        currentResidentID = ((APUHostelManagement.Resident) user).getResidentID(); // Store residentID
+                        new ResidentMainPageGUI(); // Launch ResidentMainPageGUI
                         dispose(); // Close current window
                     }
                 } else if (title.equals("Staff Login Page")) {
