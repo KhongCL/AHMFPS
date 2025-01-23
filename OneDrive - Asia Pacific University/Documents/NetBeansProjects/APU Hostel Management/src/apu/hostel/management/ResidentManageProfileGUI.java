@@ -6,6 +6,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.util.List;
+import apu.hostel.management.ValidationListener;
 
 public class ResidentManageProfileGUI {
     private JFrame frame;
@@ -401,28 +402,5 @@ public class ResidentManageProfileGUI {
         } else {
             System.out.println("Resident not found.");
         }
-    }
-}
-
-class ValidationListener implements javax.swing.event.DocumentListener {
-    private Runnable validationFunction;
-
-    public ValidationListener(Runnable validationFunction) {
-        this.validationFunction = validationFunction;
-    }
-
-    @Override
-    public void insertUpdate(javax.swing.event.DocumentEvent e) {
-        validationFunction.run(); 
-    }
-
-    @Override
-    public void removeUpdate(javax.swing.event.DocumentEvent e) {
-        validationFunction.run();
-    }
-
-    @Override
-    public void changedUpdate(javax.swing.event.DocumentEvent e) {
-        validationFunction.run();
     }
 }
