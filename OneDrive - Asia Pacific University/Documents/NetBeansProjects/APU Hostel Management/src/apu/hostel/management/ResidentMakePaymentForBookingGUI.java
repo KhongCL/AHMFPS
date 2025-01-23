@@ -123,7 +123,7 @@ public class ResidentMakePaymentForBookingGUI {
                 {"Start Date", startDate.toString()},
                 {"End Date", endDate.toString()},
                 {"Stay Duration", stayDuration + " days"},
-                {"Room ID", details[5]},
+                {"Room Number", roomNumber},
                 {"Payment Amount", "RM" + details[6]},
                 {"Payment Status", details[7]},
                 {"Booking Date and Time", details[8]},
@@ -150,14 +150,28 @@ public class ResidentMakePaymentForBookingGUI {
         bankTransferButton.addActionListener(e -> selectPaymentMethod("bank_transfer"));
         cashButton.addActionListener(e -> selectPaymentMethod("cash"));
 
-        paymentPanel.add(creditCardButton);
-        paymentPanel.add(bankTransferButton);
-        paymentPanel.add(cashButton);
+        // Set button size to half the width of the popup and center them
+        Dimension buttonSize = new Dimension(200, 30);
+        creditCardButton.setPreferredSize(buttonSize);
+        bankTransferButton.setPreferredSize(buttonSize);
+        cashButton.setPreferredSize(buttonSize);
+
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        buttonPanel.add(creditCardButton);
+        buttonPanel.add(bankTransferButton);
+        buttonPanel.add(cashButton);
+
+        paymentPanel.add(buttonPanel);
 
         // Create confirm payment button
         JButton confirmPaymentButton = new JButton("Confirm Payment");
+        confirmPaymentButton.setPreferredSize(buttonSize);
         confirmPaymentButton.addActionListener(e -> confirmPayment(details[0], rowIndex));
-        paymentPanel.add(confirmPaymentButton);
+
+        JPanel confirmButtonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        confirmButtonPanel.add(confirmPaymentButton);
+
+        paymentPanel.add(confirmButtonPanel);
 
         // Create a panel to hold the details table and payment panel
         JPanel popupPanel = new JPanel(new BorderLayout(10, 10));
