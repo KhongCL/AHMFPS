@@ -89,7 +89,7 @@ public class ResidentMakePaymentForBookingGUI {
         backButton.setPreferredSize(new Dimension(frame.getWidth(), 50)); // Set button size
         backButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                new ResidentMainPageGUI();
+                new ResidentManageBookingsGUI();
                 frame.dispose();
             }
         });

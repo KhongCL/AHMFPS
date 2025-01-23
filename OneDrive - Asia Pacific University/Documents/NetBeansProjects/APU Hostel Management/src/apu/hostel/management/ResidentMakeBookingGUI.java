@@ -53,7 +53,7 @@ public class ResidentMakeBookingGUI {
         pricingPanel.add(scrollPane, BorderLayout.CENTER);
 
         // Adjust the size of the pricing panel
-        pricingPanel.setPreferredSize(new Dimension(1024, 300));
+        pricingPanel.setPreferredSize(new Dimension(1024, 200));
 
         mainPanel.add(pricingPanel, BorderLayout.NORTH);
 
@@ -62,6 +62,7 @@ public class ResidentMakeBookingGUI {
 
         // Room Type Selection and Date Input Fields
         JPanel selectionAndDatePanel = new JPanel(new BorderLayout(10, 10));
+        selectionAndDatePanel.setPreferredSize(new Dimension(1024, 300)); // Adjust the size of the panel
 
         // Room Type Selection
         JPanel selectionPanel = new JPanel(new BorderLayout());
@@ -75,9 +76,10 @@ public class ResidentMakeBookingGUI {
         familyButton = new JButton("Family");
 
         // Adjust button size
-        standardButton.setPreferredSize(new Dimension(200, 30)); // Increase width, reduce height
-        largeButton.setPreferredSize(new Dimension(200, 30)); // Increase width, reduce height
-        familyButton.setPreferredSize(new Dimension(200, 30)); // Increase width, reduce height
+        Dimension buttonSize = new Dimension(512, 30); // Half the width of the frame
+        standardButton.setPreferredSize(buttonSize);
+        largeButton.setPreferredSize(buttonSize);
+        familyButton.setPreferredSize(buttonSize);
 
         standardButton.addActionListener(e -> selectRoomType("Standard"));
         largeButton.addActionListener(e -> selectRoomType("Large"));
@@ -87,22 +89,34 @@ public class ResidentMakeBookingGUI {
         buttonPanel.add(largeButton);
         buttonPanel.add(familyButton);
 
-        selectionPanel.add(buttonPanel, BorderLayout.CENTER);
+        JPanel buttonPanelContainer = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        buttonPanelContainer.add(buttonPanel);
+
+        selectionPanel.add(buttonPanelContainer, BorderLayout.CENTER);
 
         selectionAndDatePanel.add(selectionPanel, BorderLayout.NORTH);
 
         // Date Input Fields
-        JPanel datePanel = new JPanel(new GridLayout(2, 2, 10, 10));
+        JPanel datePanel = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.anchor = GridBagConstraints.WEST;
+
         JLabel startDateLabel = new JLabel("Enter start date of your stay (yyyy-MM-dd): ");
         JLabel endDateLabel = new JLabel("Enter end date of your stay (yyyy-MM-dd): ");
-        startDateField = new JTextField();
-        endDateField = new JTextField();
+        startDateField = new JTextField(20); // Increase the length of the text field
+        endDateField = new JTextField(20); // Increase the length of the text field
 
         // Set placeholder text
         startDateField.setText("yyyy-MM-dd");
         endDateField.setText("yyyy-MM-dd");
         startDateField.setForeground(Color.GRAY);
         endDateField.setForeground(Color.GRAY);
+
+        // Shrink the height of the text input boxes
+        Dimension textFieldDimension = new Dimension(200, 25);
+        startDateField.setPreferredSize(textFieldDimension);
+        endDateField.setPreferredSize(textFieldDimension);
 
         // Add focus listeners to clear placeholder text
         startDateField.addFocusListener(new java.awt.event.FocusAdapter() {
@@ -137,10 +151,16 @@ public class ResidentMakeBookingGUI {
             }
         });
 
-        datePanel.add(startDateLabel);
-        datePanel.add(startDateField);
-        datePanel.add(endDateLabel);
-        datePanel.add(endDateField);
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        datePanel.add(startDateLabel, gbc);
+        gbc.gridx = 1;
+        datePanel.add(startDateField, gbc);
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        datePanel.add(endDateLabel, gbc);
+        gbc.gridx = 1;
+        datePanel.add(endDateField, gbc);
 
         // Add the datePanel to the selectionAndDatePanel
         selectionAndDatePanel.add(datePanel, BorderLayout.CENTER);
@@ -149,13 +169,13 @@ public class ResidentMakeBookingGUI {
         JButton makeBookingButton = new JButton("Make Booking");
         makeBookingButton.addActionListener(e -> makeBooking());
 
-        JPanel buttonPanelContainer = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        buttonPanelContainer.add(makeBookingButton);
+        JPanel makeBookingButtonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        makeBookingButtonPanel.add(makeBookingButton);
 
-        selectionAndDatePanel.add(buttonPanelContainer, BorderLayout.SOUTH);
+        selectionAndDatePanel.add(makeBookingButtonPanel, BorderLayout.SOUTH);
 
-        // Add the selectionAndDatePanel right below the pricing table
-        mainPanel.add(selectionAndDatePanel, BorderLayout.SOUTH);
+        // Add the selectionAndDatePanel to the center of the main panel
+        mainPanel.add(selectionAndDatePanel, BorderLayout.CENTER);
 
         frame.add(mainPanel, BorderLayout.CENTER);
 

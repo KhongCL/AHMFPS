@@ -156,8 +156,7 @@ public class ResidentCancelBookingGUI {
     }
 
     private void cancelBooking(String paymentID, int rowIndex) {
-        boolean success = APUHostelManagement.Resident.cancelBooking(paymentID);
-        if (success) {
+        if (APUHostelManagement.Resident.cancelBooking(paymentID)) {
             JOptionPane.showMessageDialog(frame, "Booking cancelled successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
             tableModel.removeRow(rowIndex); // Remove the cancelled row from the table
         } else {
