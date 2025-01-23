@@ -19,10 +19,19 @@ public class ResidentViewPaymentRecordsGUI {
     private Map<Integer, String[]> paymentDetailsMap; // Map to store payment details
 
     public ResidentViewPaymentRecordsGUI() {
-        initialize();
+        String residentID = WelcomePageGUI.getCurrentResidentID(); // Retrieve the session for the currently logged-in resident
+        if (residentID == null) {
+            JOptionPane.showMessageDialog(null, "Please login as a resident to access this page.", "Error", JOptionPane.ERROR_MESSAGE);
+            SwingUtilities.invokeLater(() -> {
+                new WelcomePageGUI();
+            });
+            return; // Ensure the rest of the constructor is not executed
+        } else {
+            initialize(residentID);
+        }
     }
 
-    private void initialize() {
+    private void initialize(String residentID) {
         frame = new JFrame("View Payment Records");
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         frame.setSize(1024, 768);
@@ -57,7 +66,6 @@ public class ResidentViewPaymentRecordsGUI {
         viewPaymentRecordsPanel.add(scrollPane, BorderLayout.CENTER);
 
         // Load payment records and populate table
-        String residentID = WelcomePageGUI.getCurrentResidentID(); // Retrieve residentID
         List<String[]> relevantPayments = APUHostelManagement.Resident.viewPaymentRecords(residentID);
         paymentDetailsMap = new HashMap<>(); // Initialize the map
         int rowIndex = 0;

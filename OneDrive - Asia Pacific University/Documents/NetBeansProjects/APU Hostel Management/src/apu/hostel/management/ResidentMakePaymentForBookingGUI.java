@@ -24,10 +24,19 @@ public class ResidentMakePaymentForBookingGUI {
     private DefaultTableModel tableModel; // Store the table model
 
     public ResidentMakePaymentForBookingGUI() {
-        initialize();
+        String residentID = WelcomePageGUI.getCurrentResidentID(); // Retrieve the session for the currently logged-in resident
+        if (residentID == null) {
+            JOptionPane.showMessageDialog(null, "Please login as a resident to access this page.", "Error", JOptionPane.ERROR_MESSAGE);
+            SwingUtilities.invokeLater(() -> {
+                new WelcomePageGUI();
+            });
+            return; // Ensure the rest of the constructor is not executed
+        } else {
+            initialize(residentID);
+        }
     }
 
-    private void initialize() {
+    private void initialize(String residentID) {
         frame = new JFrame("Make Payment for Booking");
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         frame.setSize(1024, 768);
@@ -62,7 +71,6 @@ public class ResidentMakePaymentForBookingGUI {
         makePaymentPanel.add(scrollPane, BorderLayout.CENTER);
 
         // Load unpaid bookings and populate table
-        String residentID = WelcomePageGUI.getCurrentResidentID(); // Retrieve residentID
         List<String[]> unpaidBookings = APUHostelManagement.Resident.getUnpaidBookingsForResident(residentID);
         Map<String, String> roomMap = APUHostelManagement.Resident.getRoomMap();
         paymentDetailsMap = new HashMap<>(); // Initialize the map

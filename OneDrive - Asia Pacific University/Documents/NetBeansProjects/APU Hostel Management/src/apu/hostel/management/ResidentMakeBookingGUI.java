@@ -23,7 +23,15 @@ public class ResidentMakeBookingGUI {
 
     public ResidentMakeBookingGUI() {
         residentID = WelcomePageGUI.getCurrentResidentID(); // Retrieve the session for the currently logged-in resident
-        initialize();
+        if (residentID == null) {
+            JOptionPane.showMessageDialog(null, "Please login as a resident to access this page.", "Error", JOptionPane.ERROR_MESSAGE);
+            SwingUtilities.invokeLater(() -> {
+                new WelcomePageGUI();
+            });
+            return; // Ensure the rest of the constructor is not executed
+        } else {
+            initialize();
+        }
     }
 
     private void initialize() {
