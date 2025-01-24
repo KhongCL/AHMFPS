@@ -205,10 +205,4 @@ public class ResidentViewPaymentRecordsGUI {
             super.fireEditingStopped();
         }
     }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            new ResidentViewPaymentRecordsGUI(null);
-        });
-    }
 }

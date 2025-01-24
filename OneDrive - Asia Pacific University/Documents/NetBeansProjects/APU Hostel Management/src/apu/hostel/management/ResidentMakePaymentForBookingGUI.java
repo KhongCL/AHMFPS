@@ -276,10 +276,4 @@ public class ResidentMakePaymentForBookingGUI {
             super.fireEditingStopped();
         }
     }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            new ResidentMakePaymentForBookingGUI(null);
-        });
-    }
 }

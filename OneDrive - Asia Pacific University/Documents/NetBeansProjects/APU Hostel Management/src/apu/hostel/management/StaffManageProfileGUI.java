@@ -371,36 +371,4 @@ public class StaffManageProfileGUI {
         }
         return "Invalid contact number.";
     }
-
-    public static void main(String[] args) {
-        // Load staff information from files
-        APUHostelManagement.Staff staff = null;
-        try {
-            List<APUHostelManagement.Staff> staffs = APUHostelManagement.Staff.readStaffsFromFile("approved_staffs.txt");
-            for (APUHostelManagement.Staff s : staffs) {
-                if (s.getStaffID().equals("S01")) { // Example staff ID
-                    staff = s;
-                    break;
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        if (staff != null) {
-            APUHostelManagement.Staff finalStaff = staff;
-            EventQueue.invokeLater(new Runnable() {
-                public void run() {
-                    try {
-                        StaffManageProfileGUI window = new StaffManageProfileGUI(finalStaff);
-                        window.frame.setVisible(true);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
-        } else {
-            System.out.println("Staff not found.");
-        }
-    }
 }

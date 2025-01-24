@@ -342,10 +342,4 @@ public class ResidentMakeBookingGUI {
         }
         return false;
     }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            new ResidentMakeBookingGUI(null);
-        });
-    }
 }

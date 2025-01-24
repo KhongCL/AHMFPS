@@ -338,17 +338,4 @@ public class ManagerManageRatesGUI {
     private void saveRatesToFile() {
         APUHostelManagement.Manager.saveRatesToFile(rateList);
     }
-
-    public static void main(String[] args) {
-        EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                try {
-                    ManagerManageRatesGUI window = new ManagerManageRatesGUI();
-                    window.frame.setVisible(true);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-    }
 }

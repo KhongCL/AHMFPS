@@ -160,18 +160,4 @@ public class ManagerApproveUsersTableGUI {
             new ManagerApproveUsersRegistrationGUI();
             frame.dispose();
         }
-    
-        public static void main(String[] args) {
-            EventQueue.invokeLater(new Runnable() {
-                public void run() {
-                    try {
-                        // Example usage
-                        List<APUHostelManagement.User> users = APUHostelManagement.User.readFromFile("unapproved_managers.txt");
-                        new ManagerApproveUsersTableGUI("Manager", users, manager);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-    }
 }

@@ -372,17 +372,4 @@ public class ManagerManageRoomsGUI {
     private void saveRoomsToFile() {
         APUHostelManagement.Manager.saveRoomsToFile(roomList);
     }
-
-    public static void main(String[] args) {
-        EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                try {
-                    ManagerManageRoomsGUI window = new ManagerManageRoomsGUI();
-                    window.frame.setVisible(true);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-    }
 }

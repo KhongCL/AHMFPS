@@ -371,36 +371,4 @@ public class ManagerManageProfileGUI {
         }
         return "Invalid contact number.";
     }
-
-    public static void main(String[] args) {
-        // Load manager information from files
-        APUHostelManagement.Manager manager = null;
-        try {
-            List<APUHostelManagement.Manager> managers = APUHostelManagement.Manager.readManagersFromFile("approved_managers.txt");
-            for (APUHostelManagement.Manager m : managers) {
-                if (m.getManagerID().equals("M01")) { // Example manager ID
-                    manager = m;
-                    break;
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        if (manager != null) {
-            APUHostelManagement.Manager finalManager = manager;
-            EventQueue.invokeLater(new Runnable() {
-                public void run() {
-                    try {
-                        ManagerManageProfileGUI window = new ManagerManageProfileGUI(finalManager);
-                        window.frame.setVisible(true);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
-        } else {
-            System.out.println("Manager not found.");
-        }
-    }
 }

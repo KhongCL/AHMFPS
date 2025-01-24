@@ -604,17 +604,4 @@ public class ManagerManageUsersGUI {
             JOptionPane.showMessageDialog(frame, "An error occurred while restoring all users.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
-
-    public static void main(String[] args) {
-        EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                try {
-                    ManagerManageUsersGUI window = new ManagerManageUsersGUI();
-                    window.frame.setVisible(true);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-    }
 }

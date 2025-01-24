@@ -96,10 +96,4 @@ public class StaffMainPageGUI {
         WelcomePageGUI welcomePage = new WelcomePageGUI();
         welcomePage.setVisible(true);
     }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            new StaffMainPageGUI(null); // For testing purposes, pass null or a mock staff object
-        });
-    }
 }

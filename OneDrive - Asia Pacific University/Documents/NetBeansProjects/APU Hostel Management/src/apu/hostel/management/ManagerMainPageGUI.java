@@ -115,17 +115,4 @@ public class ManagerMainPageGUI {
         WelcomePageGUI welcomePage = new WelcomePageGUI(); // Create an instance of WelcomePageGUI
         welcomePage.setVisible(true); // Set the WelcomePageGUI frame to visible
     }
-
-    public static void main(String[] args) {
-        EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                try {
-                    ManagerMainPageGUI window = new ManagerMainPageGUI();
-                    window.frame.setVisible(true);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-    }
 }

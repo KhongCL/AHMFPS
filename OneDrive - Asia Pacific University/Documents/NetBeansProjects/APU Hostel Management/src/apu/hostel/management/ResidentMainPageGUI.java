@@ -104,12 +104,6 @@ public class ResidentMainPageGUI {
         welcomePage.setVisible(true);
     }
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            new ResidentMainPageGUI();
-        });
-    }
-
     // Custom renderer for the "Action" column
     class ButtonRenderer extends JButton implements TableCellRenderer {
         public ButtonRenderer() {

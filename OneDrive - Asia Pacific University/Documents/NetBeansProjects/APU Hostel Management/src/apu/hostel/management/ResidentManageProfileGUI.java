@@ -371,36 +371,4 @@ public class ResidentManageProfileGUI {
         }
         return "Invalid contact number.";
     }
-
-    public static void main(String[] args) {
-        // Load resident information from files
-        APUHostelManagement.Resident resident = null;
-        try {
-            List<APUHostelManagement.Resident> residents = APUHostelManagement.Resident.readResidentsFromFile("approved_residents.txt");
-            for (APUHostelManagement.Resident r : residents) {
-                if (r.getResidentID().equals("R01")) { // Example resident ID
-                    resident = r;
-                    break;
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        if (resident != null) {
-            APUHostelManagement.Resident finalResident = resident;
-            EventQueue.invokeLater(new Runnable() {
-                public void run() {
-                    try {
-                        ResidentManageProfileGUI window = new ResidentManageProfileGUI(finalResident);
-                        window.frame.setVisible(true);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
-        } else {
-            System.out.println("Resident not found.");
-        }
-    }
 }
