@@ -1899,17 +1899,17 @@ public class APUHostelManagement {
         }
 
         public static List<Staff> readStaffsFromFile(String filename) throws IOException {
-            List<Staff> staffList = new ArrayList<>();
+            List<Staff> staffs = new ArrayList<>();
             try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
                     String[] parts = line.split(",");
                     if (parts.length == 10) {
-                        staffList.add(new Staff(parts));
+                        staffs.add(new Staff(parts));
                     }
                 }
             }
-            return staffList;
+            return staffs;
         }
 
         // Define a single Scanner instance at the Staff class level

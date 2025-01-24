@@ -181,9 +181,19 @@ public class WelcomePageGUI extends JFrame {
     
         JPanel centerPanel = new JPanel(new GridLayout(6, 1, 19, 19)); // Adjusted grid layout
         centerPanel.setBorder(BorderFactory.createEmptyBorder(38, 38, 38, 38)); // Adjusted border
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(10, 10, 10, 10);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.gridwidth = 2;
     
         JLabel titleLabel = new JLabel(title, SwingConstants.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 28)); // Adjusted font size
+        centerPanel.add(titleLabel, gbc);
+        
+        gbc.gridy++;
+        gbc.gridwidth = 1;
     
         JTextField usernameField = new JTextField("Username");
         usernameField.setFont(new Font("Arial", Font.PLAIN, 24)); // Adjusted font size
