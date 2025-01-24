@@ -213,7 +213,10 @@ public class WelcomePageGUI extends JFrame {
                 }
             }
         });
+        centerPanel.add(usernameField, gbc);
     
+        gbc.gridy++;
+        gbc.gridwidth = 1;
         JPasswordField passwordField = new JPasswordField("Password");
         passwordField.setFont(new Font("Arial", Font.PLAIN, 24)); // Adjusted font size
         passwordField.setForeground(Color.GRAY);
@@ -235,7 +238,31 @@ public class WelcomePageGUI extends JFrame {
                 }
             }
         });
+
+        JPanel passwordPanel = new JPanel(new BorderLayout());
+        passwordPanel.setPreferredSize(new Dimension(300, 40)); // Adjust size as needed
+        passwordPanel.add(passwordField, BorderLayout.CENTER);
     
+        JLabel showHideIcon = new JLabel(new ImageIcon(new ImageIcon("images/show_icon.png").getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH))); // Use appropriate path to the icon
+        showHideIcon.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        showHideIcon.setPreferredSize(new Dimension(40, 40)); // Set the size of the icon to match the height of the password field
+        showHideIcon.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                if (passwordField.getEchoChar() == '*') {
+                    passwordField.setEchoChar((char) 0);
+                    showHideIcon.setIcon(new ImageIcon(new ImageIcon("images/hide_icon.png").getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH))); // Use appropriate path to the hide icon
+                } else {
+                    passwordField.setEchoChar('*');
+                    showHideIcon.setIcon(new ImageIcon(new ImageIcon("images/show_icon.png").getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH))); // Use appropriate path to the show icon
+                }
+            }
+        });
+        passwordPanel.add(showHideIcon, BorderLayout.EAST);
+        centerPanel.add(passwordPanel, gbc);
+    
+        gbc.gridx = 0;
+        gbc.gridy++;
+        gbc.gridwidth = 2;  
         JButton loginButton = new JButton("Login");
         loginButton.setFont(new Font("Arial", Font.PLAIN, 24)); // Adjusted font size
         loginButton.setPreferredSize(new Dimension(171, 57)); // Adjusted button size
@@ -248,8 +275,8 @@ public class WelcomePageGUI extends JFrame {
                     APUHostelManagement.User user = APUHostelManagement.User.findUser(username, password, "approved_residents.txt");
                     if (user != null && user.getRole().equals("resident")) {
                         loginSuccess = true;
-                        currentResidentID = ((APUHostelManagement.Resident) user).getResidentID(); // Store residentID
-                        new ResidentMainPageGUI(); // Launch ResidentMainPageGUI
+                        APUHostelManagement.Resident resident = (APUHostelManagement.Resident) user; // Cast to Resident
+                        new ResidentMainPageGUI(resident); // Launch ResidentMainPageGUI with resident info
                         dispose(); // Close current window
                     }
                 } else if (title.equals("Staff Login Page")) {
@@ -276,7 +303,9 @@ public class WelcomePageGUI extends JFrame {
                 JOptionPane.showMessageDialog(this, "Invalid username or password", "Login Error", JOptionPane.ERROR_MESSAGE);
             }
         });
+        centerPanel.add(loginButton, gbc);
     
+        gbc.gridy++;
         JLabel registerLabel = new JLabel("<html>Don't have an account? <a href=''>Register here</a></html>", SwingConstants.CENTER);
         registerLabel.setFont(new Font("Arial", Font.PLAIN, 24)); // Adjusted font size
         registerLabel.setCursor(new Cursor(Cursor.HAND_CURSOR));
@@ -296,7 +325,7 @@ public class WelcomePageGUI extends JFrame {
         centerPanel.add(usernameField);
         centerPanel.add(passwordField);
         centerPanel.add(loginButton);
-        centerPanel.add(registerLabel);
+        centerPanel.add(registerLabel, gbc);
     
         panel.add(centerPanel, BorderLayout.CENTER);
     
@@ -309,6 +338,7 @@ public class WelcomePageGUI extends JFrame {
                 passwordField.setText("Password");
                 passwordField.setForeground(Color.GRAY);
                 passwordField.setEchoChar((char) 0);
+                showHideIcon.setIcon(new ImageIcon(new ImageIcon("images/show_icon.png").getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH))); // Reset to show icon
             }
         });
     
