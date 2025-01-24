@@ -233,9 +233,7 @@ public class ResidentMakePaymentForBookingGUI {
     // Custom editor for the "Action" column
     class ButtonEditor extends DefaultCellEditor {
         private JButton button;
-        private String label;
-        private boolean isPushed;
-
+        
         public ButtonEditor(JCheckBox checkBox) {
             super(checkBox);
             button = new JButton();
@@ -267,7 +265,6 @@ public class ResidentMakePaymentForBookingGUI {
 
         @Override
         public boolean stopCellEditing() {
-            isPushed = false;
             return super.stopCellEditing();
         }
 

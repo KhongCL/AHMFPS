@@ -2,21 +2,18 @@ package apu.hostel.management;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.io.IOException;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
+
 
 public class WelcomePageGUI extends JFrame {
     private CardLayout cardLayout;
     private JPanel mainPanel;
-    private APUHostelManagement management;
-
+    
     public WelcomePageGUI() {
-        management = new APUHostelManagement();
+        new APUHostelManagement();
     
         setTitle("APU Hostel Management System");
         setSize(1024, 768); // Adjusted size
