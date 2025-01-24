@@ -1,62 +1,137 @@
 package apu.hostel.management;
 
-import java.awt.BorderLayout;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Dimension;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import javax.swing.JPanel;
-import javax.swing.JLabel;
-
-import javax.swing.JButton;
-import javax.swing.JFrame;
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import java.awt.*;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class StaffMakePaymentForResidentGUI {
-        private JFrame frame;
-    private APUHostelManagement.Staff staff; // Add staff field
+    private JFrame frame;
+    private JTable paymentTable;
+    private DefaultTableModel tableModel;
+    private Map<Integer, String[]> paymentDetailsMap;
+    private APUHostelManagement.Staff staff;
 
-    // Add new constructor
     public StaffMakePaymentForResidentGUI(APUHostelManagement.Staff staff) {
         this.staff = staff;
         initialize();
     }
 
-    public StaffMakePaymentForResidentGUI() {
-        initialize();
-    }
-
     private void initialize() {
-
-        JPanel buttonPanel = new JPanel(new GridBagLayout());
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        gbc.gridwidth = 1;
-        gbc.gridheight = 1;
-        gbc.weightx = 1.0;
-        gbc.weighty = 1.0;
-        gbc.fill = GridBagConstraints.NONE;
-        gbc.anchor = GridBagConstraints.CENTER;
-
-        // Add Back button
-        gbc.gridy++;
+        frame = new JFrame("Make Payment for Resident");
+        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         frame.setSize(1024, 768);
-        frame.setLayout(new BorderLayout());
+        frame.setLayout(new BorderLayout(10, 10));
 
-
-                // Add Back button
-                gbc.gridy++;
+        // Back button panel
+        JPanel topPanel = new JPanel(new BorderLayout());
         JButton backButton = new JButton("Back");
-        backButton.setPreferredSize(new Dimension(300, 50)); // Set button size
-        backButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                new StaffMainPageGUI(staff); // Pass staff
-                frame.dispose();
-            }
+        backButton.setPreferredSize(new Dimension(100, 40));
+        backButton.addActionListener(e -> {
+            new StaffMainPageGUI(staff);
+            frame.dispose();
         });
-        buttonPanel.add(backButton, gbc);
+        topPanel.add(backButton, BorderLayout.WEST);
+        frame.add(topPanel, BorderLayout.NORTH);
 
+        // Payment table
+        tableModel = new DefaultTableModel(
+            new Object[]{"Payment ID", "Resident ID", "Amount"}, 0
+        ) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false; // Make table non-editable
+            }
+        };
+        paymentTable = new JTable(tableModel);
+        paymentTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        JScrollPane scrollPane = new JScrollPane(paymentTable);
+        frame.add(scrollPane, BorderLayout.CENTER);
+
+        // Make Payment button
+        JButton makePaymentButton = new JButton("Make Payment");
+        makePaymentButton.addActionListener(e -> showPaymentConfirmation());
+        JPanel bottomPanel = new JPanel();
+        bottomPanel.add(makePaymentButton);
+        frame.add(bottomPanel, BorderLayout.SOUTH);
+
+        loadPendingPayments();
+        frame.setVisible(true);
     }
-    
+
+    private void loadPendingPayments() {
+        paymentDetailsMap = new HashMap<>();
+        tableModel.setRowCount(0);
+        
+        try (BufferedReader reader = new BufferedReader(new FileReader("payments.txt"))) {
+            String line;
+            int row = 0;
+            while ((line = reader.readLine()) != null) {
+                String[] payment = line.split(",");
+                if (payment[7].equalsIgnoreCase("pending")) {
+                    paymentDetailsMap.put(row, payment);
+                    tableModel.addRow(new Object[]{
+                        payment[0], payment[1], "RM" + payment[6]
+                    });
+                    row++;
+                }
+            }
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(frame, "Error loading payments", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void showPaymentConfirmation() {
+        int selectedRow = paymentTable.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(frame, "Please select a payment to make payment for.", 
+                "Warning", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        String[] selectedPayment = paymentDetailsMap.get(selectedRow);
+        
+        // Create payment details table
+        String[][] data = {
+            {"Payment ID", selectedPayment[0]},
+            {"Resident ID", selectedPayment[1]},
+            {"Staff ID", selectedPayment[2]},
+            {"Start Date", selectedPayment[3]},
+            {"End Date", selectedPayment[4]},
+            {"Room ID", selectedPayment[5]},
+            {"Payment Amount", "RM" + selectedPayment[6]},
+            {"Payment Status", selectedPayment[7]},
+            {"Booking DateTime", selectedPayment[8]},
+            {"Payment Method", selectedPayment[9]},
+            {"Booking Status", selectedPayment[10]}
+        };
+        String[] columnNames = {"Field", "Value"};
+        JTable detailsTable = new JTable(data, columnNames);
+        detailsTable.setEnabled(false);
+        
+        // Create confirmation dialog
+        JPanel panel = new JPanel(new BorderLayout(10, 10));
+        panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        panel.add(new JScrollPane(detailsTable), BorderLayout.CENTER);
+        JLabel confirmLabel = new JLabel("Are you sure to make payment for this booking?");
+        confirmLabel.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
+        panel.add(confirmLabel, BorderLayout.SOUTH);
+        
+        int result = JOptionPane.showConfirmDialog(frame, panel, "Payment Confirmation",
+            JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+            
+        if (result == JOptionPane.YES_OPTION) {
+            if (APUHostelManagement.Staff.processPendingPayment(selectedPayment[0], staff.getStaffID())) {
+                JOptionPane.showMessageDialog(frame, "Payment processed successfully");
+                loadPendingPayments(); // Refresh table
+            } else {
+                JOptionPane.showMessageDialog(frame, "Error processing payment", 
+                    "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
 }

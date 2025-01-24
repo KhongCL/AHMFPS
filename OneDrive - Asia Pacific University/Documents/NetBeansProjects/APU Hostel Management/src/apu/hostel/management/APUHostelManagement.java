@@ -3,11 +3,6 @@ import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import apu.hostel.management.APUHostelManagement.Manager;
-import apu.hostel.management.APUHostelManagement.Resident;
-import apu.hostel.management.APUHostelManagement.Staff;
-import apu.hostel.management.APUHostelManagement.User;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Year;
@@ -1910,6 +1905,44 @@ public class APUHostelManagement {
                 }
             }
             return staffs;
+        }
+
+        public static boolean processPendingPayment(String paymentId, String staffId) {
+            List<String[]> payments = new ArrayList<>();
+            boolean success = false;
+            
+            try (BufferedReader reader = new BufferedReader(new FileReader("payments.txt"))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    payments.add(line.split(","));
+                }
+            } catch (IOException e) {
+                return false;
+            }
+
+            // Update payment
+            for (String[] payment : payments) {
+                if (payment[0].equals(paymentId)) {
+                    payment[2] = staffId;
+                    payment[7] = "paid";
+                    success = true;
+                    break;
+                }
+            }
+
+            // Save updated payments
+            if (success) {
+                try (BufferedWriter writer = new BufferedWriter(new FileWriter("payments.txt"))) {
+                    for (String[] payment : payments) {
+                        writer.write(String.join(",", payment));
+                        writer.newLine();
+                    }
+                } catch (IOException e) {
+                    return false;
+                }
+            }
+
+            return success;
         }
 
         // Define a single Scanner instance at the Staff class level
