@@ -9,6 +9,13 @@ import javax.swing.event.DocumentListener;
 
 public class ResidentManageBookingsGUI {
     private JFrame frame;
+    private APUHostelManagement.Resident resident; // Add resident field
+
+    // Add new constructor
+    public ResidentManageBookingsGUI(APUHostelManagement.Resident resident) {
+        this.resident = resident;
+        initialize();
+    }
 
     public ResidentManageBookingsGUI() {
         initialize();
@@ -72,7 +79,7 @@ public class ResidentManageBookingsGUI {
         backButton.setPreferredSize(new Dimension(300, 50)); // Set button size
         backButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                new ResidentMainPageGUI();
+                new ResidentMainPageGUI(resident);
                 frame.dispose();
             }
         });

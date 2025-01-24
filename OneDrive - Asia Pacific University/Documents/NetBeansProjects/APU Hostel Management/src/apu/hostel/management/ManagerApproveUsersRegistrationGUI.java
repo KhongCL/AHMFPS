@@ -11,6 +11,13 @@ public class ManagerApproveUsersRegistrationGUI {
     private JFrame frame;
     private JPanel rolePanel;
     private List<APUHostelManagement.User> selectedRoleList;
+    private APUHostelManagement.Manager manager; // Add manager field
+
+    // Add new constructor
+    public ManagerApproveUsersRegistrationGUI(APUHostelManagement.Manager manager) {
+        this.manager = manager;
+        initialize();
+    }
 
     public ManagerApproveUsersRegistrationGUI() {
         initialize();
@@ -29,7 +36,7 @@ public class ManagerApproveUsersRegistrationGUI {
         backButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 System.out.println("Back button in Choose Role to Approve page clicked");
-                new ManagerMainPageGUI();
+                new ManagerMainPageGUI(manager); // Pass manager back
                 frame.dispose();
             }
         });
@@ -98,7 +105,7 @@ public class ManagerApproveUsersRegistrationGUI {
                 return;
             }
 
-            new ManagerApproveUsersTableGUI(role, selectedRoleList);
+            new ManagerApproveUsersTableGUI(role, selectedRoleList, manager);
             frame.dispose();
         } catch (IOException e) {
             JOptionPane.showMessageDialog(frame, "An error occurred while loading users.", "Error", JOptionPane.ERROR_MESSAGE);

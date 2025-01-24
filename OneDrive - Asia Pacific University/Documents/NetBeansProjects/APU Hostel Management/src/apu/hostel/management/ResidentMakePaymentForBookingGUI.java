@@ -22,6 +22,12 @@ public class ResidentMakePaymentForBookingGUI {
     private JButton cashButton;
     private JDialog paymentDetailsDialog; // Store the payment details dialog
     private DefaultTableModel tableModel; // Store the table model
+    private APUHostelManagement.Resident resident;
+
+    public ResidentMakePaymentForBookingGUI(APUHostelManagement.Resident resident) {
+        this.resident = resident;
+        initialize(resident.getResidentID());
+    }
 
     public ResidentMakePaymentForBookingGUI() {
         String residentID = WelcomePageGUI.getCurrentResidentID(); // Retrieve the session for the currently logged-in resident
@@ -97,7 +103,7 @@ public class ResidentMakePaymentForBookingGUI {
         backButton.setPreferredSize(new Dimension(frame.getWidth(), 50)); // Set button size
         backButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                new ResidentManageBookingsGUI();
+                new ResidentManageBookingsGUI(resident);
                 frame.dispose();
             }
         });

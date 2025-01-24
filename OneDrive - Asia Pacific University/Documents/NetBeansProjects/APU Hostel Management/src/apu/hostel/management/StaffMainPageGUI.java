@@ -57,7 +57,8 @@ public class StaffMainPageGUI {
         makePaymentButton.setPreferredSize(new Dimension(300, 50)); // Set button size
         makePaymentButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                // Implement the action for making payment for resident
+                new StaffMakePaymentForResidentGUI(staff); // Pass staff
+                frame.dispose();
             }
         });
         buttonPanel.add(makePaymentButton, gbc);
@@ -68,7 +69,8 @@ public class StaffMainPageGUI {
         generateReceiptButton.setPreferredSize(new Dimension(300, 50)); // Set button size
         generateReceiptButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                // Implement the action for generating receipt
+                new StaffGenerateReceiptGUI(staff); // Pass staff  
+                frame.dispose();
             }
         });
         buttonPanel.add(generateReceiptButton, gbc);

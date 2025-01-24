@@ -14,6 +14,13 @@ public class ManagerManageRatesGUI {
     private JTable rateTable;
     private DefaultTableModel tableModel;
     private List<APUHostelManagement.FeeRate> rateList;
+    private APUHostelManagement.Manager manager; // Add manager field
+
+    // Add new constructor
+    public ManagerManageRatesGUI(APUHostelManagement.Manager manager) {
+        this.manager = manager;
+        initialize();
+    }
 
     public ManagerManageRatesGUI() {
         initialize();
@@ -41,7 +48,7 @@ public class ManagerManageRatesGUI {
         backButton.setPreferredSize(new Dimension(100, 40));
         backButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                new ManagerMainPageGUI();
+                new ManagerMainPageGUI(manager); // Pass manager back
                 frame.dispose();
             }
         });

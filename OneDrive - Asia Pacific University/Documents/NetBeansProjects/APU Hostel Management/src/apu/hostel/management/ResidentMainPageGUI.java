@@ -63,7 +63,7 @@ public class ResidentMainPageGUI {
         viewPaymentRecordsButton.setPreferredSize(new Dimension(300, 50)); // Set button size
         viewPaymentRecordsButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                new ResidentViewPaymentRecordsGUI();
+                new ResidentViewPaymentRecordsGUI(resident); // Pass resident
                 frame.dispose(); // Close the Resident Main Page
             }
         });
@@ -75,7 +75,7 @@ public class ResidentMainPageGUI {
         manageBookingsButton.setPreferredSize(new Dimension(300, 50)); // Set button size
         manageBookingsButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                new ResidentManageBookingsGUI();
+                new ResidentManageBookingsGUI(resident); // Pass resident
                 frame.dispose();
             }
         });

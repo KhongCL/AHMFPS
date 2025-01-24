@@ -17,6 +17,13 @@ public class ResidentViewPaymentRecordsGUI {
     private JFrame frame;
     private JPanel viewPaymentRecordsPanel;
     private Map<Integer, String[]> paymentDetailsMap; // Map to store payment details
+    private APUHostelManagement.Resident resident; // Add resident field
+
+    // Add new constructor
+    public ResidentViewPaymentRecordsGUI(APUHostelManagement.Resident resident) {
+        this.resident = resident; 
+        initialize(null);
+    }
 
     public ResidentViewPaymentRecordsGUI() {
         String residentID = WelcomePageGUI.getCurrentResidentID(); // Retrieve the session for the currently logged-in resident
@@ -89,7 +96,7 @@ public class ResidentViewPaymentRecordsGUI {
         backButton.setMinimumSize(new Dimension(102, 57)); // Adjusted button size
         backButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                new ResidentMainPageGUI();
+                new ResidentMainPageGUI(resident);
                 frame.dispose();
             }
         });

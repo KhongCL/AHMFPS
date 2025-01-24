@@ -14,11 +14,6 @@ public class WelcomePageGUI extends JFrame {
     private CardLayout cardLayout;
     private JPanel mainPanel;
     private APUHostelManagement management;
-    private static String currentResidentID; // Add this line
-
-    public static String getCurrentResidentID() { // Add this method
-        return currentResidentID;
-    }
 
     public WelcomePageGUI() {
         management = new APUHostelManagement();

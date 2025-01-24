@@ -17,6 +17,13 @@ public class ResidentCancelBookingGUI {
     private JPanel cancelBookingPanel;
     private DefaultTableModel tableModel; // Store the table model
     private Map<Integer, String[]> paymentDetailsMap; // Map to store payment details
+    private APUHostelManagement.Resident resident; // Add resident field
+
+    // Add new constructor
+    public ResidentCancelBookingGUI(APUHostelManagement.Resident resident) {
+        this.resident = resident;
+        initialize(resident.getResidentID());
+    }
 
     public ResidentCancelBookingGUI() {
         String residentID = WelcomePageGUI.getCurrentResidentID(); // Retrieve the session for the currently logged-in resident
@@ -92,7 +99,7 @@ public class ResidentCancelBookingGUI {
         backButton.setPreferredSize(new Dimension(frame.getWidth(), 50)); // Set button size
         backButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                new ResidentManageBookingsGUI();
+                new ResidentManageBookingsGUI(resident);
                 frame.dispose();
             }
         });

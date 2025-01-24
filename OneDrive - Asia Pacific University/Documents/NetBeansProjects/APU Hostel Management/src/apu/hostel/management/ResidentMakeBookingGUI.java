@@ -20,6 +20,13 @@ public class ResidentMakeBookingGUI {
     private JButton standardButton;
     private JButton largeButton;
     private JButton familyButton;
+    private APUHostelManagement.Resident resident; // Add resident field
+
+    // Add new constructor
+    public ResidentMakeBookingGUI(APUHostelManagement.Resident resident) {
+        this.resident = resident;
+        initialize();
+    }
 
     public ResidentMakeBookingGUI() {
         residentID = WelcomePageGUI.getCurrentResidentID(); // Retrieve the session for the currently logged-in resident
@@ -191,7 +198,7 @@ public class ResidentMakeBookingGUI {
         JButton backButton = new JButton("Back");
         backButton.setPreferredSize(new Dimension(frame.getWidth(), 50)); // Set button size
         backButton.addActionListener(e -> {
-            new ResidentManageBookingsGUI();
+            new ResidentManageBookingsGUI(resident);
             frame.dispose();
         });
 

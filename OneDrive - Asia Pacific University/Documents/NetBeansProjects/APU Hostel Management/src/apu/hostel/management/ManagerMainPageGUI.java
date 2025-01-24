@@ -40,7 +40,7 @@ public class ManagerMainPageGUI {
         approveUserButton.setPreferredSize(new Dimension(300, 50)); // Set button size
         approveUserButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                new ManagerApproveUsersRegistrationGUI();
+                new ManagerApproveUsersRegistrationGUI(manager); // Pass manager
                 frame.dispose(); // Close the current window
             }
         });
@@ -51,7 +51,7 @@ public class ManagerMainPageGUI {
         searchUserButton.setPreferredSize(new Dimension(300, 50)); // Set button size
         searchUserButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                new ManagerManageUsersGUI();
+                new ManagerManageUsersGUI(manager); // Pass manager  
                 frame.dispose(); // Close the current window
             }
         });
@@ -62,7 +62,7 @@ public class ManagerMainPageGUI {
         fixRateButton.setPreferredSize(new Dimension(300, 50)); // Set button size
         fixRateButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                new ManagerManageRatesGUI();
+                new ManagerManageRatesGUI(manager); // Pass manager
                 frame.dispose(); // Close the current window
             }
         });
@@ -73,7 +73,7 @@ public class ManagerMainPageGUI {
         manageRoomsButton.setPreferredSize(new Dimension(300, 50)); // Set button size
         manageRoomsButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                new ManagerManageRoomsGUI();
+                new ManagerManageRoomsGUI(manager); // Pass manager
                 frame.dispose(); // Close the current window
             }
         });

@@ -14,6 +14,13 @@ public class ManagerManageRoomsGUI {
     private JTable roomTable;
     private DefaultTableModel tableModel;
     private List<APUHostelManagement.Room> roomList;
+    private APUHostelManagement.Manager manager; // Add manager field
+
+    // Add new constructor
+    public ManagerManageRoomsGUI(APUHostelManagement.Manager manager) {
+        this.manager = manager;
+        initialize();
+    }
 
     public ManagerManageRoomsGUI() {
         initialize();
@@ -33,7 +40,7 @@ public class ManagerManageRoomsGUI {
         backButton.setPreferredSize(new Dimension(100, 40));
         backButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                new ManagerMainPageGUI();
+                new ManagerMainPageGUI(manager); // Pass manager back
                 frame.dispose();
             }
         });
