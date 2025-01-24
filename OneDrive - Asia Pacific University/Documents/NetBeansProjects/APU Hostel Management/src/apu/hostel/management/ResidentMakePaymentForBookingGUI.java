@@ -2,7 +2,6 @@ package apu.hostel.management;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -23,6 +22,7 @@ public class ResidentMakePaymentForBookingGUI {
     private JDialog paymentDetailsDialog; // Store the payment details dialog
     private DefaultTableModel tableModel; // Store the table model
     private APUHostelManagement.Resident resident;
+    private JTable table;
 
     public ResidentMakePaymentForBookingGUI(APUHostelManagement.Resident resident) {
         this.resident = resident;
@@ -35,6 +35,19 @@ public class ResidentMakePaymentForBookingGUI {
         frame.setSize(1024, 768);
         frame.setLayout(new BorderLayout(10, 10)); // Use BorderLayout for the main panel
 
+        // Top panel for the back button
+        JPanel topPanel = new JPanel(new BorderLayout());
+        JButton backButton = new JButton("Back");
+        backButton.setPreferredSize(new Dimension(100, 40));
+        backButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                new ResidentManageBookingsGUI(resident);
+                frame.dispose();
+            }
+        });
+        topPanel.add(backButton, BorderLayout.WEST);
+        frame.add(topPanel, BorderLayout.NORTH);
+
         makePaymentPanel = new JPanel(new BorderLayout(10, 10));
         frame.add(makePaymentPanel, BorderLayout.CENTER);
 
@@ -43,22 +56,13 @@ public class ResidentMakePaymentForBookingGUI {
         makePaymentPanel.add(titleLabel, BorderLayout.NORTH);
 
         // Create table model and table
-        tableModel = new DefaultTableModel(new Object[]{"Payment ID", "Resident ID", "Room Number", "Stay Duration", "Payment Amount", "Action"}, 0);
-        JTable table = new JTable(tableModel) {
+        tableModel = new DefaultTableModel(new Object[]{"Payment ID", "Resident ID", "Room Number", "Stay Duration", "Payment Amount"}, 0);
+        table = new JTable(tableModel) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return column == 5; // Only the "Action" column is editable
-            }
-
-            @Override
-            public TableCellRenderer getCellRenderer(int row, int column) {
-                if (column == 5) {
-                    return new ButtonRenderer();
-                }
-                return super.getCellRenderer(row, column);
+                return false; // Make table cells non-editable
             }
         };
-        table.getColumn("Action").setCellEditor(new ButtonEditor(new JCheckBox()));
         table.setRowHeight(30); // Increase row height
         JScrollPane scrollPane = new JScrollPane(table);
         makePaymentPanel.add(scrollPane, BorderLayout.CENTER);
@@ -72,32 +76,27 @@ public class ResidentMakePaymentForBookingGUI {
             paymentDetailsMap.put(rowIndex, details); // Store payment details in the map
             String roomNumber = roomMap.getOrDefault(details[5], "Unknown Room");
             long stayDuration = ChronoUnit.DAYS.between(LocalDate.parse(details[3]), LocalDate.parse(details[4]));
-            JButton payButton = new JButton("Pay for Booking");
-            payButton.setActionCommand(String.valueOf(rowIndex)); // Set the action command to the row index
-            payButton.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    int rowIndex = Integer.parseInt(e.getActionCommand());
-                    showPaymentDetailsPopup(details, rowIndex);
-                }
-            });
-            tableModel.addRow(new Object[]{details[0], details[1], roomNumber, stayDuration + " days", "RM" + details[6], payButton});
+            tableModel.addRow(new Object[]{details[0], details[1], roomNumber, stayDuration + " days", "RM" + details[6]});
             rowIndex++;
         }
 
-        // Add Back button
-        JButton backButton = new JButton("Back");
-        backButton.setFont(new Font("Arial", Font.PLAIN, 21)); // Adjusted font size
-        backButton.setPreferredSize(new Dimension(frame.getWidth(), 50)); // Set button size
-        backButton.addActionListener(new ActionListener() {
+        // Add Pay for Booking button
+        JButton payButton = new JButton("Pay for Booking");
+        payButton.setPreferredSize(new Dimension(200, 40)); // Adjusted button size
+        payButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                new ResidentManageBookingsGUI(resident);
-                frame.dispose();
+                int selectedRow = table.getSelectedRow();
+                if (selectedRow != -1) {
+                    showPaymentDetailsPopup(paymentDetailsMap.get(selectedRow), selectedRow);
+                } else {
+                    JOptionPane.showMessageDialog(frame, "Please select a booking to pay for.", "Error", JOptionPane.ERROR_MESSAGE);
+                }
             }
         });
 
         // Create a panel for the bottom button
-        JPanel bottomPanel = new JPanel(new BorderLayout());
-        bottomPanel.add(backButton, BorderLayout.SOUTH);
+        JPanel bottomPanel = new JPanel();
+        bottomPanel.add(payButton);
         makePaymentPanel.add(bottomPanel, BorderLayout.SOUTH);
 
         frame.setVisible(true);
@@ -109,25 +108,24 @@ public class ResidentMakePaymentForBookingGUI {
         LocalDate endDate = LocalDate.parse(details[4]);
         long stayDuration = ChronoUnit.DAYS.between(startDate, endDate);
 
+        // Create payment details table
         String[][] data = {
-                {"Payment ID", details[0]},
-                {"Resident ID", details[1]},
-                {"Staff ID", details[2]},
-                {"Start Date", startDate.toString()},
-                {"End Date", endDate.toString()},
-                {"Stay Duration", stayDuration + " days"},
-                {"Room Number", roomNumber},
-                {"Payment Amount", "RM" + details[6]},
-                {"Payment Status", details[7]},
-                {"Booking Date and Time", details[8]},
-                {"Payment Method", details[9]},
-                {"Booking Status", details[10]}
+            {"Payment ID", details[0]},
+            {"Resident ID", details[1]},
+            {"Staff ID", details[2]},
+            {"Start Date", startDate.toString()},
+            {"End Date", endDate.toString()},
+            {"Stay Duration", stayDuration + " days"},
+            {"Room Number", roomNumber},
+            {"Payment Amount", "RM" + details[6]},
+            {"Payment Status", details[7]},
+            {"Booking Date and Time", details[8]},
+            {"Payment Method", details[9]},
+            {"Booking Status", details[10]}
         };
-
-        String[] columnNames = {"Category", "Details"};
-
+        String[] columnNames = {"Field", "Value"};
         JTable detailsTable = new JTable(data, columnNames);
-        JScrollPane scrollPane = new JScrollPane(detailsTable);
+        detailsTable.setEnabled(false);
 
         // Create a panel for payment method selection and confirmation
         JPanel paymentPanel = new JPanel(new GridLayout(5, 1, 10, 10));
@@ -168,10 +166,10 @@ public class ResidentMakePaymentForBookingGUI {
 
         // Create a panel to hold the details table and payment panel
         JPanel popupPanel = new JPanel(new BorderLayout(10, 10));
-        popupPanel.add(scrollPane, BorderLayout.CENTER);
+        popupPanel.add(new JScrollPane(detailsTable), BorderLayout.CENTER);
         popupPanel.add(paymentPanel, BorderLayout.SOUTH);
 
-        paymentDetailsDialog = new JDialog(frame, "Payment Details", true);
+        paymentDetailsDialog = new JDialog(frame, "Detailed Payment", true);
         paymentDetailsDialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
         paymentDetailsDialog.getContentPane().add(popupPanel);
         paymentDetailsDialog.pack();
@@ -205,75 +203,12 @@ public class ResidentMakePaymentForBookingGUI {
         }
 
         boolean success = APUHostelManagement.Resident.updatePaymentStatusAndMethod(paymentID, selectedPaymentMethod);
+        paymentDetailsDialog.dispose(); // Close the payment details dialog before showing the success message
         if (success) {
             JOptionPane.showMessageDialog(frame, "Payment successful.", "Success", JOptionPane.INFORMATION_MESSAGE);
-            paymentDetailsDialog.dispose(); // Close the payment details dialog
             tableModel.removeRow(rowIndex); // Remove the paid row from the table
         } else {
             JOptionPane.showMessageDialog(frame, "An error occurred while processing the payment.", "Error", JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
-    // Custom renderer for the "Action" column
-    class ButtonRenderer extends JButton implements TableCellRenderer {
-        public ButtonRenderer() {
-            setOpaque(true);
-        }
-
-        @Override
-        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-            if (value instanceof JButton) {
-                JButton button = (JButton) value;
-                return button;
-            }
-            return this;
-        }
-    }
-
-    // Custom editor for the "Action" column
-    class ButtonEditor extends DefaultCellEditor {
-        private JButton button;
-        private String label;
-        private boolean isPushed;
-
-        public ButtonEditor(JCheckBox checkBox) {
-            super(checkBox);
-            button = new JButton();
-            button.setOpaque(true);
-            button.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    fireEditingStopped();
-                }
-            });
-        }
-
-        @Override
-        public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
-            if (value instanceof JButton) {
-                button = (JButton) value;
-                button.addActionListener(new ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
-                        showPaymentDetailsPopup(paymentDetailsMap.get(row), row);
-                    }
-                });
-            }
-            return button;
-        }
-
-        @Override
-        public Object getCellEditorValue() {
-            return button;
-        }
-
-        @Override
-        public boolean stopCellEditing() {
-            isPushed = false;
-            return super.stopCellEditing();
-        }
-
-        @Override
-        protected void fireEditingStopped() {
-            super.fireEditingStopped();
         }
     }
 }
