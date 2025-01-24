@@ -43,7 +43,7 @@ public class ResidentManageBookingsGUI {
         makeBookingButton.setPreferredSize(new Dimension(300, 50)); // Set button size
         makeBookingButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                new ResidentMakeBookingGUI();
+                new ResidentMakeBookingGUI(resident);
                 frame.dispose();
             }
         });
@@ -55,7 +55,7 @@ public class ResidentManageBookingsGUI {
         makePaymentButton.setPreferredSize(new Dimension(300, 50)); // Set button size
         makePaymentButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                new ResidentMakePaymentForBookingGUI();
+                new ResidentMakePaymentForBookingGUI(resident);
                 frame.dispose();
             }
         });
@@ -67,7 +67,7 @@ public class ResidentManageBookingsGUI {
         cancelBookingButton.setPreferredSize(new Dimension(300, 50)); // Set button size
         cancelBookingButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                new ResidentCancelBookingGUI();
+                new ResidentCancelBookingGUI(resident);
                 frame.dispose();
             }
         });

@@ -22,23 +22,10 @@ public class ResidentCancelBookingGUI {
     // Add new constructor
     public ResidentCancelBookingGUI(APUHostelManagement.Resident resident) {
         this.resident = resident;
-        initialize(resident.getResidentID());
+        initialize();
     }
 
-    public ResidentCancelBookingGUI() {
-        String residentID = WelcomePageGUI.getCurrentResidentID(); // Retrieve the session for the currently logged-in resident
-        if (residentID == null) {
-            JOptionPane.showMessageDialog(null, "Please login as a resident to access this page.", "Error", JOptionPane.ERROR_MESSAGE);
-            SwingUtilities.invokeLater(() -> {
-                new WelcomePageGUI();
-            });
-            return; // Ensure the rest of the constructor is not executed
-        } else {
-            initialize(residentID);
-        }
-    }
-
-    private void initialize(String residentID) {
+    private void initialize() {
         frame = new JFrame("Cancel Booking");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(1024, 768);
@@ -73,7 +60,7 @@ public class ResidentCancelBookingGUI {
         cancelBookingPanel.add(scrollPane, BorderLayout.CENTER);
 
         // Load cancellable bookings and populate table
-        List<String[]> cancellableBookings = APUHostelManagement.Resident.getCancellableBookingsForResident(residentID);
+        List<String[]> cancellableBookings = APUHostelManagement.Resident.getCancellableBookingsForResident(resident.getResidentID());
         Map<String, String> roomMap = APUHostelManagement.Resident.getRoomMap();
         paymentDetailsMap = new HashMap<>(); // Initialize the map
         int rowIndex = 0;
@@ -244,7 +231,7 @@ public class ResidentCancelBookingGUI {
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            new ResidentCancelBookingGUI();
+            new ResidentCancelBookingGUI(null);
         });
     }
 }

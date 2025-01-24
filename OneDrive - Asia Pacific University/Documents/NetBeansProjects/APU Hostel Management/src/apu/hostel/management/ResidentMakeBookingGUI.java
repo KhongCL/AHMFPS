@@ -16,7 +16,6 @@ public class ResidentMakeBookingGUI {
     private String selectedRoomType = null;
     private JTextField startDateField;
     private JTextField endDateField;
-    private String residentID;
     private JButton standardButton;
     private JButton largeButton;
     private JButton familyButton;
@@ -26,19 +25,6 @@ public class ResidentMakeBookingGUI {
     public ResidentMakeBookingGUI(APUHostelManagement.Resident resident) {
         this.resident = resident;
         initialize();
-    }
-
-    public ResidentMakeBookingGUI() {
-        residentID = WelcomePageGUI.getCurrentResidentID(); // Retrieve the session for the currently logged-in resident
-        if (residentID == null) {
-            JOptionPane.showMessageDialog(null, "Please login as a resident to access this page.", "Error", JOptionPane.ERROR_MESSAGE);
-            SwingUtilities.invokeLater(() -> {
-                new WelcomePageGUI();
-            });
-            return; // Ensure the rest of the constructor is not executed
-        } else {
-            initialize();
-        }
     }
 
     private void initialize() {
@@ -297,7 +283,7 @@ public class ResidentMakeBookingGUI {
         String paymentID = APUHostelManagement.Resident.generatePaymentID1();
     
         // Get the ResidentID of the logged-in user
-        String residentID = this.residentID;
+        String residentID = resident.getResidentID();
     
         // Calculate the payment amount
         String feeRateID = APUHostelManagement.Resident.getFeeRateID(roomID);
@@ -359,7 +345,7 @@ public class ResidentMakeBookingGUI {
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            new ResidentMakeBookingGUI();
+            new ResidentMakeBookingGUI(null);
         });
     }
 }
