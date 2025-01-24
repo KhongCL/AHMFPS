@@ -19,10 +19,19 @@ public class ResidentCancelBookingGUI {
     private Map<Integer, String[]> paymentDetailsMap; // Map to store payment details
 
     public ResidentCancelBookingGUI() {
-        initialize();
+        String residentID = WelcomePageGUI.getCurrentResidentID(); // Retrieve the session for the currently logged-in resident
+        if (residentID == null) {
+            JOptionPane.showMessageDialog(null, "Please login as a resident to access this page.", "Error", JOptionPane.ERROR_MESSAGE);
+            SwingUtilities.invokeLater(() -> {
+                new WelcomePageGUI();
+            });
+            return; // Ensure the rest of the constructor is not executed
+        } else {
+            initialize(residentID);
+        }
     }
 
-    private void initialize() {
+    private void initialize(String residentID) {
         frame = new JFrame("Cancel Booking");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(1024, 768);
@@ -57,7 +66,6 @@ public class ResidentCancelBookingGUI {
         cancelBookingPanel.add(scrollPane, BorderLayout.CENTER);
 
         // Load cancellable bookings and populate table
-        String residentID = WelcomePageGUI.getCurrentResidentID(); // Retrieve residentID
         List<String[]> cancellableBookings = APUHostelManagement.Resident.getCancellableBookingsForResident(residentID);
         Map<String, String> roomMap = APUHostelManagement.Resident.getRoomMap();
         paymentDetailsMap = new HashMap<>(); // Initialize the map
@@ -156,8 +164,7 @@ public class ResidentCancelBookingGUI {
     }
 
     private void cancelBooking(String paymentID, int rowIndex) {
-        boolean success = APUHostelManagement.Resident.cancelBooking(paymentID);
-        if (success) {
+        if (APUHostelManagement.Resident.cancelBooking(paymentID)) {
             JOptionPane.showMessageDialog(frame, "Booking cancelled successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
             tableModel.removeRow(rowIndex); // Remove the cancelled row from the table
         } else {

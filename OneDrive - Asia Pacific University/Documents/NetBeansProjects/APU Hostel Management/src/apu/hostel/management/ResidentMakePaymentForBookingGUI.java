@@ -24,10 +24,19 @@ public class ResidentMakePaymentForBookingGUI {
     private DefaultTableModel tableModel; // Store the table model
 
     public ResidentMakePaymentForBookingGUI() {
-        initialize();
+        String residentID = WelcomePageGUI.getCurrentResidentID(); // Retrieve the session for the currently logged-in resident
+        if (residentID == null) {
+            JOptionPane.showMessageDialog(null, "Please login as a resident to access this page.", "Error", JOptionPane.ERROR_MESSAGE);
+            SwingUtilities.invokeLater(() -> {
+                new WelcomePageGUI();
+            });
+            return; // Ensure the rest of the constructor is not executed
+        } else {
+            initialize(residentID);
+        }
     }
 
-    private void initialize() {
+    private void initialize(String residentID) {
         frame = new JFrame("Make Payment for Booking");
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         frame.setSize(1024, 768);
@@ -62,7 +71,6 @@ public class ResidentMakePaymentForBookingGUI {
         makePaymentPanel.add(scrollPane, BorderLayout.CENTER);
 
         // Load unpaid bookings and populate table
-        String residentID = WelcomePageGUI.getCurrentResidentID(); // Retrieve residentID
         List<String[]> unpaidBookings = APUHostelManagement.Resident.getUnpaidBookingsForResident(residentID);
         Map<String, String> roomMap = APUHostelManagement.Resident.getRoomMap();
         paymentDetailsMap = new HashMap<>(); // Initialize the map
@@ -89,7 +97,7 @@ public class ResidentMakePaymentForBookingGUI {
         backButton.setPreferredSize(new Dimension(frame.getWidth(), 50)); // Set button size
         backButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                new ResidentMainPageGUI();
+                new ResidentManageBookingsGUI();
                 frame.dispose();
             }
         });
@@ -115,7 +123,7 @@ public class ResidentMakePaymentForBookingGUI {
                 {"Start Date", startDate.toString()},
                 {"End Date", endDate.toString()},
                 {"Stay Duration", stayDuration + " days"},
-                {"Room ID", details[5]},
+                {"Room Number", roomNumber},
                 {"Payment Amount", "RM" + details[6]},
                 {"Payment Status", details[7]},
                 {"Booking Date and Time", details[8]},
@@ -142,14 +150,28 @@ public class ResidentMakePaymentForBookingGUI {
         bankTransferButton.addActionListener(e -> selectPaymentMethod("bank_transfer"));
         cashButton.addActionListener(e -> selectPaymentMethod("cash"));
 
-        paymentPanel.add(creditCardButton);
-        paymentPanel.add(bankTransferButton);
-        paymentPanel.add(cashButton);
+        // Set button size to half the width of the popup and center them
+        Dimension buttonSize = new Dimension(200, 30);
+        creditCardButton.setPreferredSize(buttonSize);
+        bankTransferButton.setPreferredSize(buttonSize);
+        cashButton.setPreferredSize(buttonSize);
+
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        buttonPanel.add(creditCardButton);
+        buttonPanel.add(bankTransferButton);
+        buttonPanel.add(cashButton);
+
+        paymentPanel.add(buttonPanel);
 
         // Create confirm payment button
         JButton confirmPaymentButton = new JButton("Confirm Payment");
+        confirmPaymentButton.setPreferredSize(buttonSize);
         confirmPaymentButton.addActionListener(e -> confirmPayment(details[0], rowIndex));
-        paymentPanel.add(confirmPaymentButton);
+
+        JPanel confirmButtonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        confirmButtonPanel.add(confirmPaymentButton);
+
+        paymentPanel.add(confirmButtonPanel);
 
         // Create a panel to hold the details table and payment panel
         JPanel popupPanel = new JPanel(new BorderLayout(10, 10));
