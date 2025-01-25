@@ -1,6 +1,9 @@
 package apu.hostel.management;
 
 import javax.swing.*;
+
+import apu.hostel.management.APUHostelManagement.User;
+
 import java.awt.*;
 
 import java.awt.event.ComponentAdapter;
@@ -261,38 +264,50 @@ public class WelcomePageGUI extends JFrame {
         loginButton.addActionListener(e -> {
             String username = usernameField.getText();
             String password = new String(passwordField.getPassword());
-            boolean loginSuccess = false;
+            User user = null;
+
             try {
                 if (title.equals("Resident Login Page")) {
-                    APUHostelManagement.User user = APUHostelManagement.User.findUser(username, password, "approved_residents.txt");
-                    if (user != null && user.getRole().equals("resident")) {
-                        loginSuccess = true;
-                        APUHostelManagement.Resident resident = (APUHostelManagement.Resident) user; // Cast to Resident
-                        new ResidentMainPageGUI(resident); // Launch ResidentMainPageGUI with resident info
-                        dispose(); // Close current window
+                    user = APUHostelManagement.loginResident(username, password);
+                    if (user != null) {
+                        if (user.getIsActive()) {
+                            new ResidentMainPageGUI((APUHostelManagement.Resident) user);
+                            dispose();
+                        } else {
+                            JOptionPane.showMessageDialog(this, "Your account is deactivated. Please contact the administrator.", 
+                                "Login Error", JOptionPane.ERROR_MESSAGE);
+                        }
+                        return;
                     }
                 } else if (title.equals("Staff Login Page")) {
-                    APUHostelManagement.User user = APUHostelManagement.User.findUser(username, password, "approved_staffs.txt");
-                    if (user != null && user.getRole().equals("staff")) {
-                        loginSuccess = true;
-                        APUHostelManagement.Staff staff = (APUHostelManagement.Staff) user; // Cast to Staff
-                        new StaffMainPageGUI(staff); // Launch StaffMainPageGUI with staff info
-                        dispose(); // Close current window
+                    user = APUHostelManagement.loginStaff(username, password);
+                    if (user != null) {
+                        if (user.getIsActive()) {
+                            new StaffMainPageGUI((APUHostelManagement.Staff) user);
+                            dispose();
+                        } else {
+                            JOptionPane.showMessageDialog(this, "Your account is deactivated. Please contact the administrator.", 
+                                "Login Error", JOptionPane.ERROR_MESSAGE);
+                        }
+                        return;
                     }
                 } else if (title.equals("Manager Login Page")) {
-                    APUHostelManagement.User user = APUHostelManagement.User.findUser(username, password, "approved_managers.txt");
-                    if (user != null && user.getRole().equals("manager")) {
-                        loginSuccess = true;
-                        APUHostelManagement.Manager manager = (APUHostelManagement.Manager) user; // Cast to Manager
-                        new ManagerMainPageGUI(manager); // Launch ManagerMainPageGUI with manager info
-                        dispose(); // Close current window
+                    user = APUHostelManagement.loginManager(username, password);
+                    if (user != null) {
+                        if (user.getIsActive()) {
+                            new ManagerMainPageGUI((APUHostelManagement.Manager) user);
+                            dispose();
+                        } else {
+                            JOptionPane.showMessageDialog(this, "Your account is deactivated. Please contact the administrator.", 
+                                "Login Error", JOptionPane.ERROR_MESSAGE);
+                        }
+                        return;
                     }
                 }
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
-            if (!loginSuccess) {
                 JOptionPane.showMessageDialog(this, "Invalid username or password", "Login Error", JOptionPane.ERROR_MESSAGE);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(this, "An error occurred during login", "Login Error", JOptionPane.ERROR_MESSAGE);
             }
         });
         centerPanel.add(loginButton, gbc);
@@ -451,64 +466,20 @@ public class WelcomePageGUI extends JFrame {
             String username = usernameField.getText();
             String password = new String(passwordField.getPassword());
             String contactNumber = contactNumberField.getText();
-
-            // Scenario 1: Check if all fields are filled
-            if (icPassportNumber.isEmpty() || username.isEmpty() || password.isEmpty() || contactNumber.isEmpty()) {
-                showErrorDialog("Please fill in all fields.");
-                return;
-            }
-
-            // Scenario 2: Check for existing data
+        
             try {
-                if (!APUHostelManagement.isUnique(icPassportNumber, "", "")) {
-                    showErrorDialog(icPassportNumber.length() == 14 ? "IC number already exists. Please use a different IC number." : "Passport number already exists. Please use a different Passport number.");
-                    return;
+                if (registerMethod.equals("registerManager")) {
+                    APUHostelManagement.registerManager(icPassportNumber, username, password, contactNumber);
+                } else if (registerMethod.equals("registerResident")) {
+                    APUHostelManagement.registerResident(icPassportNumber, username, password, contactNumber);
+                } else if (registerMethod.equals("registerStaff")) {
+                    APUHostelManagement.registerStaff(icPassportNumber, username, password, contactNumber);
                 }
-                if (!APUHostelManagement.isUnique("", username, "")) {
-                    showErrorDialog("Username already exists. Please use a different Username.");
-                    return;
-                }
-                if (!APUHostelManagement.isUnique("", "", contactNumber)) {
-                    showErrorDialog("Contact Number already exists. Please use a different Contact Number.");
-                    return;
-                }
-            } catch (IOException ex) {
-                showErrorDialog("An error occurred while checking the existing data. Please try again.");
-                return;
-            }
-
-            // Scenario 3: Validate format of each field
-            if (!APUHostelManagement.isValidICPassport(icPassportNumber)) {
-                showErrorDialog("Invalid IC/Passport Number. IC format: xxxxxx-xx-xxxx, Passport format: one alphabet followed by 8 numbers.");
-                return;
-            }
-            if (!APUHostelManagement.isValidUsername(username)) {
-                showErrorDialog("Invalid Username. Username must be between 3 and 12 characters long, contain only letters, numbers, and underscores, and must contain at least one letter.");
-                return;
-            }
-            if (!APUHostelManagement.isValidPassword(password, username)) {
-                showErrorDialog("Invalid Password. Password must be between 8 and 12 characters long, contain at least one number, one special character (!@#$%^&*()), and one uppercase letter, and cannot be similar to the username.");
-                return;
-            }
-            if (!APUHostelManagement.isValidContactNumber(contactNumber)) {
-                showErrorDialog("Invalid Contact Number. The correct format is 01X-XXX-XXXX.");
-                return;
-            }
-
-            boolean success = false;
-            if (registerMethod.equals("registerManager")) {
-                success = APUHostelManagement.registerManager(icPassportNumber, username, password, contactNumber);
-            } else if (registerMethod.equals("registerResident")) {
-                success = APUHostelManagement.registerResident(icPassportNumber, username, password, contactNumber);
-            } else if (registerMethod.equals("registerStaff")) {
-                success = APUHostelManagement.registerStaff(icPassportNumber, username, password, contactNumber);
-            }
-
-            if (success) {
+                
                 JOptionPane.showMessageDialog(this, "Registration successful.");
                 cardLayout.show(mainPanel, "RoleSelection");
-            } else {
-                showErrorDialog("Registration failed. Please try again.");
+            } catch (Exception ex) {
+                showErrorDialog(ex.getMessage());
             }
         });
     

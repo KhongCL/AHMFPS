@@ -4076,172 +4076,171 @@ public class APUHostelManagement {
     }
 
     // Method to handle Manager registration
-    public static boolean registerManager(String icPassportNumber, String username, String password, String contactNumber) {
+    public static void registerManager(String icPassportNumber, String username, String password, String contactNumber) throws Exception {
+        // Check empty fields
+        if (icPassportNumber.isEmpty() || username.isEmpty() || password.isEmpty() || contactNumber.isEmpty()) {
+            throw new Exception("Please fill in all fields.");
+        }
+    
+        // Check existing data
+        if (!isUnique(icPassportNumber, "", "")) {
+            throw new Exception(icPassportNumber.length() == 14 ? 
+                "IC number already exists." : "Passport number already exists.");
+        }
+        if (!isUnique("", username, "")) {
+            throw new Exception("Username already exists.");
+        }
+        if (!isUnique("", "", contactNumber)) {
+            throw new Exception("Contact Number already exists.");
+        }
+    
+        // Validate formats
         if (!isValidICPassport(icPassportNumber)) {
-            System.out.println("Invalid IC/Passport Number.");
-            return false;
+            throw new Exception("Invalid IC/Passport Number format.");
         }
         if (!isValidUsername(username)) {
-            System.out.println("Invalid Username.");
-            return false;
+            throw new Exception("Invalid Username format.");
         }
         if (!isValidPassword(password, username)) {
-            System.out.println("Invalid Password.");
-            return false;
+            throw new Exception("Invalid Password format.");
         }
         if (!isValidContactNumber(contactNumber)) {
-            System.out.println("Invalid Contact Number.");
-            return false;
+            throw new Exception("Invalid Contact Number format.");
         }
+    
+        // Create and save manager
+        String dateOfRegistration = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        String userID = generateUserID("U");
+        String managerID = generateUserID("M");
+        Manager manager = new Manager(managerID, userID, icPassportNumber, username, password, 
+            contactNumber, dateOfRegistration, "manager", false, null);
+        manager.saveToManagerFile(null, null, "unapproved_managers.txt");
+    }
 
-        try {
-            String dateOfRegistration = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-            String userID = generateUserID("U");
-            String managerID = generateUserID("M");
-            Manager manager = new Manager(managerID, userID, icPassportNumber, username, password, contactNumber, dateOfRegistration, "manager", false, null);
-            manager.saveToManagerFile(null, null, "unapproved_managers.txt");
-            System.out.println("Manager registered successfully.");
-            return true;
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
+    public static void registerStaff(String icPassportNumber, String username, String password, String contactNumber) throws Exception {
+        // Check empty fields
+        if (icPassportNumber.isEmpty() || username.isEmpty() || password.isEmpty() || contactNumber.isEmpty()) {
+            throw new Exception("Please fill in all fields.");
         }
+    
+        // Check existing data
+        if (!isUnique(icPassportNumber, "", "")) {
+            throw new Exception(icPassportNumber.length() == 14 ? 
+                "IC number already exists." : "Passport number already exists.");
+        }
+        if (!isUnique("", username, "")) {
+            throw new Exception("Username already exists.");
+        }
+        if (!isUnique("", "", contactNumber)) {
+            throw new Exception("Contact Number already exists.");
+        }
+    
+        // Validate formats
+        if (!isValidICPassport(icPassportNumber)) {
+            throw new Exception("Invalid IC/Passport Number format.");
+        }
+        if (!isValidUsername(username)) {
+            throw new Exception("Invalid Username format.");
+        }
+        if (!isValidPassword(password, username)) {
+            throw new Exception("Invalid Password format.");
+        }
+        if (!isValidContactNumber(contactNumber)) {
+            throw new Exception("Invalid Contact Number format.");
+        }
+    
+        // Create and save staff
+        String dateOfRegistration = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        String userID = generateUserID("U");
+        String staffID = generateUserID("S");
+        Staff staff = new Staff(staffID, userID, icPassportNumber, username, password, 
+            contactNumber, dateOfRegistration, "staff", true, null);
+        staff.saveToStaffFile(null, null, "unapproved_staffs.txt");
+    }
+    
+    public static void registerResident(String icPassportNumber, String username, String password, String contactNumber) throws Exception {
+        // Check empty fields
+        if (icPassportNumber.isEmpty() || username.isEmpty() || password.isEmpty() || contactNumber.isEmpty()) {
+            throw new Exception("Please fill in all fields.");
+        }
+    
+        // Check existing data
+        if (!isUnique(icPassportNumber, "", "")) {
+            throw new Exception(icPassportNumber.length() == 14 ? 
+                "IC number already exists." : "Passport number already exists.");
+        }
+        if (!isUnique("", username, "")) {
+            throw new Exception("Username already exists.");
+        }
+        if (!isUnique("", "", contactNumber)) {
+            throw new Exception("Contact Number already exists.");
+        }
+    
+        // Validate formats
+        if (!isValidICPassport(icPassportNumber)) {
+            throw new Exception("Invalid IC/Passport Number format.");
+        }
+        if (!isValidUsername(username)) {
+            throw new Exception("Invalid Username format.");
+        }
+        if (!isValidPassword(password, username)) {
+            throw new Exception("Invalid Password format.");
+        }
+        if (!isValidContactNumber(contactNumber)) {
+            throw new Exception("Invalid Contact Number format.");
+        }
+    
+        // Create and save resident
+        String dateOfRegistration = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        String userID = generateUserID("U");
+        String residentID = generateUserID("R");
+        Resident resident = new Resident(residentID, userID, icPassportNumber, username, password, 
+            contactNumber, dateOfRegistration, "resident", true, null);
+        resident.saveToResidentFile(null, null, "unapproved_residents.txt");
     }
 
     // Method to handle Manager login
-    public static boolean loginManager(String username, String password) {
+    public static User loginManager(String username, String password) {
         try {
             User user = User.findUser(username, password, "approved_managers.txt");
             if (user != null && user.getRole().equals("manager")) {
-                if (user.getIsActive()) {
-                    System.out.println("Login successful.");
-                    user.displayMenu();
-                    return true;
-                } else {
-                    System.out.println("Your account is deactivated. Please contact the administrator.");
-                    return false;
-                }
-            } else {
-                System.out.println("Invalid username or password.");
-                return false;
+                return user;
             }
         } catch (IOException e) {
             e.printStackTrace();
-            return false;
         }
-    }
-
-    // Method to handle Staff registration
-    public static boolean registerStaff(String icPassportNumber, String username, String password, String contactNumber) {
-        if (!isValidICPassport(icPassportNumber)) {
-            System.out.println("Invalid IC/Passport Number.");
-            return false;
-        }
-        if (!isValidUsername(username)) {
-            System.out.println("Invalid Username.");
-            return false;
-        }
-        if (!isValidPassword(password, username)) {
-            System.out.println("Invalid Password.");
-            return false;
-        }
-        if (!isValidContactNumber(contactNumber)) {
-            System.out.println("Invalid Contact Number.");
-            return false;
-        }
-
-        try {
-            String dateOfRegistration = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-            String userID = generateUserID("U");
-            String staffID = generateUserID("S");
-            Staff staff = new Staff(staffID, userID, icPassportNumber, username, password, contactNumber, dateOfRegistration, "staff", true, null);
-            staff.saveToStaffFile(null, null, "unapproved_staffs.txt");
-            System.out.println("Staff registered successfully.");
-            return true;
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
-        }
+        return null;
     }
 
     // Method to handle Staff login
-    public static boolean loginStaff(String username, String password) {
+    public static User loginStaff(String username, String password) {
         try {
             User user = User.findUser(username, password, "approved_staffs.txt");
             if (user != null && user.getRole().equals("staff")) {
-                if (user.getIsActive()) {
-                    System.out.println("Login successful.");
-                    user.displayMenu();
-                    return true;
-                } else {
-                    System.out.println("Your account is deactivated. Please contact the administrator.");
-                    return false;
-                }
-            } else {
-                System.out.println("Invalid username or password.");
-                return false;
+                return user;
             }
         } catch (IOException e) {
             e.printStackTrace();
-            return false;
         }
-    }
-
-    // Method to handle Resident registration
-    public static boolean registerResident(String icPassportNumber, String username, String password, String contactNumber) {
-        if (!isValidICPassport(icPassportNumber)) {
-            System.out.println("Invalid IC/Passport Number.");
-            return false;
-        }
-        if (!isValidUsername(username)) {
-            System.out.println("Invalid Username.");
-            return false;
-        }
-        if (!isValidPassword(password, username)) {
-            System.out.println("Invalid Password.");
-            return false;
-        }
-        if (!isValidContactNumber(contactNumber)) {
-            System.out.println("Invalid Contact Number.");
-            return false;
-        }
-
-        try {
-            String dateOfRegistration = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-            String userID = generateUserID("U");
-            String residentID = generateUserID("R");
-            Resident resident = new Resident(residentID, userID, icPassportNumber, username, password, contactNumber, dateOfRegistration, "resident", true, null);
-            resident.saveToResidentFile(null, null, "unapproved_residents.txt");
-            System.out.println("Resident registered successfully.");
-            return true;
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
-        }
+        return null;
     }
 
     // Method to handle Resident login
-    public static boolean loginResident(String username, String password) {
+    public static User loginResident(String username, String password) {
         try {
             User user = User.findUser(username, password, "approved_residents.txt");
             if (user != null && user.getRole().equals("resident")) {
-                if (user.getIsActive()) {
-                    System.out.println("Login successful.");
-                    user.displayMenu();
-                    return true;
-                } else {
-                    System.out.println("Your account is deactivated. Please contact the administrator.");
-                    return false;
-                }
-            } else {
-                System.out.println("Invalid username or password.");
-                return false;
+                return user;
             }
         } catch (IOException e) {
             e.printStackTrace();
-            return false;
         }
+        return null;
     }
+
+    
+
+
 
     // Method to generate unique IDs with a prefix
     static String generateUserID(String prefix) {
