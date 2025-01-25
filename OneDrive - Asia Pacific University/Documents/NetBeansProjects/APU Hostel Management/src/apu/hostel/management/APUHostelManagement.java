@@ -2553,13 +2553,16 @@ public class APUHostelManagement {
         }
 
         public static double calculatePaymentAmount1(LocalDate startDate, LocalDate endDate, String feeRateID) {
-            long totalDays = ChronoUnit.DAYS.between(startDate, endDate.plusDays(1)); // Include the end date
-    
+            // Include end date in total days calculation
+            long totalDays = ChronoUnit.DAYS.between(startDate, endDate.plusDays(1));
+            System.out.println("Total days: " + totalDays);
+        
             double dailyRate = 0;
             double weeklyRate = 0;
             double monthlyRate = 0;
             double yearlyRate = 0;
-    
+        
+            // Read rates from file
             try (BufferedReader rateReader = new BufferedReader(new FileReader("fee_rates.txt"))) {
                 String line;
                 while ((line = rateReader.readLine()) != null) {
@@ -2575,15 +2578,71 @@ public class APUHostelManagement {
             } catch (IOException e) {
                 System.out.println("An error occurred while reading the fee rate data.");
             }
-    
-            long years = totalDays / 365;
-            long remainingDaysAfterYears = totalDays % 365;
-            long months = remainingDaysAfterYears / 30;
-            long remainingDaysAfterMonths = remainingDaysAfterYears % 30;
-            long weeks = remainingDaysAfterMonths / 7;
-            long remainingDays = remainingDaysAfterMonths % 7;
-    
-            return (years * yearlyRate) + (months * monthlyRate) + (weeks * weeklyRate) + (remainingDays * dailyRate);
+        
+            double totalAmount = 0;
+            long remainingDays = totalDays;
+        
+            // Handle years first (including leap years)
+            if (remainingDays >= 365) {
+                int yearsCount = 0;
+                LocalDate currentDate = startDate;
+                while (ChronoUnit.DAYS.between(currentDate, endDate) >= 365) {
+                    if (Year.isLeap(currentDate.getYear())) {
+                        if (remainingDays >= 366) {
+                            yearsCount++;
+                            currentDate = currentDate.plusYears(1);
+                            remainingDays -= 366;
+                        } else {
+                            break;
+                        }
+                    } else {
+                        yearsCount++;
+                        currentDate = currentDate.plusYears(1);
+                        remainingDays -= 365;
+                    }
+                }
+                totalAmount += yearsCount * yearlyRate;
+                System.out.println("Years: " + yearsCount);
+            }
+        
+            // Handle months (30 days)
+            if (remainingDays >= 30) {
+                long months = remainingDays / 30;
+                // Check if monthly rate is more cost-effective
+                double monthCost = monthlyRate;
+                double weeksCost = (30.0 / 7.0) * weeklyRate;
+                double daysCost = 30 * dailyRate;
+                
+                if (monthCost <= weeksCost && monthCost <= daysCost) {
+                    totalAmount += months * monthlyRate;
+                    remainingDays %= 30;
+                }
+                System.out.println("Months: " + months);
+            }
+        
+            // Handle weeks
+            if (remainingDays >= 7) {
+                long weeks = remainingDays / 7;
+                // Check if weekly rate is more cost-effective
+                double weekCost = weeklyRate;
+                double daysCost = 7 * dailyRate;
+                
+                if (weekCost <= daysCost) {
+                    totalAmount += weeks * weeklyRate;
+                    remainingDays %= 7;
+                }
+                System.out.println("Weeks: " + weeks);
+            }
+        
+            // Add remaining days
+            if (remainingDays > 0) {
+                totalAmount += remainingDays * dailyRate;
+            }
+            System.out.println("Days: " + remainingDays);
+
+            
+        
+            return totalAmount;
         }
 
         public static boolean addBookingToFile(String paymentID, String residentID, LocalDate startDate, LocalDate endDate, String roomID, double paymentAmount, String bookingDateTime) {
@@ -3597,6 +3656,7 @@ public class APUHostelManagement {
 
         private double calculatePaymentAmount(LocalDate startDate, LocalDate endDate, String feeRateID) {
             long totalDays = ChronoUnit.DAYS.between(startDate, endDate.plusDays(1)); // Include the end date
+            System.out.println("Total days: " + totalDays);
         
             double dailyRate = 0;
             double weeklyRate = 0;
@@ -3625,6 +3685,7 @@ public class APUHostelManagement {
             long remainingDaysAfterMonths = remainingDaysAfterYears % 30;
             long weeks = remainingDaysAfterMonths / 7;
             long remainingDays = remainingDaysAfterMonths % 7;
+            System.out.println("Years: " + years + ", Months: " + months + ", Weeks: " + weeks + ", Days: " + remainingDays);
         
             return (years * yearlyRate) + (months * monthlyRate) + (weeks * weeklyRate) + (remainingDays * dailyRate);
         }
