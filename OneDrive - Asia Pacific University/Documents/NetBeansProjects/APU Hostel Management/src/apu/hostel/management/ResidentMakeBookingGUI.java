@@ -287,7 +287,7 @@ public class ResidentMakeBookingGUI {
     
         // Calculate the payment amount
         String feeRateID = APUHostelManagement.Resident.getFeeRateID(roomID);
-        double paymentAmount = APUHostelManagement.Resident.calculatePaymentAmount1(startDate, endDate, feeRateID);
+        double paymentAmount = APUHostelManagement.Resident.calculatePaymentAmount(startDate, endDate, feeRateID);
     
         // Get the current date and time for BookingDateTime
         String bookingDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
