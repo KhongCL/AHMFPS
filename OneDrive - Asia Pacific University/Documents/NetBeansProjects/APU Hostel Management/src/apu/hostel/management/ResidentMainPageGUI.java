@@ -5,7 +5,6 @@ import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Map;
 
 public class ResidentMainPageGUI {
     private JFrame frame;
@@ -123,9 +122,7 @@ public class ResidentMainPageGUI {
     // Custom editor for the "Action" column
     class ButtonEditor extends DefaultCellEditor {
         private JButton button;
-        private String label;
-        private boolean isPushed;
-
+        
         public ButtonEditor(JCheckBox checkBox) {
             super(checkBox);
             button = new JButton();
@@ -152,7 +149,6 @@ public class ResidentMainPageGUI {
 
         @Override
         public boolean stopCellEditing() {
-            isPushed = false;
             return super.stopCellEditing();
         }
 

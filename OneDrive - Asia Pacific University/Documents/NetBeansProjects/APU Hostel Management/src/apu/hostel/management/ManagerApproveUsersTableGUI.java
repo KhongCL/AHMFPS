@@ -24,7 +24,7 @@ public class ManagerApproveUsersTableGUI {
         public ManagerApproveUsersTableGUI(String role, List<APUHostelManagement.User> selectedRoleList, APUHostelManagement.Manager manager) {
             this.role = role;
             this.selectedRoleList = selectedRoleList;
-            this.manager = manager; // Add manager field
+            ManagerApproveUsersTableGUI.manager = manager; // Add manager field
             initialize();
         }
     

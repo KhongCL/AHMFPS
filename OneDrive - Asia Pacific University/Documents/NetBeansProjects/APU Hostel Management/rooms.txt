@@ -17,7 +17,7 @@ RM16,FR03,family,116,unavailable,6,true
 RM17,FR01,standard,117,unavailable,1,true
 RM18,FR03,family,118,unavailable,6,true
 RM19,FR01,standard,119,unavailable,1,true
-RM20,FR03,family,120,available,6,true
+RM20,FR03,family,120,unavailable,6,true
 RM21,FR02,large,121,available,3,true
 RM22,FR01,standard,122,available,1,true
 RM23,FR02,large,123,available,3,true
