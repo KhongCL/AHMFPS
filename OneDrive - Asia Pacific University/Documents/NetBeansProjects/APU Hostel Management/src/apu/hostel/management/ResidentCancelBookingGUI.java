@@ -5,13 +5,17 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.ArrayList; // Import ArrayList
-import java.io.*;
 
 public class ResidentCancelBookingGUI {
     private JFrame frame;
@@ -54,7 +58,7 @@ public class ResidentCancelBookingGUI {
         cancelBookingPanel.add(titleLabel, BorderLayout.NORTH);
 
         // Create table model and table
-        tableModel = new DefaultTableModel(new Object[]{"Payment ID", "Room Number", "Stay Duration", "Payment Amount", "Booking Date Time"}, 0);
+        tableModel = new DefaultTableModel(new Object[]{"Room Number", "Stay Duration", "Booking Date and Time", "Payment Amount"}, 0);
         table = new JTable(tableModel) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -74,7 +78,7 @@ public class ResidentCancelBookingGUI {
             paymentDetailsMap.put(rowIndex, details); // Store payment details in the map
             String roomNumber = roomMap.getOrDefault(details[5], "Unknown Room");
             long stayDuration = ChronoUnit.DAYS.between(LocalDate.parse(details[3]), LocalDate.parse(details[4]));
-            tableModel.addRow(new Object[]{details[0], roomNumber, stayDuration + " days", "RM" + details[6], details[8]});
+            tableModel.addRow(new Object[]{roomNumber, stayDuration + " days", details[8], "RM" + details[6]});
             rowIndex++;
         }
 
@@ -105,28 +109,26 @@ public class ResidentCancelBookingGUI {
         LocalDate startDate = LocalDate.parse(details[3]);
         LocalDate endDate = LocalDate.parse(details[4]);
         long stayDuration = ChronoUnit.DAYS.between(startDate, endDate);
+        String username = resident.getUsername(); // Assuming there's a getUsername() method
+        String roomType = APUHostelManagement.Resident.getRoomType(details[5]); // Get room type based on room ID
 
-        // Create payment details table
-        String[][] data = {
-            {"Payment ID", details[0]},
-            {"Resident ID", details[1]},
-            {"Start Date", startDate.toString()},
-            {"End Date", endDate.toString()},
-            {"Stay Duration", stayDuration + " days"},
-            {"Room Number", roomNumber},
-            {"Payment Amount", "RM" + details[6]},
-            {"Payment Status", details[7]},
-            {"Booking Date Time", details[8]},
-            {"Booking Status", details[10]}
-        };
-        String[] columnNames = {"Category", "Details"};
-        JTable detailsTable = new JTable(data, columnNames);
-        detailsTable.setEnabled(false);
+        // Create a panel for booking details
+        JPanel detailsPanel = new JPanel();
+        detailsPanel.setLayout(new BoxLayout(detailsPanel, BoxLayout.Y_AXIS));
+        detailsPanel.add(new JLabel("<html><div style='text-align: left;'><b style='font-size:14px;'>Booking Details:</b><br/><br/>" +
+                                    "Username: " + username + "<br/>" +
+                                    "Start Date: " + startDate + "<br/>" +
+                                    "End Date: " + endDate + "<br/>" +
+                                    "Stay Duration: " + stayDuration + " days<br/>" +
+                                    "Room Type: " + roomType + "<br/>" +
+                                    "Room Number: " + roomNumber + "<br/>" +
+                                    "Booking Status: " + details[10] + "<br/>" +
+                                    "Payment Amount: RM" + details[6] + "</div></html>"));
 
         // Create confirmation dialog
         JPanel panel = new JPanel(new BorderLayout(10, 10));
         panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        panel.add(new JScrollPane(detailsTable), BorderLayout.CENTER);
+        panel.add(detailsPanel, BorderLayout.CENTER);
         JLabel confirmLabel = new JLabel("Are you sure you want to cancel this booking?");
         confirmLabel.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
         panel.add(confirmLabel, BorderLayout.SOUTH);

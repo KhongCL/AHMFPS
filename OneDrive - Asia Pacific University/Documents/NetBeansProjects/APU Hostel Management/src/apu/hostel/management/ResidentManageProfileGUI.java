@@ -194,179 +194,122 @@ public class ResidentManageProfileGUI {
     
     private void validateICPassport(JLabel iconLabel) {
         String icPassport = icPassportField.getText().trim();
-        if (!icPassport.equals(resident.getIcPassportNumber()) && !APUHostelManagement.isValidICPassport(icPassport)) {
-            icPassportErrorLabel.setText(getICPassportErrorMessage(icPassport));
-            icPassportErrorLabel.setForeground(Color.RED);
-            icPassportField.setBorder(BorderFactory.createLineBorder(Color.RED));
-            iconLabel.setIcon(new ImageIcon(new ImageIcon("images/red_warning_icon.png").getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH))); // Add warning icon
+        if (!icPassport.equals(resident.getIcPassportNumber())) {
+            try {
+                APUHostelManagement.validateICPassport(icPassport);
+                setValidField(icPassportField, icPassportErrorLabel, iconLabel);
+            } catch (Exception e) {
+                setInvalidField(icPassportField, icPassportErrorLabel, iconLabel, e.getMessage());
+            }
         } else {
-            icPassportErrorLabel.setText(""); // Remove check mark
-            icPassportErrorLabel.setForeground(Color.GREEN);
-            icPassportField.setBorder(BorderFactory.createLineBorder(Color.GREEN));
-            iconLabel.setIcon(new ImageIcon(new ImageIcon("images/green_check_icon.png").getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH))); // Add check icon
+            setValidField(icPassportField, icPassportErrorLabel, iconLabel);
         }
     }
     
     private void validateUsername(JLabel iconLabel) {
         String username = usernameField.getText().trim();
-        if (!username.equals(resident.getUsername()) && !APUHostelManagement.isValidUsername(username)) {
-            usernameErrorLabel.setText(getUsernameErrorMessage(username));
-            usernameErrorLabel.setForeground(Color.RED);
-            usernameField.setBorder(BorderFactory.createLineBorder(Color.RED));
-            iconLabel.setIcon(new ImageIcon(new ImageIcon("images/red_warning_icon.png").getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH))); // Add warning icon
+        if (!username.equals(resident.getUsername())) {
+            try {
+                APUHostelManagement.validateUsername(username);
+                setValidField(usernameField, usernameErrorLabel, iconLabel);
+            } catch (Exception e) {
+                setInvalidField(usernameField, usernameErrorLabel, iconLabel, e.getMessage());
+            }
         } else {
-            usernameErrorLabel.setText(""); // Remove check mark
-            usernameErrorLabel.setForeground(Color.GREEN);
-            usernameField.setBorder(BorderFactory.createLineBorder(Color.GREEN));
-            iconLabel.setIcon(new ImageIcon(new ImageIcon("images/green_check_icon.png").getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH))); // Add check icon
+            setValidField(usernameField, usernameErrorLabel, iconLabel);
         }
     }
     
     private void validatePassword(JLabel iconLabel) {
         String password = new String(passwordField.getPassword()).trim();
         String username = usernameField.getText().trim();
-        if (!password.equals(resident.getPassword()) && !APUHostelManagement.isValidPassword(password, username)) {
-            passwordErrorLabel.setText(getPasswordErrorMessage(password, username));
-            passwordErrorLabel.setForeground(Color.RED);
-            passwordField.setBorder(BorderFactory.createLineBorder(Color.RED));
-            iconLabel.setIcon(new ImageIcon(new ImageIcon("images/red_warning_icon.png").getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH))); // Add warning icon
+        if (!password.equals(resident.getPassword())) {
+            try {
+                APUHostelManagement.validatePassword(password, username);
+                setValidField(passwordField, passwordErrorLabel, iconLabel);
+            } catch (Exception e) {
+                setInvalidField(passwordField, passwordErrorLabel, iconLabel, e.getMessage());
+            }
         } else {
-            passwordErrorLabel.setText(""); // Remove check mark
-            passwordErrorLabel.setForeground(Color.GREEN);
-            passwordField.setBorder(BorderFactory.createLineBorder(Color.GREEN));
-            iconLabel.setIcon(new ImageIcon(new ImageIcon("images/green_check_icon.png").getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH))); // Add check icon
+            setValidField(passwordField, passwordErrorLabel, iconLabel);
         }
     }
     
     private void validateContactNumber(JLabel iconLabel) {
         String contactNumber = contactNumberField.getText().trim();
-        if (!contactNumber.equals(resident.getContactNumber()) && !APUHostelManagement.isValidContactNumber(contactNumber)) {
-            contactNumberErrorLabel.setText(getContactNumberErrorMessage(contactNumber));
-            contactNumberErrorLabel.setForeground(Color.RED);
-            contactNumberField.setBorder(BorderFactory.createLineBorder(Color.RED));
-            iconLabel.setIcon(new ImageIcon(new ImageIcon("images/red_warning_icon.png").getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH))); // Add warning icon
+        if (!contactNumber.equals(resident.getContactNumber())) {
+            try {
+                APUHostelManagement.validateContactNumber(contactNumber);
+                setValidField(contactNumberField, contactNumberErrorLabel, iconLabel);
+            } catch (Exception e) {
+                setInvalidField(contactNumberField, contactNumberErrorLabel, iconLabel, e.getMessage());
+            }
         } else {
-            contactNumberErrorLabel.setText(""); // Remove check mark
-            contactNumberErrorLabel.setForeground(Color.GREEN);
-            contactNumberField.setBorder(BorderFactory.createLineBorder(Color.GREEN));
-            iconLabel.setIcon(new ImageIcon(new ImageIcon("images/green_check_icon.png").getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH))); // Add check icon
+            setValidField(contactNumberField, contactNumberErrorLabel, iconLabel);
         }
     }
-
+    
+    private void setValidField(JComponent field, JTextArea errorLabel, JLabel iconLabel) {
+        errorLabel.setText("");
+        errorLabel.setForeground(Color.GREEN);
+        field.setBorder(BorderFactory.createLineBorder(Color.GREEN));
+        iconLabel.setIcon(new ImageIcon(new ImageIcon("images/green_check_icon.png")
+            .getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH)));
+    }
+    
+    private void setInvalidField(JComponent field, JTextArea errorLabel, JLabel iconLabel, String message) {
+        errorLabel.setText(message);
+        errorLabel.setForeground(Color.RED);
+        field.setBorder(BorderFactory.createLineBorder(Color.RED));
+        iconLabel.setIcon(new ImageIcon(new ImageIcon("images/red_warning_icon.png")
+            .getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH)));
+    }
+    
     private void updateProfile() {
         String newIcPassportNumber = icPassportField.getText().trim();
         String newUsername = usernameField.getText().trim();
         String newPassword = new String(passwordField.getPassword()).trim();
         String newContactNumber = contactNumberField.getText().trim();
-
-        if (!newIcPassportNumber.equals(resident.getIcPassportNumber())) {
-            if (!APUHostelManagement.isValidICPassport(newIcPassportNumber)) {
-                JOptionPane.showMessageDialog(frame, "Invalid IC/Passport Number.", "Error", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-            resident.setIcPassportNumber(newIcPassportNumber);
-        }
-
-        if (!newUsername.equals(resident.getUsername())) {
-            if (!APUHostelManagement.isValidUsername(newUsername)) {
-                JOptionPane.showMessageDialog(frame, "Invalid Username.", "Error", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-            resident.setUsername(newUsername);
-        }
-
-        if (!newPassword.equals(resident.getPassword())) {
-            if (!APUHostelManagement.isValidPassword(newPassword, newUsername)) {
-                JOptionPane.showMessageDialog(frame, "Invalid Password.", "Error", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-            resident.setPassword(newPassword);
-        }
-
-        if (!newContactNumber.equals(resident.getContactNumber())) {
-            if (!APUHostelManagement.isValidContactNumber(newContactNumber)) {
-                JOptionPane.showMessageDialog(frame, "Invalid Contact Number.", "Error", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-            resident.setContactNumber(newContactNumber);
-        }
-
+    
         try {
+            if (!newIcPassportNumber.equals(resident.getIcPassportNumber())) {
+                APUHostelManagement.validateICPassport(newIcPassportNumber);
+                resident.setIcPassportNumber(newIcPassportNumber);
+            }
+    
+            if (!newUsername.equals(resident.getUsername())) {
+                APUHostelManagement.validateUsername(newUsername);
+                resident.setUsername(newUsername);
+            }
+    
+            if (!newPassword.equals(resident.getPassword())) {
+                APUHostelManagement.validatePassword(newPassword, newUsername);
+                resident.setPassword(newPassword);
+            }
+    
+            if (!newContactNumber.equals(resident.getContactNumber())) {
+                APUHostelManagement.validateContactNumber(newContactNumber);
+                resident.setContactNumber(newContactNumber);
+            }
+    
+            updateUserFiles();
+            JOptionPane.showMessageDialog(frame, "Profile updated successfully.", 
+                "Success", JOptionPane.INFORMATION_MESSAGE);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(frame, e.getMessage(),
+                "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    
+    private void updateUserFiles() throws IOException {
+        String role = resident.getRole();
+        if (role.equals("manager")) {
+            APUHostelManagement.Manager.updateFile("approved_managers.txt", resident);
+        } else if (role.equals("staff")) {
+            APUHostelManagement.Manager.updateFile("approved_staffs.txt", resident);
+        } else if (role.equals("resident")) {
             APUHostelManagement.Manager.updateFile("approved_residents.txt", resident);
-            APUHostelManagement.Manager.updateFile("users.txt", resident);
-            JOptionPane.showMessageDialog(frame, "Profile updated successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
-        } catch (IOException e) {
-            JOptionPane.showMessageDialog(frame, "An error occurred while updating the profile.", "Error", JOptionPane.ERROR_MESSAGE);
         }
-    }
-
-    private String getICPassportErrorMessage(String icPassport) {
-        if (icPassport.length() != 14 && icPassport.length() != 9) {
-            return "Invalid IC/Passport format. IC format: xxxxxx-xx-xxxx, Passport format: one alphabet followed by 8 numbers.";
-        }
-        try {
-            if (!APUHostelManagement.isUnique(icPassport, "", "")) {
-                return "IC/Passport number already exists. Please use a different IC/Passport number.";
-            }
-        } catch (IOException e) {
-            return "An error occurred while checking the IC/Passport number.";
-        }
-        return "Invalid IC/Passport number.";
-    }
-
-    private String getUsernameErrorMessage(String username) {
-        if (username.length() < 3 || username.length() > 12) {
-            return "Username must be between 3 and 12 characters long.";
-        }
-        for (char c : username.toCharArray()) {
-            if (!Character.isLetterOrDigit(c) && c != '_') {
-                return "Username can only contain letters, numbers, and underscores.";
-            }
-        }
-        if (!username.matches(".*[a-zA-Z]+.*")) {
-            return "Username must contain at least one letter.";
-        }
-        try {
-            if (!APUHostelManagement.isUnique("", username, "")) {
-                return "Username already exists. Please choose a different username.";
-            }
-        } catch (IOException e) {
-            return "An error occurred while checking the username.";
-        }
-        return "Invalid username.";
-    }
-
-    private String getPasswordErrorMessage(String password, String username) {
-        if (password.length() < 8 || password.length() > 12) {
-            return "Password must be between 8 and 12 characters long.";
-        }
-        if (password.contains(username)) {
-            return "Password cannot be similar to the username.";
-        }
-        boolean hasNumber = password.matches(".*\\d.*");
-        boolean hasUppercase = password.matches(".*[A-Z].*");
-        boolean hasSpecialChar = password.matches(".*[!@#$%^&*()].*");
-        boolean hasInvalidChar = password.matches(".*[^a-zA-Z0-9!@#$%^&*()].*");
-        if (!(hasNumber && hasSpecialChar && hasUppercase)) {
-            return "Password must contain at least one number, one special character (!@#$%^&*()), and one uppercase letter.";
-        }
-        if (hasInvalidChar) {
-            return "Password contains invalid characters. Only !@#$%^&*() are allowed as special characters.";
-        }
-        return "Invalid password.";
-    }
-
-    private String getContactNumberErrorMessage(String contactNumber) {
-        if (contactNumber.length() != 12 || !contactNumber.startsWith("01") || contactNumber.charAt(3) != '-' || contactNumber.charAt(7) != '-' || !contactNumber.replace("-", "").matches("\\d+")) {
-            return "Invalid contact number format. The correct format is 01X-XXX-XXXX.";
-        }
-        try {
-            if (!APUHostelManagement.isUnique("", "", contactNumber)) {
-                return "Contact number already exists. Please choose a different contact number.";
-            }
-        } catch (IOException e) {
-            return "An error occurred while checking the contact number.";
-        }
-        return "Invalid contact number.";
+        APUHostelManagement.Manager.updateFile("users.txt", resident);
     }
 }

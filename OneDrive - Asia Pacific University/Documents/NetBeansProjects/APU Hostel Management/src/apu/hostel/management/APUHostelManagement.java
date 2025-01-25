@@ -341,10 +341,12 @@ public class APUHostelManagement {
                         while (true) {
                             System.out.print("Enter new IC Passport Number: ");
                             String newIcPassportNumber = scanner.nextLine();
-                            if (!isValidICPassport(newIcPassportNumber)) {
+                            String error = validateUpdateICPassport(newIcPassportNumber, this.icPassportNumber);
+                            if (error != null) {
+                                System.out.println(error);
                                 System.out.print("Do you want to try again? (yes/no): ");
                                 if (!scanner.nextLine().equalsIgnoreCase("yes")) {
-                                    return;
+                                    break;
                                 }
                                 continue;
                             }
@@ -358,10 +360,12 @@ public class APUHostelManagement {
                         while (true) {
                             System.out.print("Enter new username: ");
                             String newUsername = scanner.nextLine();
-                            if (!isValidUsername(newUsername)) {
+                            String error = validateUpdateUsername(newUsername, this.username);
+                            if (error != null) {
+                                System.out.println(error);
                                 System.out.print("Do you want to try again? (yes/no): ");
                                 if (!scanner.nextLine().equalsIgnoreCase("yes")) {
-                                    return;
+                                    break;
                                 }
                                 continue;
                             }
@@ -375,10 +379,12 @@ public class APUHostelManagement {
                         while (true) {
                             System.out.print("Enter new password: ");
                             String newPassword = scanner.nextLine();
-                            if (!isValidPassword(newPassword, this.username)) {
+                            String error = validateUpdatePassword(newPassword, this.username);
+                            if (error != null) {
+                                System.out.println(error);
                                 System.out.print("Do you want to try again? (yes/no): ");
                                 if (!scanner.nextLine().equalsIgnoreCase("yes")) {
-                                    return;
+                                    break;
                                 }
                                 continue;
                             }
@@ -392,10 +398,12 @@ public class APUHostelManagement {
                         while (true) {
                             System.out.print("Enter new contact number: ");
                             String newContactNumber = scanner.nextLine();
-                            if (!isValidContactNumber(newContactNumber)) {
+                            String error = validateUpdateContactNumber(newContactNumber, this.contactNumber);
+                            if (error != null) {
+                                System.out.println(error);
                                 System.out.print("Do you want to try again? (yes/no): ");
                                 if (!scanner.nextLine().equalsIgnoreCase("yes")) {
-                                    return;
+                                    break;
                                 }
                                 continue;
                             }
@@ -808,16 +816,18 @@ public class APUHostelManagement {
                         while (true) {
                             System.out.print("Enter new IC Passport Number: ");
                             String newIcPassportNumber = scanner.nextLine();
-                            if (!isValidICPassport(newIcPassportNumber)) {
-                                System.out.print("Invalid IC Passport Number. Do you want to try again? (yes/no): ");
+                            String error = validateUpdateICPassport(newIcPassportNumber, userToUpdate.getIcPassportNumber());
+                            if (error != null) {
+                                System.out.println(error);
+                                System.out.print("Do you want to try again? (yes/no): ");
                                 if (!scanner.nextLine().equalsIgnoreCase("yes")) {
-                                    return;
+                                    break;
                                 }
-                            } else {
-                                userToUpdate.setIcPassportNumber(newIcPassportNumber);
-                                System.out.println("IC Passport Number updated successfully.");
-                                break;
+                                continue;
                             }
+                            userToUpdate.setIcPassportNumber(newIcPassportNumber);
+                            System.out.println("IC Passport Number updated successfully.");
+                            break;
                         }
                     }
                     case 2 -> {
@@ -825,16 +835,18 @@ public class APUHostelManagement {
                         while (true) {
                             System.out.print("Enter new username: ");
                             String newUsername = scanner.nextLine();
-                            if (!isValidUsername(newUsername)) {
-                                System.out.print("Invalid Username. Do you want to try again? (yes/no): ");
+                            String error = validateUpdateUsername(newUsername, userToUpdate.getUsername());
+                            if (error != null) {
+                                System.out.println(error);
+                                System.out.print("Do you want to try again? (yes/no): ");
                                 if (!scanner.nextLine().equalsIgnoreCase("yes")) {
-                                    return;
+                                    break;
                                 }
-                            } else {
-                                userToUpdate.setUsername(newUsername);
-                                System.out.println("Username updated successfully.");
-                                break;
+                                continue;
                             }
+                            userToUpdate.setUsername(newUsername);
+                            System.out.println("Username updated successfully.");
+                            break;
                         }
                     }
                     case 3 -> {
@@ -842,16 +854,18 @@ public class APUHostelManagement {
                         while (true) {
                             System.out.print("Enter new password: ");
                             String newPassword = scanner.nextLine();
-                            if (!isValidPassword(newPassword, userToUpdate.getUsername())) {
-                                System.out.print("Invalid Password. Do you want to try again? (yes/no): ");
+                            String error = validateUpdatePassword(newPassword, userToUpdate.getUsername());
+                            if (error != null) {
+                                System.out.println(error);
+                                System.out.print("Do you want to try again? (yes/no): ");
                                 if (!scanner.nextLine().equalsIgnoreCase("yes")) {
-                                    return;
+                                    break;
                                 }
-                            } else {
-                                userToUpdate.setPassword(newPassword);
-                                System.out.println("Password updated successfully.");
-                                break;
+                                continue;
                             }
+                            userToUpdate.setPassword(newPassword);
+                            System.out.println("Password updated successfully.");
+                            break;
                         }
                     }
                     case 4 -> {
@@ -859,16 +873,18 @@ public class APUHostelManagement {
                         while (true) {
                             System.out.print("Enter new contact number: ");
                             String newContactNumber = scanner.nextLine();
-                            if (!isValidContactNumber(newContactNumber)) {
-                                System.out.print("Invalid Contact Number. Do you want to try again? (yes/no): ");
+                            String error = validateUpdateContactNumber(newContactNumber, userToUpdate.getContactNumber());
+                            if (error != null) {
+                                System.out.println(error);
+                                System.out.print("Do you want to try again? (yes/no): ");
                                 if (!scanner.nextLine().equalsIgnoreCase("yes")) {
-                                    return;
+                                    break;
                                 }
-                            } else {
-                                userToUpdate.setContactNumber(newContactNumber);
-                                System.out.println("Contact number updated successfully.");
-                                break;
+                                continue;
                             }
+                            userToUpdate.setContactNumber(newContactNumber);
+                            System.out.println("Contact number updated successfully.");
+                            break;
                         }
                     }
                     case 0 -> {
@@ -1846,7 +1862,21 @@ public class APUHostelManagement {
                 }
             }
             return choice;
-        }   
+        }
+        
+        public void logout() {
+            // Clear manager data
+            this.userID = null;
+            this.icPassportNumber = null;
+            this.username = null;
+            this.password = null;
+            this.contactNumber = null;
+            this.dateOfRegistration = null;
+            this.role = null;
+            this.isActive = false;
+            this.managerID = null;
+            this.dateOfApproval = null;
+        }
     }
 
     // Staff class
@@ -1992,10 +2022,12 @@ public class APUHostelManagement {
                         while (true) {
                             System.out.print("Enter new IC Passport Number: ");
                             String newIcPassportNumber = scanner.nextLine();
-                            if (!isValidICPassport(newIcPassportNumber)) {
+                            String error = validateUpdateICPassport(newIcPassportNumber, this.icPassportNumber);
+                            if (error != null) {
+                                System.out.println(error);
                                 System.out.print("Do you want to try again? (yes/no): ");
                                 if (!scanner.nextLine().equalsIgnoreCase("yes")) {
-                                    return;
+                                    break;
                                 }
                                 continue;
                             }
@@ -2009,10 +2041,12 @@ public class APUHostelManagement {
                         while (true) {
                             System.out.print("Enter new username: ");
                             String newUsername = scanner.nextLine();
-                            if (!isValidUsername(newUsername)) {
+                            String error = validateUpdateUsername(newUsername, this.username);
+                            if (error != null) {
+                                System.out.println(error);
                                 System.out.print("Do you want to try again? (yes/no): ");
                                 if (!scanner.nextLine().equalsIgnoreCase("yes")) {
-                                    return;
+                                    break;
                                 }
                                 continue;
                             }
@@ -2026,10 +2060,12 @@ public class APUHostelManagement {
                         while (true) {
                             System.out.print("Enter new password: ");
                             String newPassword = scanner.nextLine();
-                            if (!isValidPassword(newPassword, this.username)) {
+                            String error = validateUpdatePassword(newPassword, this.username);
+                            if (error != null) {
+                                System.out.println(error);
                                 System.out.print("Do you want to try again? (yes/no): ");
                                 if (!scanner.nextLine().equalsIgnoreCase("yes")) {
-                                    return;
+                                    break;
                                 }
                                 continue;
                             }
@@ -2043,10 +2079,12 @@ public class APUHostelManagement {
                         while (true) {
                             System.out.print("Enter new contact number: ");
                             String newContactNumber = scanner.nextLine();
-                            if (!isValidContactNumber(newContactNumber)) {
+                            String error = validateUpdateContactNumber(newContactNumber, this.contactNumber);
+                            if (error != null) {
+                                System.out.println(error);
                                 System.out.print("Do you want to try again? (yes/no): ");
                                 if (!scanner.nextLine().equalsIgnoreCase("yes")) {
-                                    return;
+                                    break;
                                 }
                                 continue;
                             }
@@ -2756,6 +2794,21 @@ public class APUHostelManagement {
             }
             return roomMap;
         }
+
+        public static String getRoomType(String roomID) {
+            try (BufferedReader br = new BufferedReader(new FileReader("rooms.txt"))) {
+                String line;
+                while ((line = br.readLine()) != null) {
+                    String[] parts = line.split(",");
+                    if (parts[0].equals(roomID)) {
+                        return parts[2]; // RoomType is the third element
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return "Unknown Room Type";
+        }
     
 
         // Define a single Scanner instance at the Resident class level
@@ -2805,10 +2858,12 @@ public class APUHostelManagement {
                         while (true) {
                             System.out.print("Enter new IC Passport Number: ");
                             String newIcPassportNumber = scanner.nextLine();
-                            if (!isValidICPassport(newIcPassportNumber)) {
+                            String error = validateUpdateICPassport(newIcPassportNumber, this.icPassportNumber);
+                            if (error != null) {
+                                System.out.println(error);
                                 System.out.print("Do you want to try again? (yes/no): ");
                                 if (!scanner.nextLine().equalsIgnoreCase("yes")) {
-                                    return;
+                                    break;
                                 }
                                 continue;
                             }
@@ -2822,10 +2877,12 @@ public class APUHostelManagement {
                         while (true) {
                             System.out.print("Enter new username: ");
                             String newUsername = scanner.nextLine();
-                            if (!isValidUsername(newUsername)) {
+                            String error = validateUpdateUsername(newUsername, this.username);
+                            if (error != null) {
+                                System.out.println(error);
                                 System.out.print("Do you want to try again? (yes/no): ");
                                 if (!scanner.nextLine().equalsIgnoreCase("yes")) {
-                                    return;
+                                    break;
                                 }
                                 continue;
                             }
@@ -2839,10 +2896,12 @@ public class APUHostelManagement {
                         while (true) {
                             System.out.print("Enter new password: ");
                             String newPassword = scanner.nextLine();
-                            if (!isValidPassword(newPassword, this.username)) {
+                            String error = validateUpdatePassword(newPassword, this.username);
+                            if (error != null) {
+                                System.out.println(error);
                                 System.out.print("Do you want to try again? (yes/no): ");
                                 if (!scanner.nextLine().equalsIgnoreCase("yes")) {
-                                    return;
+                                    break;
                                 }
                                 continue;
                             }
@@ -2856,10 +2915,12 @@ public class APUHostelManagement {
                         while (true) {
                             System.out.print("Enter new contact number: ");
                             String newContactNumber = scanner.nextLine();
-                            if (!isValidContactNumber(newContactNumber)) {
+                            String error = validateUpdateContactNumber(newContactNumber, this.contactNumber);
+                            if (error != null) {
+                                System.out.println(error);
                                 System.out.print("Do you want to try again? (yes/no): ");
                                 if (!scanner.nextLine().equalsIgnoreCase("yes")) {
-                                    return;
+                                    break;
                                 }
                                 continue;
                             }
@@ -3950,118 +4011,110 @@ public class APUHostelManagement {
     }
 
     // Validation methods
-    public static boolean isValidICPassport(String icPassport) {
-        String icPassportType;
-
+    public static void validateICPassport(String icPassport) throws Exception {
         // Check IC format
-        if (icPassport.length() == 14 && icPassport.charAt(6) == '-' && icPassport.charAt(9) == '-' && icPassport.replace("-", "").matches("\\d+")) {
-            icPassportType = "IC";
+        if (icPassport.length() == 14) {
+            if (icPassport.charAt(6) != '-' || icPassport.charAt(9) != '-') {
+                throw new Exception("Invalid IC format: Must contain hyphens at positions 7 and 10");
+            }
+            if (!icPassport.replace("-", "").matches("\\d+")) {
+                throw new Exception("Invalid IC format: Must contain only numbers between hyphens");
+            }
         }
-        // Check Passport format
-        else if (icPassport.length() == 9 && Character.isLetter(icPassport.charAt(0)) && icPassport.substring(1).matches("\\d+")) {
-            icPassportType = "Passport";
+        // Check Passport format 
+        else if (icPassport.length() == 9) {
+            if (!Character.isLetter(icPassport.charAt(0))) {
+                throw new Exception("Invalid Passport format: Must start with a letter");
+            }
+            if (!icPassport.substring(1).matches("\\d+")) {
+                throw new Exception("Invalid Passport format: Must be followed by 8 numbers");
+            }
         } else {
-            System.out.println("Invalid IC/Passport format. IC format: xxxxxx-xx-xxxx, Passport format: one alphabet followed by 8 numbers.");
-            return false;
+            throw new Exception("Invalid format. IC format: xxxxxx-xx-xxxx, Passport format: letter followed by 8 numbers");
         }
-
+    
         // Check uniqueness
         try {
             if (!isUnique(icPassport, "", "")) {
-                System.out.println(icPassportType + " number already exists. Please use a different " + icPassportType + " number.");
-                return false;
+                String type = icPassport.length() == 14 ? "IC" : "Passport";
+                throw new Exception(type + " number already exists");
             }
         } catch (IOException e) {
-            return false;
+            throw new Exception("Error checking " + (icPassport.length() == 14 ? "IC" : "Passport") + " number uniqueness");
         }
-
-        return true;
     }
-
-    public static boolean isValidUsername(String username) {
-        // Check length
+    
+    public static void validateUsername(String username) throws Exception {
         if (username.length() < 3 || username.length() > 12) {
-            System.out.println("Username must be between 3 and 12 characters long.");
-            return false;
+            throw new Exception("Username must be between 3 and 12 characters long");
         }
-
-        // Check allowed characters
-        for (char c : username.toCharArray()) {
-            if (!Character.isLetterOrDigit(c) && c != '_') {
-                System.out.println("Username can only contain letters, numbers, and underscores.");
-                return false;
-            }
+        
+        if (!username.matches("^[a-zA-Z0-9_]*$")) {
+            throw new Exception("Username can only contain letters, numbers, and underscores");
         }
-
-        // Check for at least one letter
+        
         if (!username.matches(".*[a-zA-Z]+.*")) {
-            System.out.println("Username must contain at least one letter.");
-            return false;
+            throw new Exception("Username must contain at least one letter");
         }
-
-        // Check uniqueness
+        
         try {
             if (!isUnique("", username, "")) {
-                System.out.println("Username already exists. Please choose a different username.");
-                return false;
+                throw new Exception("Username already exists");
             }
         } catch (IOException e) {
-            return false;
+            throw new Exception("Error checking username uniqueness");
         }
-
-        return true;
     }
-
-    public static boolean isValidPassword(String password, String username) {
-        // Check length
+    
+    public static void validatePassword(String password, String username) throws Exception {
         if (password.length() < 8 || password.length() > 12) {
-            System.out.println("Password must be between 8 and 12 characters long.");
-            return false;
+            throw new Exception("Password must be between 8 and 12 characters long");
         }
-    
-        // Check if password is similar to username
+        
         if (password.contains(username)) {
-            System.out.println("Password cannot be similar to the username.");
-            return false;
+            throw new Exception("Password cannot contain username");
         }
-    
-        // Check for at least one number, one special character, and one uppercase letter
-        boolean hasNumber = password.matches(".*\\d.*");
-        boolean hasUppercase = password.matches(".*[A-Z].*");
-        boolean hasSpecialChar = password.matches(".*[!@#$%^&*()].*");
-    
-        // Check for invalid characters
-        boolean hasInvalidChar = password.matches(".*[^a-zA-Z0-9!@#$%^&*()].*");
-    
-        if (!(hasNumber && hasSpecialChar && hasUppercase)) {
-            System.out.println("Password must contain at least one number, one special character (!@#$%^&*()), and one uppercase letter.");
-            return false;
+        
+        if (!password.matches(".*\\d.*")) {
+            throw new Exception("Password must contain at least one number");
         }
-    
-        if (hasInvalidChar) {
-            System.out.println("Password contains invalid characters. Only !@#$%^&*() are allowed as special characters.");
-            return false;
+        
+        if (!password.matches(".*[A-Z].*")) {
+            throw new Exception("Password must contain at least one uppercase letter");
         }
-    
-        return true;
+        
+        if (!password.matches(".*[!@#$%^&*()].*")) {
+            throw new Exception("Password must contain at least one special character (!@#$%^&*())");
+        }
+        
+        if (password.matches(".*[^a-zA-Z0-9!@#$%^&*()].*")) {
+            throw new Exception("Password contains invalid characters");
+        }
     }
-
-    public static boolean isValidContactNumber(String contactNumber) {
-        // Check contact number format
-        if (contactNumber.length() == 12 && contactNumber.startsWith("01") && contactNumber.charAt(3) == '-' && contactNumber.charAt(7) == '-' && contactNumber.replace("-", "").matches("\\d+")) {
-            // Check uniqueness
-            try {
-                if (!isUnique("", "", contactNumber)) {
-                    System.out.println("Contact number already exists. Please choose a different contact number.");
-                    return false;
-                }
-            } catch (IOException e) {
-                return false;
+    
+    public static void validateContactNumber(String contactNumber) throws Exception {
+        if (contactNumber.length() != 12) {
+            throw new Exception("Contact number must be 12 characters long");
+        }
+        
+        if (!contactNumber.startsWith("01")) {
+            throw new Exception("Contact number must start with '01'");
+        }
+        
+        if (contactNumber.charAt(3) != '-' || contactNumber.charAt(7) != '-') {
+            throw new Exception("Contact number must have hyphens in correct positions (01X-XXX-XXXX)");
+        }
+        
+        if (!contactNumber.replace("-", "").matches("\\d+")) {
+            throw new Exception("Contact number must contain only numbers between hyphens");
+        }
+        
+        try {
+            if (!isUnique("", "", contactNumber)) {
+                throw new Exception("Contact number already exists");
             }
-            return true;
-        } else {
-            System.out.println("Invalid contact number format. The correct format is 01X-XXX-XXXX.");
-            return false;
+        } catch (IOException e) {
+            throw new Exception("Error checking contact number uniqueness");
         }
     }
 
@@ -4082,31 +4135,11 @@ public class APUHostelManagement {
             throw new Exception("Please fill in all fields.");
         }
     
-        // Check existing data
-        if (!isUnique(icPassportNumber, "", "")) {
-            throw new Exception(icPassportNumber.length() == 14 ? 
-                "IC number already exists." : "Passport number already exists.");
-        }
-        if (!isUnique("", username, "")) {
-            throw new Exception("Username already exists.");
-        }
-        if (!isUnique("", "", contactNumber)) {
-            throw new Exception("Contact Number already exists.");
-        }
-    
-        // Validate formats
-        if (!isValidICPassport(icPassportNumber)) {
-            throw new Exception("Invalid IC/Passport Number format.");
-        }
-        if (!isValidUsername(username)) {
-            throw new Exception("Invalid Username format.");
-        }
-        if (!isValidPassword(password, username)) {
-            throw new Exception("Invalid Password format.");
-        }
-        if (!isValidContactNumber(contactNumber)) {
-            throw new Exception("Invalid Contact Number format.");
-        }
+        // Validate all fields
+        validateICPassport(icPassportNumber);
+        validateUsername(username);
+        validatePassword(password, username);
+        validateContactNumber(contactNumber);
     
         // Create and save manager
         String dateOfRegistration = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
@@ -4116,38 +4149,18 @@ public class APUHostelManagement {
             contactNumber, dateOfRegistration, "manager", false, null);
         manager.saveToManagerFile(null, null, "unapproved_managers.txt");
     }
-
+    
     public static void registerStaff(String icPassportNumber, String username, String password, String contactNumber) throws Exception {
         // Check empty fields
         if (icPassportNumber.isEmpty() || username.isEmpty() || password.isEmpty() || contactNumber.isEmpty()) {
             throw new Exception("Please fill in all fields.");
         }
     
-        // Check existing data
-        if (!isUnique(icPassportNumber, "", "")) {
-            throw new Exception(icPassportNumber.length() == 14 ? 
-                "IC number already exists." : "Passport number already exists.");
-        }
-        if (!isUnique("", username, "")) {
-            throw new Exception("Username already exists.");
-        }
-        if (!isUnique("", "", contactNumber)) {
-            throw new Exception("Contact Number already exists.");
-        }
-    
-        // Validate formats
-        if (!isValidICPassport(icPassportNumber)) {
-            throw new Exception("Invalid IC/Passport Number format.");
-        }
-        if (!isValidUsername(username)) {
-            throw new Exception("Invalid Username format.");
-        }
-        if (!isValidPassword(password, username)) {
-            throw new Exception("Invalid Password format.");
-        }
-        if (!isValidContactNumber(contactNumber)) {
-            throw new Exception("Invalid Contact Number format.");
-        }
+        // Validate all fields
+        validateICPassport(icPassportNumber);
+        validateUsername(username);
+        validatePassword(password, username);
+        validateContactNumber(contactNumber);
     
         // Create and save staff
         String dateOfRegistration = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
@@ -4164,31 +4177,11 @@ public class APUHostelManagement {
             throw new Exception("Please fill in all fields.");
         }
     
-        // Check existing data
-        if (!isUnique(icPassportNumber, "", "")) {
-            throw new Exception(icPassportNumber.length() == 14 ? 
-                "IC number already exists." : "Passport number already exists.");
-        }
-        if (!isUnique("", username, "")) {
-            throw new Exception("Username already exists.");
-        }
-        if (!isUnique("", "", contactNumber)) {
-            throw new Exception("Contact Number already exists.");
-        }
-    
-        // Validate formats
-        if (!isValidICPassport(icPassportNumber)) {
-            throw new Exception("Invalid IC/Passport Number format.");
-        }
-        if (!isValidUsername(username)) {
-            throw new Exception("Invalid Username format.");
-        }
-        if (!isValidPassword(password, username)) {
-            throw new Exception("Invalid Password format.");
-        }
-        if (!isValidContactNumber(contactNumber)) {
-            throw new Exception("Invalid Contact Number format.");
-        }
+        // Validate all fields
+        validateICPassport(icPassportNumber);
+        validateUsername(username);
+        validatePassword(password, username);
+        validateContactNumber(contactNumber);
     
         // Create and save resident
         String dateOfRegistration = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
@@ -4277,6 +4270,42 @@ public class APUHostelManagement {
         } catch (IOException e) {
         }
         return prefix + String.format("%02d", id);
+    }
+
+    public static String validateUpdateICPassport(String icPassport, String currentICPassport) {
+        try {
+            validateICPassport(icPassport);
+            return null; // No error
+        } catch (Exception e) {
+            return e.getMessage();
+        }
+    }
+    
+    public static String validateUpdateUsername(String username, String currentUsername) {
+        try {
+            validateUsername(username);
+            return null; // No error
+        } catch (Exception e) {
+            return e.getMessage();
+        }
+    }
+    
+    public static String validateUpdatePassword(String password, String username) {
+        try {
+            validatePassword(password, username);
+            return null; // No error
+        } catch (Exception e) {
+            return e.getMessage();
+        }
+    }
+    
+    public static String validateUpdateContactNumber(String contactNumber, String currentContactNumber) {
+        try {
+            validateContactNumber(contactNumber);
+            return null; // No error
+        } catch (Exception e) {
+            return e.getMessage();
+        }
     }
 }
 

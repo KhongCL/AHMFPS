@@ -3,6 +3,8 @@ package apu.hostel.management;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Year;
@@ -52,6 +54,18 @@ public class ResidentMakeBookingGUI {
         JTable pricingTable = new JTable(tableModel);
         JScrollPane scrollPane = new JScrollPane(pricingTable);
         pricingPanel.add(scrollPane, BorderLayout.CENTER);
+
+        // Add hyperlink below the table
+        JLabel hyperlinkLabel = new JLabel("<html><a href=''>How do we calculate our pricing?</a></html>");
+        hyperlinkLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        hyperlinkLabel.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        hyperlinkLabel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                showPricingExplanation();
+            }
+        });
+        pricingPanel.add(hyperlinkLabel, BorderLayout.SOUTH);
 
         // Adjust the size of the pricing panel
         pricingPanel.setPreferredSize(new Dimension(1024, 200));
@@ -168,7 +182,7 @@ public class ResidentMakeBookingGUI {
 
         // Make Booking Button
         JButton makeBookingButton = new JButton("Make Booking");
-        makeBookingButton.addActionListener(e -> makeBooking());
+        makeBookingButton.addActionListener(e -> showBookingDetails());
 
         JPanel makeBookingButtonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         makeBookingButtonPanel.add(makeBookingButton);
@@ -223,13 +237,13 @@ public class ResidentMakeBookingGUI {
         }
     }
 
-    private void makeBooking() {
+    private void showBookingDetails() {
         // Validate room type selection
         if (selectedRoomType == null) {
             JOptionPane.showMessageDialog(frame, "Please select a room type.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
-    
+
         // Validate start date
         LocalDate startDate = null;
         try {
@@ -250,7 +264,7 @@ public class ResidentMakeBookingGUI {
             JOptionPane.showMessageDialog(frame, "Invalid date format. Please enter the date in yyyy-MM-dd format.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
-    
+
         // Validate end date
         LocalDate endDate = null;
         try {
@@ -271,44 +285,61 @@ public class ResidentMakeBookingGUI {
             JOptionPane.showMessageDialog(frame, "Invalid date format. Please enter the date in yyyy-MM-dd format.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
-    
+
         // Select an available room based on room type
         String roomID = APUHostelManagement.Resident.selectAvailableRoomByType1(selectedRoomType);
         if (roomID == null) {
             JOptionPane.showMessageDialog(frame, "No available rooms of the selected type.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
-    
+
         // Generate a new PaymentID
         String paymentID = APUHostelManagement.Resident.generatePaymentID1();
-    
+
         // Get the ResidentID of the logged-in user
         String residentID = resident.getResidentID();
-    
+
         // Calculate the payment amount
         String feeRateID = APUHostelManagement.Resident.getFeeRateID(roomID);
         double paymentAmount = APUHostelManagement.Resident.calculatePaymentAmount(startDate, endDate, feeRateID);
-    
+
         // Get the current date and time for BookingDateTime
         String bookingDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-    
-        // Add a new line to payments.txt
-        boolean bookingSuccess = APUHostelManagement.Resident.addBookingToFile(paymentID, residentID, startDate, endDate, roomID, paymentAmount, bookingDateTime);
-        if (!bookingSuccess) {
-            JOptionPane.showMessageDialog(frame, "An error occurred while saving the booking.", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-    
-        // Update room status to unavailable
-        APUHostelManagement.Resident.updateRoomStatus1(roomID, "unavailable");
-    
-        // Print confirmation message
+
+        // Show booking details confirmation dialog
         long daysBetween = ChronoUnit.DAYS.between(startDate, endDate);
         String roomNumber = APUHostelManagement.Resident.getRoomNumber(roomID);
-        JOptionPane.showMessageDialog(frame, "Booking successful.\nPayment ID: " + paymentID + "\nResident ID: " + residentID + "\nStart Date: " + startDate + "\nEnd Date: " + endDate + "\nStay Duration: " + daysBetween + " days\nRoom Number: " + roomNumber + "\nPayment Amount: RM " + paymentAmount, "Success", JOptionPane.INFORMATION_MESSAGE);
+        String username = resident.getUsername(); // Assuming there's a getUsername() method
+        String bookingDetails = "<html><b style='font-size:14px;'>Booking Details:</b><br/><br/>" +
+                                "Username: " + username + "<br/>" +
+                                "Start Date: " + startDate + "<br/>" +
+                                "End Date: " + endDate + "<br/>" +
+                                "Stay Duration: " + daysBetween + " days<br/>" +
+                                "Room Type: " + selectedRoomType + "<br/>" +
+                                "Room Number: " + roomNumber + "<br/>" +
+                                "Payment Amount: RM " + paymentAmount + "</html>";
 
-        // Reset fields after successful booking
-        resetFields();
+        int confirm = JOptionPane.showConfirmDialog(frame, bookingDetails + "\n\nAre you sure you want to confirm this booking?", "Booking Details", JOptionPane.YES_NO_OPTION);
+        if (confirm == JOptionPane.YES_OPTION) {
+            // Add a new line to payments.txt
+            boolean bookingSuccess = APUHostelManagement.Resident.addBookingToFile(paymentID, residentID, startDate, endDate, roomID, paymentAmount, bookingDateTime);
+            if (!bookingSuccess) {
+                JOptionPane.showMessageDialog(frame, "An error occurred while saving the booking.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            // Update room status to unavailable
+            APUHostelManagement.Resident.updateRoomStatus1(roomID, "unavailable");
+
+            // Print confirmation message
+            JOptionPane.showMessageDialog(frame, "Booking successful.", "Success", JOptionPane.INFORMATION_MESSAGE);
+
+            // Reset fields after successful booking
+            resetFields();
+        } else {
+            // Reset fields if booking is not confirmed
+            resetFields();
+        }
     }
 
     private void resetFields() {
@@ -341,5 +372,22 @@ public class ResidentMakeBookingGUI {
             }
         }
         return false;
+    }
+
+    private void showPricingExplanation() {
+        String explanation = "<html><body style='width: 300px; padding: 10px;'>" +
+                "<h2>How We Calculate Our Pricing</h2>" +
+                "<p>The total payment amount is calculated based on the duration of your stay and the rates for the selected room type. " +
+                "The calculation is done as follows:</p>" +
+                "<ul>" +
+                "<li>Each week is counted as 7 days, Each month is counted as 30 days and Each year is counted as 365 days.</li>" +
+                "<li>First, the total number of days between the start and end dates is calculated.</li>" +
+                "<li>The number of years, months, weeks, and remaining days are then determined from the total days.</li>" +
+                "<li>The payment amount is calculated by multiplying the number of years, months, weeks, and days by their respective rates and summing them up.</li>" +
+                "</ul>" +
+                "<p>This ensures that you are charged accurately based on the duration of your stay.</p>" +
+                "</body></html>";
+
+        JOptionPane.showMessageDialog(frame, explanation, "Pricing Explanation", JOptionPane.INFORMATION_MESSAGE);
     }
 }

@@ -2,8 +2,6 @@ package apu.hostel.management;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 public class ManagerMainPageGUI {
     private JFrame frame;
@@ -37,71 +35,78 @@ public class ManagerMainPageGUI {
         gbc.gridy = 0;
 
         JButton approveUserButton = new JButton("Approve User Registration");
-        approveUserButton.setPreferredSize(new Dimension(300, 50)); // Set button size
-        approveUserButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                new ManagerApproveUsersRegistrationGUI(manager); // Pass manager
-                frame.dispose(); // Close the current window
+        approveUserButton.setPreferredSize(new Dimension(300, 50));
+        approveUserButton.addActionListener(e -> {
+            if (manager != null) {
+                new ManagerApproveUsersRegistrationGUI(manager);
+                frame.dispose();
+            } else {
+                JOptionPane.showMessageDialog(frame, "Session expired. Please login again.", 
+                    "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
         buttonPanel.add(approveUserButton, gbc);
 
         gbc.gridy++;
         JButton searchUserButton = new JButton("Search, Update, Delete or Restore User");
-        searchUserButton.setPreferredSize(new Dimension(300, 50)); // Set button size
-        searchUserButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                new ManagerManageUsersGUI(manager); // Pass manager  
-                frame.dispose(); // Close the current window
+        searchUserButton.setPreferredSize(new Dimension(300, 50));
+        searchUserButton.addActionListener(e -> {
+            if (manager != null) {
+                new ManagerManageUsersGUI(manager);
+                frame.dispose();
+            } else {
+                JOptionPane.showMessageDialog(frame, "Session expired. Please login again.", 
+                    "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
         buttonPanel.add(searchUserButton, gbc);
 
         gbc.gridy++;
         JButton fixRateButton = new JButton("Fix, Update, Delete or Restore Rate");
-        fixRateButton.setPreferredSize(new Dimension(300, 50)); // Set button size
-        fixRateButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                new ManagerManageRatesGUI(manager); // Pass manager
-                frame.dispose(); // Close the current window
+        fixRateButton.setPreferredSize(new Dimension(300, 50));
+        fixRateButton.addActionListener(e -> {
+            if (manager != null) {
+                new ManagerManageRatesGUI(manager);
+                frame.dispose();
+            } else {
+                JOptionPane.showMessageDialog(frame, "Session expired. Please login again.", 
+                    "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
         buttonPanel.add(fixRateButton, gbc);
 
         gbc.gridy++;
         JButton manageRoomsButton = new JButton("Manage Rooms");
-        manageRoomsButton.setPreferredSize(new Dimension(300, 50)); // Set button size
-        manageRoomsButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                new ManagerManageRoomsGUI(manager); // Pass manager
-                frame.dispose(); // Close the current window
+        manageRoomsButton.setPreferredSize(new Dimension(300, 50));
+        manageRoomsButton.addActionListener(e -> {
+            if (manager != null) {
+                new ManagerManageRoomsGUI(manager);
+                frame.dispose();
+            } else {
+                JOptionPane.showMessageDialog(frame, "Session expired. Please login again.", 
+                    "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
         buttonPanel.add(manageRoomsButton, gbc);
 
         gbc.gridy++;
         JButton updatePersonalInfoButton = new JButton("Update Personal Information");
-        updatePersonalInfoButton.setPreferredSize(new Dimension(300, 50)); // Set button size
-        updatePersonalInfoButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                if (manager == null) {
-                    JOptionPane.showMessageDialog(frame, "Please login to update personal information.", "Error", JOptionPane.ERROR_MESSAGE);
-                } else {
-                    new ManagerManageProfileGUI(manager); // Pass manager info
-                    frame.dispose(); // Close the current window
-                }
+        updatePersonalInfoButton.setPreferredSize(new Dimension(300, 50));
+        updatePersonalInfoButton.addActionListener(e -> {
+            if (manager != null) {
+                new ManagerManageProfileGUI(manager);
+                frame.dispose();
+            } else {
+                JOptionPane.showMessageDialog(frame, "Session expired. Please login again.", 
+                    "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
         buttonPanel.add(updatePersonalInfoButton, gbc);
 
         gbc.gridy++;
         JButton logoutButton = new JButton("Logout");
-        logoutButton.setPreferredSize(new Dimension(300, 50)); // Set button size
-        logoutButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                logout();
-            }
-        });
+        logoutButton.setPreferredSize(new Dimension(300, 50));
+        logoutButton.addActionListener(e -> logout());
         buttonPanel.add(logoutButton, gbc);
 
         frame.add(buttonPanel, BorderLayout.CENTER);
@@ -109,10 +114,11 @@ public class ManagerMainPageGUI {
     }
 
     private void logout() {
-        // Implement the logic for logging out
+        if (manager != null) {
+            manager.logout();
+        }
         JOptionPane.showMessageDialog(frame, "Logging out...");
         frame.dispose();
-        WelcomePageGUI welcomePage = new WelcomePageGUI(); // Create an instance of WelcomePageGUI
-        welcomePage.setVisible(true); // Set the WelcomePageGUI frame to visible
+        new WelcomePageGUI().setVisible(true);
     }
 }

@@ -52,7 +52,7 @@ public class ResidentViewPaymentRecordsGUI {
         viewPaymentRecordsPanel.add(titleLabel, BorderLayout.NORTH);
 
         // Create table model and table
-        DefaultTableModel tableModel = new DefaultTableModel(new Object[]{"Payment ID", "Payment Amount", "Booking Date"}, 0);
+        DefaultTableModel tableModel = new DefaultTableModel(new Object[]{"Room Number", "Stay Duration", "Booking Date and Time", "Payment Amount"}, 0);
         table = new JTable(tableModel) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -69,7 +69,9 @@ public class ResidentViewPaymentRecordsGUI {
         int rowIndex = 0;
         for (String[] details : relevantPayments) {
             paymentDetailsMap.put(rowIndex, details); // Store payment details in the map
-            tableModel.addRow(new Object[]{details[0], "RM" + details[6], details[8]});
+            String roomNumber = getRoomNumber(details[5]);
+            long stayDuration = ChronoUnit.DAYS.between(LocalDate.parse(details[3]), LocalDate.parse(details[4]));
+            tableModel.addRow(new Object[]{roomNumber, stayDuration + " days", details[8], "RM" + details[6]});
             rowIndex++;
         }
 
@@ -102,7 +104,6 @@ public class ResidentViewPaymentRecordsGUI {
         long stayDuration = ChronoUnit.DAYS.between(startDate, endDate);
 
         String[][] data = {
-            {"Payment ID", details[0]},
             {"Payment Status", details[7]},
             {"Start Date", startDate.toString()},
             {"End Date", endDate.toString()},

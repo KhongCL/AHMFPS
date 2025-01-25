@@ -290,121 +290,141 @@ public class ManagerManageUsersGUI {
         APUHostelManagement.User userToUpdate = userList.get(selectedIndex);
     
         String[] options = {"IC/Passport Number", "Username", "Password", "Contact Number"};
-        String fieldToUpdate = (String) JOptionPane.showInputDialog(frame, "Select field to update:", "Update User", JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+        String fieldToUpdate = (String) JOptionPane.showInputDialog(frame, 
+            "Select field to update:", "Update User", 
+            JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
     
-        if (fieldToUpdate == null) {
-            return; // User cancelled
-        }
+        if (fieldToUpdate == null) return;
     
-        String newValue = JOptionPane.showInputDialog(frame, "Enter new " + fieldToUpdate + ":", getCurrentValue(userToUpdate, fieldToUpdate));
+        String newValue = JOptionPane.showInputDialog(frame, 
+            "Enter new " + fieldToUpdate + ":", 
+            getCurrentValue(userToUpdate, fieldToUpdate));
     
-        if (newValue == null || newValue.trim().isEmpty()) {
-            return; // User cancelled or entered empty value
-        }
-    
-        switch (fieldToUpdate) {
-            case "IC/Passport Number":
-                if (newValue.equals(userToUpdate.getIcPassportNumber())) {
-                    JOptionPane.showMessageDialog(frame, "The IC/Passport Number is the same as the original value.", "Information", JOptionPane.INFORMATION_MESSAGE);
-                    return;
-                }
-                while (true) {
-                    if (!APUHostelManagement.isValidICPassport(newValue)) {
-                        String errorMessage = getICPassportErrorMessage(newValue);
-                        int retry = JOptionPane.showConfirmDialog(frame, errorMessage + " Do you want to try again?", "Error", JOptionPane.YES_NO_OPTION);
-                        if (retry == JOptionPane.NO_OPTION) {
-                            return;
-                        }
-                        newValue = JOptionPane.showInputDialog(frame, "Enter new IC/Passport Number:", userToUpdate.getIcPassportNumber());
-                        if (newValue == null || newValue.trim().isEmpty()) {
-                            return; // User cancelled or entered empty value
-                        }
-                    } else {
-                        userToUpdate.setIcPassportNumber(newValue);
-                        break;
-                    }
-                }
-                break;
-            case "Username":
-                if (newValue.equals(userToUpdate.getUsername())) {
-                    JOptionPane.showMessageDialog(frame, "The Username is the same as the original value.", "Information", JOptionPane.INFORMATION_MESSAGE);
-                    return;
-                }
-                while (true) {
-                    if (!APUHostelManagement.isValidUsername(newValue)) {
-                        String errorMessage = getUsernameErrorMessage(newValue);
-                        int retry = JOptionPane.showConfirmDialog(frame, errorMessage + " Do you want to try again?", "Error", JOptionPane.YES_NO_OPTION);
-                        if (retry == JOptionPane.NO_OPTION) {
-                            return;
-                        }
-                        newValue = JOptionPane.showInputDialog(frame, "Enter new Username:", userToUpdate.getUsername());
-                        if (newValue == null || newValue.trim().isEmpty()) {
-                            return; // User cancelled or entered empty value
-                        }
-                    } else {
-                        userToUpdate.setUsername(newValue);
-                        break;
-                    }
-                }
-                break;
-            case "Password":
-                if (newValue.equals(userToUpdate.getPassword())) {
-                    JOptionPane.showMessageDialog(frame, "The Password is the same as the original value.", "Information", JOptionPane.INFORMATION_MESSAGE);
-                    return;
-                }
-                while (true) {
-                    if (!APUHostelManagement.isValidPassword(newValue, userToUpdate.getUsername())) {
-                        String errorMessage = getPasswordErrorMessage(newValue, userToUpdate.getUsername());
-                        int retry = JOptionPane.showConfirmDialog(frame, errorMessage + " Do you want to try again?", "Error", JOptionPane.YES_NO_OPTION);
-                        if (retry == JOptionPane.NO_OPTION) {
-                            return;
-                        }
-                        newValue = JOptionPane.showInputDialog(frame, "Enter new Password:", userToUpdate.getPassword());
-                        if (newValue == null || newValue.trim().isEmpty()) {
-                            return; // User cancelled or entered empty value
-                        }
-                    } else {
-                        userToUpdate.setPassword(newValue);
-                        break;
-                    }
-                }
-                break;
-            case "Contact Number":
-                if (newValue.equals(userToUpdate.getContactNumber())) {
-                    JOptionPane.showMessageDialog(frame, "The Contact Number is the same as the original value.", "Information", JOptionPane.INFORMATION_MESSAGE);
-                    return;
-                }
-                while (true) {
-                    if (!APUHostelManagement.isValidContactNumber(newValue)) {
-                        String errorMessage = getContactNumberErrorMessage(newValue);
-                        int retry = JOptionPane.showConfirmDialog(frame, errorMessage + " Do you want to try again?", "Error", JOptionPane.YES_NO_OPTION);
-                        if (retry == JOptionPane.NO_OPTION) {
-                            return;
-                        }
-                        newValue = JOptionPane.showInputDialog(frame, "Enter new Contact Number:", userToUpdate.getContactNumber());
-                        if (newValue == null || newValue.trim().isEmpty()) {
-                            return; // User cancelled or entered empty value
-                        }
-                    } else {
-                        userToUpdate.setContactNumber(newValue);
-                        break;
-                    }
-                }
-                break;
-        }
+        if (newValue == null || newValue.trim().isEmpty()) return;
     
         try {
-            APUHostelManagement.Manager.updateFile("users.txt", userToUpdate);
-            APUHostelManagement.Manager.updateFile("unapproved_managers.txt", userToUpdate);
-            APUHostelManagement.Manager.updateFile("unapproved_staffs.txt", userToUpdate);
-            APUHostelManagement.Manager.updateFile("unapproved_residents.txt", userToUpdate);
-            APUHostelManagement.Manager.updateFile("approved_managers.txt", userToUpdate);
-            APUHostelManagement.Manager.updateFile("approved_staffs.txt", userToUpdate);
-            APUHostelManagement.Manager.updateFile("approved_residents.txt", userToUpdate);
-            loadUsers(); // Refresh the table
-            JOptionPane.showMessageDialog(frame, "User updated successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
-        } catch (IOException e) {
-            JOptionPane.showMessageDialog(frame, "An error occurred while updating the user.", "Error", JOptionPane.ERROR_MESSAGE);
+            switch (fieldToUpdate) {
+                case "IC/Passport Number" -> {
+                    if (newValue.equals(userToUpdate.getIcPassportNumber())) {
+                        showSameValueMessage(fieldToUpdate);
+                        return;
+                    }
+                    APUHostelManagement.validateICPassport(newValue);
+                    userToUpdate.setIcPassportNumber(newValue);
+                }
+                case "Username" -> {
+                    if (newValue.equals(userToUpdate.getUsername())) {
+                        showSameValueMessage(fieldToUpdate);
+                        return;
+                    }
+                    APUHostelManagement.validateUsername(newValue);
+                    userToUpdate.setUsername(newValue);
+                }
+                case "Password" -> {
+                    if (newValue.equals(userToUpdate.getPassword())) {
+                        showSameValueMessage(fieldToUpdate);
+                        return;
+                    }
+                    APUHostelManagement.validatePassword(newValue, userToUpdate.getUsername());
+                    userToUpdate.setPassword(newValue);
+                }
+                case "Contact Number" -> {
+                    if (newValue.equals(userToUpdate.getContactNumber())) {
+                        showSameValueMessage(fieldToUpdate);
+                        return;
+                    }
+                    APUHostelManagement.validateContactNumber(newValue);
+                    userToUpdate.setContactNumber(newValue);
+                }
+            }
+    
+            updateAllUserFiles(userToUpdate);
+            loadUsers();
+            JOptionPane.showMessageDialog(frame, "User updated successfully.", 
+                "Success", JOptionPane.INFORMATION_MESSAGE);
+    
+        } catch (Exception e) {
+            handleUpdateError(e.getMessage(), fieldToUpdate, userToUpdate);
+        }
+    }
+    
+    private void showSameValueMessage(String fieldName) {
+        JOptionPane.showMessageDialog(frame,
+            "The " + fieldName + " is the same as the original value.",
+            "Information", JOptionPane.INFORMATION_MESSAGE);
+    }
+    
+    private void handleUpdateError(String errorMessage, String fieldToUpdate, APUHostelManagement.User userToUpdate) {
+        int retry = JOptionPane.showConfirmDialog(frame,
+            errorMessage + "\nDo you want to try again?",
+            "Error", JOptionPane.YES_NO_OPTION);
+            
+        if (retry == JOptionPane.YES_OPTION) {
+            String newValue = JOptionPane.showInputDialog(frame,
+                "Enter new " + fieldToUpdate + ":",
+                getCurrentValue(userToUpdate, fieldToUpdate));
+            if (newValue != null && !newValue.trim().isEmpty()) {
+                updateSelectedField(userToUpdate, fieldToUpdate, newValue);
+            }
+        }
+    }
+    
+    private void updateAllUserFiles(APUHostelManagement.User userToUpdate) throws IOException {
+        String[] files = {
+            "users.txt", "unapproved_managers.txt", "unapproved_staffs.txt",
+            "unapproved_residents.txt", "approved_managers.txt", 
+            "approved_staffs.txt", "approved_residents.txt"
+        };
+        
+        for (String file : files) {
+            APUHostelManagement.Manager.updateFile(file, userToUpdate);
+        }
+    }
+
+    private void updateSelectedField(APUHostelManagement.User userToUpdate, String fieldToUpdate, String newValue) {
+        try {
+            switch (fieldToUpdate) {
+                case "IC/Passport Number" -> {
+                    if (newValue.equals(userToUpdate.getIcPassportNumber())) {
+                        showSameValueMessage(fieldToUpdate);
+                        return;
+                    }
+                    APUHostelManagement.validateICPassport(newValue);
+                    userToUpdate.setIcPassportNumber(newValue);
+                }
+                case "Username" -> {
+                    if (newValue.equals(userToUpdate.getUsername())) {
+                        showSameValueMessage(fieldToUpdate);
+                        return;
+                    }
+                    APUHostelManagement.validateUsername(newValue);
+                    userToUpdate.setUsername(newValue);
+                }
+                case "Password" -> {
+                    if (newValue.equals(userToUpdate.getPassword())) {
+                        showSameValueMessage(fieldToUpdate);
+                        return;
+                    }
+                    APUHostelManagement.validatePassword(newValue, userToUpdate.getUsername());
+                    userToUpdate.setPassword(newValue);
+                }
+                case "Contact Number" -> {
+                    if (newValue.equals(userToUpdate.getContactNumber())) {
+                        showSameValueMessage(fieldToUpdate);
+                        return;
+                    }
+                    APUHostelManagement.validateContactNumber(newValue);
+                    userToUpdate.setContactNumber(newValue);
+                }
+            }
+    
+            updateAllUserFiles(userToUpdate);
+            loadUsers();
+            JOptionPane.showMessageDialog(frame, "User updated successfully.", 
+                "Success", JOptionPane.INFORMATION_MESSAGE);
+    
+        } catch (Exception e) {
+            handleUpdateError(e.getMessage(), fieldToUpdate, userToUpdate);
         }
     }
     
@@ -423,76 +443,6 @@ public class ManagerManageUsersGUI {
         }
     }
     
-    private String getICPassportErrorMessage(String icPassport) {
-        if (icPassport.length() != 14 && icPassport.length() != 9) {
-            return "Invalid IC/Passport format. IC format: xxxxxx-xx-xxxx, Passport format: one alphabet followed by 8 numbers.";
-        }
-        try {
-            if (!APUHostelManagement.isUnique(icPassport, "", "")) {
-                return "IC/Passport number already exists. Please use a different IC/Passport number.";
-            }
-        } catch (IOException e) {
-            return "An error occurred while checking the IC/Passport number.";
-        }
-        return "Invalid IC/Passport number.";
-    }
-    
-    private String getUsernameErrorMessage(String username) {
-        if (username.length() < 3 || username.length() > 12) {
-            return "Username must be between 3 and 12 characters long.";
-        }
-        for (char c : username.toCharArray()) {
-            if (!Character.isLetterOrDigit(c) && c != '_') {
-                return "Username can only contain letters, numbers, and underscores.";
-            }
-        }
-        if (!username.matches(".*[a-zA-Z]+.*")) {
-            return "Username must contain at least one letter.";
-        }
-        try {
-            if (!APUHostelManagement.isUnique("", username, "")) {
-                return "Username already exists. Please choose a different username.";
-            }
-        } catch (IOException e) {
-            return "An error occurred while checking the username.";
-        }
-        return "Invalid username.";
-    }
-    
-    private String getPasswordErrorMessage(String password, String username) {
-        if (password.length() < 8 || password.length() > 12) {
-            return "Password must be between 8 and 12 characters long.";
-        }
-        if (password.contains(username)) {
-            return "Password cannot be similar to the username.";
-        }
-        boolean hasNumber = password.matches(".*\\d.*");
-        boolean hasUppercase = password.matches(".*[A-Z].*");
-        boolean hasSpecialChar = password.matches(".*[!@#$%^&*()].*");
-        boolean hasInvalidChar = password.matches(".*[^a-zA-Z0-9!@#$%^&*()].*");
-        if (!(hasNumber && hasSpecialChar && hasUppercase)) {
-            return "Password must contain at least one number, one special character (!@#$%^&*()), and one uppercase letter.";
-        }
-        if (hasInvalidChar) {
-            return "Password contains invalid characters. Only !@#$%^&*() are allowed as special characters.";
-        }
-        return "Invalid password.";
-    }
-    
-    private String getContactNumberErrorMessage(String contactNumber) {
-        if (contactNumber.length() != 12 || !contactNumber.startsWith("01") || contactNumber.charAt(3) != '-' || contactNumber.charAt(7) != '-' || !contactNumber.replace("-", "").matches("\\d+")) {
-            return "Invalid contact number format. The correct format is 01X-XXX-XXXX.";
-        }
-        try {
-            if (!APUHostelManagement.isUnique("", "", contactNumber)) {
-                return "Contact number already exists. Please choose a different contact number.";
-            }
-        } catch (IOException e) {
-            return "An error occurred while checking the contact number.";
-        }
-        return "Invalid contact number.";
-    }
-
     private void deleteUser() {
         int selectedIndex = userTable.getSelectedRow();
         if (selectedIndex == -1) {

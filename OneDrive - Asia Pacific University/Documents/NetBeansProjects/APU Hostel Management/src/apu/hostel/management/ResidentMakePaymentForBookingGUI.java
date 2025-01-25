@@ -56,7 +56,7 @@ public class ResidentMakePaymentForBookingGUI {
         makePaymentPanel.add(titleLabel, BorderLayout.NORTH);
 
         // Create table model and table
-        tableModel = new DefaultTableModel(new Object[]{"Payment ID", "Resident ID", "Room Number", "Stay Duration", "Payment Amount"}, 0);
+        tableModel = new DefaultTableModel(new Object[]{"Room Number", "Stay Duration", "Booking Date and Time", "Payment Amount"}, 0);
         table = new JTable(tableModel) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -76,7 +76,7 @@ public class ResidentMakePaymentForBookingGUI {
             paymentDetailsMap.put(rowIndex, details); // Store payment details in the map
             String roomNumber = roomMap.getOrDefault(details[5], "Unknown Room");
             long stayDuration = ChronoUnit.DAYS.between(LocalDate.parse(details[3]), LocalDate.parse(details[4]));
-            tableModel.addRow(new Object[]{details[0], details[1], roomNumber, stayDuration + " days", "RM" + details[6]});
+            tableModel.addRow(new Object[]{roomNumber, stayDuration + " days", details[8], "RM" + details[6]});
             rowIndex++;
         }
 
@@ -109,25 +109,21 @@ public class ResidentMakePaymentForBookingGUI {
         LocalDate startDate = LocalDate.parse(details[3]);
         LocalDate endDate = LocalDate.parse(details[4]);
         long stayDuration = ChronoUnit.DAYS.between(startDate, endDate);
+        String username = resident.getUsername(); // Assuming there's a getUsername() method
+        String roomType = APUHostelManagement.Resident.getRoomType(details[5]); // Get room type based on room ID
 
-        // Create payment details table
-        String[][] data = {
-            {"Payment ID", details[0]},
-            {"Resident ID", details[1]},
-            {"Staff ID", details[2]},
-            {"Start Date", startDate.toString()},
-            {"End Date", endDate.toString()},
-            {"Stay Duration", stayDuration + " days"},
-            {"Room Number", roomNumber},
-            {"Payment Amount", "RM" + details[6]},
-            {"Payment Status", details[7]},
-            {"Booking Date and Time", details[8]},
-            {"Payment Method", details[9]},
-            {"Booking Status", details[10]}
-        };
-        String[] columnNames = {"Field", "Value"};
-        JTable detailsTable = new JTable(data, columnNames);
-        detailsTable.setEnabled(false);
+        // Create a panel for payment details
+        JPanel detailsPanel = new JPanel();
+        detailsPanel.setLayout(new BoxLayout(detailsPanel, BoxLayout.Y_AXIS));
+        detailsPanel.add(new JLabel("<html><div style='text-align: left;'><b style='font-size:14px;'>Payment Details:</b><br/><br/>" +
+                                    "Username: " + username + "<br/>" +
+                                    "Start Date: " + startDate + "<br/>" +
+                                    "End Date: " + endDate + "<br/>" +
+                                    "Stay Duration: " + stayDuration + " days<br/>" +
+                                    "Room Type: " + roomType + "<br/>" +
+                                    "Room Number: " + roomNumber + "<br/>" +
+                                    "Booking Status: " + details[10] + "<br/>" +
+                                    "Payment Amount: RM" + details[6] + "</div></html>"));
 
         // Create a panel for payment method selection and confirmation
         JPanel paymentPanel = new JPanel(new GridLayout(5, 1, 10, 10));
@@ -166,12 +162,12 @@ public class ResidentMakePaymentForBookingGUI {
 
         paymentPanel.add(confirmButtonPanel);
 
-        // Create a panel to hold the details table and payment panel
+        // Create a panel to hold the details panel and payment panel
         JPanel popupPanel = new JPanel(new BorderLayout(10, 10));
-        popupPanel.add(new JScrollPane(detailsTable), BorderLayout.CENTER);
+        popupPanel.add(detailsPanel, BorderLayout.CENTER);
         popupPanel.add(paymentPanel, BorderLayout.SOUTH);
 
-        paymentDetailsDialog = new JDialog(frame, "Detailed Payment", true);
+        paymentDetailsDialog = new JDialog(frame, "Payment Details", true);
         paymentDetailsDialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
         paymentDetailsDialog.getContentPane().add(popupPanel);
         paymentDetailsDialog.pack();
