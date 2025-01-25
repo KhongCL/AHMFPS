@@ -10,6 +10,8 @@ import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.ArrayList; // Import ArrayList
+import java.io.*;
 
 public class ResidentCancelBookingGUI {
     private JFrame frame;
@@ -133,16 +135,42 @@ public class ResidentCancelBookingGUI {
             JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
 
         if (result == JOptionPane.YES_OPTION) {
-            cancelBooking(details[0], rowIndex);
+            cancelBooking(details[0], rowIndex, details[5]);
         }
     }
 
-    private void cancelBooking(String paymentID, int rowIndex) {
+    private void cancelBooking(String paymentID, int rowIndex, String roomID) {
         if (APUHostelManagement.Resident.cancelBooking(paymentID)) {
             JOptionPane.showMessageDialog(frame, "Booking cancelled successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
             tableModel.removeRow(rowIndex); // Remove the cancelled row from the table
+            updateRoomStatusToAvailable(roomID); // Update room status to available
         } else {
             JOptionPane.showMessageDialog(frame, "An error occurred while cancelling the booking.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void updateRoomStatusToAvailable(String roomID) {
+        List<String[]> rooms = new ArrayList<>();
+        try (BufferedReader reader = new BufferedReader(new FileReader("rooms.txt"))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (parts[0].equals(roomID)) {
+                    parts[4] = "available"; // Assuming parts[4] is RoomStatus
+                }
+                rooms.add(parts);
+            }
+        } catch (IOException e) {
+            System.out.println("An error occurred while reading the room data.");
+        }
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("rooms.txt"))) {
+            for (String[] room : rooms) {
+                writer.write(String.join(",", room));
+                writer.newLine();
+            }
+        } catch (IOException e) {
+            System.out.println("An error occurred while updating the room data.");
         }
     }
 }
