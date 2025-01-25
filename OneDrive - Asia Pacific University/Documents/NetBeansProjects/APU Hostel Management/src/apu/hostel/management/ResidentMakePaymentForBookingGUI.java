@@ -103,6 +103,8 @@ public class ResidentMakePaymentForBookingGUI {
     }
 
     private void showPaymentDetailsPopup(String[] details, int rowIndex) {
+        selectedPaymentMethod = null; // Reset the selected payment method each time the popup is shown
+
         String roomNumber = APUHostelManagement.Resident.getRoomMap().getOrDefault(details[5], "Unknown Room");
         LocalDate startDate = LocalDate.parse(details[3]);
         LocalDate endDate = LocalDate.parse(details[4]);
