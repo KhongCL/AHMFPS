@@ -1,19 +1,12 @@
 package apu.hostel.management;
 
-import javax.swing.JFrame;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.*;
 import java.awt.*;
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class StaffGenerateReceiptGUI {
@@ -121,7 +114,7 @@ public class StaffGenerateReceiptGUI {
             {"Start Date", selectedPayment[3]},
             {"End Date", selectedPayment[4]},
             {"Room ID", selectedPayment[5]},
-            {"Amount", selectedPayment[6]},
+            {"Amount", "RM " + selectedPayment[6]},
             {"Payment Method", selectedPayment[9]},
             {"Booking Date", selectedPayment[8]}
         };
@@ -132,54 +125,13 @@ public class StaffGenerateReceiptGUI {
             "Confirm Receipt Generation", JOptionPane.YES_NO_OPTION);
             
         if (result == JOptionPane.YES_OPTION) {
-            try {
-                // Generate receipt ID
-                List<String[]> receipts = new ArrayList<>();
-                try (BufferedReader reader = new BufferedReader(new FileReader("receipts.txt"))) {
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        receipts.add(line.split(","));
-                    }
-                } catch (IOException e) {
-                    // Handle if receipts.txt doesn't exist yet
-                }
-                
-                String receiptID = "RC" + String.format("%02d", receipts.size() + 1);
-                String currentDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-                
-                // Add new receipt
-                String[] newReceipt = {receiptID, selectedPayment[0], staff.getStaffID(), currentDateTime};
-                try (BufferedWriter writer = new BufferedWriter(new FileWriter("receipts.txt", true))) {
-                    writer.write(String.join(",", newReceipt));
-                    writer.newLine();
-                }
-                
-                // Update payment status
-                selectedPayment[10] = "completed";
-                List<String[]> allPayments = new ArrayList<>();
-                try (BufferedReader reader = new BufferedReader(new FileReader("payments.txt"))) {
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        String[] payment = line.split(",");
-                        if (payment[0].equals(selectedPayment[0])) {
-                            payment[10] = "completed";
-                        }
-                        allPayments.add(payment);
-                    }
-                }
-                
-                try (BufferedWriter writer = new BufferedWriter(new FileWriter("payments.txt"))) {
-                    for (String[] payment : allPayments) {
-                        writer.write(String.join(",", payment));
-                        writer.newLine();
-                    }
-                }
-                
+            if (APUHostelManagement.Staff.generateReceipt(
+                    selectedPayment[0], 
+                    staff.getStaffID())) {
                 JOptionPane.showMessageDialog(frame, "Receipt generated successfully!", 
                     "Success", JOptionPane.INFORMATION_MESSAGE);
-                loadEligiblePayments(); // Refresh table
-                
-            } catch (IOException ex) {
+                loadEligiblePayments();
+            } else {
                 JOptionPane.showMessageDialog(frame, "Error generating receipt", 
                     "Error", JOptionPane.ERROR_MESSAGE);
             }

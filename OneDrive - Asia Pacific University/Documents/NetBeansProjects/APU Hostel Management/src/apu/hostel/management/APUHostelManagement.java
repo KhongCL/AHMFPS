@@ -1950,7 +1950,7 @@ public class APUHostelManagement {
             switch (choice) {
                 case 1 -> updatePersonalInformation();
                 case 2 -> makePayment(); // Make Payment for Resident logic
-                case 3 -> generateReceipt(); // Generate Receipt logic
+                case 3 -> generateReceipt(dateOfApproval, dateOfApproval); // Generate Receipt logic
                 case 4 -> {
                     System.out.println("Logging out...");
                     System.out.println("You have been logged out successfully.");
@@ -2266,118 +2266,72 @@ public class APUHostelManagement {
             return false;
         }
 
-        public void generateReceipt() {
+        public static boolean generateReceipt(String paymentId, String staffId) {
             List<String[]> payments = new ArrayList<>();
             List<String[]> receipts = new ArrayList<>();
-        
-            // Read payments from file
-            try (BufferedReader reader = new BufferedReader(new FileReader("payments.txt"))) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    payments.add(line.split(","));
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-                return;
-            }
-        
-            // Read receipts from file
+            boolean success = false;
+            
+            // Read existing receipts
             try (BufferedReader reader = new BufferedReader(new FileReader("receipts.txt"))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
                     receipts.add(line.split(","));
                 }
             } catch (IOException e) {
-                e.printStackTrace();
-                return;
+                // Handle new file case
             }
-        
-            // Filter payments
-            List<String[]> eligiblePayments = new ArrayList<>();
-            for (String[] payment : payments) {
-                if (payment[2] != null && !payment[2].isEmpty() && payment[7].equalsIgnoreCase("paid") && payment[10].equalsIgnoreCase("active")) {
-                    eligiblePayments.add(payment);
-                }
-            }
-        
-            if (eligiblePayments.isEmpty()) {
-                System.out.println("No eligible payments found.");
-                return;
-            }
-        
-            // Display eligible payments in brief
-            System.out.println("Eligible Payments:");
-            for (int i = 0; i < eligiblePayments.size(); i++) {
-                String[] payment = eligiblePayments.get(i);
-                System.out.println((i + 1) + ". Payment ID: " + payment[0] + ", Resident ID: " + payment[1] + ", Amount: " + payment[6]);
-            }
-        
-            // Select payment to generate receipt
-            System.out.print("Enter the number of the payment to generate receipt: ");
-            int paymentIndex = getValidatedChoice(scanner, 1, eligiblePayments.size()) - 1;
-        
-            // Show selected payment in detail
-            String[] selectedPayment = eligiblePayments.get(paymentIndex);
-            System.out.println("Selected Payment Details:");
-            System.out.println("Payment ID: " + selectedPayment[0]);
-            System.out.println("Resident ID: " + selectedPayment[1]);
-            System.out.println("Staff ID: " + selectedPayment[2]);
-            System.out.println("Start Date: " + selectedPayment[3]);
-            System.out.println("End Date: " + selectedPayment[4]);
-            System.out.println("Room ID: " + selectedPayment[5]);
-            System.out.println("Payment Amount: " + selectedPayment[6]);
-            System.out.println("Payment Status: " + selectedPayment[7]);
-            System.out.println("Booking DateTime: " + selectedPayment[8]);
-            System.out.println("Payment Method: " + selectedPayment[9]);
-            System.out.println("Booking Status: " + selectedPayment[10]);
-        
-            // Confirm receipt generation
-            String confirmation = "";
-            while (!confirmation.equalsIgnoreCase("yes") && !confirmation.equalsIgnoreCase("no")) {
-                System.out.print("Do you want to generate a receipt for this payment? (yes/no): ");
-                confirmation = scanner.nextLine();
-                if (!confirmation.equalsIgnoreCase("yes") && !confirmation.equalsIgnoreCase("no")) {
-                    System.out.println("Invalid input. Please enter 'yes' or 'no'.");
-                }
-            }
-        
-            if (confirmation.equalsIgnoreCase("no")) {
-                System.out.println("Receipt generation cancelled.");
-                return;
-            }
-        
+    
             // Generate receipt
             String receiptID = "RC" + String.format("%02d", receipts.size() + 1);
             String currentDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-            String[] newReceipt = {receiptID, selectedPayment[0], this.staffID, currentDateTime};
-            receipts.add(newReceipt);
-        
-            // Update booking status to completed
-            selectedPayment[10] = "completed";
-        
-            // Write updated receipts back to file
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter("receipts.txt"))) {
-                for (String[] receipt : receipts) {
-                    writer.write(String.join(",", receipt));
-                    writer.newLine();
-                }
+            String[] newReceipt = {receiptID, paymentId, staffId, currentDateTime};
+    
+            try {
+                // Add receipt
+                BufferedWriter writer = new BufferedWriter(new FileWriter("receipts.txt", true));
+                writer.write(String.join(",", newReceipt));
+                writer.newLine();
+                writer.close();
+    
+                // Update payment status
+                success = updatePaymentToCompleted(paymentId);
             } catch (IOException e) {
-                e.printStackTrace();
+                return false;
             }
-        
-            // Write updated payments back to file
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter("payments.txt"))) {
+    
+            return success;
+        }
+    
+        private static boolean updatePaymentToCompleted(String paymentId) {
+            List<String[]> payments = new ArrayList<>();
+            boolean updated = false;
+    
+            try {
+                // Read and update payment
+                BufferedReader reader = new BufferedReader(new FileReader("payments.txt"));
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    String[] payment = line.split(",");
+                    if (payment[0].equals(paymentId)) {
+                        payment[10] = "completed";
+                        updated = true;
+                    }
+                    payments.add(payment);
+                }
+                reader.close();
+    
+                // Write back all payments
+                BufferedWriter writer = new BufferedWriter(new FileWriter("payments.txt"));
                 for (String[] payment : payments) {
                     writer.write(String.join(",", payment));
                     writer.newLine();
                 }
+                writer.close();
             } catch (IOException e) {
-         
-
-               e.printStackTrace();
+                return false;
             }
-        
-            System.out.println("Receipt generated successfully.");
+    
+            return updated;
         }
 
         private int getValidatedChoice(Scanner scanner, int min, int max) {
