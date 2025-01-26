@@ -1126,11 +1126,12 @@ public class APUHostelManagement {
                         continue;
                     }
                 }
+                double currentRate=0;
         
-                double dailyRate = getValidatedRate(scanner, "Daily Rate");
-                double weeklyRate = getValidatedRate(scanner, "Weekly Rate");
-                double monthlyRate = getValidatedRate(scanner, "Monthly Rate");
-                double yearlyRate = getValidatedRate(scanner, "Yearly Rate");
+                double dailyRate = validateRate("Daily Rate",currentRate);
+                double weeklyRate = validateRate("Weekly Rate", currentRate);
+                double monthlyRate = validateRate("Monthly Rate", currentRate);
+                double yearlyRate = validateRate("Yearly Rate", currentRate);
         
                 System.out.println("Fee Rate Details:");
                 System.out.println("Fee Rate ID: " + feeRateID);
@@ -1254,7 +1255,8 @@ public class APUHostelManagement {
                     System.out.println("Room type update cancelled.");
                 }
             } else {
-                double newRate = getValidatedRate(scanner, "new rate");
+                double currentRate = 0;
+                double newRate = validateRate("new rate", currentRate);
                 if (newRate == getCurrentRate(rateToUpdate, attributeChoice)) {
                     System.out.println("The new rate is the same as the current rate.");
                     return;
@@ -1455,24 +1457,18 @@ public class APUHostelManagement {
             return restrictedFeeRateIDs;
         }
 
-
-        private double getValidatedRate(Scanner scanner, String rateType) {
-            double rate = -1;
-            while (rate <= 0) {
-                System.out.print("Enter " + rateType + ": ");
-                if (scanner.hasNextDouble()) {
-                    rate = scanner.nextDouble();
-                    scanner.nextLine(); // Consume newline
-                    if (rate <= 0) {
-                        System.out.println(rateType + " must be greater than zero. Please enter a valid rate.");
-                    }
-                } else {
-                    System.out.println("Invalid input. Please enter a valid " + rateType + ".");
-                    scanner.nextLine(); // Consume invalid input
-                }
+        public static double validateRate(String rateType, double currentRate) {
+            if (currentRate <= 0) {
+                throw new IllegalArgumentException(rateType + " must be greater than zero");
             }
-            return rate;
+            return currentRate;
         }
+
+        public static String generateFeeRateID(int currentSize) {
+            return "FR" + String.format("%02d", currentSize + 1);
+        }
+
+
         
         static void saveRatesToFile(List<FeeRate> rates) {
             try (BufferedWriter writer = new BufferedWriter(new FileWriter("fee_rates.txt"))) {

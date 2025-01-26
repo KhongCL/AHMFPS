@@ -137,21 +137,52 @@ public class ManagerManageRatesGUI {
     }
 
     private void setInitialRates() {
-        String feeRateID = "FR" + String.format("%02d", rateList.size() + 1);
-    
+        String feeRateID = APUHostelManagement.Manager.generateFeeRateID(rateList.size());
+        
         String[] roomTypes = {"Standard", "Large", "Family"};
-        String roomType = (String) JOptionPane.showInputDialog(frame, "Select Room Type:", "Set Initial Rates", JOptionPane.QUESTION_MESSAGE, null, roomTypes, roomTypes[0]);
+        String roomType = (String) JOptionPane.showInputDialog(frame, "Select Room Type:", "Set Initial Rates", 
+            JOptionPane.QUESTION_MESSAGE, null, roomTypes, roomTypes[0]);
         if (roomType == null) return;
     
-        double dailyRate = getValidatedRate("Daily Rate", 0);
-        double weeklyRate = getValidatedRate("Weekly Rate", 0);
-        double monthlyRate = getValidatedRate("Monthly Rate", 0);
-        double yearlyRate = getValidatedRate("Yearly Rate", 0);
+        try {
+            double dailyRate = APUHostelManagement.Manager.validateRate("Daily Rate", getValidatedRate("Daily Rate", 0));
+            double weeklyRate = APUHostelManagement.Manager.validateRate("Weekly Rate", getValidatedRate("Weekly Rate", 0));
+            double monthlyRate = APUHostelManagement.Manager.validateRate("Monthly Rate", getValidatedRate("Monthly Rate", 0)); 
+            double yearlyRate = APUHostelManagement.Manager.validateRate("Yearly Rate", getValidatedRate("Yearly Rate", 0));
     
-        rateList.add(new APUHostelManagement.FeeRate(feeRateID, roomType.toLowerCase(), dailyRate, weeklyRate, monthlyRate, yearlyRate, true));
-        saveRatesToFile();
-        loadRates(); // Refresh the table
-        JOptionPane.showMessageDialog(frame, "Rate added successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
+            // Show fee rate details and confirm
+            String message = String.format("""
+                Fee Rate Details:
+                Fee Rate ID: %s
+                Room Type: %s
+                Daily Rate: %.2f
+                Weekly Rate: %.2f
+                Monthly Rate: %.2f
+                Yearly Rate: %.2f
+                
+                Are you sure you want to add this rate?""",
+                feeRateID, roomType, dailyRate, weeklyRate, monthlyRate, yearlyRate);
+    
+            int confirm = JOptionPane.showConfirmDialog(frame, message, "Confirm Rate Addition", JOptionPane.YES_NO_OPTION);
+                
+            if (confirm != JOptionPane.YES_OPTION) {
+                JOptionPane.showMessageDialog(frame, "Rate addition cancelled.");
+                return;
+            }
+    
+            rateList.add(new APUHostelManagement.FeeRate(feeRateID, roomType.toLowerCase(), dailyRate, weeklyRate, monthlyRate, yearlyRate, true));
+            saveRatesToFile();
+            loadRates();
+            
+            // Ask if user wants to add another rate
+            int addMore = JOptionPane.showConfirmDialog(frame, "Do you want to add another rate?","Add Another Rate", JOptionPane.YES_NO_OPTION);
+            if (addMore == JOptionPane.YES_OPTION) {
+                setInitialRates(); // Recursive call to add another rate
+            }
+            
+        } catch (IllegalArgumentException e) {
+            JOptionPane.showMessageDialog(frame, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
     
     private void updateRate() {
