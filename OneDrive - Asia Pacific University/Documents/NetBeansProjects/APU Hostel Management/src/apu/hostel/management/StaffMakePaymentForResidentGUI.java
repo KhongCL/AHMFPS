@@ -2,6 +2,7 @@ package apu.hostel.management;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+
 import java.awt.*;
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -72,23 +73,28 @@ public class StaffMakePaymentForResidentGUI {
             int row = 0;
             while ((line = reader.readLine()) != null) {
                 String[] payment = line.split(",");
-                if (payment[7].equalsIgnoreCase("pending")) {
+                // Check if payment status is "pending" and booking status is "active"
+                if (payment[7].equalsIgnoreCase("pending") && payment[10].equalsIgnoreCase("active")) {
                     paymentDetailsMap.put(row, payment);
                     tableModel.addRow(new Object[]{
-                        payment[0], payment[1], "RM" + payment[6]
+                        payment[0],  // Payment ID
+                        payment[1],  // Resident ID
+                        "RM" + payment[6]  // Amount
                     });
                     row++;
                 }
             }
         } catch (IOException e) {
-            JOptionPane.showMessageDialog(frame, "Error loading payments", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(frame, "Error loading payments", 
+                "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
     private void showPaymentConfirmation() {
         int selectedRow = paymentTable.getSelectedRow();
         if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(frame, "Please select a payment to make payment for.", 
+            JOptionPane.showMessageDialog(frame, 
+                "Please select a payment to make payment for.", 
                 "Warning", JOptionPane.WARNING_MESSAGE);
             return;
         }
@@ -98,7 +104,7 @@ public class StaffMakePaymentForResidentGUI {
         // Create payment details table
         String[][] data = {
             {"Payment ID", selectedPayment[0]},
-            {"Resident ID", selectedPayment[1]},
+            {"Resident ID", selectedPayment[1]}, 
             {"Staff ID", selectedPayment[2]},
             {"Start Date", selectedPayment[3]},
             {"End Date", selectedPayment[4]},
@@ -109,23 +115,28 @@ public class StaffMakePaymentForResidentGUI {
             {"Payment Method", selectedPayment[9]},
             {"Booking Status", selectedPayment[10]}
         };
+
         String[] columnNames = {"Field", "Value"};
         JTable detailsTable = new JTable(data, columnNames);
         detailsTable.setEnabled(false);
         
-        // Create confirmation dialog
         JPanel panel = new JPanel(new BorderLayout(10, 10));
         panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         panel.add(new JScrollPane(detailsTable), BorderLayout.CENTER);
+        
         JLabel confirmLabel = new JLabel("Are you sure to make payment for this booking?");
         confirmLabel.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
         panel.add(confirmLabel, BorderLayout.SOUTH);
         
-        int result = JOptionPane.showConfirmDialog(frame, panel, "Payment Confirmation",
-            JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+        int result = JOptionPane.showConfirmDialog(frame, panel, 
+            "Payment Confirmation",
+            JOptionPane.YES_NO_OPTION, 
+            JOptionPane.QUESTION_MESSAGE);
             
         if (result == JOptionPane.YES_OPTION) {
-            if (APUHostelManagement.Staff.processPendingPayment(selectedPayment[0], staff.getStaffID())) {
+            if (APUHostelManagement.Staff.processPendingPayment(
+                    selectedPayment[0], 
+                    staff.getStaffID())) {
                 JOptionPane.showMessageDialog(frame, "Payment processed successfully");
                 loadPendingPayments(); // Refresh table
             } else {

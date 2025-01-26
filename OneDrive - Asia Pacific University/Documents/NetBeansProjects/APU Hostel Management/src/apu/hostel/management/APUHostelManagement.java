@@ -1933,44 +1933,6 @@ public class APUHostelManagement {
             return staffs;
         }
 
-        public static boolean processPendingPayment(String paymentId, String staffId) {
-            List<String[]> payments = new ArrayList<>();
-            boolean success = false;
-            
-            try (BufferedReader reader = new BufferedReader(new FileReader("payments.txt"))) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    payments.add(line.split(","));
-                }
-            } catch (IOException e) {
-                return false;
-            }
-
-            // Update payment
-            for (String[] payment : payments) {
-                if (payment[0].equals(paymentId)) {
-                    payment[2] = staffId;
-                    payment[7] = "paid";
-                    success = true;
-                    break;
-                }
-            }
-
-            // Save updated payments
-            if (success) {
-                try (BufferedWriter writer = new BufferedWriter(new FileWriter("payments.txt"))) {
-                    for (String[] payment : payments) {
-                        writer.write(String.join(",", payment));
-                        writer.newLine();
-                    }
-                } catch (IOException e) {
-                    return false;
-                }
-            }
-
-            return success;
-        }
-
         // Define a single Scanner instance at the Staff class level
         private static final Scanner scanner = new Scanner(System.in);
 
@@ -2222,7 +2184,7 @@ public class APUHostelManagement {
             System.out.println("Payment updated successfully.");
         }
 
-        private List<Room> readRoomsFromFile(String filename) {
+        private static List<Room> readRoomsFromFile(String filename) {
             List<Room> rooms = new ArrayList<>();
             try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
                 String line;
@@ -2237,8 +2199,8 @@ public class APUHostelManagement {
             }
             return rooms;
         }
-
-        private void saveRoomsToFile(List<Room> rooms) {
+        
+        private static void saveRoomsToFile(List<Room> rooms) {
             try (BufferedWriter writer = new BufferedWriter(new FileWriter("rooms.txt"))) {
                 for (Room room : rooms) {
                     writer.write(room.toString());
@@ -2247,6 +2209,61 @@ public class APUHostelManagement {
                 System.out.println("Rooms updated successfully.");
             } catch (IOException e) {
             }
+        }
+                
+        public static boolean processPendingPayment(String paymentId, String staffId) {
+            List<String[]> payments = new ArrayList<>();
+            boolean success = false;
+            
+            try (BufferedReader reader = new BufferedReader(new FileReader("payments.txt"))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    payments.add(line.split(","));
+                }
+            } catch (IOException e) {
+                return false;
+            }
+    
+            // Update payment
+            String roomId = null;
+            for (String[] payment : payments) {
+                if (payment[0].equals(paymentId)) {
+                    payment[2] = staffId;  // Update staffID
+                    payment[7] = "paid";  // Update status
+                    roomId = payment[5]; // Store room ID
+                    success = true;
+                    break;
+                }
+            }
+    
+            if (success) {
+                // Update room status
+                List<Room> rooms = readRoomsFromFile("rooms.txt");
+                for (Room room : rooms) {
+                    if (room.getRoomID().equals(roomId)) {
+                        room.setRoomStatus("available");
+                        break;
+                    }
+                }
+    
+                try {
+                    // Save updated room status
+                    saveRoomsToFile(rooms);
+            
+                    // Save updated payment status 
+                    BufferedWriter writer = new BufferedWriter(new FileWriter("payments.txt"));
+                    for (String[] payment : payments) {
+                        writer.write(String.join(",", payment));
+                        writer.newLine();
+                    }
+                    writer.close();
+                    return true;
+                } catch (IOException e) {
+                    return false;
+                }
+            }
+
+            return false;
         }
 
         public void generateReceipt() {
@@ -3699,21 +3716,22 @@ public class APUHostelManagement {
     // Payment class
     public static class Payment {
         private String paymentID;
-        private String residentID;
+        private String residentID; 
         private String staffID;
         private double amount;
         private String bookingDate;
         private String roomNumber;
-        private String paymentMethod;
-
-        public Payment(String paymentID, String residentID, String staffID, double amount, String bookingDate, String roomNumber, String paymentMethod) {
+        private String paymentStatus;
+    
+        public Payment(String paymentID, String residentID, String staffID, 
+                      double amount, String bookingDate, String roomNumber, String paymentStatus) {
             this.paymentID = paymentID;
             this.residentID = residentID;
             this.staffID = staffID;
             this.amount = amount;
-            this.bookingDate = bookingDate;
+            this.bookingDate = bookingDate; 
             this.roomNumber = roomNumber;
-            this.paymentMethod = paymentMethod;
+            this.paymentStatus = paymentStatus;
         }
 
         public String getPaymentID() {
@@ -3740,13 +3758,13 @@ public class APUHostelManagement {
             return roomNumber;
         }
 
-        public String getPaymentMethod() {
-            return paymentMethod;
+        public String getPaymentStatus() {
+            return paymentStatus;
         }
 
         public void saveToFile(String filename) throws IOException {
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename, true))) {
-                writer.write(paymentID + "," + residentID + "," + (staffID != null ? staffID : "NULL") + "," + amount + "," + bookingDate + "," + roomNumber + "," + (paymentMethod != null ? paymentMethod : "NULL"));
+                writer.write(paymentID + "," + residentID + "," + (staffID != null ? staffID : "NULL") + "," + amount + "," + bookingDate + "," + roomNumber + "," + (paymentStatus != null ? paymentStatus : "NULL"));
                 writer.newLine();
             }
         }

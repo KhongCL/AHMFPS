@@ -290,7 +290,7 @@ public class ManagerManageUsersGUI {
     }
 
     private void sortUsers() {
-        String[] sortOptions = {"Primary Key Ascending", "Primary Key Descending", "Username Ascending", "Username Descending"};
+        String[] sortOptions = {"User ID Ascending", "User ID Descending", "Username Ascending", "Username Descending"};
         String sortChoice = (String) JOptionPane.showInputDialog(frame, "Select sort option:", "Sort Users", JOptionPane.QUESTION_MESSAGE, null, sortOptions, sortOptions[0]);
 
         if (sortChoice == null) {
@@ -300,10 +300,10 @@ public class ManagerManageUsersGUI {
         List<APUHostelManagement.User> sortedUsers = new ArrayList<>(filteredUserList);
 
         switch (sortChoice) {
-            case "Primary Key Ascending":
+            case "User ID Ascending":
                 sortedUsers.sort(Comparator.comparing(APUHostelManagement.User::getUserID));
                 break;
-            case "Primary Key Descending":
+            case "User ID Descending":
                 sortedUsers.sort(Comparator.comparing(APUHostelManagement.User::getUserID).reversed());
                 break;
             case "Username Ascending":
