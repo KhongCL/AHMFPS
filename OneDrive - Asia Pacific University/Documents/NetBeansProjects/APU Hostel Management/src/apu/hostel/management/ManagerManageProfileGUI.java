@@ -270,31 +270,100 @@ public class ManagerManageProfileGUI {
         String newUsername = usernameField.getText().trim();
         String newPassword = new String(passwordField.getPassword()).trim();
         String newContactNumber = contactNumberField.getText().trim();
+        boolean hasErrors = false;
+        boolean hasChanges = false;
     
         try {
+            // Check if any changes were made
+            if (newIcPassportNumber.equals(manager.getIcPassportNumber()) &&
+                newUsername.equals(manager.getUsername()) &&
+                newPassword.equals(manager.getPassword()) &&
+                newContactNumber.equals(manager.getContactNumber())) {
+                JOptionPane.showMessageDialog(frame, "No changes were made to the profile.",
+                    "Information", JOptionPane.INFORMATION_MESSAGE);
+                return;
+            }
+    
+            // IC/Passport Number
             if (!newIcPassportNumber.equals(manager.getIcPassportNumber())) {
-                APUHostelManagement.validateICPassport(newIcPassportNumber);
-                manager.setIcPassportNumber(newIcPassportNumber);
+                String icError = APUHostelManagement.validateUpdateICPassport(newIcPassportNumber, manager.getIcPassportNumber());
+                if (icError != null) {
+                    int retry = JOptionPane.showConfirmDialog(frame, 
+                        icError + "\nDo you want to try again?", 
+                        "Error", JOptionPane.YES_NO_OPTION);
+                    if (retry == JOptionPane.YES_OPTION) {
+                        hasErrors = true;
+                    } else {
+                        icPassportField.setText(manager.getIcPassportNumber());
+                    }
+                } else if (!hasErrors) {
+                    manager.setIcPassportNumber(newIcPassportNumber);
+                    hasChanges = true;
+                }
             }
     
+            // Username  
             if (!newUsername.equals(manager.getUsername())) {
-                APUHostelManagement.validateUsername(newUsername);
-                manager.setUsername(newUsername);
+                String usernameError = APUHostelManagement.validateUpdateUsername(newUsername, manager.getUsername());
+                if (usernameError != null) {
+                    int retry = JOptionPane.showConfirmDialog(frame,
+                        usernameError + "\nDo you want to try again?",
+                        "Error", JOptionPane.YES_NO_OPTION);
+                    if (retry == JOptionPane.YES_OPTION) {
+                        hasErrors = true;
+                    } else {
+                        usernameField.setText(manager.getUsername());
+                    }
+                } else if (!hasErrors) {
+                    manager.setUsername(newUsername);
+                    hasChanges = true;
+                }
             }
     
+            // Password
             if (!newPassword.equals(manager.getPassword())) {
-                APUHostelManagement.validatePassword(newPassword, newUsername);
-                manager.setPassword(newPassword);
+                String passwordError = APUHostelManagement.validateUpdatePassword(newPassword, newUsername);
+                if (passwordError != null) {
+                    int retry = JOptionPane.showConfirmDialog(frame,
+                        passwordError + "\nDo you want to try again?",
+                        "Error", JOptionPane.YES_NO_OPTION);
+                    if (retry == JOptionPane.YES_OPTION) {
+                        hasErrors = true;
+                    } else {
+                        passwordField.setText(manager.getPassword());
+                    }
+                } else if (!hasErrors) {
+                    manager.setPassword(newPassword);
+                    hasChanges = true;
+                }
             }
     
+            // Contact Number
             if (!newContactNumber.equals(manager.getContactNumber())) {
-                APUHostelManagement.validateContactNumber(newContactNumber);
-                manager.setContactNumber(newContactNumber);
+                String contactError = APUHostelManagement.validateUpdateContactNumber(newContactNumber, manager.getContactNumber());
+                if (contactError != null) {
+                    int retry = JOptionPane.showConfirmDialog(frame,
+                        contactError + "\nDo you want to try again?",
+                        "Error", JOptionPane.YES_NO_OPTION);
+                    if (retry == JOptionPane.YES_OPTION) {
+                        hasErrors = true;
+                    } else {
+                        contactNumberField.setText(manager.getContactNumber());
+                    }
+                } else if (!hasErrors) {
+                    manager.setContactNumber(newContactNumber);
+                    hasChanges = true;
+                }
             }
     
-            updateUserFiles();
-            JOptionPane.showMessageDialog(frame, "Profile updated successfully.", 
-                "Success", JOptionPane.INFORMATION_MESSAGE);
+            if (!hasErrors && hasChanges) {
+                updateUserFiles();
+                JOptionPane.showMessageDialog(frame, "Profile updated successfully.", 
+                    "Success", JOptionPane.INFORMATION_MESSAGE);
+                frame.dispose();
+                new ManagerManageProfileGUI(manager);
+            }
+    
         } catch (Exception e) {
             JOptionPane.showMessageDialog(frame, e.getMessage(),
                 "Error", JOptionPane.ERROR_MESSAGE);
