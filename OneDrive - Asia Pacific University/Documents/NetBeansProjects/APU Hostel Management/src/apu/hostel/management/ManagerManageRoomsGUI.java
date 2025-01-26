@@ -147,28 +147,28 @@ public class ManagerManageRoomsGUI {
             JOptionPane.showMessageDialog(frame, "An error occurred while loading fee rates.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
-
+    
         String roomId = "RM" + String.format("%02d", roomList.size() + 1);
         int roomNumber = 101 + roomList.size();
-
+    
         String[] roomTypes = feeRates.stream()
                 .map(APUHostelManagement.FeeRate::getRoomType)
                 .distinct()
                 .toArray(String[]::new);
-
+    
         String selectedRoomType = (String) JOptionPane.showInputDialog(frame, "Select Room Type:", "Add Room", JOptionPane.QUESTION_MESSAGE, null, roomTypes, roomTypes[0]);
         if (selectedRoomType == null) return;
-
+    
         APUHostelManagement.FeeRate selectedFeeRate = feeRates.stream()
                 .filter(rate -> rate.getRoomType().equalsIgnoreCase(selectedRoomType))
                 .findFirst()
                 .orElse(null);
-
+    
         if (selectedFeeRate == null) {
             JOptionPane.showMessageDialog(frame, "No fee rate found for the selected room type.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
-
+    
         int roomCapacity;
         switch (selectedRoomType.toLowerCase()) {
             case "standard" -> roomCapacity = 1;
@@ -179,18 +179,41 @@ public class ManagerManageRoomsGUI {
                 return;
             }
         }
-
+    
         APUHostelManagement.Room newRoom = new APUHostelManagement.Room(roomId, selectedFeeRate.getFeeRateID(), selectedRoomType, roomNumber, "available", roomCapacity, true);
-
-        int confirm = JOptionPane.showConfirmDialog(frame, "Do you want to add this room?\n" + newRoom, "Confirm Addition", JOptionPane.YES_NO_OPTION);
+    
+        // Show room details and confirm
+        String message = String.format("""
+            Room Details:
+            Room ID: %s
+            Fee Rate ID: %s
+            Room Type: %s
+            Room Number: %d
+            Room Status: %s
+            Room Capacity: %d
+            
+            Do you want to add this room?""",
+            newRoom.getRoomID(), newRoom.getFeeRateID(), newRoom.getRoomType(),
+            newRoom.getRoomNumber(), newRoom.getRoomStatus(), newRoom.getRoomCapacity());
+    
+        int confirm = JOptionPane.showConfirmDialog(frame, message, "Confirm Addition", JOptionPane.YES_NO_OPTION);
         if (confirm != JOptionPane.YES_OPTION) {
+            JOptionPane.showMessageDialog(frame, "Room addition cancelled.");
             return;
         }
-
+    
         roomList.add(newRoom);
         saveRoomsToFile();
-        loadRooms(); // Refresh the table
-        JOptionPane.showMessageDialog(frame, "Room added successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
+        loadRooms();
+        
+        // Ask if user wants to add another room
+        int addMore = JOptionPane.showConfirmDialog(frame, 
+            "Do you want to add another room?",
+            "Add Another Room", 
+            JOptionPane.YES_NO_OPTION);
+        if (addMore == JOptionPane.YES_OPTION) {
+            addRoom(); // Recursive call to add another room
+        }
     }
 
     private void updateRoomStatus() {
