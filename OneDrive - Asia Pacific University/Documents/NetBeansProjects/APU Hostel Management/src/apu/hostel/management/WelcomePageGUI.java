@@ -1,6 +1,7 @@
 package apu.hostel.management;
 
 import javax.swing.*;
+import javax.swing.border.TitledBorder;
 
 import apu.hostel.management.APUHostelManagement.User;
 
@@ -490,6 +491,41 @@ public class WelcomePageGUI extends JFrame {
         centerPanel.add(registerButton);
     
         panel.add(centerPanel, BorderLayout.CENTER);
+
+        // Add the new format requirements panel here
+        JPanel formatPanel = new JPanel(new GridLayout(4, 1, 5, 5));
+        formatPanel.setBorder(BorderFactory.createTitledBorder("Format Requirements"));
+
+        JLabel icLabel = new JLabel("• IC: XXXXXX-XX-XXXX or Passport: AXXXXXXXX", SwingConstants.LEFT);
+        JLabel usernameLabel = new JLabel("• Username: 3-12 chars, letters, numbers, underscore (_)", SwingConstants.LEFT);
+        JLabel passwordLabel = new JLabel("• Password: 8-12 chars, 1 uppercase, 1 number, 1 special (!@#$%^&*())", SwingConstants.LEFT);
+        JLabel contactLabel = new JLabel("• Contact: 01X-XXX-XXXX (Example: 012-345-6789)", SwingConstants.LEFT);
+
+        // Set font for all labels
+        Font labelFont = new Font("Arial", Font.PLAIN, 14);
+        icLabel.setFont(labelFont);
+        usernameLabel.setFont(labelFont);
+        passwordLabel.setFont(labelFont);
+        contactLabel.setFont(labelFont);
+
+        formatPanel.add(icLabel);
+        formatPanel.add(usernameLabel);
+        formatPanel.add(passwordLabel);
+        formatPanel.add(contactLabel);
+
+        // Add some padding around the format panel
+        formatPanel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createTitledBorder(
+                BorderFactory.createLineBorder(Color.GRAY),
+                "Format Requirements",
+                TitledBorder.LEFT,
+                TitledBorder.TOP,
+                new Font("Arial", Font.BOLD, 16)
+            ),
+            BorderFactory.createEmptyBorder(5, 10, 5, 10)
+        ));
+
+        panel.add(formatPanel, BorderLayout.SOUTH);
     
         // Add a component listener to reset the fields when the panel is shown
         panel.addComponentListener(new ComponentAdapter() {

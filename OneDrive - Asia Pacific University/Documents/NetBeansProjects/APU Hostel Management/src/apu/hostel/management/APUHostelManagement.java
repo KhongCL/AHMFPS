@@ -4050,7 +4050,7 @@ public class APUHostelManagement {
         }
         
         if (!username.matches("^[a-zA-Z0-9_]*$")) {
-            throw new Exception("Username can only contain letters, numbers, and underscores");
+            throw new Exception("Username can only contain letters, numbers, and underscores (_)");
         }
         
         if (!username.matches(".*[a-zA-Z]+.*")) {
@@ -4093,20 +4093,18 @@ public class APUHostelManagement {
     }
     
     public static void validateContactNumber(String contactNumber) throws Exception {
-        if (contactNumber.length() != 12) {
-            throw new Exception("Contact number must be 12 characters long");
+        // First check if the raw number format is valid (without hyphens)
+        String rawNumber = contactNumber.replace("-", "");
+        if (!rawNumber.matches("^01\\d{8}$")) {
+            throw new Exception("Contact number must be in format: 01X-XXX-XXXX (with hyphens)");
         }
         
-        if (!contactNumber.startsWith("01")) {
-            throw new Exception("Contact number must start with '01'");
+        if (contactNumber.length() != 12) {
+            throw new Exception("Contact number must be in format: 01X-XXX-XXXX (Example: 012-345-6789)");
         }
         
         if (contactNumber.charAt(3) != '-' || contactNumber.charAt(7) != '-') {
-            throw new Exception("Contact number must have hyphens in correct positions (01X-XXX-XXXX)");
-        }
-        
-        if (!contactNumber.replace("-", "").matches("\\d+")) {
-            throw new Exception("Contact number must contain only numbers between hyphens");
+            throw new Exception("Contact number must contain hyphens in correct positions (Example: 012-345-6789)");
         }
         
         try {
@@ -4146,7 +4144,7 @@ public class APUHostelManagement {
         String userID = generateUserID("U");
         String managerID = generateUserID("M");
         Manager manager = new Manager(managerID, userID, icPassportNumber, username, password, 
-            contactNumber, dateOfRegistration, "manager", false, null);
+            contactNumber, dateOfRegistration, "manager", true, null);
         manager.saveToManagerFile(null, null, "unapproved_managers.txt");
     }
     
