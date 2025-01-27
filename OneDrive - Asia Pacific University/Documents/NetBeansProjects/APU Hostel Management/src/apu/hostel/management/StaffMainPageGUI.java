@@ -91,6 +91,9 @@ public class StaffMainPageGUI {
     }
 
     private void logout() {
+        if (staff != null) {
+            staff.logout(); 
+        }
         JOptionPane.showMessageDialog(frame, "Logging out...");
         frame.dispose();
         WelcomePageGUI welcomePage = new WelcomePageGUI();

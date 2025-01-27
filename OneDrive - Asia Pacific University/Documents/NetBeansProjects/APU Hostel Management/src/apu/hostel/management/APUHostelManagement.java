@@ -2350,6 +2350,20 @@ public class APUHostelManagement {
             }
             return choice;
         }
+
+        public void logout() {
+            // Clear staff data
+            this.userID = null;
+            this.icPassportNumber = null; 
+            this.username = null;
+            this.password = null;
+            this.contactNumber = null;
+            this.dateOfRegistration = null;
+            this.role = null;
+            this.isActive = false;
+            this.staffID = null;
+            this.dateOfApproval = null;
+        }
     }
 
     // Resident class
@@ -2410,7 +2424,264 @@ public class APUHostelManagement {
             return residents;
         }
 
+        // Define a single Scanner instance at the Resident class level
+        private static final Scanner scanner = new Scanner(System.in);
 
+        @Override
+        public void displayMenu() {
+            // Resident-specific menu implementation
+            System.out.println("Resident Menu:");
+            System.out.println("1. Update Personal Information");
+            System.out.println("2. View Payment Records");
+            System.out.println("3. Manage Bookings");
+            System.out.println("4. Logout");
+            System.out.print("Enter your choice: ");
+        
+            int choice = getValidatedChoice(scanner, 1, 4);
+        
+            switch (choice) {
+                case 1 -> updatePersonalInformation();
+                case 2 -> viewPaymentRecords();
+                case 3 -> manageBookings();
+                case 4 -> residentLogout();
+                default -> {
+                    System.out.println("Invalid choice. Please try again.");
+                    displayMenu(); // Recursively call to retry
+                }
+            }
+            displayMenu();
+        }
+
+        public void updatePersonalInformation() {
+            int choice;
+        
+            do {
+                System.out.println("Update Personal Information:");
+                System.out.println("1. Update IC Passport Number");
+                System.out.println("2. Update Username");
+                System.out.println("3. Update Password");
+                System.out.println("4. Update Contact Number");
+                System.out.println("0. Go Back to Resident Menu");
+                System.out.print("Enter your choice: ");
+                choice = getValidatedChoice(scanner, 0, 4);
+        
+                switch (choice) {
+                    case 1 -> {
+                        System.out.println("Current IC Passport Number: " + this.icPassportNumber);
+                        while (true) {
+                            System.out.print("Enter new IC Passport Number: ");
+                            String newIcPassportNumber = scanner.nextLine();
+                            String error = validateUpdateICPassport(newIcPassportNumber, this.icPassportNumber);
+                            if (error != null) {
+                                System.out.println(error);
+                                System.out.print("Do you want to try again? (yes/no): ");
+                                if (!scanner.nextLine().equalsIgnoreCase("yes")) {
+                                    break;
+                                }
+                                continue;
+                            }
+                            this.icPassportNumber = newIcPassportNumber;
+                            System.out.println("IC Passport Number updated successfully.");
+                            break;
+                        }
+                    }
+                    case 2 -> {
+                        System.out.println("Current Username: " + this.username);
+                        while (true) {
+                            System.out.print("Enter new username: ");
+                            String newUsername = scanner.nextLine();
+                            String error = validateUpdateUsername(newUsername, this.username);
+                            if (error != null) {
+                                System.out.println(error);
+                                System.out.print("Do you want to try again? (yes/no): ");
+                                if (!scanner.nextLine().equalsIgnoreCase("yes")) {
+                                    break;
+                                }
+                                continue;
+                            }
+                            this.username = newUsername;
+                            System.out.println("Username updated successfully.");
+                            break;
+                        }
+                    }
+                    case 3 -> {
+                        System.out.println("Current Password: " + this.password);
+                        while (true) {
+                            System.out.print("Enter new password: ");
+                            String newPassword = scanner.nextLine();
+                            String error = validateUpdatePassword(newPassword, this.username);
+                            if (error != null) {
+                                System.out.println(error);
+                                System.out.print("Do you want to try again? (yes/no): ");
+                                if (!scanner.nextLine().equalsIgnoreCase("yes")) {
+                                    break;
+                                }
+                                continue;
+                            }
+                            this.password = newPassword;
+                            System.out.println("Password updated successfully.");
+                            break;
+                        }
+                    }
+                    case 4 -> {
+                        System.out.println("Current Contact Number: " + this.contactNumber);
+                        while (true) {
+                            System.out.print("Enter new contact number: ");
+                            String newContactNumber = scanner.nextLine();
+                            String error = validateUpdateContactNumber(newContactNumber, this.contactNumber);
+                            if (error != null) {
+                                System.out.println(error);
+                                System.out.print("Do you want to try again? (yes/no): ");
+                                if (!scanner.nextLine().equalsIgnoreCase("yes")) {
+                                    break;
+                                }
+                                continue;
+                            }
+                            this.contactNumber = newContactNumber;
+                            System.out.println("Contact number updated successfully.");
+                            break;
+                        }
+                    }
+                    case 0 -> {
+                        System.out.println("Returning to Resident Menu...");
+                        return;
+                    }
+                    default -> System.out.println("Invalid choice. Please try again.");
+                }
+        
+                try {
+                    updateFile("approved_residents.txt");
+                    updateFile("users.txt");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            } while (choice != 0);
+        }
+        
+        private void updateFile(String filename) throws IOException {
+            List<User> users = User.readFromFile(filename);
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
+                for (User user : users) {
+                    if (user.getUserID().equals(this.userID)) {
+                        if (filename.equals("users.txt")) {
+                            writer.write(this.userID + "," + this.icPassportNumber + "," + this.username + "," + this.password + "," + this.contactNumber + "," + this.dateOfRegistration + "," + this.role + "," + this.isActive);
+                        } else if (user instanceof Staff staff) {
+                            writer.write(staff.getStaffID() + "," + this.userID + "," + this.icPassportNumber + "," + this.username + "," + this.password + "," + this.contactNumber + "," + this.dateOfRegistration + "," + this.role + "," + this.isActive + "," + staff.getDateOfApproval());
+                        } else if (user instanceof Resident resident) {
+                            writer.write(resident.getResidentID() + "," + this.userID + "," + this.icPassportNumber + "," + this.username + "," + this.password + "," + this.contactNumber + "," + this.dateOfRegistration + "," + this.role + "," + this.isActive + "," + resident.getDateOfApproval());
+                        }
+                    } else {
+                        if (filename.equals("users.txt")) {
+                            writer.write(user.getUserID() + "," + user.getIcPassportNumber() + "," + user.getUsername() + "," + user.getPassword() + "," + user.getContactNumber() + "," + user.getDateOfRegistration() + "," + user.getRole() + "," + user.getIsActive());
+                        } else if (user instanceof Staff staff) {
+                            writer.write(staff.getStaffID() + "," + staff.getUserID() + "," + staff.getIcPassportNumber() + "," + staff.getUsername() + "," + staff.getPassword() + "," + staff.getContactNumber() + "," + staff.getDateOfRegistration() + "," + staff.getRole() + "," + staff.getIsActive() + "," + staff.getDateOfApproval());
+                        } else if (user instanceof Resident resident) {
+                            writer.write(resident.getResidentID() + "," + resident.getUserID() + "," + resident.getIcPassportNumber() + "," + resident.getUsername() + "," + resident.getPassword() + "," + resident.getContactNumber() + "," + resident.getDateOfRegistration() + "," + resident.getRole() + "," + resident.getIsActive() + "," + resident.getDateOfApproval());
+                        }
+                    }
+                    writer.newLine();
+                }
+            }
+        }
+
+        public static List<String[]> viewPaymentRecords(String residentID) {
+            List<String[]> paymentRecords = new ArrayList<>();
+            try (BufferedReader reader = new BufferedReader(new FileReader("payments.txt"))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    String[] details = line.split(",");
+                    if (details.length > 0 && details[1].equals(residentID) && !details[7].equals("unpaid") && !details[9].equals("null")) {
+                        paymentRecords.add(details);
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return paymentRecords;
+        }
+    
+        public void viewPaymentRecords() {
+            System.out.println("Payment Records:");
+            String residentID = this.getResidentID(); 
+        
+            // Read room data from rooms.txt and store it in a map
+            Map<String, String> roomMap = new HashMap<>();
+            try (BufferedReader roomReader = new BufferedReader(new FileReader("rooms.txt"))) {
+                String line;
+                while ((line = roomReader.readLine()) != null) {
+                    String[] parts = line.split(",");
+                    if (parts.length >= 4) {
+                        roomMap.put(parts[0], parts[3]); // Assuming parts[0] is RoomID and parts[3] is RoomNumber
+                    }
+                }
+            } catch (IOException e) {
+                System.out.println("An error occurred while reading the room data.");
+            }
+        
+            List<String[]> relevantPayments = new ArrayList<>();
+            try (BufferedReader br = new BufferedReader(new FileReader("payments.txt"))) {
+                String line;
+                while ((line = br.readLine()) != null) {
+                    String[] details = line.split(",");
+                    if (details[1].equals(residentID) && !details[7].equals("unpaid") && !details[10].equals("null")) { // Assuming the second element is the residentID, eighth is PaymentStatus, and eleventh is PaymentMethod
+                        relevantPayments.add(details);
+                    }
+                }
+            } catch (IOException e) {
+                System.out.println("An error occurred while reading the payment records.");
+            }
+        
+            if (relevantPayments.isEmpty()) {
+                System.out.println("No payment records found for your account.");
+                return;
+            }
+        
+            // Display the list of relevant payment records
+            System.out.println("Choose which Payment Record to view:");
+            for (int i = 0; i < relevantPayments.size(); i++) {
+                String[] details = relevantPayments.get(i);
+                System.out.printf("%d. Payment ID: %s, Payment Amount: RM %s, Booking Date: %s%n", i + 1, details[0], details[6], details[8]);
+            }
+        
+            // Get the user's choice
+            System.out.printf("Enter your choice (1-%d): ", relevantPayments.size());
+            int choice = getValidatedChoice(scanner, 1, relevantPayments.size());
+        
+            // Display the selected payment record in detail
+            String[] selectedDetails = relevantPayments.get(choice - 1);
+            String roomNumber = roomMap.getOrDefault(selectedDetails[5], "Unknown Room"); // Assuming the sixth element is RoomID
+            LocalDate startDate = LocalDate.parse(selectedDetails[3]); // Assuming the fourth element is StartDate
+            LocalDate endDate = LocalDate.parse(selectedDetails[4]); // Assuming the fifth element is EndDate
+            long stayDuration = ChronoUnit.DAYS.between(startDate, endDate);
+            System.out.println("Payment ID: " + selectedDetails[0]);
+            System.out.println("Payment Status: " + selectedDetails[7]);
+            System.out.println("Start Date: " + startDate);
+            System.out.println("End Date: " + endDate);
+            System.out.println("Stay Duration: " + stayDuration + " days");
+            System.out.println("Payment Amount: " + selectedDetails[6]);
+            System.out.println("Booking Date: " + selectedDetails[8]);
+            System.out.println("Room Number: " + roomNumber);
+            System.out.println("Payment Method: " + selectedDetails[9]);
+            System.out.println("Booking Status: " + selectedDetails[10]);
+            System.out.println("-----------------------------");
+        }
+
+        public static String getRoomNumber(String roomID) {
+            String roomNumber = "Unknown Room";
+            try (BufferedReader roomReader = new BufferedReader(new FileReader("rooms.txt"))) {
+                String line;
+                while ((line = roomReader.readLine()) != null) {
+                    String[] parts = line.split(",");
+                    if (parts[0].equals(roomID)) {
+                        roomNumber = parts[3]; // Assuming parts[3] is RoomNumber
+                        break;
+                    }
+                }
+            } catch (IOException e) {
+                System.out.println("An error occurred while reading the room data.");
+            }
+            return roomNumber;
+        }
 
         public static List<String[]> getRoomPricing() {
             List<String[]> roomPricing = new ArrayList<>();
@@ -2744,266 +3015,6 @@ public class APUHostelManagement {
                 e.printStackTrace();
             }
             return "Unknown Room Type";
-        }
-    
-
-        // Define a single Scanner instance at the Resident class level
-        private static final Scanner scanner = new Scanner(System.in);
-
-        @Override
-        public void displayMenu() {
-            // Resident-specific menu implementation
-            System.out.println("Resident Menu:");
-            System.out.println("1. Update Personal Information");
-            System.out.println("2. View Payment Records");
-            System.out.println("3. Manage Bookings");
-            System.out.println("4. Logout");
-            System.out.print("Enter your choice: ");
-        
-            int choice = getValidatedChoice(scanner, 1, 4);
-        
-            switch (choice) {
-                case 1 -> updatePersonalInformation();
-                case 2 -> viewPaymentRecords();
-                case 3 -> manageBookings();
-                case 4 -> residentLogout();
-                default -> {
-                    System.out.println("Invalid choice. Please try again.");
-                    displayMenu(); // Recursively call to retry
-                }
-            }
-            displayMenu();
-        }
-
-        public void updatePersonalInformation() {
-            int choice;
-        
-            do {
-                System.out.println("Update Personal Information:");
-                System.out.println("1. Update IC Passport Number");
-                System.out.println("2. Update Username");
-                System.out.println("3. Update Password");
-                System.out.println("4. Update Contact Number");
-                System.out.println("0. Go Back to Resident Menu");
-                System.out.print("Enter your choice: ");
-                choice = getValidatedChoice(scanner, 0, 4);
-        
-                switch (choice) {
-                    case 1 -> {
-                        System.out.println("Current IC Passport Number: " + this.icPassportNumber);
-                        while (true) {
-                            System.out.print("Enter new IC Passport Number: ");
-                            String newIcPassportNumber = scanner.nextLine();
-                            String error = validateUpdateICPassport(newIcPassportNumber, this.icPassportNumber);
-                            if (error != null) {
-                                System.out.println(error);
-                                System.out.print("Do you want to try again? (yes/no): ");
-                                if (!scanner.nextLine().equalsIgnoreCase("yes")) {
-                                    break;
-                                }
-                                continue;
-                            }
-                            this.icPassportNumber = newIcPassportNumber;
-                            System.out.println("IC Passport Number updated successfully.");
-                            break;
-                        }
-                    }
-                    case 2 -> {
-                        System.out.println("Current Username: " + this.username);
-                        while (true) {
-                            System.out.print("Enter new username: ");
-                            String newUsername = scanner.nextLine();
-                            String error = validateUpdateUsername(newUsername, this.username);
-                            if (error != null) {
-                                System.out.println(error);
-                                System.out.print("Do you want to try again? (yes/no): ");
-                                if (!scanner.nextLine().equalsIgnoreCase("yes")) {
-                                    break;
-                                }
-                                continue;
-                            }
-                            this.username = newUsername;
-                            System.out.println("Username updated successfully.");
-                            break;
-                        }
-                    }
-                    case 3 -> {
-                        System.out.println("Current Password: " + this.password);
-                        while (true) {
-                            System.out.print("Enter new password: ");
-                            String newPassword = scanner.nextLine();
-                            String error = validateUpdatePassword(newPassword, this.username);
-                            if (error != null) {
-                                System.out.println(error);
-                                System.out.print("Do you want to try again? (yes/no): ");
-                                if (!scanner.nextLine().equalsIgnoreCase("yes")) {
-                                    break;
-                                }
-                                continue;
-                            }
-                            this.password = newPassword;
-                            System.out.println("Password updated successfully.");
-                            break;
-                        }
-                    }
-                    case 4 -> {
-                        System.out.println("Current Contact Number: " + this.contactNumber);
-                        while (true) {
-                            System.out.print("Enter new contact number: ");
-                            String newContactNumber = scanner.nextLine();
-                            String error = validateUpdateContactNumber(newContactNumber, this.contactNumber);
-                            if (error != null) {
-                                System.out.println(error);
-                                System.out.print("Do you want to try again? (yes/no): ");
-                                if (!scanner.nextLine().equalsIgnoreCase("yes")) {
-                                    break;
-                                }
-                                continue;
-                            }
-                            this.contactNumber = newContactNumber;
-                            System.out.println("Contact number updated successfully.");
-                            break;
-                        }
-                    }
-                    case 0 -> {
-                        System.out.println("Returning to Resident Menu...");
-                        return;
-                    }
-                    default -> System.out.println("Invalid choice. Please try again.");
-                }
-        
-                try {
-                    updateFile("approved_residents.txt");
-                    updateFile("users.txt");
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            } while (choice != 0);
-        }
-        
-        private void updateFile(String filename) throws IOException {
-            List<User> users = User.readFromFile(filename);
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
-                for (User user : users) {
-                    if (user.getUserID().equals(this.userID)) {
-                        if (filename.equals("users.txt")) {
-                            writer.write(this.userID + "," + this.icPassportNumber + "," + this.username + "," + this.password + "," + this.contactNumber + "," + this.dateOfRegistration + "," + this.role + "," + this.isActive);
-                        } else if (user instanceof Staff staff) {
-                            writer.write(staff.getStaffID() + "," + this.userID + "," + this.icPassportNumber + "," + this.username + "," + this.password + "," + this.contactNumber + "," + this.dateOfRegistration + "," + this.role + "," + this.isActive + "," + staff.getDateOfApproval());
-                        } else if (user instanceof Resident resident) {
-                            writer.write(resident.getResidentID() + "," + this.userID + "," + this.icPassportNumber + "," + this.username + "," + this.password + "," + this.contactNumber + "," + this.dateOfRegistration + "," + this.role + "," + this.isActive + "," + resident.getDateOfApproval());
-                        }
-                    } else {
-                        if (filename.equals("users.txt")) {
-                            writer.write(user.getUserID() + "," + user.getIcPassportNumber() + "," + user.getUsername() + "," + user.getPassword() + "," + user.getContactNumber() + "," + user.getDateOfRegistration() + "," + user.getRole() + "," + user.getIsActive());
-                        } else if (user instanceof Staff staff) {
-                            writer.write(staff.getStaffID() + "," + staff.getUserID() + "," + staff.getIcPassportNumber() + "," + staff.getUsername() + "," + staff.getPassword() + "," + staff.getContactNumber() + "," + staff.getDateOfRegistration() + "," + staff.getRole() + "," + staff.getIsActive() + "," + staff.getDateOfApproval());
-                        } else if (user instanceof Resident resident) {
-                            writer.write(resident.getResidentID() + "," + resident.getUserID() + "," + resident.getIcPassportNumber() + "," + resident.getUsername() + "," + resident.getPassword() + "," + resident.getContactNumber() + "," + resident.getDateOfRegistration() + "," + resident.getRole() + "," + resident.getIsActive() + "," + resident.getDateOfApproval());
-                        }
-                    }
-                    writer.newLine();
-                }
-            }
-        }
-
-        public static List<String[]> viewPaymentRecords(String residentID) {
-            List<String[]> paymentRecords = new ArrayList<>();
-            try (BufferedReader reader = new BufferedReader(new FileReader("payments.txt"))) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    String[] details = line.split(",");
-                    if (details.length > 0 && details[1].equals(residentID) && !details[7].equals("unpaid") && !details[9].equals("null")) {
-                        paymentRecords.add(details);
-                    }
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return paymentRecords;
-        }
-    
-        public void viewPaymentRecords() {
-            System.out.println("Payment Records:");
-            String residentID = this.getResidentID(); 
-        
-            // Read room data from rooms.txt and store it in a map
-            Map<String, String> roomMap = new HashMap<>();
-            try (BufferedReader roomReader = new BufferedReader(new FileReader("rooms.txt"))) {
-                String line;
-                while ((line = roomReader.readLine()) != null) {
-                    String[] parts = line.split(",");
-                    if (parts.length >= 4) {
-                        roomMap.put(parts[0], parts[3]); // Assuming parts[0] is RoomID and parts[3] is RoomNumber
-                    }
-                }
-            } catch (IOException e) {
-                System.out.println("An error occurred while reading the room data.");
-            }
-        
-            List<String[]> relevantPayments = new ArrayList<>();
-            try (BufferedReader br = new BufferedReader(new FileReader("payments.txt"))) {
-                String line;
-                while ((line = br.readLine()) != null) {
-                    String[] details = line.split(",");
-                    if (details[1].equals(residentID) && !details[7].equals("unpaid") && !details[10].equals("null")) { // Assuming the second element is the residentID, eighth is PaymentStatus, and eleventh is PaymentMethod
-                        relevantPayments.add(details);
-                    }
-                }
-            } catch (IOException e) {
-                System.out.println("An error occurred while reading the payment records.");
-            }
-        
-            if (relevantPayments.isEmpty()) {
-                System.out.println("No payment records found for your account.");
-                return;
-            }
-        
-            // Display the list of relevant payment records
-            System.out.println("Choose which Payment Record to view:");
-            for (int i = 0; i < relevantPayments.size(); i++) {
-                String[] details = relevantPayments.get(i);
-                System.out.printf("%d. Payment ID: %s, Payment Amount: RM %s, Booking Date: %s%n", i + 1, details[0], details[6], details[8]);
-            }
-        
-            // Get the user's choice
-            System.out.printf("Enter your choice (1-%d): ", relevantPayments.size());
-            int choice = getValidatedChoice(scanner, 1, relevantPayments.size());
-        
-            // Display the selected payment record in detail
-            String[] selectedDetails = relevantPayments.get(choice - 1);
-            String roomNumber = roomMap.getOrDefault(selectedDetails[5], "Unknown Room"); // Assuming the sixth element is RoomID
-            LocalDate startDate = LocalDate.parse(selectedDetails[3]); // Assuming the fourth element is StartDate
-            LocalDate endDate = LocalDate.parse(selectedDetails[4]); // Assuming the fifth element is EndDate
-            long stayDuration = ChronoUnit.DAYS.between(startDate, endDate);
-            System.out.println("Payment ID: " + selectedDetails[0]);
-            System.out.println("Payment Status: " + selectedDetails[7]);
-            System.out.println("Start Date: " + startDate);
-            System.out.println("End Date: " + endDate);
-            System.out.println("Stay Duration: " + stayDuration + " days");
-            System.out.println("Payment Amount: " + selectedDetails[6]);
-            System.out.println("Booking Date: " + selectedDetails[8]);
-            System.out.println("Room Number: " + roomNumber);
-            System.out.println("Payment Method: " + selectedDetails[9]);
-            System.out.println("Booking Status: " + selectedDetails[10]);
-            System.out.println("-----------------------------");
-        }
-
-        public static String getRoomNumber(String roomID) {
-            String roomNumber = "Unknown Room";
-            try (BufferedReader roomReader = new BufferedReader(new FileReader("rooms.txt"))) {
-                String line;
-                while ((line = roomReader.readLine()) != null) {
-                    String[] parts = line.split(",");
-                    if (parts[0].equals(roomID)) {
-                        roomNumber = parts[3]; // Assuming parts[3] is RoomNumber
-                        break;
-                    }
-                }
-            } catch (IOException e) {
-                System.out.println("An error occurred while reading the room data.");
-            }
-            return roomNumber;
         }
 
         public void manageBookings() {
@@ -3626,15 +3637,7 @@ public class APUHostelManagement {
             return (years * yearlyRate) + (months * monthlyRate) + (weeks * weeklyRate) + (remainingDays * dailyRate);
         }
 
-        public void residentLogout() {
-            System.out.println("Logging out...");
-            
-            // Perform any necessary cleanup, such as closing resources or saving state
-            // For example:
-            // closeDatabaseConnection();
-            // saveUserSession();
-            
-            // Clear user-specific data
+        public void logout() {
             this.userID = null;
             this.icPassportNumber = null;
             this.username = null;
@@ -3643,11 +3646,8 @@ public class APUHostelManagement {
             this.dateOfRegistration = null;
             this.role = null;
             this.isActive = false;
-            
-            System.out.println("You have been logged out successfully.");
-            
-            // Route back to the main menu
-
+            this.residentID = null;
+            this.dateOfApproval = null;
         }
 
         private int getValidatedChoice(Scanner scanner, int min, int max) {

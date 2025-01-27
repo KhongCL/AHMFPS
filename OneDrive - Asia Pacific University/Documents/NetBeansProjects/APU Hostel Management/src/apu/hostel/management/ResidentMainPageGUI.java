@@ -97,6 +97,9 @@ public class ResidentMainPageGUI {
     }
 
     private void logout() {
+        if (resident != null) {
+            resident.logout(); // Clear resident data using APUHostelManagement method
+        }
         JOptionPane.showMessageDialog(frame, "Logging out...");
         frame.dispose();
         WelcomePageGUI welcomePage = new WelcomePageGUI();
