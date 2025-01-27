@@ -206,7 +206,7 @@ public class ManagerManageRatesGUI {
         switch (attributeToUpdate) {
             case "Room Type":
                 if (restrictedFeeRateIDs.contains(rateToUpdate.getFeeRateID())) {
-                    JOptionPane.showMessageDialog(frame, "Cannot update room type for fee rate ID: " + rateToUpdate.getFeeRateID() + " as it exists in rooms.txt.", "Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(frame, "Cannot update room type for fee rate ID: " + rateToUpdate.getFeeRateID() + " as it is currently being used.", "Error", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
                 String[] roomTypes = {"Standard", "Large", "Family"};
@@ -261,7 +261,7 @@ public class ManagerManageRatesGUI {
 
         List<String> restrictedFeeRateIDs = APUHostelManagement.Manager.getRestrictedFeeRateIDs();
         if (restrictedFeeRateIDs.contains(rateToDelete.getFeeRateID())) {
-            JOptionPane.showMessageDialog(frame, "Cannot delete fee rate ID: " + rateToDelete.getFeeRateID() + " as it exists in rooms.txt.", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(frame, "Cannot delete fee rate ID: " + rateToDelete.getFeeRateID() + " as it is currently being used.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 

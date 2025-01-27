@@ -2443,7 +2443,7 @@ public class APUHostelManagement {
                 case 1 -> updatePersonalInformation();
                 case 2 -> viewPaymentRecords();
                 case 3 -> manageBookings();
-                case 4 -> residentLogout();
+                case 4 -> logout();
                 default -> {
                     System.out.println("Invalid choice. Please try again.");
                     displayMenu(); // Recursively call to retry
