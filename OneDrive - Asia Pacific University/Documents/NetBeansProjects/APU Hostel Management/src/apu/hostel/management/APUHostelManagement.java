@@ -2666,190 +2666,6 @@ public class APUHostelManagement {
             System.out.println("-----------------------------");
         }
 
-        public static String getRoomNumber(String roomID) {
-            String roomNumber = "Unknown Room";
-            try (BufferedReader roomReader = new BufferedReader(new FileReader("rooms.txt"))) {
-                String line;
-                while ((line = roomReader.readLine()) != null) {
-                    String[] parts = line.split(",");
-                    if (parts[0].equals(roomID)) {
-                        roomNumber = parts[3]; // Assuming parts[3] is RoomNumber
-                        break;
-                    }
-                }
-            } catch (IOException e) {
-                System.out.println("An error occurred while reading the room data.");
-            }
-            return roomNumber;
-        }
-
-        public static List<String[]> getRoomPricing() {
-            List<String[]> roomPricing = new ArrayList<>();
-            Map<String, String> roomTypeToFeeRateID = new HashMap<>();
-            try (BufferedReader roomReader = new BufferedReader(new FileReader("rooms.txt"))) {
-                String line;
-                while ((line = roomReader.readLine()) != null) {
-                    String[] parts = line.split(",");
-                    if (parts.length >= 3) {
-                        roomTypeToFeeRateID.put(parts[2].toLowerCase(), parts[1]); // Assuming parts[2] is RoomType and parts[1] is FeeRateID
-                    }
-                }
-            } catch (IOException e) {
-                System.out.println("An error occurred while reading the room data.");
-                return roomPricing;
-            }
-    
-            Map<String, double[]> feeRates = new HashMap<>();
-            try (BufferedReader feeRateReader = new BufferedReader(new FileReader("fee_rates.txt"))) {
-                String line;
-                while ((line = feeRateReader.readLine()) != null) {
-                    String[] parts = line.split(",");
-                    if (parts.length >= 6 && parts[6].equalsIgnoreCase("true")) { // Check if the fee rate is active
-                        String feeRateID = parts[0];
-                        double dailyRate = Double.parseDouble(parts[2]);
-                        double weeklyRate = Double.parseDouble(parts[3]);
-                        double monthlyRate = Double.parseDouble(parts[4]);
-                        double yearlyRate = Double.parseDouble(parts[5]);
-                        feeRates.put(feeRateID, new double[]{dailyRate, weeklyRate, monthlyRate, yearlyRate});
-                    }
-                }
-            } catch (IOException e) {
-                System.out.println("An error occurred while reading the fee rate data.");
-                return roomPricing;
-            }
-    
-            for (Map.Entry<String, String> entry : roomTypeToFeeRateID.entrySet()) {
-                String roomType = entry.getKey();
-                String feeRateID = entry.getValue();
-                double[] rates = feeRates.get(feeRateID);
-                if (rates != null) {
-                    roomPricing.add(new String[]{
-                            roomType.substring(0, 1).toUpperCase() + roomType.substring(1),
-                            getRoomCapacity(roomType),
-                            String.format("RM %.2f", rates[0]),
-                            String.format("RM %.2f", rates[1]),
-                            String.format("RM %.2f", rates[2]),
-                            String.format("RM %.2f", rates[3])
-                    });
-                }
-            }
-            return roomPricing;
-        }
-    
-        private static String getRoomCapacity(String roomType) {
-            switch (roomType.toLowerCase()) {
-                case "standard":
-                    return "1";
-                case "large":
-                    return "3";
-                case "family":
-                    return "6";
-                default:
-                    return "Unknown";
-            }
-        }
-
-        public static String selectAvailableRoomByType1(String roomType) {
-            List<String> availableRooms = new ArrayList<>();
-            try (BufferedReader roomReader = new BufferedReader(new FileReader("rooms.txt"))) {
-                String line;
-                while ((line = roomReader.readLine()) != null) {
-                    String[] parts = line.split(",");
-                    if (parts.length >= 7 && parts[2].equalsIgnoreCase(roomType) && parts[4].equals("available") && Boolean.parseBoolean(parts[6])) {
-                        availableRooms.add(parts[0]); // Assuming parts[0] is RoomID
-                    }
-                }
-            } catch (IOException e) {
-                System.out.println("An error occurred while reading the room data.");
-            }
-    
-            if (!availableRooms.isEmpty()) {
-                Random random = new Random();
-                return availableRooms.get(random.nextInt(availableRooms.size())); // Randomly select an available room
-            }
-            return null;
-        }
-
-        public static String generatePaymentID1() {
-            int id = 1;
-            String filename = "payments.txt";
-            File file = new File(filename);
-            if (!file.exists()) {
-                try {
-                    file.createNewFile();
-                } catch (IOException e) {
-                }
-            }
-    
-            try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    String[] parts = line.split(",");
-                    if (parts[0].startsWith("P")) {
-                        int currentId = Integer.parseInt(parts[0].substring(1));
-                        if (currentId >= id) {
-                            id = currentId + 1;
-                        }
-                    }
-                }
-            } catch (IOException e) {
-            }
-            return "P" + String.format("%02d", id);
-        }
-
-        public static String getFeeRateID(String roomID) {
-            String feeRateID = null;
-            try (BufferedReader roomReader = new BufferedReader(new FileReader("rooms.txt"))) {
-                String line;
-                while ((line = roomReader.readLine()) != null) {
-                    String[] parts = line.split(",");
-                    if (parts[0].equals(roomID)) {
-                        feeRateID = parts[1]; // Assuming parts[1] is FeeRateID
-                        break;
-                    }
-                }
-            } catch (IOException e) {
-                System.out.println("An error occurred while reading the room data.");
-            }
-            return feeRateID;
-        }
-
-        public static boolean addBookingToFile(String paymentID, String residentID, LocalDate startDate, LocalDate endDate, String roomID, double paymentAmount, String bookingDateTime) {
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter("payments.txt", true))) {
-                writer.write(paymentID + "," + residentID + "," + null + "," + startDate + "," + endDate + "," + roomID + "," + paymentAmount + ",unpaid," + bookingDateTime + "," + null + ",active");
-                writer.newLine();
-                return true;
-            } catch (IOException e) {
-                System.out.println("An error occurred while saving the booking.");
-                return false;
-            }
-        }
-
-        public static void updateRoomStatus1(String roomID, String status) {
-            List<String[]> rooms = new ArrayList<>();
-            try (BufferedReader reader = new BufferedReader(new FileReader("rooms.txt"))) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    String[] parts = line.split(",");
-                    if (parts[0].equals(roomID)) {
-                        parts[4] = status; // Assuming parts[4] is RoomStatus
-                    }
-                    rooms.add(parts);
-                }
-            } catch (IOException e) {
-                System.out.println("An error occurred while reading the room data.");
-            }
-    
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter("rooms.txt"))) {
-                for (String[] room : rooms) {
-                    writer.write(String.join(",", room));
-                    writer.newLine();
-                }
-            } catch (IOException e) {
-                System.out.println("An error occurred while updating the room data.");
-            }
-        }
-
         public static List<String[]> getUnpaidBookingsForResident(String residentID) {
             List<String[]> payments = new ArrayList<>();
             List<String[]> unpaidBookings = new ArrayList<>();
@@ -3455,6 +3271,226 @@ public class APUHostelManagement {
             System.out.println("Please go back to Manage Bookings to make payment for this booking.");
         }
 
+        public static String getRoomNumber(String roomID) {
+            String roomNumber = "Unknown Room";
+            try (BufferedReader roomReader = new BufferedReader(new FileReader("rooms.txt"))) {
+                String line;
+                while ((line = roomReader.readLine()) != null) {
+                    String[] parts = line.split(",");
+                    if (parts[0].equals(roomID)) {
+                        roomNumber = parts[3]; // Assuming parts[3] is RoomNumber
+                        break;
+                    }
+                }
+            } catch (IOException e) {
+                System.out.println("An error occurred while reading the room data.");
+            }
+            return roomNumber;
+        }
+
+        public static List<String[]> getRoomPricing() {
+            List<String[]> roomPricing = new ArrayList<>();
+            Map<String, String> roomTypeToFeeRateID = new HashMap<>();
+            try (BufferedReader roomReader = new BufferedReader(new FileReader("rooms.txt"))) {
+                String line;
+                while ((line = roomReader.readLine()) != null) {
+                    String[] parts = line.split(",");
+                    if (parts.length >= 3) {
+                        roomTypeToFeeRateID.put(parts[2].toLowerCase(), parts[1]); // Assuming parts[2] is RoomType and parts[1] is FeeRateID
+                    }
+                }
+            } catch (IOException e) {
+                System.out.println("An error occurred while reading the room data.");
+                return roomPricing;
+            }
+    
+            Map<String, double[]> feeRates = new HashMap<>();
+            try (BufferedReader feeRateReader = new BufferedReader(new FileReader("fee_rates.txt"))) {
+                String line;
+                while ((line = feeRateReader.readLine()) != null) {
+                    String[] parts = line.split(",");
+                    if (parts.length >= 6 && parts[6].equalsIgnoreCase("true")) { // Check if the fee rate is active
+                        String feeRateID = parts[0];
+                        double dailyRate = Double.parseDouble(parts[2]);
+                        double weeklyRate = Double.parseDouble(parts[3]);
+                        double monthlyRate = Double.parseDouble(parts[4]);
+                        double yearlyRate = Double.parseDouble(parts[5]);
+                        feeRates.put(feeRateID, new double[]{dailyRate, weeklyRate, monthlyRate, yearlyRate});
+                    }
+                }
+            } catch (IOException e) {
+                System.out.println("An error occurred while reading the fee rate data.");
+                return roomPricing;
+            }
+    
+            for (Map.Entry<String, String> entry : roomTypeToFeeRateID.entrySet()) {
+                String roomType = entry.getKey();
+                String feeRateID = entry.getValue();
+                double[] rates = feeRates.get(feeRateID);
+                if (rates != null) {
+                    roomPricing.add(new String[]{
+                            roomType.substring(0, 1).toUpperCase() + roomType.substring(1),
+                            getRoomCapacity(roomType),
+                            String.format("RM %.2f", rates[0]),
+                            String.format("RM %.2f", rates[1]),
+                            String.format("RM %.2f", rates[2]),
+                            String.format("RM %.2f", rates[3])
+                    });
+                }
+            }
+            return roomPricing;
+        }
+    
+        private static String getRoomCapacity(String roomType) {
+            switch (roomType.toLowerCase()) {
+                case "standard":
+                    return "1";
+                case "large":
+                    return "3";
+                case "family":
+                    return "6";
+                default:
+                    return "Unknown";
+            }
+        }
+
+        public static String selectAvailableRoomByType1(String roomType) {
+            List<String> availableRooms = new ArrayList<>();
+            try (BufferedReader roomReader = new BufferedReader(new FileReader("rooms.txt"))) {
+                String line;
+                while ((line = roomReader.readLine()) != null) {
+                    String[] parts = line.split(",");
+                    if (parts.length >= 7 && parts[2].equalsIgnoreCase(roomType) && parts[4].equals("available") && Boolean.parseBoolean(parts[6])) {
+                        availableRooms.add(parts[0]); // Assuming parts[0] is RoomID
+                    }
+                }
+            } catch (IOException e) {
+                System.out.println("An error occurred while reading the room data.");
+            }
+    
+            if (!availableRooms.isEmpty()) {
+                Random random = new Random();
+                return availableRooms.get(random.nextInt(availableRooms.size())); // Randomly select an available room
+            }
+            return null;
+        }
+
+        public static String generatePaymentID1() {
+            int id = 1;
+            String filename = "payments.txt";
+            File file = new File(filename);
+            if (!file.exists()) {
+                try {
+                    file.createNewFile();
+                } catch (IOException e) {
+                }
+            }
+    
+            try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    String[] parts = line.split(",");
+                    if (parts[0].startsWith("P")) {
+                        int currentId = Integer.parseInt(parts[0].substring(1));
+                        if (currentId >= id) {
+                            id = currentId + 1;
+                        }
+                    }
+                }
+            } catch (IOException e) {
+            }
+            return "P" + String.format("%02d", id);
+        }
+
+        public static String getFeeRateID(String roomID) {
+            String feeRateID = null;
+            try (BufferedReader roomReader = new BufferedReader(new FileReader("rooms.txt"))) {
+                String line;
+                while ((line = roomReader.readLine()) != null) {
+                    String[] parts = line.split(",");
+                    if (parts[0].equals(roomID)) {
+                        feeRateID = parts[1]; // Assuming parts[1] is FeeRateID
+                        break;
+                    }
+                }
+            } catch (IOException e) {
+                System.out.println("An error occurred while reading the room data.");
+            }
+            return feeRateID;
+        }
+
+        public static boolean addBookingToFile(String paymentID, String residentID, LocalDate startDate, LocalDate endDate, String roomID, double paymentAmount, String bookingDateTime) {
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter("payments.txt", true))) {
+                writer.write(paymentID + "," + residentID + "," + null + "," + startDate + "," + endDate + "," + roomID + "," + paymentAmount + ",unpaid," + bookingDateTime + "," + null + ",active");
+                writer.newLine();
+                return true;
+            } catch (IOException e) {
+                System.out.println("An error occurred while saving the booking.");
+                return false;
+            }
+        }
+
+        public static void updateRoomStatus1(String roomID, String status) {
+            List<String[]> rooms = new ArrayList<>();
+            try (BufferedReader reader = new BufferedReader(new FileReader("rooms.txt"))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    String[] parts = line.split(",");
+                    if (parts[0].equals(roomID)) {
+                        parts[4] = status; // Assuming parts[4] is RoomStatus
+                    }
+                    rooms.add(parts);
+                }
+            } catch (IOException e) {
+                System.out.println("An error occurred while reading the room data.");
+            }
+    
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter("rooms.txt"))) {
+                for (String[] room : rooms) {
+                    writer.write(String.join(",", room));
+                    writer.newLine();
+                }
+            } catch (IOException e) {
+                System.out.println("An error occurred while updating the room data.");
+            }
+        }
+
+        static double calculatePaymentAmount(LocalDate startDate, LocalDate endDate, String feeRateID) {
+            long totalDays = ChronoUnit.DAYS.between(startDate, endDate); // Include the end date
+            System.out.println("Total days: " + totalDays);
+        
+            double dailyRate = 0;
+            double weeklyRate = 0;
+            double monthlyRate = 0;
+            double yearlyRate = 0;
+        
+            try (BufferedReader rateReader = new BufferedReader(new FileReader("fee_rates.txt"))) {
+                String line;
+                while ((line = rateReader.readLine()) != null) {
+                    String[] parts = line.split(",");
+                    if (parts[0].equals(feeRateID)) {
+                        dailyRate = Double.parseDouble(parts[2]);
+                        weeklyRate = Double.parseDouble(parts[3]);
+                        monthlyRate = Double.parseDouble(parts[4]);
+                        yearlyRate = Double.parseDouble(parts[5]);
+                        break;
+                    }
+                }
+            } catch (IOException e) {
+                System.out.println("An error occurred while reading the fee rate data.");
+            }
+        
+            long years = totalDays / 365;
+            long remainingDaysAfterYears = totalDays % 365;
+            long months = remainingDaysAfterYears / 30;
+            long remainingDaysAfterMonths = remainingDaysAfterYears % 30;
+            long weeks = remainingDaysAfterMonths / 7;
+            long remainingDays = remainingDaysAfterMonths % 7;
+            System.out.println("Years: " + years + ", Months: " + months + ", Weeks: " + weeks + ", Days: " + remainingDays);
+        
+            return (years * yearlyRate) + (months * monthlyRate) + (weeks * weeklyRate) + (remainingDays * dailyRate);
+        }
+
         private void displayRoomPricing() {
             // Map to store room type to fee rate ID
             Map<String, String> roomTypeToFeeRateID = new HashMap<>();
@@ -3599,42 +3635,6 @@ public class APUHostelManagement {
             } catch (IOException e) {
             }
             return "P" + String.format("%02d", id);
-        }
-
-        static double calculatePaymentAmount(LocalDate startDate, LocalDate endDate, String feeRateID) {
-            long totalDays = ChronoUnit.DAYS.between(startDate, endDate); // Include the end date
-            System.out.println("Total days: " + totalDays);
-        
-            double dailyRate = 0;
-            double weeklyRate = 0;
-            double monthlyRate = 0;
-            double yearlyRate = 0;
-        
-            try (BufferedReader rateReader = new BufferedReader(new FileReader("fee_rates.txt"))) {
-                String line;
-                while ((line = rateReader.readLine()) != null) {
-                    String[] parts = line.split(",");
-                    if (parts[0].equals(feeRateID)) {
-                        dailyRate = Double.parseDouble(parts[2]);
-                        weeklyRate = Double.parseDouble(parts[3]);
-                        monthlyRate = Double.parseDouble(parts[4]);
-                        yearlyRate = Double.parseDouble(parts[5]);
-                        break;
-                    }
-                }
-            } catch (IOException e) {
-                System.out.println("An error occurred while reading the fee rate data.");
-            }
-        
-            long years = totalDays / 365;
-            long remainingDaysAfterYears = totalDays % 365;
-            long months = remainingDaysAfterYears / 30;
-            long remainingDaysAfterMonths = remainingDaysAfterYears % 30;
-            long weeks = remainingDaysAfterMonths / 7;
-            long remainingDays = remainingDaysAfterMonths % 7;
-            System.out.println("Years: " + years + ", Months: " + months + ", Weeks: " + weeks + ", Days: " + remainingDays);
-        
-            return (years * yearlyRate) + (months * monthlyRate) + (weeks * weeklyRate) + (remainingDays * dailyRate);
         }
 
         public void logout() {
