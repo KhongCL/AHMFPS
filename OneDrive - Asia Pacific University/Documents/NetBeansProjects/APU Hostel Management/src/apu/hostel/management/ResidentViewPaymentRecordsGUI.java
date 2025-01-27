@@ -5,8 +5,8 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.*;
 import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.List;
@@ -65,11 +65,14 @@ public class ResidentViewPaymentRecordsGUI {
 
         // Load payment records and populate table
         List<String[]> relevantPayments = APUHostelManagement.Resident.viewPaymentRecords(resident.getResidentID());
-        paymentDetailsMap = new HashMap<>(); // Initialize the map
+        if (relevantPayments.isEmpty()) {
+            JOptionPane.showMessageDialog(frame, "No payment records found for your account.", "Information", JOptionPane.INFORMATION_MESSAGE);
+        }
+        paymentDetailsMap = new HashMap<>();
         int rowIndex = 0;
         for (String[] details : relevantPayments) {
-            paymentDetailsMap.put(rowIndex, details); // Store payment details in the map
-            String roomNumber = getRoomNumber(details[5]);
+            paymentDetailsMap.put(rowIndex, details);
+            String roomNumber = APUHostelManagement.Resident.getRoomNumber(details[5]); 
             long stayDuration = ChronoUnit.DAYS.between(LocalDate.parse(details[3]), LocalDate.parse(details[4]));
             tableModel.addRow(new Object[]{roomNumber, stayDuration + " days", details[8], "RM" + details[6]});
             rowIndex++;
@@ -98,48 +101,37 @@ public class ResidentViewPaymentRecordsGUI {
     }
 
     private void showPaymentDetailsPopup(String[] details) {
-        String roomNumber = getRoomNumber(details[5]);
-        LocalDate startDate = LocalDate.parse(details[3]);
-        LocalDate endDate = LocalDate.parse(details[4]);
-        long stayDuration = ChronoUnit.DAYS.between(startDate, endDate);
+        try {
+            String roomNumber = APUHostelManagement.Resident.getRoomNumber(details[5]);
+            LocalDate startDate = LocalDate.parse(details[3]);
+            LocalDate endDate = LocalDate.parse(details[4]); 
+            long stayDuration = ChronoUnit.DAYS.between(startDate, endDate);
 
-        String[][] data = {
-            {"Payment Status", details[7]},
-            {"Start Date", startDate.toString()},
-            {"End Date", endDate.toString()},
-            {"Stay Duration", stayDuration + " days"},
-            {"Payment Amount", "RM" + details[6]},
-            {"Booking Date", details[8]},
-            {"Room Number", roomNumber},
-            {"Payment Method", details[9]},
-            {"Booking Status", details[10]}
-        };
+            String[][] data = {
+                {"Payment Status", details[7]},
+                {"Start Date", startDate.toString()},
+                {"End Date", endDate.toString()},
+                {"Stay Duration", stayDuration + " days"},
+                {"Payment Amount", "RM" + details[6]},
+                {"Booking Date", details[8]},
+                {"Room Number", roomNumber},
+                {"Payment Method", details[9]},
+                {"Booking Status", details[10]}
+            };
 
-        String[] columnNames = {"Category", "Details"};
+            String[] columnNames = {"Category", "Details"};
+            JTable detailsTable = new JTable(data, columnNames);
+            JScrollPane scrollPane = new JScrollPane(detailsTable);
 
-        JTable detailsTable = new JTable(data, columnNames);
-        JScrollPane scrollPane = new JScrollPane(detailsTable);
-
-        JOptionPane optionPane = new JOptionPane(scrollPane, JOptionPane.INFORMATION_MESSAGE, JOptionPane.DEFAULT_OPTION);
-        JDialog dialog = optionPane.createDialog(frame, "Payment Details");
-        dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-        dialog.setVisible(true);
-    }
-
-    private String getRoomNumber(String roomID) {
-        // Read room data from rooms.txt and store it in a map
-        Map<String, String> roomMap = new HashMap<>();
-        try (BufferedReader roomReader = new BufferedReader(new FileReader("rooms.txt"))) {
-            String line;
-            while ((line = roomReader.readLine()) != null) {
-                String[] parts = line.split(",");
-                if (parts.length >= 4) {
-                    roomMap.put(parts[0], parts[3]); // Assuming parts[0] is RoomID and parts[3] is RoomNumber
-                }
-            }
-        } catch (IOException e) {
-            System.out.println("An error occurred while reading the room data.");
+            JOptionPane optionPane = new JOptionPane(scrollPane, 
+                JOptionPane.INFORMATION_MESSAGE, JOptionPane.DEFAULT_OPTION);
+            JDialog dialog = optionPane.createDialog(frame, "Payment Details");
+            dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+            dialog.setVisible(true);
+        } catch (DateTimeParseException e) {
+            JOptionPane.showMessageDialog(frame, 
+                "Error parsing dates in payment record", 
+                "Error", JOptionPane.ERROR_MESSAGE);
         }
-        return roomMap.getOrDefault(roomID, "Unknown Room");
     }
 }

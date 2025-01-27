@@ -2410,21 +2410,7 @@ public class APUHostelManagement {
             return residents;
         }
 
-        public static List<String[]> viewPaymentRecords(String residentID) {
-            List<String[]> paymentRecords = new ArrayList<>();
-            try (BufferedReader reader = new BufferedReader(new FileReader("payments.txt"))) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    String[] details = line.split(",");
-                    if (details.length > 0 && details[1].equals(residentID) && !details[7].equals("unpaid") && !details[9].equals("null")) {
-                        paymentRecords.add(details);
-                    }
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return paymentRecords;
-        }
+
 
         public static List<String[]> getRoomPricing() {
             List<String[]> roomPricing = new ArrayList<>();
@@ -2492,7 +2478,7 @@ public class APUHostelManagement {
             }
         }
 
-                public static String selectAvailableRoomByType1(String roomType) {
+        public static String selectAvailableRoomByType1(String roomType) {
             List<String> availableRooms = new ArrayList<>();
             try (BufferedReader roomReader = new BufferedReader(new FileReader("rooms.txt"))) {
                 String line;
@@ -2593,23 +2579,6 @@ public class APUHostelManagement {
             }
         }
 
-        public static String getRoomNumber(String roomID) {
-            String roomNumber = "Unknown Room";
-            try (BufferedReader roomReader = new BufferedReader(new FileReader("rooms.txt"))) {
-                String line;
-                while ((line = roomReader.readLine()) != null) {
-                    String[] parts = line.split(",");
-                    if (parts[0].equals(roomID)) {
-                        roomNumber = parts[3]; // Assuming parts[3] is RoomNumber
-                        break;
-                    }
-                }
-            } catch (IOException e) {
-                System.out.println("An error occurred while reading the room data.");
-            }
-            return roomNumber;
-        }
-
         public static List<String[]> getUnpaidBookingsForResident(String residentID) {
             List<String[]> payments = new ArrayList<>();
             List<String[]> unpaidBookings = new ArrayList<>();
@@ -2688,7 +2657,7 @@ public class APUHostelManagement {
             return true;
         }
 
-                public static List<String[]> getCancellableBookingsForResident(String residentID) {
+        public static List<String[]> getCancellableBookingsForResident(String residentID) {
             List<String[]> payments = new ArrayList<>();
             List<String[]> cancellableBookings = new ArrayList<>();
 
@@ -2937,8 +2906,23 @@ public class APUHostelManagement {
                 }
             }
         }
-    
 
+        public static List<String[]> viewPaymentRecords(String residentID) {
+            List<String[]> paymentRecords = new ArrayList<>();
+            try (BufferedReader reader = new BufferedReader(new FileReader("payments.txt"))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    String[] details = line.split(",");
+                    if (details.length > 0 && details[1].equals(residentID) && !details[7].equals("unpaid") && !details[9].equals("null")) {
+                        paymentRecords.add(details);
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return paymentRecords;
+        }
+    
         public void viewPaymentRecords() {
             System.out.println("Payment Records:");
             String residentID = this.getResidentID(); 
@@ -3003,6 +2987,23 @@ public class APUHostelManagement {
             System.out.println("Payment Method: " + selectedDetails[9]);
             System.out.println("Booking Status: " + selectedDetails[10]);
             System.out.println("-----------------------------");
+        }
+
+        public static String getRoomNumber(String roomID) {
+            String roomNumber = "Unknown Room";
+            try (BufferedReader roomReader = new BufferedReader(new FileReader("rooms.txt"))) {
+                String line;
+                while ((line = roomReader.readLine()) != null) {
+                    String[] parts = line.split(",");
+                    if (parts[0].equals(roomID)) {
+                        roomNumber = parts[3]; // Assuming parts[3] is RoomNumber
+                        break;
+                    }
+                }
+            } catch (IOException e) {
+                System.out.println("An error occurred while reading the room data.");
+            }
+            return roomNumber;
         }
 
         public void manageBookings() {
