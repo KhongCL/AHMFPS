@@ -145,34 +145,9 @@ public class ResidentCancelBookingGUI {
         if (APUHostelManagement.Resident.cancelBooking(paymentID)) {
             JOptionPane.showMessageDialog(frame, "Booking cancelled successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
             tableModel.removeRow(rowIndex); // Remove the cancelled row from the table
-            updateRoomStatusToAvailable(roomID); // Update room status to available
+            APUHostelManagement.Resident.updateRoomStatus1(roomID, "available"); // Use existing method instead
         } else {
             JOptionPane.showMessageDialog(frame, "An error occurred while cancelling the booking.", "Error", JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
-    private void updateRoomStatusToAvailable(String roomID) {
-        List<String[]> rooms = new ArrayList<>();
-        try (BufferedReader reader = new BufferedReader(new FileReader("rooms.txt"))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] parts = line.split(",");
-                if (parts[0].equals(roomID)) {
-                    parts[4] = "available"; // Assuming parts[4] is RoomStatus
-                }
-                rooms.add(parts);
-            }
-        } catch (IOException e) {
-            System.out.println("An error occurred while reading the room data.");
-        }
-
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter("rooms.txt"))) {
-            for (String[] room : rooms) {
-                writer.write(String.join(",", room));
-                writer.newLine();
-            }
-        } catch (IOException e) {
-            System.out.println("An error occurred while updating the room data.");
         }
     }
 }
