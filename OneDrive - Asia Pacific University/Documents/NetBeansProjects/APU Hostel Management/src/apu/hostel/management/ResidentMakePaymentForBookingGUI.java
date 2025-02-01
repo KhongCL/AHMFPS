@@ -31,13 +31,13 @@ public class ResidentMakePaymentForBookingGUI {
 
     private void initialize() {
         frame = new JFrame("Make Payment for Booking");
-        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         frame.setSize(1024, 768);
         frame.setLayout(new BorderLayout(10, 10)); // Use BorderLayout for the main panel
 
         // Top panel for the back button
         JPanel topPanel = new JPanel(new BorderLayout());
-        JButton backButton = new JButton("Back");
+        JButton backButton = createButton("Back", "back_icon.png");
         backButton.setPreferredSize(new Dimension(100, 40));
         backButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -81,7 +81,7 @@ public class ResidentMakePaymentForBookingGUI {
         }
 
         // Add Pay for Booking button
-        JButton payButton = new JButton("Pay for Booking");
+        JButton payButton = createButton("Pay for Booking", "payment_icon2.png");
         payButton.setPreferredSize(new Dimension(200, 40)); // Adjusted button size
         payButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -100,6 +100,20 @@ public class ResidentMakePaymentForBookingGUI {
         makePaymentPanel.add(bottomPanel, BorderLayout.SOUTH);
 
         frame.setVisible(true);
+
+        frame.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                int choice = JOptionPane.showConfirmDialog(frame, 
+                    "Are you sure you want to close this window?", "Confirm Close",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.QUESTION_MESSAGE);
+                if (choice == JOptionPane.YES_OPTION) {
+                    System.exit(0);
+                }
+                // No need for else as the window will stay open by default
+            }
+        });
     }
 
     private void showPaymentDetailsPopup(String[] details, int rowIndex) {
@@ -131,9 +145,9 @@ public class ResidentMakePaymentForBookingGUI {
         paymentPanel.add(paymentMethodLabel);
 
         // Create payment method buttons
-        creditCardButton = new JButton("Credit Card");
-        bankTransferButton = new JButton("Bank Transfer");
-        cashButton = new JButton("Cash");
+        creditCardButton = createButton("Credit Card", "credit_card_icon.png");
+        bankTransferButton = createButton("Bank Transfer", "bank_transfer_icon.png");
+        cashButton = createButton("Cash", "cash_icon.png");
 
         creditCardButton.addActionListener(e -> selectPaymentMethod("credit_card"));
         bankTransferButton.addActionListener(e -> selectPaymentMethod("bank_transfer"));
@@ -153,7 +167,7 @@ public class ResidentMakePaymentForBookingGUI {
         paymentPanel.add(buttonPanel);
 
         // Create confirm payment button
-        JButton confirmPaymentButton = new JButton("Confirm Payment");
+        JButton confirmPaymentButton = createButton("Confirm Payment", "approve_icon.png");
         confirmPaymentButton.setPreferredSize(buttonSize);
         confirmPaymentButton.addActionListener(e -> confirmPayment(details[0], rowIndex));
 
@@ -208,5 +222,19 @@ public class ResidentMakePaymentForBookingGUI {
         } else {
             JOptionPane.showMessageDialog(frame, "An error occurred while processing the payment.", "Error", JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+    private JButton createButton(String text, String iconPath) {
+        JButton button = new JButton(text);
+        try {
+            ImageIcon icon = new ImageIcon(new ImageIcon("images/" + iconPath)
+                .getImage().getScaledInstance(24, 24, Image.SCALE_SMOOTH));
+            button.setIcon(icon);
+            button.setHorizontalAlignment(SwingConstants.CENTER);
+        } catch (Exception e) {
+            System.err.println("Could not load icon: " + iconPath);
+        }
+        // Don't set a default size here, let individual calls specify the size
+        return button;
     }
 }

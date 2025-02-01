@@ -28,7 +28,7 @@ public class ManagerManageRoomsGUI {
 
     private void initialize() {
         frame = new JFrame("Manage Rooms");
-        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         frame.setSize(1024, 768);
         frame.setLayout(new BorderLayout(10, 10)); // Add spacing between components
 
@@ -36,7 +36,7 @@ public class ManagerManageRoomsGUI {
         topPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); // Add padding
 
         // Back button
-        JButton backButton = new JButton("Back");
+        JButton backButton = createButton("Back", "back_icon.png");
         backButton.setPreferredSize(new Dimension(100, 40));
         backButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -59,14 +59,21 @@ public class ManagerManageRoomsGUI {
         loadRooms();
 
         // Action buttons
-        JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        JButton addButton = new JButton("Add Room");
-        JButton updateStatusButton = new JButton("Update Room Status");
-        JButton updateFeeRateButton = new JButton("Update Fee Rate for Room Type");
-        JButton deleteButton = new JButton("Delete Room");
-        JButton restoreButton = new JButton("Restore Room");
-        JButton deleteAllButton = new JButton("Delete All Rooms");
-        JButton restoreAllButton = new JButton("Restore All Rooms");
+        JPanel actionPanel = new JPanel(new BorderLayout(5, 5));
+        actionPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+
+        // First row panel
+        JPanel firstRowPanel = new JPanel(new GridLayout(1, 4, 5, 0));
+        JButton addButton = createButton("Add Room", "add_icon.png");
+        JButton updateStatusButton = createButton("Update Room Status", "update_icon.png");
+        JButton updateFeeRateButton = createButton("Update Fee Rate for Room Type", "update_icon.png");
+        JButton deleteButton = createButton("Delete Room", "delete_icon.png");
+
+        // Second row panel
+        JPanel secondRowPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
+        JButton restoreButton = createButton("Restore Room", "restore_icon.png");
+        JButton deleteAllButton = createButton("Delete All Room", "delete_all_icon.png");
+        JButton restoreAllButton = createButton("Restore All Room", "restore_all_icon.png");
 
         addButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -110,17 +117,44 @@ public class ManagerManageRoomsGUI {
             }
         });
 
-        actionPanel.add(addButton);
-        actionPanel.add(updateStatusButton);
-        actionPanel.add(updateFeeRateButton);
-        actionPanel.add(deleteButton);
-        actionPanel.add(restoreButton);
-        actionPanel.add(deleteAllButton);
-        actionPanel.add(restoreAllButton);
+        firstRowPanel.add(addButton);
+        firstRowPanel.add(updateStatusButton);
+        firstRowPanel.add(updateFeeRateButton);
+        firstRowPanel.add(deleteButton);
+        
+        secondRowPanel.add(restoreButton);
+        secondRowPanel.add(deleteAllButton);
+        secondRowPanel.add(restoreAllButton);
+
+        actionPanel.add(firstRowPanel, BorderLayout.NORTH);
+        actionPanel.add(secondRowPanel, BorderLayout.CENTER);
+
+        Dimension buttonSize = new Dimension(150, 40);
+        addButton.setPreferredSize(buttonSize);
+        updateStatusButton.setPreferredSize(buttonSize);
+        updateFeeRateButton.setPreferredSize(buttonSize);
+        deleteButton.setPreferredSize(buttonSize);
+        restoreButton.setPreferredSize(buttonSize);
+        deleteAllButton.setPreferredSize(new Dimension(200,40));
+        restoreAllButton.setPreferredSize(new Dimension(200,40));
 
         frame.add(actionPanel, BorderLayout.SOUTH);
 
         frame.setVisible(true);
+        
+        frame.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                int choice = JOptionPane.showConfirmDialog(frame, 
+                    "Are you sure you want to close this window?", "Confirm Close",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.QUESTION_MESSAGE);
+                if (choice == JOptionPane.YES_OPTION) {
+                    System.exit(0);
+                }
+                // No need for else as the window will stay open by default
+            }
+        });
     }
 
     private void loadRooms() {
@@ -394,5 +428,19 @@ public class ManagerManageRoomsGUI {
 
     private void saveRoomsToFile() {
         APUHostelManagement.Manager.saveRoomsToFile(roomList);
+    }
+
+    private JButton createButton(String text, String iconPath) {
+        JButton button = new JButton(text);
+        try {
+            ImageIcon icon = new ImageIcon(new ImageIcon("images/" + iconPath)
+                .getImage().getScaledInstance(24, 24, Image.SCALE_SMOOTH));
+            button.setIcon(icon);
+            button.setHorizontalAlignment(SwingConstants.CENTER);
+        } catch (Exception e) {
+            System.err.println("Could not load icon: " + iconPath);
+        }
+        // Don't set a default size here, let individual calls specify the size
+        return button;
     }
 }

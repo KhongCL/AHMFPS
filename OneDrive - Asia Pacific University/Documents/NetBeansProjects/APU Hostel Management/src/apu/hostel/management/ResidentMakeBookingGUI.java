@@ -31,7 +31,7 @@ public class ResidentMakeBookingGUI {
 
     private void initialize() {
         frame = new JFrame("Make Booking");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         frame.setSize(1024, 768);
         frame.setLayout(new BorderLayout(10, 10)); // Add spacing between components
 
@@ -86,9 +86,9 @@ public class ResidentMakeBookingGUI {
         selectionPanel.add(selectionLabel, BorderLayout.NORTH);
 
         JPanel buttonPanel = new JPanel(new GridLayout(3, 1, 10, 10));
-        standardButton = new JButton("Standard");
-        largeButton = new JButton("Large");
-        familyButton = new JButton("Family");
+        standardButton = createButton("Standard", "standard_icon.png");
+        largeButton = createButton("Large", "large_icon.png");
+        familyButton = createButton("Family", "family_icon.png");
 
         // Adjust button size
         Dimension buttonSize = new Dimension(512, 30); // Half the width of the frame
@@ -181,7 +181,7 @@ public class ResidentMakeBookingGUI {
         selectionAndDatePanel.add(datePanel, BorderLayout.CENTER);
 
         // Make Booking Button
-        JButton makeBookingButton = new JButton("Make Booking");
+        JButton makeBookingButton = createButton("Make Booking", "booking_icon.png");
         makeBookingButton.addActionListener(e -> showBookingDetails());
 
         JPanel makeBookingButtonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
@@ -195,7 +195,7 @@ public class ResidentMakeBookingGUI {
         frame.add(mainPanel, BorderLayout.CENTER);
 
         // Back Button
-        JButton backButton = new JButton("Back");
+        JButton backButton = createButton("Back", "back_icon.png");
         backButton.setPreferredSize(new Dimension(frame.getWidth(), 50)); // Set button size
         backButton.addActionListener(e -> {
             new ResidentManageBookingsGUI(resident);
@@ -208,6 +208,20 @@ public class ResidentMakeBookingGUI {
         frame.add(bottomPanel, BorderLayout.SOUTH);
 
         frame.setVisible(true);
+
+        frame.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                int choice = JOptionPane.showConfirmDialog(frame, 
+                    "Are you sure you want to close this window?", "Confirm Close",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.QUESTION_MESSAGE);
+                if (choice == JOptionPane.YES_OPTION) {
+                    System.exit(0);
+                }
+                // No need for else as the window will stay open by default
+            }
+        });
     }
 
     private void displayRoomPricing(DefaultTableModel tableModel) {
@@ -389,5 +403,19 @@ public class ResidentMakeBookingGUI {
                 "</body></html>";
 
         JOptionPane.showMessageDialog(frame, explanation, "Pricing Explanation", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    private JButton createButton(String text, String iconPath) {
+        JButton button = new JButton(text);
+        try {
+            ImageIcon icon = new ImageIcon(new ImageIcon("images/" + iconPath)
+                .getImage().getScaledInstance(24, 24, Image.SCALE_SMOOTH));
+            button.setIcon(icon);
+            button.setHorizontalAlignment(SwingConstants.CENTER);
+        } catch (Exception e) {
+            System.err.println("Could not load icon: " + iconPath);
+        }
+        // Don't set a default size here, let individual calls specify the size
+        return button;
     }
 }

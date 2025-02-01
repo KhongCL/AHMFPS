@@ -24,7 +24,7 @@ public class WelcomePageGUI extends JFrame {
     
         setTitle("APU Hostel Management System");
         setSize(1024, 768); // Adjusted size
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         setLocationRelativeTo(null);
     
         cardLayout = new CardLayout();
@@ -73,6 +73,20 @@ public class WelcomePageGUI extends JFrame {
             }
             return false;
         });
+
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                int choice = JOptionPane.showConfirmDialog(WelcomePageGUI.this,
+                    "Are you sure you want to close this window?", "Confirm Close",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.QUESTION_MESSAGE);
+                if (choice == JOptionPane.YES_OPTION) {
+                    System.exit(0);
+                }
+                // No need for else as the window will stay open by default
+            }
+        });
     }
 
     private JPanel createRoleSelectionPanel() {
@@ -94,17 +108,17 @@ public class WelcomePageGUI extends JFrame {
 
         JLabel label = new JLabel("Select Your Role:", SwingConstants.CENTER);
         label.setFont(new Font("Arial", Font.PLAIN, 24)); // Adjusted font size
-        JButton managerButton = new JButton("Manager");
-        JButton staffButton = new JButton("Staff");
-        JButton residentButton = new JButton("Resident");
+        JButton managerButton = createButton("Manager", "manager_icon.png");
+        JButton staffButton = createButton("Staff","staff_icon.png");
+        JButton residentButton = createButton("Resident", "resident_icon.png");
 
         managerButton.setFont(new Font("Arial", Font.PLAIN, 24)); // Adjusted font size
         staffButton.setFont(new Font("Arial", Font.PLAIN, 24)); // Adjusted font size
         residentButton.setFont(new Font("Arial", Font.PLAIN, 24)); // Adjusted font size
 
-        managerButton.setPreferredSize(new Dimension(171, 57)); // Adjusted button size
-        staffButton.setPreferredSize(new Dimension(171, 57)); // Adjusted button size
-        residentButton.setPreferredSize(new Dimension(171, 57)); // Adjusted button size
+        managerButton.setPreferredSize(new Dimension(200, 50)); // Adjusted button size
+        staffButton.setPreferredSize(new Dimension(200, 50)); // Adjusted button size
+        residentButton.setPreferredSize(new Dimension(200, 50)); // Adjusted button size
 
         managerButton.addActionListener(e -> cardLayout.show(mainPanel, "ManagerAuthCode"));
         staffButton.addActionListener(e -> cardLayout.show(mainPanel, "StaffAuthCode"));
@@ -143,9 +157,9 @@ public class WelcomePageGUI extends JFrame {
         });
 
         JPanel topPanel = new JPanel(new BorderLayout());
-        JButton backButton = new JButton("Back");
+        JButton backButton = createButton("Back", "back_icon.png");
         backButton.setFont(new Font("Arial", Font.PLAIN, 21)); // Adjusted font size
-        backButton.setPreferredSize(new Dimension(102, 57)); // Adjusted button size
+        backButton.setPreferredSize(new Dimension(150, 57)); // Adjusted button size
         backButton.setMaximumSize(new Dimension(102, 57)); // Adjusted button size
         backButton.setMinimumSize(new Dimension(102, 57)); // Adjusted button size
         backButton.addActionListener(e -> cardLayout.show(mainPanel, "RoleSelection"));
@@ -191,9 +205,9 @@ public class WelcomePageGUI extends JFrame {
             }
         });
 
-        JButton submitButton = new JButton("Submit");
+        JButton submitButton = createButton("Submit", "submit_icon.png");
         submitButton.setFont(new Font("Arial", Font.PLAIN, 24)); // Adjusted font size
-        submitButton.setPreferredSize(new Dimension(171, 57)); // Adjusted button size
+        submitButton.setPreferredSize(new Dimension(200, 50));  // Adjusted button size
         authCodeField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
@@ -234,6 +248,8 @@ public class WelcomePageGUI extends JFrame {
         backButton.setToolTipText("Go back (Alt+B)");
         submitButton.setToolTipText("Submit the authorization code (Alt+S)");
         submitButton.setMnemonic(KeyEvent.VK_S);  // Alt+S
+
+        addFocusHighlight(authCodeField);
         
         return panel;
         }
@@ -243,9 +259,9 @@ public class WelcomePageGUI extends JFrame {
     
         // Back button panel at top
         JPanel topPanel = new JPanel(new BorderLayout());
-        JButton backButton = new JButton("Back");
+        JButton backButton = createButton("Back", "back_icon.png");
         backButton.setFont(new Font("Arial", Font.PLAIN, 21));
-        backButton.setPreferredSize(new Dimension(102, 57));
+        backButton.setPreferredSize(new Dimension(150, 57));
         backButton.setMaximumSize(new Dimension(102, 57));
         backButton.setMinimumSize(new Dimension(102, 57));
         
@@ -376,9 +392,9 @@ public class WelcomePageGUI extends JFrame {
         gbc.gridx = 0;
         gbc.gridwidth = 2;
         gbc.fill = GridBagConstraints.NONE;
-        JButton loginButton = new JButton("Login");
+        JButton loginButton = createButton("Login", "login_icon.png");
         loginButton.setFont(new Font("Arial", Font.PLAIN, 24));
-        loginButton.setPreferredSize(new Dimension(120, 35));
+        loginButton.setPreferredSize(new Dimension(200, 35));
         centerPanel.add(loginButton, gbc);
     
         // Register link
@@ -417,7 +433,26 @@ public class WelcomePageGUI extends JFrame {
             String username = usernameField.getText();
             String password = new String(passwordField.getPassword());
             User user = null;
-    
+        
+            // Check for empty fields first
+            if (username.equals("Username") || username.isEmpty()) {
+                JOptionPane.showMessageDialog(this, 
+                    "Username field cannot be empty", 
+                    "Login Error", 
+                    JOptionPane.ERROR_MESSAGE);
+                usernameField.requestFocus();
+                return;
+            }
+        
+            if (password.equals("Password") || password.isEmpty()) {
+                JOptionPane.showMessageDialog(this, 
+                    "Password field cannot be empty", 
+                    "Login Error", 
+                    JOptionPane.ERROR_MESSAGE);
+                passwordField.requestFocus();
+                return;
+            }
+        
             try {
                 if (title.equals("Resident Login Page")) {
                     user = APUHostelManagement.loginResident(username, password);
@@ -426,7 +461,7 @@ public class WelcomePageGUI extends JFrame {
                 } else if (title.equals("Manager Login Page")) {
                     user = APUHostelManagement.loginManager(username, password);
                 }
-    
+        
                 if (user != null) {
                     if (user.getIsActive()) {
                         if (user instanceof APUHostelManagement.Resident) {
@@ -443,12 +478,14 @@ public class WelcomePageGUI extends JFrame {
                             "Login Error", JOptionPane.ERROR_MESSAGE);
                     }
                 } else {
-                    JOptionPane.showMessageDialog(this, "Invalid username or password", 
+                    JOptionPane.showMessageDialog(this, 
+                        "Invalid username or password", 
                         "Login Error", JOptionPane.ERROR_MESSAGE);
                 }
             } catch (Exception ex) {
                 ex.printStackTrace();
-                JOptionPane.showMessageDialog(this, "An error occurred during login", 
+                JOptionPane.showMessageDialog(this, 
+                    "An error occurred during login", 
                     "Login Error", JOptionPane.ERROR_MESSAGE);
             }
         });
@@ -508,9 +545,9 @@ public class WelcomePageGUI extends JFrame {
         JPanel panel = new JPanel(new BorderLayout());
     
         JPanel topPanel = new JPanel(new BorderLayout());
-        JButton backButton = new JButton("Back");
+        JButton backButton = createButton("Back", "back_icon.png");
         backButton.setFont(new Font("Arial", Font.PLAIN, 21));
-        backButton.setPreferredSize(new Dimension(102, 57));
+        backButton.setPreferredSize(new Dimension(150, 57));
         backButton.setMaximumSize(new Dimension(102, 57));
         backButton.setMinimumSize(new Dimension(102, 57));
         
@@ -770,7 +807,7 @@ public class WelcomePageGUI extends JFrame {
         gbc.gridx = 0;
         gbc.gridwidth = 3;
         gbc.anchor = GridBagConstraints.CENTER;
-        JButton registerButton = new JButton("Register");
+        JButton registerButton = createButton("Register", "register_icon.png");
         registerButton.setFont(new Font("Arial", Font.PLAIN, 24));
         registerButton.setPreferredSize(new Dimension(200, 50));
         centerPanel.add(registerButton, gbc);
@@ -978,11 +1015,20 @@ public class WelcomePageGUI extends JFrame {
             new ValidationListener(() -> validateContactNumber(contactNumberField, contactNumberIconLabel)));
     }
     
+    // Update showErrorDialog method
     private void showErrorDialog(String message) {
         String userFriendlyMessage = String.format(
-            "Error: %s\n\nPlease check:\n" +
-            "• Input formats are correct\n" +
-            "• Required fields are filled\n",
+            "<html><body style='width: 300px'>" +
+            "<h3 style='color: #CC0000'>Error</h3>" +
+            "<p>%s</p>" +
+            "<hr>" +
+            "<p><b>Please check:</b></p>" +
+            "<ul>" +
+            "<li>Input formats are correct</li>" +
+            "<li>Required fields are filled</li>" +
+            "<li>Network connection is stable</li>" +
+            "</ul>" +
+            "</body></html>",
             message
         );
         JOptionPane.showMessageDialog(
@@ -1049,6 +1095,20 @@ public class WelcomePageGUI extends JFrame {
     
         JOptionPane.showMessageDialog(this, requirements, 
             "Format Requirements", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    private JButton createButton(String text, String iconPath) {
+        JButton button = new JButton(text);
+        try {
+            ImageIcon icon = new ImageIcon(new ImageIcon("images/" + iconPath)
+                .getImage().getScaledInstance(24, 24, Image.SCALE_SMOOTH));
+            button.setIcon(icon);
+            button.setHorizontalAlignment(SwingConstants.CENTER);
+        } catch (Exception e) {
+            System.err.println("Could not load icon: " + iconPath);
+        }
+        // Don't set a default size here, let individual calls specify the size
+        return button;
     }
 
     public static void main(String[] args) {

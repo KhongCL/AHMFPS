@@ -23,13 +23,13 @@ public class StaffGenerateReceiptGUI {
 
     private void initialize() {
         frame = new JFrame("Generate Receipt");
-        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         frame.setSize(1024, 768);
         frame.setLayout(new BorderLayout(10, 10));
 
         // Back button panel
         JPanel topPanel = new JPanel(new BorderLayout());
-        JButton backButton = new JButton("Back");
+        JButton backButton = createButton("Back", "back_icon.png");
         backButton.setPreferredSize(new Dimension(100, 40));
         backButton.addActionListener(e -> {
             new StaffMainPageGUI(staff);
@@ -38,7 +38,7 @@ public class StaffGenerateReceiptGUI {
         topPanel.add(backButton, BorderLayout.WEST);
 
         // View Receipts button
-        JButton viewReceiptsButton = new JButton("View Receipts");
+        JButton viewReceiptsButton = createButton("View Receipts", "view_receipt_icon.png");
         viewReceiptsButton.addActionListener(e -> {
             new StaffViewReceiptGUI(staff);
             frame.dispose();
@@ -57,7 +57,7 @@ public class StaffGenerateReceiptGUI {
         frame.add(scrollPane, BorderLayout.CENTER);
 
         // Generate Receipt button
-        JButton generateReceiptButton = new JButton("Generate Receipt");
+        JButton generateReceiptButton = createButton("Generate Receipt", "generate_receipt_icon.png");
         generateReceiptButton.addActionListener(e -> generateReceipt());
         JPanel bottomPanel = new JPanel();
         bottomPanel.add(generateReceiptButton);
@@ -65,6 +65,20 @@ public class StaffGenerateReceiptGUI {
 
         loadEligiblePayments();
         frame.setVisible(true);
+
+        frame.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                int choice = JOptionPane.showConfirmDialog(frame, 
+                    "Are you sure you want to close this window?", "Confirm Close",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.QUESTION_MESSAGE);
+                if (choice == JOptionPane.YES_OPTION) {
+                    System.exit(0);
+                }
+                // No need for else as the window will stay open by default
+            }
+        });
     }
 
     private void loadEligiblePayments() {
@@ -136,5 +150,19 @@ public class StaffGenerateReceiptGUI {
                     "Error", JOptionPane.ERROR_MESSAGE);
             }
         }
+    }
+
+    private JButton createButton(String text, String iconPath) {
+        JButton button = new JButton(text);
+        try {
+            ImageIcon icon = new ImageIcon(new ImageIcon("images/" + iconPath)
+                .getImage().getScaledInstance(24, 24, Image.SCALE_SMOOTH));
+            button.setIcon(icon);
+            button.setHorizontalAlignment(SwingConstants.CENTER);
+        } catch (Exception e) {
+            System.err.println("Could not load icon: " + iconPath);
+        }
+        // Don't set a default size here, let individual calls specify the size
+        return button;
     }
 }

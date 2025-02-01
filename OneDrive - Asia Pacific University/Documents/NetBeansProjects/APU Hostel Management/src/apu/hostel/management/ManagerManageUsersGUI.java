@@ -36,7 +36,7 @@ public class ManagerManageUsersGUI {
             return;
         }
         frame = new JFrame("Search, Update, Delete or Restore User");
-        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         frame.setSize(1024, 768);
         frame.setLayout(new BorderLayout(10, 10)); // Add spacing between components
 
@@ -45,10 +45,10 @@ public class ManagerManageUsersGUI {
 
         // Filter, Sort, and Search components
         JPanel filterSortSearchPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        JButton filterButton = new JButton("Filter");
-        JButton sortButton = new JButton("Sort");
+        JButton filterButton = createButton("Filter", "filter_icon.png");
+        JButton sortButton = createButton("Sort", "sort_icon.png");
         JTextField searchField = new JTextField(20);
-        JButton searchButton = new JButton("Search");
+        JButton searchButton = createButton("Search", "search_icon.png");
 
         filterSortSearchPanel.add(filterButton);
         filterSortSearchPanel.add(sortButton);
@@ -58,7 +58,7 @@ public class ManagerManageUsersGUI {
         topPanel.add(filterSortSearchPanel, BorderLayout.EAST);
 
         // Back button
-        JButton backButton = new JButton("Back");
+        JButton backButton = createButton("Back", "back_icon.png");
         backButton.setPreferredSize(new Dimension(100, 40));
         backButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -83,11 +83,11 @@ public class ManagerManageUsersGUI {
 
         // Action buttons
         JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        JButton updateButton = new JButton("Update");
-        JButton deleteButton = new JButton("Delete");
-        JButton restoreButton = new JButton("Restore");
-        JButton deleteAllButton = new JButton("Delete All");
-        JButton restoreAllButton = new JButton("Restore All");
+        JButton updateButton = createButton("Update", "update_icon.png");
+        JButton deleteButton = createButton("Delete", "delete_icon.png");
+        JButton restoreButton = createButton("Restore", "restore_icon.png");
+        JButton deleteAllButton = createButton("Delete All", "delete_all_icon.png");
+        JButton restoreAllButton = createButton("Restore All", "restore_all_icon.png");
 
         filterButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -108,7 +108,7 @@ public class ManagerManageUsersGUI {
         });
 
         searchField.addActionListener(e -> searchUsers(searchField.getText()));
-        JButton clearButton = new JButton("Clear");
+        JButton clearButton = createButton("Clear", "clear_icon.png");
         clearButton.addActionListener(e -> {
             searchField.setText("");
             if (currentFilterChoice != null) {
@@ -158,6 +158,20 @@ public class ManagerManageUsersGUI {
         frame.add(actionPanel, BorderLayout.SOUTH);
 
         frame.setVisible(true);
+
+        frame.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                int choice = JOptionPane.showConfirmDialog(frame, 
+                    "Are you sure you want to close this window?", "Confirm Close",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.QUESTION_MESSAGE);
+                if (choice == JOptionPane.YES_OPTION) {
+                    System.exit(0);
+                }
+                // No need for else as the window will stay open by default
+            }
+        });
     }
 
     private void loadUsers() {
@@ -652,5 +666,19 @@ public class ManagerManageUsersGUI {
                 "An error occurred while restoring users.", 
                 "Error", JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+    private JButton createButton(String text, String iconPath) {
+        JButton button = new JButton(text);
+        try {
+            ImageIcon icon = new ImageIcon(new ImageIcon("images/" + iconPath)
+                .getImage().getScaledInstance(24, 24, Image.SCALE_SMOOTH));
+            button.setIcon(icon);
+            button.setHorizontalAlignment(SwingConstants.CENTER);
+        } catch (Exception e) {
+            System.err.println("Could not load icon: " + iconPath);
+        }
+        // Don't set a default size here, let individual calls specify the size
+        return button;
     }
 }

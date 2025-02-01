@@ -20,13 +20,13 @@ public class StaffViewReceiptGUI {
 
     private void initialize() {
         frame = new JFrame("View Receipts");
-        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         frame.setSize(1024, 768);
         frame.setLayout(new BorderLayout(10, 10));
 
         // Back button panel
         JPanel topPanel = new JPanel(new BorderLayout());
-        JButton backButton = new JButton("Back");
+        JButton backButton = createButton("Back", "back_icon.png");
         backButton.setPreferredSize(new Dimension(100, 40));
         backButton.addActionListener(e -> {
             new StaffGenerateReceiptGUI(staff);
@@ -45,7 +45,7 @@ public class StaffViewReceiptGUI {
         frame.add(scrollPane, BorderLayout.CENTER);
 
         // View Receipt button
-        JButton viewReceiptButton = new JButton("View Receipt");
+        JButton viewReceiptButton = createButton("View Receipt", "view_receipt_icon.png");
         viewReceiptButton.addActionListener(e -> viewReceipt());
         JPanel bottomPanel = new JPanel();
         bottomPanel.add(viewReceiptButton);
@@ -53,6 +53,20 @@ public class StaffViewReceiptGUI {
 
         loadCompletedPayments();
         frame.setVisible(true);
+
+        frame.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                int choice = JOptionPane.showConfirmDialog(frame, 
+                    "Are you sure you want to close this window?", "Confirm Close",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.QUESTION_MESSAGE);
+                if (choice == JOptionPane.YES_OPTION) {
+                    System.exit(0);
+                }
+                // No need for else as the window will stay open by default
+            }
+        });
     }
 
     private void loadCompletedPayments() {
@@ -144,5 +158,19 @@ public class StaffViewReceiptGUI {
         // Show receipt in dialog
         JOptionPane.showMessageDialog(frame, receiptPanel, 
             "Receipt Details", JOptionPane.PLAIN_MESSAGE);
+    }
+
+    private JButton createButton(String text, String iconPath) {
+        JButton button = new JButton(text);
+        try {
+            ImageIcon icon = new ImageIcon(new ImageIcon("images/" + iconPath)
+                .getImage().getScaledInstance(24, 24, Image.SCALE_SMOOTH));
+            button.setIcon(icon);
+            button.setHorizontalAlignment(SwingConstants.CENTER);
+        } catch (Exception e) {
+            System.err.println("Could not load icon: " + iconPath);
+        }
+        // Don't set a default size here, let individual calls specify the size
+        return button;
     }
 }

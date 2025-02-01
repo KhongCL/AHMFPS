@@ -27,13 +27,13 @@ public class ResidentCancelBookingGUI {
 
     private void initialize() {
         frame = new JFrame("Cancel Booking");
-        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         frame.setSize(1024, 768);
         frame.setLayout(new BorderLayout(10, 10)); // Add spacing between components
 
         // Top panel for the back button
         JPanel topPanel = new JPanel(new BorderLayout());
-        JButton backButton = new JButton("Back");
+        JButton backButton = createButton("Back", "back_icon.png");
         backButton.setPreferredSize(new Dimension(100, 40));
         backButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -77,7 +77,7 @@ public class ResidentCancelBookingGUI {
         }
 
         // Add Cancel button
-        JButton cancelButton = new JButton("Cancel Booking");
+        JButton cancelButton = createButton("Cancel Booking", "cancel_icon.png");
         cancelButton.setPreferredSize(new Dimension(200, 40)); // Adjusted button size
         cancelButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -96,6 +96,20 @@ public class ResidentCancelBookingGUI {
         cancelBookingPanel.add(bottomPanel, BorderLayout.SOUTH);
 
         frame.setVisible(true);
+
+        frame.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                int choice = JOptionPane.showConfirmDialog(frame, 
+                    "Are you sure you want to close this window?", "Confirm Close",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.QUESTION_MESSAGE);
+                if (choice == JOptionPane.YES_OPTION) {
+                    System.exit(0);
+                }
+                // No need for else as the window will stay open by default
+            }
+        });
     }
 
     private void showCancelBookingPopup(String[] details, int rowIndex) {
@@ -143,5 +157,19 @@ public class ResidentCancelBookingGUI {
         } else {
             JOptionPane.showMessageDialog(frame, "An error occurred while cancelling the booking.", "Error", JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+    private JButton createButton(String text, String iconPath) {
+        JButton button = new JButton(text);
+        try {
+            ImageIcon icon = new ImageIcon(new ImageIcon("images/" + iconPath)
+                .getImage().getScaledInstance(24, 24, Image.SCALE_SMOOTH));
+            button.setIcon(icon);
+            button.setHorizontalAlignment(SwingConstants.CENTER);
+        } catch (Exception e) {
+            System.err.println("Could not load icon: " + iconPath);
+        }
+        // Don't set a default size here, let individual calls specify the size
+        return button;
     }
 }

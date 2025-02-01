@@ -24,7 +24,7 @@ public class ManagerApproveUsersRegistrationGUI {
 
         private void initialize() {
             frame = new JFrame("Approve Users");
-            frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+            frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
             frame.setSize(1024, 768);
             frame.setLayout(new BorderLayout(10, 10));
 
@@ -33,7 +33,7 @@ public class ManagerApproveUsersRegistrationGUI {
             topPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
             // Back button
-            JButton backButton = new JButton("Back");
+            JButton backButton = createButton("Back", "back_icon.png");
             backButton.setPreferredSize(new Dimension(100, 40));
             backButton.addActionListener(e -> {
                 new ManagerMainPageGUI(manager);
@@ -43,7 +43,7 @@ public class ManagerApproveUsersRegistrationGUI {
 
             // Filter panel
             JPanel filterPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-            JButton filterButton = new JButton("Filter");
+            JButton filterButton = createButton("Filter", "filter_icon.png");
             filterButton.addActionListener(e -> filterUsers());
             filterPanel.add(filterButton);
             topPanel.add(filterPanel, BorderLayout.EAST);
@@ -60,7 +60,7 @@ public class ManagerApproveUsersRegistrationGUI {
 
             // Approve button panel
             JPanel approvePanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-            JButton approveButton = new JButton("Approve");
+            JButton approveButton = createButton("Approve", "approve_icon.png");
             approveButton.setPreferredSize(new Dimension(150, 40));
             approveButton.addActionListener(e -> approveSelectedUser());
             approvePanel.add(approveButton);
@@ -68,6 +68,20 @@ public class ManagerApproveUsersRegistrationGUI {
 
             loadUnapprovedUsers();
             frame.setVisible(true);
+
+            frame.addWindowListener(new java.awt.event.WindowAdapter() {
+                @Override
+                public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                    int choice = JOptionPane.showConfirmDialog(frame, 
+                        "Are you sure you want to close this window?", "Confirm Close",
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.QUESTION_MESSAGE);
+                    if (choice == JOptionPane.YES_OPTION) {
+                        System.exit(0);
+                    }
+                    // No need for else as the window will stay open by default
+                }
+            });
         }
 
         private void loadUnapprovedUsers() {
@@ -217,5 +231,19 @@ public class ManagerApproveUsersRegistrationGUI {
                     "An error occurred while approving the user.", 
                     "Error", JOptionPane.ERROR_MESSAGE);
             }
+        }
+
+        private JButton createButton(String text, String iconPath) {
+            JButton button = new JButton(text);
+            try {
+                ImageIcon icon = new ImageIcon(new ImageIcon("images/" + iconPath)
+                    .getImage().getScaledInstance(24, 24, Image.SCALE_SMOOTH));
+                button.setIcon(icon);
+                button.setHorizontalAlignment(SwingConstants.CENTER);
+            } catch (Exception e) {
+                System.err.println("Could not load icon: " + iconPath);
+            }
+            // Don't set a default size here, let individual calls specify the size
+            return button;
         }
 }

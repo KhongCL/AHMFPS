@@ -25,7 +25,7 @@ public class ManagerManageProfileGUI {
 
     private void initialize() {
         frame = new JFrame("Update Personal Information");
-        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         frame.setSize(1024, 768);
         frame.setLayout(new BorderLayout(10, 10)); // Add spacing between components
     
@@ -33,7 +33,7 @@ public class ManagerManageProfileGUI {
         topPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); // Add padding
     
         // Back button
-        JButton backButton = new JButton("Back");
+        JButton backButton = createButton("Back", "back_icon.png");
         backButton.setPreferredSize(new Dimension(100, 40));
         backButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -132,7 +132,7 @@ public class ManagerManageProfileGUI {
         frame.add(inputPanel, BorderLayout.CENTER);
     
         // Update button
-        JButton updateButton = new JButton("Update Profile");
+        JButton updateButton = createButton("Update Profile", "update_profile_icon.png");
         updateButton.setPreferredSize(new Dimension(150, 40));
         updateButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -149,6 +149,20 @@ public class ManagerManageProfileGUI {
         addValidationListeners(icPassportIconLabel, usernameIconLabel, passwordIconLabel, contactNumberIconLabel);
     
         frame.setVisible(true);
+
+        frame.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                int choice = JOptionPane.showConfirmDialog(frame, 
+                    "Are you sure you want to close this window?", "Confirm Close",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.QUESTION_MESSAGE);
+                if (choice == JOptionPane.YES_OPTION) {
+                    System.exit(0);
+                }
+                // No need for else as the window will stay open by default
+            }
+        });
     }
 
     private JTextArea createErrorLabel() {
@@ -380,5 +394,19 @@ public class ManagerManageProfileGUI {
             APUHostelManagement.Manager.updateFile("approved_residents.txt", manager);
         }
         APUHostelManagement.Manager.updateFile("users.txt", manager);
+    }
+
+    private JButton createButton(String text, String iconPath) {
+        JButton button = new JButton(text);
+        try {
+            ImageIcon icon = new ImageIcon(new ImageIcon("images/" + iconPath)
+                .getImage().getScaledInstance(24, 24, Image.SCALE_SMOOTH));
+            button.setIcon(icon);
+            button.setHorizontalAlignment(SwingConstants.CENTER);
+        } catch (Exception e) {
+            System.err.println("Could not load icon: " + iconPath);
+        }
+        // Don't set a default size here, let individual calls specify the size
+        return button;
     }
 }
