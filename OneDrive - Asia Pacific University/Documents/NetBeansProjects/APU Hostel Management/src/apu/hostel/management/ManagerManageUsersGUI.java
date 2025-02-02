@@ -28,6 +28,8 @@ public class ManagerManageUsersGUI {
     private String currentFilterValue = null;
     private JButton filterButton;
     private JButton sortButton;
+    private String currentSortCategory = null;
+    private String currentSortOrder = null;
 
     // Add new constructor
     public ManagerManageUsersGUI(APUHostelManagement.Manager manager) {
@@ -48,6 +50,7 @@ public class ManagerManageUsersGUI {
         frame.setSize(1024, 768);
         frame.setLayout(new BorderLayout(10, 10)); // Add spacing between components
         frame.setTitle("Manage Users - " + manager.getUsername());
+        frame.setLocationRelativeTo(null);
 
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); // Add padding
@@ -177,7 +180,12 @@ public class ManagerManageUsersGUI {
                     filterButton.setText("Filter");
                     currentFilterChoice = null;
                     currentFilterValue = null;
-                    loadUsers();
+                    frame.setTitle("Manage Users - " + manager.getUsername());
+                    if (currentSortCategory != null) {
+                        applySorting(userList);
+                    } else {
+                        loadUsers();
+                    }
                 }
             } else {
                 filterUsers();
@@ -193,7 +201,14 @@ public class ManagerManageUsersGUI {
                     JOptionPane.QUESTION_MESSAGE);
                 if (choice == JOptionPane.YES_OPTION) {
                     sortButton.setText("Sort");
-                    updateTable(userList);
+                    currentSortCategory = null;
+                    currentSortOrder = null;
+                    // Reapply current filter if exists
+                    if (currentFilterChoice != null) {
+                        reapplyCurrentFilter();
+                    } else {
+                        loadUsers();
+                    }
                 }
             } else {
                 sortUsers();
@@ -432,7 +447,11 @@ public class ManagerManageUsersGUI {
                     .collect(Collectors.toList());
             }
         }
-        updateTable(filteredUsers);
+        if (currentSortCategory != null) {
+            applySorting(filteredUsers);
+        } else {
+            updateTable(filteredUsers);
+        }
     }
 
     private void reapplyCurrentFilter() {
@@ -478,34 +497,38 @@ public class ManagerManageUsersGUI {
         };
         String sortChoice = (String) JOptionPane.showInputDialog(frame, "Select sort option:", "Sort Users", JOptionPane.QUESTION_MESSAGE, null, sortOptions, sortOptions[0]);
 
-        if (sortChoice == null) {
-            return; // User cancelled
-        }
+        if (sortChoice == null) return;
+        
 
         if (sortChoice != null) {
             sortButton.setText("Sort: " + sortChoice.split(" ")[0]);
         }
 
-        List<APUHostelManagement.User> sortedUsers = new ArrayList<>(filteredUserList);
+        currentSortCategory = sortChoice.split(" ")[0]; // "Username" or "Registration Date"  
+        currentSortOrder = sortChoice.contains("Z-A") || sortChoice.contains("Newest") ? "Descending" : "Ascending";
 
-        switch (sortChoice) {
-            case "Username A-Z":
-                sortedUsers.sort(Comparator.comparing(APUHostelManagement.User::getUsername));
-                break;
-            case "Username Z-A":
-                sortedUsers.sort(Comparator.comparing(APUHostelManagement.User::getUsername).reversed());
-                break;
-            case "Registration Date (Newest)":
-                sortedUsers.sort(Comparator.comparing(APUHostelManagement.User::getDateOfRegistration).reversed());
-                break;
-            case "Registration Date (Oldest)":
-                sortedUsers.sort(Comparator.comparing(APUHostelManagement.User::getDateOfRegistration));
-                break;
-            default:
-                break;
+        applySorting(filteredUserList != null ? filteredUserList : userList);
+    }
+
+    private void applySorting(List<APUHostelManagement.User> listToSort) {
+        if (currentSortCategory == null || currentSortOrder == null) return;
+        
+        List<APUHostelManagement.User> sortedList = new ArrayList<>(listToSort);
+        
+        Comparator<APUHostelManagement.User> comparator = switch (currentSortCategory) {
+            case "Username" -> Comparator.comparing(APUHostelManagement.User::getUsername);
+            case "Registration" -> Comparator.comparing(APUHostelManagement.User::getDateOfRegistration);
+            default -> null;
+        };
+    
+        if (comparator != null) {
+            if (currentSortOrder.equals("Descending")) {
+                comparator = comparator.reversed();
+            }
+            sortedList.sort(comparator);
+            sortButton.setText("Sort: " + currentSortCategory.split(" ")[0]);
+            updateTable(sortedList);
         }
-
-        updateTable(sortedUsers);
     }
 
     private void searchUsers(String searchQuery) {

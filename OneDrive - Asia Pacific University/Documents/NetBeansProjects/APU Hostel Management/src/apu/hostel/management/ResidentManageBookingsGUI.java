@@ -23,7 +23,8 @@ public class ResidentManageBookingsGUI {
         frame = new JFrame("Manage Bookings");
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         frame.setSize(1024, 768);
-        frame.setLayout(new BorderLayout(10, 10)); // Add spacing between components
+        frame.setLayout(new BorderLayout(10, 10));
+        frame.setLocationRelativeTo(null);
 
         JLabel titleLabel = new JLabel("Manage Bookings", JLabel.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 24)); // Set font size

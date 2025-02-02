@@ -28,6 +28,8 @@ public class ManagerApproveUsersRegistrationGUI {
     private String currentFilterValue = null;
     private JButton filterButton;
     private JButton sortButton;
+    private String currentSortCategory = null;
+    private String currentSortOrder = null;
 
     public ManagerApproveUsersRegistrationGUI(APUHostelManagement.Manager manager) {
         this.manager = manager;
@@ -40,6 +42,7 @@ public class ManagerApproveUsersRegistrationGUI {
         frame.setSize(1024, 768);
         frame.setLayout(new BorderLayout(10, 10));
         frame.setTitle("Approve Users - " + manager.getUsername());
+        frame.setLocationRelativeTo(null);
 
         // Top panel
         JPanel topPanel = new JPanel(new BorderLayout());
@@ -68,7 +71,12 @@ public class ManagerApproveUsersRegistrationGUI {
                     filterButton.setText("Filter");
                     currentFilterChoice = null;
                     currentFilterValue = null;
-                    loadUnapprovedUsers();
+                    frame.setTitle("Approve Users - " + manager.getUsername());
+                    if (currentSortCategory != null) {
+                        applySorting(userList);
+                    } else {
+                        loadUnapprovedUsers();
+                    }
                 }
             } else {
                 filterUsers();
@@ -85,7 +93,14 @@ public class ManagerApproveUsersRegistrationGUI {
                     JOptionPane.QUESTION_MESSAGE);
                 if (choice == JOptionPane.YES_OPTION) {
                     sortButton.setText("Sort");
-                    updateTable(userList);
+                    currentSortCategory = null;
+                    currentSortOrder = null;
+                    // Reapply current filter if exists
+                    if (currentFilterChoice != null) {
+                        reapplyCurrentFilter();
+                    } else {
+                        loadUnapprovedUsers();
+                    }
                 }
             } else {
                 sortUsers();
@@ -207,7 +222,6 @@ public class ManagerApproveUsersRegistrationGUI {
                 }
             }
         });
-        searchField.setPreferredSize(new Dimension(200, 30));
 
         backButton.setMnemonic(KeyEvent.VK_B);  // Alt+B
         approveButton.setMnemonic(KeyEvent.VK_A); // Alt+A
@@ -432,7 +446,11 @@ public class ManagerApproveUsersRegistrationGUI {
                 " (Filtered: " + roleChoice + ", " + filteredUsers.size() + " users)");
         }
         
-        updateTable(filteredUsers);
+        if (currentSortCategory != null) {
+            applySorting(filteredUsers);
+        } else {
+            updateTable(filteredUsers);
+        }
     }
 
     private void reapplyCurrentFilter() {
@@ -452,48 +470,69 @@ public class ManagerApproveUsersRegistrationGUI {
         }
     }
 
-    private void searchUsers(String query) {
-        if (query == null || query.trim().isEmpty()) {
-            updateTable(userList);
+    private void searchUsers(String searchQuery) {
+        if (searchQuery == null || searchQuery.trim().isEmpty()) {
+            // If search query is empty, reapply current filter or show all users
+            if (currentFilterChoice != null) {
+                reapplyCurrentFilter();
+            } else {
+                loadUnapprovedUsers();
+            }
             return;
         }
-        String lowerQuery = query.toLowerCase();
-        List<APUHostelManagement.User> searchResults = userList.stream()
-            .filter(user -> user.getUserID().toLowerCase().contains(lowerQuery) ||
-                            user.getIcPassportNumber().toLowerCase().contains(lowerQuery) ||
-                            user.getUsername().toLowerCase().contains(lowerQuery) ||
-                            user.getPassword().toLowerCase().contains(lowerQuery) ||
-                            user.getContactNumber().toLowerCase().contains(lowerQuery) ||
-                            user.getDateOfRegistration().toLowerCase().contains(lowerQuery) ||
-                            user.getRole().toLowerCase().contains(lowerQuery) ||
-                            String.valueOf(user.getIsActive()).toLowerCase().contains(lowerQuery))
-            .collect(Collectors.toList());
-        if (!searchResults.isEmpty()) {
-            frame.setTitle("Approve Users - " + manager.getUsername() + 
-                " (Found " + searchResults.size() + " results)");
+    
+        String lowerCaseQuery = searchQuery.toLowerCase();
+    
+        List<APUHostelManagement.User> searchedUsers = filteredUserList.stream()
+                .filter(user -> user.getUserID().toLowerCase().contains(lowerCaseQuery) ||
+                                user.getIcPassportNumber().toLowerCase().contains(lowerCaseQuery) ||
+                                user.getUsername().toLowerCase().contains(lowerCaseQuery) ||
+                                user.getPassword().toLowerCase().contains(lowerCaseQuery) ||
+                                user.getContactNumber().toLowerCase().contains(lowerCaseQuery) ||
+                                user.getDateOfRegistration().toLowerCase().contains(lowerCaseQuery) ||
+                                user.getRole().toLowerCase().contains(lowerCaseQuery) ||
+                                String.valueOf(user.getIsActive()).toLowerCase().contains(lowerCaseQuery))
+                .collect(Collectors.toList());
+        
+        if (!searchedUsers.isEmpty()) {
+            frame.setTitle("Manage Users - " + manager.getUsername() + 
+                " (Found " + searchedUsers.size() + " results)");
         }
-        updateTable(searchResults);
+    
+        updateTable(searchedUsers);
     }
 
     private void sortUsers() {
         String[] options = {"Username A-Z", "Username Z-A", "Registration Date (Newest)", "Registration Date (Oldest)"};
         String choice = (String) JOptionPane.showInputDialog(frame, "Sort by:",
             "Sort Users", JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+
+        if (choice == null) return;
+
+        currentSortCategory = choice.split(" ")[0]; // "Username" or "Registration Date"
+        currentSortOrder = choice.contains("Z-A") || choice.contains("Newest") ? "Descending" : "Ascending";
+
+        applySorting(filteredUserList != null ? filteredUserList : userList);
+    }
+
+    private void applySorting(List<APUHostelManagement.User> listToSort) {
+        if (currentSortCategory == null || currentSortOrder == null) return;
+        
+        List<APUHostelManagement.User> sortedList = new ArrayList<>(listToSort);
+        
+        Comparator<APUHostelManagement.User> comparator = switch (currentSortCategory) {
+            case "Username" -> Comparator.comparing(APUHostelManagement.User::getUsername); 
+            case "Registration" -> Comparator.comparing(APUHostelManagement.User::getDateOfRegistration);
+            default -> null;
+        };
     
-        if (choice != null) {
-            sortButton.setText("Sort: " + choice.split(" ")[0]);
-    
-            // Sort the filtered list instead of the full list
-            List<APUHostelManagement.User> listToSort = 
-                (filteredUserList != null) ? new ArrayList<>(filteredUserList) : new ArrayList<>(userList);
-    
-            switch (choice) {
-                case "Username A-Z" -> listToSort.sort(Comparator.comparing(APUHostelManagement.User::getUsername));
-                case "Username Z-A" -> listToSort.sort(Comparator.comparing(APUHostelManagement.User::getUsername).reversed());
-                case "Registration Date (Newest)" -> listToSort.sort(Comparator.comparing(APUHostelManagement.User::getDateOfRegistration).reversed());
-                case "Registration Date (Oldest)" -> listToSort.sort(Comparator.comparing(APUHostelManagement.User::getDateOfRegistration));
+        if (comparator != null) {
+            if (currentSortOrder.equals("Descending")) {
+                comparator = comparator.reversed();
             }
-            updateTable(listToSort);
+            sortedList.sort(comparator);
+            sortButton.setText("Sort: " + currentSortCategory.split(" ")[0]);
+            updateTable(sortedList);
         } else {
             sortButton.setText("Sort");
         }

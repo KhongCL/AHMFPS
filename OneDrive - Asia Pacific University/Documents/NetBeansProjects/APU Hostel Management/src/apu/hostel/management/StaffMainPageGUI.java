@@ -25,6 +25,7 @@ public class StaffMainPageGUI {
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         frame.setSize(1024, 768);
         frame.setLayout(new BorderLayout(10, 10));
+        frame.setLocationRelativeTo(null);
 
 
         JLabel titleLabel = new JLabel("Staff Menu", JLabel.CENTER);

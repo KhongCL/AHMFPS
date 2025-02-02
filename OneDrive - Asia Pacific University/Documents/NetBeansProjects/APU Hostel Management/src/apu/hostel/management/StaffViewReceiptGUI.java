@@ -23,6 +23,7 @@ public class StaffViewReceiptGUI {
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         frame.setSize(1024, 768);
         frame.setLayout(new BorderLayout(10, 10));
+        frame.setLocationRelativeTo(null);
 
         // Back button panel
         JPanel topPanel = new JPanel(new BorderLayout());

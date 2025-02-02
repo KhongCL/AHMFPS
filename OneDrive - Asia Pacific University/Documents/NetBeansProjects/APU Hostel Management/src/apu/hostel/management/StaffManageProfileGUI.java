@@ -27,7 +27,8 @@ public class StaffManageProfileGUI {
         frame = new JFrame("Update Personal Information");
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         frame.setSize(1024, 768);
-        frame.setLayout(new BorderLayout(10, 10)); // Add spacing between components
+        frame.setLayout(new BorderLayout(10, 10));
+        frame.setLocationRelativeTo(null);
     
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); // Add padding

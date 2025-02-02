@@ -29,9 +29,9 @@ public class ResidentCancelBookingGUI {
         frame = new JFrame("Cancel Booking");
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         frame.setSize(1024, 768);
-        frame.setLayout(new BorderLayout(10, 10)); // Add spacing between components
-
-        // Top panel for the back button
+        frame.setLayout(new BorderLayout(10, 10)); 
+        frame.setLocationRelativeTo(null);
+        
         JPanel topPanel = new JPanel(new BorderLayout());
         JButton backButton = createButton("Back", "back_icon.png");
         backButton.setPreferredSize(new Dimension(100, 40));

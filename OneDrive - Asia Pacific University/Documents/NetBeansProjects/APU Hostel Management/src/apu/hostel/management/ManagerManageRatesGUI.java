@@ -1,13 +1,21 @@
 package apu.hostel.management;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Comparator;
+import java.util.stream.Collectors;
 
 public class ManagerManageRatesGUI {
     private JFrame frame;
@@ -15,6 +23,13 @@ public class ManagerManageRatesGUI {
     private DefaultTableModel tableModel;
     private List<APUHostelManagement.FeeRate> rateList;
     private APUHostelManagement.Manager manager; // Add manager field
+    private List<APUHostelManagement.FeeRate> filteredRateList;
+    private String currentFilterChoice = null;
+    private String currentFilterValue = null;
+    private String currentSortCategory = null;
+    private String currentSortOrder = null;
+    private JButton filterButton;
+    private JButton sortButton;
 
     // Add new constructor
     public ManagerManageRatesGUI(APUHostelManagement.Manager manager) {
@@ -30,7 +45,9 @@ public class ManagerManageRatesGUI {
         frame = new JFrame("Fix, Update, Delete or Restore Rate");
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         frame.setSize(1024, 768);
-        frame.setLayout(new BorderLayout(10, 10)); // Add spacing between components
+        frame.setLayout(new BorderLayout(10, 10));
+        frame.setTitle("Manage Rates - " + manager.getUsername());
+        frame.setLocationRelativeTo(null);
 
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); // Add padding
@@ -53,14 +70,149 @@ public class ManagerManageRatesGUI {
             }
         });
 
-        topPanel.add(addButton, BorderLayout.EAST);
+        JPanel filterSortSearchPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        filterButton = createButton("Filter", "filter_icon.png");
+        filterButton.addActionListener(e -> {
+            if (filterButton.getText().startsWith("Filter: ")) {
+                int choice = JOptionPane.showConfirmDialog(frame,
+                    "Do you want to clear the current filter?",
+                    "Clear Filter",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.QUESTION_MESSAGE);
+                if (choice == JOptionPane.YES_OPTION) {
+                    filterButton.setText("Filter");
+                    currentFilterChoice = null;
+                    currentFilterValue = null;
+                    frame.setTitle("Manage Rates - " + manager.getUsername());
+                    if (currentSortCategory != null) {
+                        applySorting(rateList);
+                    } else {
+                        loadRates();
+                    }
+                }
+            } else {
+                filterRates();
+            }
+        });
+
+        sortButton = createButton("Sort", "sort_icon.png");
+        sortButton.addActionListener(e -> {
+            if (sortButton.getText().startsWith("Sort: ")) {
+                int choice = JOptionPane.showConfirmDialog(frame,
+                    "Do you want to clear the current sort?",
+                    "Clear Sort",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.QUESTION_MESSAGE);
+                if (choice == JOptionPane.YES_OPTION) {
+                    sortButton.setText("Sort");
+                    currentSortCategory = null;
+                    currentSortOrder = null;
+                    // Reapply current filter if exists
+                    if (currentFilterChoice != null) {
+                        reapplyCurrentFilter();
+                    } else {
+                        loadRates();
+                    }
+                }
+            } else {
+                sortRates();
+            }
+        });
+        JTextField searchField = new JTextField(20);
+        searchField.setText("Search rates...");
+        searchField.setForeground(Color.GRAY);
+        searchField.setPreferredSize(new Dimension(200, 30));
+        searchField.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(Color.GRAY),
+            BorderFactory.createEmptyBorder(5, 5, 5, 5)
+        ));
+        searchField.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                if (searchField.getText().equals("Search rates...")) {
+                    searchField.setText("");
+                    searchField.setForeground(Color.BLACK);
+                }
+            }
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                if (searchField.getText().isEmpty()) {
+                    searchField.setText("Search rates...");
+                    searchField.setForeground(Color.GRAY);
+                }
+            }
+        });
+
+        JButton searchButton = createButton("Search", "search_icon.png");
+        searchButton.addActionListener(e -> searchRates(searchField.getText()));
+        JButton clearButton = createButton("Clear", "clear_icon.png");
+        clearButton.addActionListener(e -> {
+            searchField.setText("");
+            if (currentFilterChoice != null) {
+                reapplyCurrentFilter();
+            } else {
+                loadRates();
+            }
+        });
+
+        filterSortSearchPanel.add(filterButton);
+        filterSortSearchPanel.add(sortButton);
+        filterSortSearchPanel.add(searchField);
+        filterSortSearchPanel.add(searchButton);
+        filterSortSearchPanel.add(clearButton);
+        filterSortSearchPanel.add(addButton);
+
+        topPanel.add(filterSortSearchPanel, BorderLayout.EAST);
         topPanel.add(backButton, BorderLayout.WEST);
 
         frame.add(topPanel, BorderLayout.NORTH);
 
         // Rate table
-        tableModel = new DefaultTableModel(new Object[]{"FeeRateID", "RoomType", "DailyRate", "WeeklyRate", "MonthlyRate", "YearlyRate", "IsActive"}, 0);
+        tableModel = new DefaultTableModel(new Object[]{"FeeRateID", "RoomType", "DailyRate", "WeeklyRate", "MonthlyRate", "YearlyRate", "IsActive"}, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false; // Make all cells non-editable
+            }
+        };
         rateTable = new JTable(tableModel);
+        // Add after rateTable creation
+        rateTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        rateTable.getTableHeader().setReorderingAllowed(false);
+        rateTable.setRowHeight(25);
+        rateTable.getTableHeader().setFont(new Font("Arial", Font.BOLD, 12));
+        rateTable.setFont(new Font("Arial", Font.PLAIN, 12)); 
+        rateTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+        rateTable.setSelectionBackground(new Color(230, 240, 250));
+        rateTable.setSelectionForeground(Color.BLACK);
+        rateTable.setGridColor(Color.LIGHT_GRAY);
+
+        // Add alternating row colors
+        rateTable.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value, 
+                    boolean isSelected, boolean hasFocus, int row, int column) {
+                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                if (!isSelected) {
+                    c.setBackground(row % 2 == 0 ? Color.WHITE : new Color(245, 245, 250));
+                }
+                return c;
+            }
+        });
+
+        rateTable.getColumnModel().getColumn(0).setPreferredWidth(80);  // FeeRateID
+        rateTable.getColumnModel().getColumn(1).setPreferredWidth(100); // RoomType  
+        rateTable.getColumnModel().getColumn(2).setPreferredWidth(100); // DailyRate
+        rateTable.getColumnModel().getColumn(3).setPreferredWidth(100); // WeeklyRate
+        rateTable.getColumnModel().getColumn(4).setPreferredWidth(100); // MonthlyRate
+        rateTable.getColumnModel().getColumn(5).setPreferredWidth(100); // YearlyRate
+        rateTable.getColumnModel().getColumn(6).setPreferredWidth(70);  // IsActive
+
+        rateTable.addMouseListener(new MouseAdapter() {
+            @Override 
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 2) {
+                    updateRate();
+                }
+            }
+        });
         JScrollPane scrollPane = new JScrollPane(rateTable);
         frame.add(scrollPane, BorderLayout.CENTER);
 
@@ -115,6 +267,58 @@ public class ManagerManageRatesGUI {
 
         frame.setVisible(true);
 
+        searchField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    searchButton.doClick();
+                }
+            }
+        });
+
+        // Add mnemonics
+        backButton.setMnemonic(KeyEvent.VK_B);  // Alt+B
+        filterButton.setMnemonic(KeyEvent.VK_F); // Alt+F
+        sortButton.setMnemonic(KeyEvent.VK_S); // Alt+S
+        searchButton.setMnemonic(KeyEvent.VK_A); // Alt+A
+        clearButton.setMnemonic(KeyEvent.VK_C); // Alt+C
+        addButton.setMnemonic(KeyEvent.VK_I);   // Alt+I
+        updateButton.setMnemonic(KeyEvent.VK_U); // Alt+U 
+        deleteButton.setMnemonic(KeyEvent.VK_D); // Alt+D
+        restoreButton.setMnemonic(KeyEvent.VK_R); // Alt+R
+        deleteAllButton.setMnemonic(KeyEvent.VK_L); // Alt+L  
+        restoreAllButton.setMnemonic(KeyEvent.VK_T); // Alt+T
+
+        // Add tooltips
+        backButton.setToolTipText("Go back to main page (Alt+B)");
+        filterButton.setToolTipText("Filter rates (Alt+F)");
+        sortButton.setToolTipText("Sort rates (Alt+S)");
+        searchButton.setToolTipText("Search by anything (case-insensitive) and press Enter");
+        clearButton.setToolTipText("Clear search and filters (Alt+C)");
+        addButton.setToolTipText("Set initial rates (Alt+I)");
+        updateButton.setToolTipText("Update selected rate (Alt+U)");
+        deleteButton.setToolTipText("Delete selected rate (Alt+D)");
+        restoreButton.setToolTipText("Restore selected rate (Alt+R)");
+        deleteAllButton.setToolTipText("Delete all rates (Alt+L)");
+        restoreAllButton.setToolTipText("Restore all rates (Alt+T)");
+
+        addButtonHoverEffect(backButton);
+        addButtonHoverEffect(addButton);
+        addButtonHoverEffect(filterButton);
+        addButtonHoverEffect(sortButton);
+        addButtonHoverEffect(searchButton);
+        addButtonHoverEffect(clearButton);
+        addButtonHoverEffect(updateButton);
+        addButtonHoverEffect(deleteButton);  
+        addButtonHoverEffect(restoreButton);
+        addButtonHoverEffect(deleteAllButton);
+        addButtonHoverEffect(restoreAllButton);
+
+        KeyStroke escapeKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
+        frame.getRootPane().registerKeyboardAction(e -> {
+            backButton.doClick();
+        }, escapeKeyStroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+
         frame.addWindowListener(new java.awt.event.WindowAdapter() {
             @Override
             public void windowClosing(java.awt.event.WindowEvent windowEvent) {
@@ -134,6 +338,7 @@ public class ManagerManageRatesGUI {
         tableModel.setRowCount(0); // Clear the table
         try {
             rateList = APUHostelManagement.FeeRate.readFromFile("fee_rates.txt");
+            filteredRateList = new ArrayList<>(rateList);
             for (APUHostelManagement.FeeRate rate : rateList) {
                 tableModel.addRow(new Object[]{
                     rate.getFeeRateID(),
@@ -382,6 +587,215 @@ public class ManagerManageRatesGUI {
 
     private void saveRatesToFile() {
         APUHostelManagement.Manager.saveRatesToFile(rateList);
+    }
+
+    private void filterRates() {
+        String[] options = {"All", "Active", "Deleted", "Room Type"};
+        String choice = (String) JOptionPane.showInputDialog(frame,
+            "Select filter:", "Filter Rates",
+            JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+    
+        if (choice == null) return;
+    
+        if (choice.equals("All")) {
+            currentFilterChoice = null;
+            currentFilterValue = null;
+            loadRates();
+            filterButton.setText("Filter");
+            return;
+        }
+
+        if (!choice.equals("All")) {
+            filterButton.setText("Filter: " + currentFilterValue);
+        } else {
+            filterButton.setText("Filter");
+        }
+    
+        currentFilterChoice = choice;
+        List<APUHostelManagement.FeeRate> filteredRates = new ArrayList<>(rateList);
+    
+        switch (choice) {
+            case "Active":
+                currentFilterValue = "Active";
+                filteredRates = rateList.stream()
+                    .filter(APUHostelManagement.FeeRate::isActive)
+                    .collect(Collectors.toList());
+                break;
+            case "Deleted":
+                currentFilterValue = "Deleted";
+                filteredRates = rateList.stream()
+                    .filter(rate -> !rate.isActive())
+                    .collect(Collectors.toList());
+                break;
+            case "Room Type":
+                String[] roomTypes = {"Standard", "Large", "Family"};
+                String roomType = (String) JOptionPane.showInputDialog(frame,
+                    "Select room type:", "Filter by Room Type",
+                    JOptionPane.QUESTION_MESSAGE, null, roomTypes, roomTypes[0]);
+                if (roomType == null) return;
+                
+                currentFilterValue = roomType;
+                filteredRates = rateList.stream()
+                    .filter(rate -> rate.getRoomType().equalsIgnoreCase(roomType))
+                    .collect(Collectors.toList());
+                break;
+        }
+    
+        filterButton.setText("Filter: " + currentFilterValue);
+        
+        if (!filteredRates.isEmpty()) {
+            frame.setTitle("Manage Rates - " + manager.getUsername() + 
+                " (Filtered: " + currentFilterValue + ", " + filteredRates.size() + " rates)");
+        }
+        
+        if (currentSortCategory != null) {
+            applySorting(filteredRates);
+        } else {
+            updateTable(filteredRates);
+        }
+    }
+    
+    private void sortRates() {
+        String[] categories = {
+            "Rate ID", 
+            "Room Type",
+            "Daily Rate",
+            "Weekly Rate", 
+            "Monthly Rate",
+            "Yearly Rate"
+        };
+    
+        String category = (String) JOptionPane.showInputDialog(frame,
+            "Select category to sort by:",
+            "Sort Rates",
+            JOptionPane.QUESTION_MESSAGE,
+            null,
+            categories,
+            categories[0]);
+    
+        if (category == null) return;
+
+
+    
+        String order = (String) JOptionPane.showInputDialog(frame,
+            "Select sort order:",
+            "Sort Order", 
+            JOptionPane.QUESTION_MESSAGE,
+            null,
+            new String[]{"Ascending", "Descending"},
+            "Ascending");
+    
+        if (order == null) return;
+        currentSortCategory = category;
+        currentSortOrder = order;
+
+        applySorting(filteredRateList != null ? filteredRateList : rateList);
+    }
+
+    private void applySorting(List<APUHostelManagement.FeeRate> listToSort) {
+        if (currentSortCategory == null || currentSortOrder == null) return;
+        
+        List<APUHostelManagement.FeeRate> sortedList = new ArrayList<>(listToSort);
+        
+        Comparator<APUHostelManagement.FeeRate> comparator = switch (currentSortCategory) {
+            case "Rate ID" -> Comparator.comparing(APUHostelManagement.FeeRate::getFeeRateID);
+            case "Room Type" -> Comparator.comparing(APUHostelManagement.FeeRate::getRoomType);
+            case "Daily Rate" -> Comparator.comparing(APUHostelManagement.FeeRate::getDailyRate);
+            case "Weekly Rate" -> Comparator.comparing(APUHostelManagement.FeeRate::getWeeklyRate);
+            case "Monthly Rate" -> Comparator.comparing(APUHostelManagement.FeeRate::getMonthlyRate);  
+            case "Yearly Rate" -> Comparator.comparing(APUHostelManagement.FeeRate::getYearlyRate);
+            default -> null;
+        };
+    
+        if (comparator != null) {
+            if (currentSortOrder.equals("Descending")) {
+                comparator = comparator.reversed();
+            }
+            sortedList.sort(comparator);
+            sortButton.setText("Sort: " + currentSortCategory.split(" ")[0]);
+            updateTable(sortedList);
+        } else {
+            sortButton.setText("Sort");
+        }
+    }
+    
+    private void searchRates(String searchQuery) {
+        if (searchQuery == null || searchQuery.trim().isEmpty() || searchQuery.equals("Search rates...")) {
+            // If search query is empty, reapply current filter or show all rates
+            if (currentFilterChoice != null) {
+                reapplyCurrentFilter();
+            } else {
+                loadRates();
+            }
+            return;
+        }
+    
+        String lowerQuery = searchQuery.toLowerCase();
+        List<APUHostelManagement.FeeRate> searchResults = filteredRateList.stream()
+            .filter(rate -> 
+                rate.getFeeRateID().toLowerCase().contains(lowerQuery) ||
+                rate.getRoomType().toLowerCase().contains(lowerQuery) ||
+                String.valueOf(rate.getDailyRate()).contains(lowerQuery) ||
+                String.valueOf(rate.getWeeklyRate()).contains(lowerQuery) ||
+                String.valueOf(rate.getMonthlyRate()).contains(lowerQuery) ||
+                String.valueOf(rate.getYearlyRate()).contains(lowerQuery) ||
+                String.valueOf(rate.isActive()).toLowerCase().contains(lowerQuery))
+            .collect(Collectors.toList());
+    
+        if (!searchResults.isEmpty()) {
+            frame.setTitle("Manage Rates - " + manager.getUsername() + 
+                " (Found " + searchResults.size() + " results)");
+        }
+        updateTable(searchResults);
+    }
+    
+    private void updateTable(List<APUHostelManagement.FeeRate> rates) {
+        tableModel.setRowCount(0);
+        
+        if (rates.isEmpty()) {
+            JOptionPane.showMessageDialog(frame, 
+                "No rates found.", 
+                "Information", JOptionPane.INFORMATION_MESSAGE);
+            if (currentFilterChoice == null) {
+                loadRates();
+            }
+            return;
+        }
+        
+        filteredRateList = new ArrayList<>(rates);
+        
+        for (APUHostelManagement.FeeRate rate : rates) {
+            tableModel.addRow(new Object[]{
+                rate.getFeeRateID(),
+                rate.getRoomType(),
+                rate.getDailyRate(),
+                rate.getWeeklyRate(),
+                rate.getMonthlyRate(),
+                rate.getYearlyRate(),
+                rate.isActive()
+            });
+        }
+    }
+    
+    private void reapplyCurrentFilter() {
+        if (currentFilterChoice != null) {
+            List<APUHostelManagement.FeeRate> filteredRates = new ArrayList<>(rateList);
+            
+            switch (currentFilterChoice) {
+                case "Active" -> filteredRates = filteredRates.stream()
+                    .filter(APUHostelManagement.FeeRate::isActive)
+                    .collect(Collectors.toList());
+                case "Deleted" -> filteredRates = filteredRates.stream()
+                    .filter(rate -> !rate.isActive())
+                    .collect(Collectors.toList());
+                case "Room Type" -> filteredRates = filteredRates.stream()
+                    .filter(rate -> rate.getRoomType().equalsIgnoreCase(currentFilterValue))
+                    .collect(Collectors.toList());
+            }
+            updateTable(filteredRates);
+        } else {
+            loadRates();
+        }
     }
 
     private JButton createButton(String text, String iconPath) {

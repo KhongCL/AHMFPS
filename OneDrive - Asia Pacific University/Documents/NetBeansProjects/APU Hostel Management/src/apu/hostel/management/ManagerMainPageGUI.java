@@ -24,6 +24,7 @@ public class ManagerMainPageGUI {
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         frame.setSize(1024, 768);
         frame.setLayout(new BorderLayout(10, 10));
+        frame.setLocationRelativeTo(null);
 
         JLabel managerLabel = new JLabel("Manager Menu", JLabel.CENTER);
         managerLabel.setFont(new Font("Arial", Font.BOLD, 24)); // Set font size

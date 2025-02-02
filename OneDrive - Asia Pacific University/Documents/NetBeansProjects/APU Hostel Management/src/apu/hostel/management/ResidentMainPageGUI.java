@@ -25,6 +25,7 @@ public class ResidentMainPageGUI {
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         frame.setSize(1024, 768);
         frame.setLayout(new BorderLayout(10, 10));
+        frame.setLocationRelativeTo(null);
 
         JLabel titleLabel = new JLabel("Resident Menu", JLabel.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 24));

@@ -33,8 +33,9 @@ public class ResidentMakePaymentForBookingGUI {
         frame = new JFrame("Make Payment for Booking");
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         frame.setSize(1024, 768);
-        frame.setLayout(new BorderLayout(10, 10)); // Use BorderLayout for the main panel
-
+        frame.setLayout(new BorderLayout(10, 10));
+        frame.setLocationRelativeTo(null);
+        
         // Top panel for the back button
         JPanel topPanel = new JPanel(new BorderLayout());
         JButton backButton = createButton("Back", "back_icon.png");

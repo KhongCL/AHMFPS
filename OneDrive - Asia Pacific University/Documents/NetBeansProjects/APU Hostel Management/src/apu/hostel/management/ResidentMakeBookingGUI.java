@@ -33,8 +33,9 @@ public class ResidentMakeBookingGUI {
         frame = new JFrame("Make Booking");
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         frame.setSize(1024, 768);
-        frame.setLayout(new BorderLayout(10, 10)); // Add spacing between components
-
+        frame.setLayout(new BorderLayout(10, 10));
+        frame.setLocationRelativeTo(null);
+        
         // Title Label
         JLabel titleLabel = new JLabel("Make Booking", JLabel.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 24)); // Set font size
