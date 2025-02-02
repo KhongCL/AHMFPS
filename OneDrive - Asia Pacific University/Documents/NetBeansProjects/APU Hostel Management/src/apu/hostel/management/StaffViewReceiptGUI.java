@@ -2,9 +2,16 @@ package apu.hostel.management;
 
 import javax.swing.*;
 import javax.swing.table.*;
+
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyAdapter;
 import java.io.*;
 import java.util.*;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class StaffViewReceiptGUI {
     private JFrame frame;
@@ -12,6 +19,13 @@ public class StaffViewReceiptGUI {
     private DefaultTableModel tableModel;
     private Map<Integer, String[]> paymentDetailsMap;
     private APUHostelManagement.Staff staff;
+    private JButton filterButton;
+    private JButton sortButton;
+    private String currentFilterChoice = null;
+    private String currentFilterValue = null;
+    private String currentSortCategory = null; 
+    private String currentSortOrder = null;
+    private List<String[]> filteredPaymentList;
 
     public StaffViewReceiptGUI(APUHostelManagement.Staff staff) {
         this.staff = staff;
@@ -23,6 +37,7 @@ public class StaffViewReceiptGUI {
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         frame.setSize(1024, 768);
         frame.setLayout(new BorderLayout(10, 10));
+        frame.setTitle("View Receipts - " + staff.getUsername());
         frame.setLocationRelativeTo(null);
 
         // Back button panel
@@ -34,14 +49,158 @@ public class StaffViewReceiptGUI {
             frame.dispose();
         });
         topPanel.add(backButton, BorderLayout.WEST);
+
+        // Add to topPanel after backButton
+        JPanel filterPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        filterButton = createButton("Filter", "filter_icon.png");
+        sortButton = createButton("Sort", "sort_icon.png");
+        JTextField searchField = new JTextField(20);
+        searchField.setText("Search receipts...");
+        searchField.setForeground(Color.GRAY);
+        searchField.setPreferredSize(new Dimension(200, 30));
+        searchField.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(Color.GRAY),
+            BorderFactory.createEmptyBorder(5, 5, 5, 5)
+        ));
+
+        // Add focus listener for search field
+        searchField.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                if (searchField.getText().equals("Search receipts...")) {
+                    searchField.setText("");
+                    searchField.setForeground(Color.BLACK);
+                }
+            }
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                if (searchField.getText().isEmpty()) {
+                    searchField.setText("Search receipts...");
+                    searchField.setForeground(Color.GRAY);
+                }
+            }
+        });
+
+        JButton searchButton = createButton("Search", "search_icon.png");
+        JButton clearButton = createButton("Clear", "clear_icon.png");
+
+        // Add button listeners 
+        filterButton.addActionListener(e -> {
+            if (filterButton.getText().startsWith("Filter: ")) {
+                int choice = JOptionPane.showConfirmDialog(frame,
+                    "Do you want to clear the current filter?",
+                    "Clear Filter",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.QUESTION_MESSAGE);
+                if (choice == JOptionPane.YES_OPTION) {
+                    filterButton.setText("Filter");
+                    currentFilterChoice = null;
+                    currentFilterValue = null;
+                    frame.setTitle("View Receipts - " + staff.getUsername());
+                    if (currentSortCategory != null) {
+                        applySorting(new ArrayList<>(paymentDetailsMap.values()));
+                    } else {
+                        loadCompletedPayments();
+                    }
+                }
+            } else {
+                filterReceipts();
+            }
+        });
+
+        sortButton.addActionListener(e -> {
+            if (sortButton.getText().startsWith("Sort: ")) {
+                int choice = JOptionPane.showConfirmDialog(frame,
+                    "Do you want to clear the current sort?",
+                    "Clear Sort",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.QUESTION_MESSAGE);
+                if (choice == JOptionPane.YES_OPTION) {
+                    sortButton.setText("Sort");
+                    currentSortCategory = null;
+                    currentSortOrder = null;
+                    if (currentFilterChoice != null) {
+                        reapplyCurrentFilter();
+                    } else {
+                        loadCompletedPayments();
+                    }
+                }
+            } else {
+                sortReceipts();
+            }
+        });
+
+        searchButton.addActionListener(e -> searchReceipts(searchField.getText()));
+        clearButton.addActionListener(e -> {
+            searchField.setText("Search receipts...");
+            searchField.setForeground(Color.GRAY);
+            if (currentFilterChoice != null) {
+                reapplyCurrentFilter();
+            } else {
+                loadCompletedPayments();
+            }
+        });
+
+        // Add components to panels
+        filterPanel.add(filterButton);
+        filterPanel.add(sortButton);
+        filterPanel.add(searchField); 
+        filterPanel.add(searchButton);
+        filterPanel.add(clearButton);
+
+        topPanel.add(filterPanel, BorderLayout.CENTER);
+
+
+
+
         frame.add(topPanel, BorderLayout.NORTH);
 
         // Payment table
         tableModel = new DefaultTableModel(
             new Object[]{"Receipt ID", "Payment ID", "Resident ID", "Staff ID", "Start Date", 
                         "End Date", "Room ID", "Amount (RM)", "Payment Method", "Receipt Date"}, 0
-        );
+        ){
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false; // Make cells non-editable
+            }
+        };
         paymentTable = new JTable(tableModel);
+        paymentTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        paymentTable.getTableHeader().setReorderingAllowed(false);
+        paymentTable.setRowHeight(25);
+        paymentTable.getTableHeader().setFont(new Font("Arial", Font.BOLD, 12));
+        paymentTable.setFont(new Font("Arial", Font.PLAIN, 12));
+        paymentTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+        paymentTable.setSelectionBackground(new Color(230, 240, 250));
+        paymentTable.setSelectionForeground(Color.BLACK);
+        paymentTable.setGridColor(Color.LIGHT_GRAY);
+        paymentTable.setIntercellSpacing(new Dimension(5, 5));
+        paymentTable.setShowGrid(true);
+        paymentTable.setFillsViewportHeight(true);
+
+        // Add zebra striping
+        paymentTable.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value, 
+                    boolean isSelected, boolean hasFocus, int row, int column) {
+                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                if (!isSelected) {
+                    c.setBackground(row % 2 == 0 ? Color.WHITE : new Color(245, 245, 250));
+                }
+                return c;
+            }
+        });
+
+        paymentTable.getColumnModel().getColumn(0).setPreferredWidth(80);  // Receipt ID
+        paymentTable.getColumnModel().getColumn(1).setPreferredWidth(80);  // Payment ID
+        paymentTable.getColumnModel().getColumn(2).setPreferredWidth(80);  // Resident ID 
+        paymentTable.getColumnModel().getColumn(3).setPreferredWidth(80);  // Staff ID
+        paymentTable.getColumnModel().getColumn(4).setPreferredWidth(100); // Start Date
+        paymentTable.getColumnModel().getColumn(5).setPreferredWidth(100); // End Date
+        paymentTable.getColumnModel().getColumn(6).setPreferredWidth(80);  // Room ID
+        paymentTable.getColumnModel().getColumn(7).setPreferredWidth(80);  // Amount
+        paymentTable.getColumnModel().getColumn(8).setPreferredWidth(100); // Payment Method
+        paymentTable.getColumnModel().getColumn(9).setPreferredWidth(100); // Receipt Date
+
         JScrollPane scrollPane = new JScrollPane(paymentTable);
         frame.add(scrollPane, BorderLayout.CENTER);
 
@@ -54,6 +213,50 @@ public class StaffViewReceiptGUI {
 
         loadCompletedPayments();
         frame.setVisible(true);
+
+        searchField.addKeyListener(new KeyAdapter() {
+            @Override 
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    searchButton.doClick();
+                }
+            }
+        });
+
+        paymentTable.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 2) {
+                    viewReceipt();
+                }
+            }
+        });
+
+        filterButton.setMnemonic(KeyEvent.VK_F);
+        sortButton.setMnemonic(KeyEvent.VK_S);
+        searchButton.setMnemonic(KeyEvent.VK_ENTER);
+        clearButton.setMnemonic(KeyEvent.VK_C);
+        backButton.setMnemonic(KeyEvent.VK_B);
+        viewReceiptButton.setMnemonic(KeyEvent.VK_V);
+
+        backButton.setToolTipText("Go back to generate receipt page (Alt+B)");
+        filterButton.setToolTipText("Filter receipts (Alt+F)");
+        sortButton.setToolTipText("Sort receipts (Alt+S)");
+        searchButton.setToolTipText("Search by anything (case-insensitive) and press Enter");
+        clearButton.setToolTipText("Clear search and filters (Alt+C)");
+        viewReceiptButton.setToolTipText("View details of selected receipt (Alt+V)");
+
+        addButtonHoverEffect(backButton);
+        addButtonHoverEffect(filterButton);
+        addButtonHoverEffect(sortButton);
+        addButtonHoverEffect(searchButton);
+        addButtonHoverEffect(clearButton);
+        addButtonHoverEffect(viewReceiptButton);
+
+        KeyStroke escapeKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
+        frame.getRootPane().registerKeyboardAction(e -> {
+            backButton.doClick();
+        }, escapeKeyStroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 
         frame.addWindowListener(new java.awt.event.WindowAdapter() {
             @Override
@@ -73,6 +276,14 @@ public class StaffViewReceiptGUI {
     private void loadCompletedPayments() {
         paymentDetailsMap = new HashMap<>();
         tableModel.setRowCount(0);
+
+        filteredPaymentList = null;
+        currentFilterChoice = null;
+        currentFilterValue = null;
+        currentSortCategory = null;
+        currentSortOrder = null;
+        filterButton.setText("Filter");
+        sortButton.setText("Sort");
         
         Map<String, String[]> receiptMap = new HashMap<>();
         try (BufferedReader reader = new BufferedReader(new FileReader("receipts.txt"))) {
@@ -106,6 +317,11 @@ public class StaffViewReceiptGUI {
                         payment[9], receipt[3]});
                     row++;
                 }
+            }
+            if (row == 0) {
+                JOptionPane.showMessageDialog(frame, 
+                    "No completed payments found.", 
+                    "Information", JOptionPane.INFORMATION_MESSAGE);
             }
         } catch (IOException e) {
             JOptionPane.showMessageDialog(frame, "Error loading payments", 
@@ -159,6 +375,224 @@ public class StaffViewReceiptGUI {
         // Show receipt in dialog
         JOptionPane.showMessageDialog(frame, receiptPanel, 
             "Receipt Details", JOptionPane.PLAIN_MESSAGE);
+    }
+
+    private void filterReceipts() {
+        String[] filterOptions = {"All", "Payment Method", "Room ID", "Resident ID"};
+        String filterChoice = (String) JOptionPane.showInputDialog(frame,
+            "Filter by:", "Filter Receipts", 
+            JOptionPane.QUESTION_MESSAGE, null, filterOptions, filterOptions[0]);
+
+        if (filterChoice == null) return;
+
+        if (filterChoice.equals("All")) {
+            currentFilterChoice = null;
+            currentFilterValue = null;
+            filterButton.setText("Filter");
+            frame.setTitle("View Receipts - " + staff.getUsername());
+            filteredPaymentList = new ArrayList<>(paymentDetailsMap.values());
+            if (currentSortCategory != null) {
+                applySorting(new ArrayList<>(filteredPaymentList));
+            } else {
+                loadCompletedPayments();
+            }
+            return;
+        }
+
+        String value = null;
+
+        switch (filterChoice) {
+            case "Payment Method" -> {
+                String[] methods = {"credit_card", "cash", "bank_transfer"};
+                String[] displayMethods = {"Credit Card", "Cash", "Bank Transfer"};
+                int index = JOptionPane.showOptionDialog(frame,
+                    "Select payment method:", "Filter Receipts",
+                    JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE,
+                    null, displayMethods, displayMethods[0]);
+                if (index >= 0) {
+                    value = methods[index];
+                }
+            }
+            case "Room ID" -> {
+                Set<String> uniqueRooms = paymentDetailsMap.values().stream()
+                    .map(p -> p[6])
+                    .collect(Collectors.toSet());
+                String[] rooms = uniqueRooms.toArray(new String[0]);
+                value = (String) JOptionPane.showInputDialog(frame,
+                    "Select Room ID:", "Filter Receipts",
+                    JOptionPane.QUESTION_MESSAGE, null, rooms, rooms[0]);
+            }
+            case "Resident ID" -> {
+                Set<String> uniqueResidents = paymentDetailsMap.values().stream()
+                    .map(p -> p[2])
+                    .collect(Collectors.toSet());
+                String[] residents = uniqueResidents.toArray(new String[0]);
+                value = (String) JOptionPane.showInputDialog(frame,
+                    "Select Resident ID:", "Filter Receipts",
+                    JOptionPane.QUESTION_MESSAGE, null, residents, residents[0]);
+            }
+        }
+
+        if (value == null) return;
+
+        currentFilterChoice = filterChoice;
+        currentFilterValue = value;
+        filterButton.setText("Filter: " + value);
+
+        filteredPaymentList = paymentDetailsMap.values().stream()
+            .filter(receipt -> switch (currentFilterChoice) {
+                case "Payment Method" -> receipt[8].equalsIgnoreCase(currentFilterValue);
+                case "Room ID" -> receipt[6].equalsIgnoreCase(currentFilterValue);
+                case "Resident ID" -> receipt[2].equalsIgnoreCase(currentFilterValue);
+                default -> true;
+            })
+            .collect(Collectors.toList());
+
+        if (!filteredPaymentList.isEmpty()) {
+            frame.setTitle("View Receipts - " + staff.getUsername() + 
+                " (Filtered: " + currentFilterValue + ", " + filteredPaymentList.size() + " receipts)");
+        }
+
+        if (currentSortCategory != null) {
+            applySorting(filteredPaymentList);
+        } else {
+            updateTable(filteredPaymentList);
+        }
+    }
+
+    private void sortReceipts() {
+        String[] options = {
+            "Amount (Low-High)", "Amount (High-Low)", 
+            "Start Date (Newest)", "Start Date (Oldest)",
+            "Room ID (A-Z)", "Room ID (Z-A)",
+            "Resident ID (A-Z)", "Resident ID (Z-A)"
+        };
+        
+        String choice = (String) JOptionPane.showInputDialog(frame, "Sort by:",
+            "Sort Receipts", JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+
+        if (choice == null) return;
+
+        currentSortCategory = choice.split(" ")[0];
+        currentSortOrder = choice.contains("High-Low") || 
+                        choice.contains("Newest") || 
+                        choice.contains("Z-A") ? "Descending" : "Ascending";
+        sortButton.setText("Sort: " + currentSortCategory);
+
+        List<String[]> listToSort = filteredPaymentList != null ? 
+            filteredPaymentList : new ArrayList<>(paymentDetailsMap.values());
+        applySorting(listToSort);
+    }
+
+    private void searchReceipts(String searchQuery) {
+        if (searchQuery == null || searchQuery.trim().isEmpty() || 
+            searchQuery.equals("Search receipts...")) {
+            if (currentFilterChoice != null) {
+                reapplyCurrentFilter();
+            } else {
+                loadCompletedPayments();
+            }
+            return;
+        }
+
+        String lowerCaseQuery = searchQuery.toLowerCase();
+        List<String[]> searchResults = paymentDetailsMap.values().stream()
+            .filter(receipt -> 
+                receipt[0].toLowerCase().contains(lowerCaseQuery) || // Receipt ID
+                receipt[1].toLowerCase().contains(lowerCaseQuery) || // Payment ID
+                receipt[2].toLowerCase().contains(lowerCaseQuery) || // Resident ID
+                receipt[3].toLowerCase().contains(lowerCaseQuery) || // Staff ID
+                receipt[4].toLowerCase().contains(lowerCaseQuery) || // Start Date
+                receipt[5].toLowerCase().contains(lowerCaseQuery) || // End Date
+                receipt[6].toLowerCase().contains(lowerCaseQuery) || // Room ID
+                receipt[7].toLowerCase().contains(lowerCaseQuery) || // Amount
+                receipt[8].toLowerCase().contains(lowerCaseQuery) ||   // Payment Method
+                receipt[9].toLowerCase().contains(lowerCaseQuery)    // Receipt Date
+            )
+            .collect(Collectors.toList());
+
+        if (!searchResults.isEmpty()) {
+            frame.setTitle("View Receipts - " + staff.getUsername() + 
+                " (Found " + searchResults.size() + " results)");
+            updateTable(searchResults);
+        } else {
+            frame.setTitle("View Receipts - " + staff.getUsername());
+            JOptionPane.showMessageDialog(frame, 
+                "No receipts found matching your search.", 
+                "No Results", JOptionPane.INFORMATION_MESSAGE);
+            if (currentFilterChoice != null) {
+                reapplyCurrentFilter();
+            } else {
+                loadCompletedPayments();
+            }
+        }
+    }
+
+    private void reapplyCurrentFilter() {
+        if (currentFilterChoice != null) {
+            filteredPaymentList = paymentDetailsMap.values().stream()
+                .filter(receipt -> switch (currentFilterChoice) {
+                    case "Payment Method" -> receipt[8].equalsIgnoreCase(currentFilterValue);
+                    case "Room ID" -> receipt[6].equalsIgnoreCase(currentFilterValue);
+                    case "Resident ID" -> receipt[2].equalsIgnoreCase(currentFilterValue);
+                    default -> true;
+                })
+                .collect(Collectors.toList());
+                
+            if (currentSortCategory != null) {
+                applySorting(filteredPaymentList);
+            } else {
+                updateTable(filteredPaymentList);
+            }
+        } else {
+            loadCompletedPayments();
+        }
+    }
+
+    private void applySorting(List<String[]> listToSort) {
+        if (currentSortCategory == null || currentSortOrder == null) return;
+        
+        List<String[]> sortedList = new ArrayList<>(listToSort);
+        
+        Comparator<String[]> comparator = switch (currentSortCategory) {
+            case "Amount" -> Comparator.comparing(p -> Double.parseDouble(p[7]));
+            case "Start" -> Comparator.comparing(p -> p[4]);
+            case "Room" -> Comparator.comparing(p -> p[6]);
+            case "Resident" -> Comparator.comparing(p -> p[2]);
+            default -> null;
+        };
+
+        if (comparator != null) {
+            if (currentSortOrder.equals("Descending")) {
+                comparator = comparator.reversed();
+            }
+            sortedList.sort(comparator);
+            sortButton.setText("Sort: " + currentSortCategory.split(" ")[0]);
+            updateTable(sortedList);
+        } else {
+            sortButton.setText("Sort");
+        }
+    }
+
+    private void updateTable(List<String[]> receiptList) {
+        tableModel.setRowCount(0);
+        // Update filteredPaymentList to maintain current view state
+        filteredPaymentList = new ArrayList<>(receiptList);
+        
+        for (String[] receipt : receiptList) {
+            tableModel.addRow(new Object[]{
+                receipt[0],  // Receipt ID
+                receipt[1],  // Payment ID 
+                receipt[2],  // Resident ID
+                receipt[3],  // Staff ID
+                receipt[4],  // Start Date
+                receipt[5],  // End Date
+                receipt[6],  // Room ID
+                receipt[7],  // Amount
+                receipt[8],  // Payment Method
+                receipt[9]   // Receipt Date
+            });
+        }
     }
 
     private JButton createButton(String text, String iconPath) {

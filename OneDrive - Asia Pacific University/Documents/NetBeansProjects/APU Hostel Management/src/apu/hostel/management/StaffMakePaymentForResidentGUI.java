@@ -282,6 +282,14 @@ public class StaffMakePaymentForResidentGUI {
     private void loadPendingPayments() {
         paymentDetailsMap = new HashMap<>();
         tableModel.setRowCount(0);
+
+        filteredPaymentList = null;
+        currentFilterChoice = null;
+        currentFilterValue = null;
+        currentSortCategory = null;
+        currentSortOrder = null;
+        filterButton.setText("Filter");
+        sortButton.setText("Sort");
         
         try (BufferedReader reader = new BufferedReader(new FileReader("payments.txt"))) {
             String line;
@@ -383,9 +391,12 @@ public class StaffMakePaymentForResidentGUI {
             currentFilterChoice = null;
             currentFilterValue = null;
             filterButton.setText("Filter");
+            frame.setTitle("View Receipts - " + staff.getUsername());
+
+            filteredPaymentList = new ArrayList<>(paymentDetailsMap.values());
             // Keep current sort if exists
             if (currentSortCategory != null) {
-                applySorting(new ArrayList<>(paymentDetailsMap.values()));
+                applySorting(new ArrayList<>(filteredPaymentList));
             } else {
                 loadPendingPayments();
             }
@@ -590,6 +601,9 @@ public class StaffMakePaymentForResidentGUI {
 
     private void updateTable(List<String[]> paymentList) {
         tableModel.setRowCount(0);
+
+        filteredPaymentList = new ArrayList<>(paymentList);
+
         for (String[] payment : paymentList) {
             tableModel.addRow(new Object[]{
                 payment[0],  // Payment ID
@@ -598,7 +612,7 @@ public class StaffMakePaymentForResidentGUI {
                 payment[3],  // Start Date
                 payment[4],  // End Date
                 calculateStayDuration(payment[3], payment[4]),  // Stay Duration
-                "RM" + payment[6],  // Amount
+                payment[6],  // Amount
                 payment[9]   // Payment Method
             });
         }

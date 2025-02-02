@@ -63,6 +63,7 @@ public class ManagerManageUsersGUI {
         JTextField searchField = new JTextField(20);
         searchField.setText("Search users...");
         searchField.setForeground(Color.GRAY);
+        searchField.setPreferredSize(new Dimension(200, 30));
         searchField.setBorder(BorderFactory.createCompoundBorder(
             BorderFactory.createLineBorder(Color.GRAY),
             BorderFactory.createEmptyBorder(5, 5, 5, 5)

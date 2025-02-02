@@ -2,7 +2,6 @@ package apu.hostel.management;
 
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.text.View;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -14,8 +13,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.awt.event.KeyAdapter;
-import java.time.LocalDate; 
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Comparator;
@@ -65,6 +62,7 @@ public class StaffGenerateReceiptGUI {
         JTextField searchField = new JTextField(20);
         searchField.setText("Search receipts...");
         searchField.setForeground(Color.GRAY);
+        searchField.setPreferredSize(new Dimension(200, 30));
         searchField.setBorder(BorderFactory.createCompoundBorder(
             BorderFactory.createLineBorder(Color.GRAY),
             BorderFactory.createEmptyBorder(5, 5, 5, 5)
@@ -287,6 +285,14 @@ public class StaffGenerateReceiptGUI {
     private void loadEligiblePayments() {
         paymentDetailsMap = new HashMap<>();
         tableModel.setRowCount(0);
+
+        filteredPaymentList = null;
+        currentFilterChoice = null;
+        currentFilterValue = null;
+        currentSortCategory = null;
+        currentSortOrder = null;
+        filterButton.setText("Filter");
+        sortButton.setText("Sort");
         
         try (BufferedReader reader = new BufferedReader(new FileReader("payments.txt"))) {
             String line;
@@ -378,8 +384,10 @@ public class StaffGenerateReceiptGUI {
             currentFilterChoice = null;
             currentFilterValue = null;
             filterButton.setText("Filter");
+            frame.setTitle("View Receipts - " + staff.getUsername());
+            filteredPaymentList = new ArrayList<>(paymentDetailsMap.values());
             if (currentSortCategory != null) {
-                applySorting(new ArrayList<>(paymentDetailsMap.values()));
+                applySorting(new ArrayList<>(filteredPaymentList));
             } else {
                 loadEligiblePayments();
             }
@@ -488,11 +496,13 @@ public class StaffGenerateReceiptGUI {
             .filter(payment -> 
                 payment[0].toLowerCase().contains(lowerCaseQuery) || // Payment ID
                 payment[1].toLowerCase().contains(lowerCaseQuery) || // Resident ID
-                payment[5].toLowerCase().contains(lowerCaseQuery) || // Room ID
+                payment[2].toLowerCase().contains(lowerCaseQuery) || // Staff ID
                 payment[3].toLowerCase().contains(lowerCaseQuery) || // Start Date
                 payment[4].toLowerCase().contains(lowerCaseQuery) || // End Date
+                payment[5].toLowerCase().contains(lowerCaseQuery) || // Room ID
                 payment[6].toLowerCase().contains(lowerCaseQuery) || // Amount
-                payment[9].toLowerCase().contains(lowerCaseQuery)    // Payment Method
+                payment[9].toLowerCase().contains(lowerCaseQuery) ||   // Payment Method
+                payment[8].toLowerCase().contains(lowerCaseQuery)    // Booking Date
             )
             .collect(Collectors.toList());
     
@@ -561,6 +571,9 @@ public class StaffGenerateReceiptGUI {
     
     private void updateTable(List<String[]> paymentList) {
         tableModel.setRowCount(0);
+
+        filteredPaymentList = new ArrayList<>(paymentList);
+
         for (String[] payment : paymentList) {
             tableModel.addRow(new Object[]{
                 payment[0],  // Payment ID
