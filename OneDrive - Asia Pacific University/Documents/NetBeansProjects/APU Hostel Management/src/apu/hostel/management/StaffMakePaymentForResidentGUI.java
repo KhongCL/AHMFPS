@@ -159,7 +159,7 @@ public class StaffMakePaymentForResidentGUI {
         // Payment table
         tableModel = new DefaultTableModel(
             new Object[]{"Payment ID", "Resident ID", "Room ID", "Start Date", "End Date", 
-                        "Stay Duration (Days)", "Amount", "Payment Method"}, 0
+                        "Stay Duration (Days)", "Amount (RM)", "Payment Method"}, 0
         ) {
             @Override
             public boolean isCellEditable(int row, int column) {

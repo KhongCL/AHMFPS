@@ -39,7 +39,7 @@ public class StaffViewReceiptGUI {
         // Payment table
         tableModel = new DefaultTableModel(
             new Object[]{"Receipt ID", "Payment ID", "Resident ID", "Staff ID", "Start Date", 
-                        "End Date", "Room ID", "Amount", "Payment Method", "Receipt Date"}, 0
+                        "End Date", "Room ID", "Amount (RM)", "Payment Method", "Receipt Date"}, 0
         );
         paymentTable = new JTable(tableModel);
         JScrollPane scrollPane = new JScrollPane(paymentTable);

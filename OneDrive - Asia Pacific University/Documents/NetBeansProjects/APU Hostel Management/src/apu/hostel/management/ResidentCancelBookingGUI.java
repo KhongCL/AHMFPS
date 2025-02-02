@@ -52,7 +52,7 @@ public class ResidentCancelBookingGUI {
         cancelBookingPanel.add(titleLabel, BorderLayout.NORTH);
 
         // Create table model and table
-        tableModel = new DefaultTableModel(new Object[]{"Room Number", "Stay Duration", "Booking Date and Time", "Payment Amount"}, 0);
+        tableModel = new DefaultTableModel(new Object[]{"Room Number", "Stay Duration", "Booking Date and Time", "Payment Amount (RM)"}, 0);
         table = new JTable(tableModel) {
             @Override
             public boolean isCellEditable(int row, int column) {

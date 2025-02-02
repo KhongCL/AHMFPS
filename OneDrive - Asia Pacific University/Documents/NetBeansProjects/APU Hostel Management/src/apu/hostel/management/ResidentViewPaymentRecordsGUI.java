@@ -53,7 +53,7 @@ public class ResidentViewPaymentRecordsGUI {
         viewPaymentRecordsPanel.add(titleLabel, BorderLayout.NORTH);
 
         // Create table model and table
-        DefaultTableModel tableModel = new DefaultTableModel(new Object[]{"Room Number", "Stay Duration", "Booking Date and Time", "Payment Amount"}, 0);
+        DefaultTableModel tableModel = new DefaultTableModel(new Object[]{"Room Number", "Stay Duration", "Booking Date and Time", "Payment Amount (RM)"}, 0);
         table = new JTable(tableModel) {
             @Override
             public boolean isCellEditable(int row, int column) {

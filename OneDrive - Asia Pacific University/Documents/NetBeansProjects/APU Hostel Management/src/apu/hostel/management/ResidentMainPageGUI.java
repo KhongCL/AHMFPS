@@ -192,7 +192,7 @@ public class ResidentMainPageGUI {
             button.setIcon(icon);
             button.setHorizontalAlignment(SwingConstants.LEFT);
             // Add category-based colors
-            if (text.contains("Update") || text.contains("View") || text.contains("logout")) {
+            if (text.contains("Update") || text.contains("View") || text.contains("Logout")) {
                 button.setBackground(new Color(230, 240, 250)); // Light blue for user management
             } else if (text.contains("Manage") || text.contains("Make")) {
                 button.setBackground(new Color(230, 250, 230)); // Light green for facility management

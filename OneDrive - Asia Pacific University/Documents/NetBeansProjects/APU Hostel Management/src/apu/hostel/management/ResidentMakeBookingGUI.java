@@ -50,7 +50,7 @@ public class ResidentMakeBookingGUI {
         pricingLabel.setFont(new Font("Arial", Font.BOLD, 18));
         pricingPanel.add(pricingLabel, BorderLayout.NORTH);
 
-        String[] columnNames = {"Room Type", "Room Capacity", "Daily Rate", "Weekly Rate", "Monthly Rate", "Yearly Rate"};
+        String[] columnNames = {"Room Type", "Room Capacity", "Daily Rate (RM)", "Weekly Rate (RM)", "Monthly Rate (RM)", "Yearly Rate (RM)"};
         DefaultTableModel tableModel = new DefaultTableModel(columnNames, 0);
         JTable pricingTable = new JTable(tableModel);
         JScrollPane scrollPane = new JScrollPane(pricingTable);

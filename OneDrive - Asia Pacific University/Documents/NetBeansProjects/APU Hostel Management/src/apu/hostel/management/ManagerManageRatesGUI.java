@@ -165,7 +165,7 @@ public class ManagerManageRatesGUI {
         frame.add(topPanel, BorderLayout.NORTH);
 
         // Rate table
-        tableModel = new DefaultTableModel(new Object[]{"FeeRateID", "RoomType", "DailyRate", "WeeklyRate", "MonthlyRate", "YearlyRate", "IsActive"}, 0) {
+        tableModel = new DefaultTableModel(new Object[]{"FeeRateID", "RoomType", "DailyRate (RM)", "WeeklyRate (RM)", "MonthlyRate (RM)", "YearlyRate (RM)", "IsActive"}, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
                 return false; // Make all cells non-editable
