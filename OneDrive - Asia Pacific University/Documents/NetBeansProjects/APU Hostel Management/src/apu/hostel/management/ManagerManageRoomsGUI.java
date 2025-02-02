@@ -1,11 +1,19 @@
 package apu.hostel.management;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.KeyAdapter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -15,6 +23,13 @@ public class ManagerManageRoomsGUI {
     private DefaultTableModel tableModel;
     private List<APUHostelManagement.Room> roomList;
     private APUHostelManagement.Manager manager; // Add manager field
+    private List<APUHostelManagement.Room> filteredRoomList;
+    private String currentFilterChoice = null;
+    private String currentFilterValue = null;
+    private JButton filterButton;
+    private JButton sortButton;
+    private String currentSortCategory = null;
+    private String currentSortOrder = null;
 
     // Add new constructor
     public ManagerManageRoomsGUI(APUHostelManagement.Manager manager) {
@@ -31,6 +46,7 @@ public class ManagerManageRoomsGUI {
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         frame.setSize(1024, 768);
         frame.setLayout(new BorderLayout(10, 10));
+        frame.setTitle("Manage Rooms - " + manager.getUsername());
         frame.setLocationRelativeTo(null);
         
         JPanel topPanel = new JPanel(new BorderLayout());
@@ -46,13 +62,139 @@ public class ManagerManageRoomsGUI {
             }
         });
 
+        JPanel filterPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        filterButton = createButton("Filter", "filter_icon.png");
+        filterButton.addActionListener(e -> {
+            if (filterButton.getText().startsWith("Filter: ")) {
+                int choice = JOptionPane.showConfirmDialog(frame,
+                    "Do you want to clear the current filter?",
+                    "Clear Filter",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.QUESTION_MESSAGE);
+                if (choice == JOptionPane.YES_OPTION) {
+                    filterButton.setText("Filter");
+                    currentFilterChoice = null;
+                    currentFilterValue = null;
+                    frame.setTitle("Manage Rooms - " + manager.getUsername());
+                    if (currentSortCategory != null) {
+                        applySorting(roomList);
+                    } else {
+                        loadRooms();
+                    }
+                }
+            } else {
+                filterRooms();
+            }
+        });
+
+        sortButton = createButton("Sort", "sort_icon.png");
+        sortButton.addActionListener(e -> {
+            if (sortButton.getText().startsWith("Sort: ")) {
+                int choice = JOptionPane.showConfirmDialog(frame,
+                    "Do you want to clear the current sort?",
+                    "Clear Sort",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.QUESTION_MESSAGE);
+                if (choice == JOptionPane.YES_OPTION) {
+                    sortButton.setText("Sort");
+                    currentSortCategory = null;
+                    currentSortOrder = null;
+                    if (currentFilterChoice != null) {
+                        reapplyCurrentFilter();
+                    } else {
+                        loadRooms();
+                    }
+                }
+            } else {
+                sortRooms();
+            }
+        });
+
+        JTextField searchField = new JTextField(20);
+        searchField.setText("Search rooms...");
+        searchField.setForeground(Color.GRAY);
+        searchField.setPreferredSize(new Dimension(200, 30));
+        searchField.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(Color.GRAY),
+            BorderFactory.createEmptyBorder(5, 5, 5, 5)
+        ));
+        searchField.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                if (searchField.getText().equals("Search rooms...")) {
+                    searchField.setText("");
+                    searchField.setForeground(Color.BLACK);
+                }
+            }
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                if (searchField.getText().isEmpty()) {
+                    searchField.setText("Search rooms...");
+                    searchField.setForeground(Color.GRAY);
+                }
+            }
+        });
+
+        JButton searchButton = createButton("Search", "search_icon.png");
+        searchButton.addActionListener(e -> searchRooms(searchField.getText()));
+
+        JButton clearButton = createButton("Clear", "clear_icon.png");
+        clearButton.addActionListener(e -> {
+            searchField.setText("");
+            if (currentFilterChoice != null) {
+                reapplyCurrentFilter();
+            } else {
+                loadRooms();
+            }
+        });
+
+        filterPanel.add(filterButton);
+        filterPanel.add(sortButton);
+        filterPanel.add(searchField);
+        filterPanel.add(searchButton);
+        filterPanel.add(clearButton);
+
+        topPanel.add(filterPanel, BorderLayout.EAST);
         topPanel.add(backButton, BorderLayout.WEST);
 
         frame.add(topPanel, BorderLayout.NORTH);
 
         // Room table
-        tableModel = new DefaultTableModel(new Object[]{"RoomID", "FeeRateID", "RoomType", "RoomNumber", "RoomStatus", "RoomCapacity", "IsActive"}, 0);
+        tableModel = new DefaultTableModel(new Object[]{"RoomID", "FeeRateID", "RoomType", "RoomNumber", "RoomStatus", "RoomCapacity", "IsActive"}, 0){
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
         roomTable = new JTable(tableModel);
+        roomTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        roomTable.getTableHeader().setReorderingAllowed(false);
+        roomTable.setRowHeight(25);
+        roomTable.getTableHeader().setFont(new Font("Arial", Font.BOLD, 12));
+        roomTable.setFont(new Font("Arial", Font.PLAIN, 12));
+        roomTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+        roomTable.setSelectionBackground(new Color(230, 240, 250));
+        roomTable.setSelectionForeground(Color.BLACK);
+        roomTable.setGridColor(Color.LIGHT_GRAY);
+
+        roomTable.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value, 
+                    boolean isSelected, boolean hasFocus, int row, int column) {
+                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                if (!isSelected) {
+                    c.setBackground(row % 2 == 0 ? Color.WHITE : new Color(245, 245, 250));
+                }
+                return c;
+            }
+        });
+
+        roomTable.getColumnModel().getColumn(0).setPreferredWidth(80);  // RoomID
+        roomTable.getColumnModel().getColumn(1).setPreferredWidth(100); // FeeRateID  
+        roomTable.getColumnModel().getColumn(2).setPreferredWidth(100); // RoomType
+        roomTable.getColumnModel().getColumn(3).setPreferredWidth(80);  // RoomNumber
+        roomTable.getColumnModel().getColumn(4).setPreferredWidth(100); // RoomStatus
+        roomTable.getColumnModel().getColumn(5).setPreferredWidth(80);  // RoomCapacity
+        roomTable.getColumnModel().getColumn(6).setPreferredWidth(70);  // IsActive
+
         JScrollPane scrollPane = new JScrollPane(roomTable);
         frame.add(scrollPane, BorderLayout.CENTER);
 
@@ -118,6 +260,24 @@ public class ManagerManageRoomsGUI {
             }
         });
 
+        roomTable.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 2) {
+                    updateRoomStatus(); // Or any other primary action
+                }
+            }
+        });
+
+        searchField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    searchButton.doClick();
+                }
+            }
+        });
+
         firstRowPanel.add(addButton);
         firstRowPanel.add(updateStatusButton);
         firstRowPanel.add(updateFeeRateButton);
@@ -142,6 +302,50 @@ public class ManagerManageRoomsGUI {
         frame.add(actionPanel, BorderLayout.SOUTH);
 
         frame.setVisible(true);
+
+        backButton.setMnemonic(KeyEvent.VK_B);
+        filterButton.setMnemonic(KeyEvent.VK_F);  // Alt+F
+        sortButton.setMnemonic(KeyEvent.VK_S);    // Alt+S
+        searchButton.setMnemonic(KeyEvent.VK_ENTER);
+        clearButton.setMnemonic(KeyEvent.VK_C);
+        addButton.setMnemonic(KeyEvent.VK_A);
+        updateStatusButton.setMnemonic(KeyEvent.VK_U);
+        updateFeeRateButton.setMnemonic(KeyEvent.VK_F);
+        deleteButton.setMnemonic(KeyEvent.VK_D);
+        restoreButton.setMnemonic(KeyEvent.VK_R);
+        deleteAllButton.setMnemonic(KeyEvent.VK_L);
+        restoreAllButton.setMnemonic(KeyEvent.VK_T);
+
+        backButton.setToolTipText("Go back to main page (Alt+B)");
+        filterButton.setToolTipText("Filter rooms (Alt+F)");
+        sortButton.setToolTipText("Sort rooms (Alt+S)");
+        searchButton.setToolTipText("Search by anything (case-insensitive) and press Enter");
+        clearButton.setToolTipText("Clear search and filters (Alt+C)");
+        addButton.setToolTipText("Add new room (Alt+A)");
+        updateStatusButton.setToolTipText("Update room status (Alt+U)");
+        updateFeeRateButton.setToolTipText("Update fee rate (Alt+F)");
+        deleteButton.setToolTipText("Delete selected room (Alt+D)");
+        restoreButton.setToolTipText("Restore selected room (Alt+R)");
+        deleteAllButton.setToolTipText("Delete all available rooms (Alt+L)");
+        restoreAllButton.setToolTipText("Restore all rooms (Alt+T)");
+
+        addButtonHoverEffect(backButton);
+        addButtonHoverEffect(filterButton);
+        addButtonHoverEffect(sortButton);
+        addButtonHoverEffect(searchButton);
+        addButtonHoverEffect(clearButton);
+        addButtonHoverEffect(addButton);
+        addButtonHoverEffect(updateStatusButton);
+        addButtonHoverEffect(updateFeeRateButton);
+        addButtonHoverEffect(deleteButton);
+        addButtonHoverEffect(restoreButton);
+        addButtonHoverEffect(deleteAllButton);
+        addButtonHoverEffect(restoreAllButton);
+
+        KeyStroke escapeKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
+        frame.getRootPane().registerKeyboardAction(e -> {
+            backButton.doClick();
+        }, escapeKeyStroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
         
         frame.addWindowListener(new java.awt.event.WindowAdapter() {
             @Override
@@ -159,19 +363,8 @@ public class ManagerManageRoomsGUI {
     }
 
     private void loadRooms() {
-        tableModel.setRowCount(0); // Clear the table
         roomList = APUHostelManagement.Manager.readRoomsFromFile("rooms.txt");
-        for (APUHostelManagement.Room room : roomList) {
-            tableModel.addRow(new Object[]{
-                room.getRoomID(),
-                room.getFeeRateID(),
-                room.getRoomType(),
-                room.getRoomNumber(),
-                room.getRoomStatus(),
-                room.getRoomCapacity(),
-                room.isActive()
-            });
-        }
+        updateTable(roomList);
     }
 
     private void addRoom() {
@@ -263,7 +456,7 @@ public class ManagerManageRoomsGUI {
         String newStatus = roomToUpdate.getRoomStatus().equals("available") ? "unavailable" : "available";
         roomToUpdate.setRoomStatus(newStatus);
 
-        int confirm = JOptionPane.showConfirmDialog(frame, "Do you want to save the changes?\n" + roomToUpdate, "Confirm Update", JOptionPane.YES_NO_OPTION);
+        int confirm = JOptionPane.showConfirmDialog(frame, "Do you want to update the selected room's status from " + (roomToUpdate.getRoomStatus().equals("available") ? "unavailable" : "available") + " to " + newStatus + "?\n" + roomToUpdate, "Confirm Update", JOptionPane.YES_NO_OPTION);
         if (confirm != JOptionPane.YES_OPTION) {
             return;
         }
@@ -429,6 +622,176 @@ public class ManagerManageRoomsGUI {
 
     private void saveRoomsToFile() {
         APUHostelManagement.Manager.saveRoomsToFile(roomList);
+    }
+
+    private void filterRooms() {
+        String[] filterOptions = {"All", "Room Type", "Room Status", "Active Status"};
+        String filterChoice = (String) JOptionPane.showInputDialog(frame,
+            "Select filter category:", "Filter Rooms",
+            JOptionPane.QUESTION_MESSAGE, null, filterOptions, filterOptions[0]);
+
+        if (filterChoice == null) return;
+
+        if (filterChoice.equals("All")) {
+            currentFilterChoice = null;
+            currentFilterValue = null;
+            loadRooms();
+            return;
+        }
+
+        String[] values = switch (filterChoice) {
+            case "Room Type" -> new String[]{"Standard", "Large", "Family"};
+            case "Room Status" -> new String[]{"Available", "Unavailable"};
+            case "Active Status" -> new String[]{"Active", "Inactive"};
+            default -> null;
+        };
+
+        if (values == null) return;
+
+        String value = (String) JOptionPane.showInputDialog(frame,
+            "Select " + filterChoice + ":", "Filter Rooms",
+            JOptionPane.QUESTION_MESSAGE, null, values, values[0]);
+
+        if (value == null) return;
+
+        currentFilterChoice = filterChoice;
+        currentFilterValue = value;
+
+        List<APUHostelManagement.Room> filteredRooms = roomList.stream()
+            .filter(room -> switch (filterChoice) {
+                case "Room Type" -> room.getRoomType().equalsIgnoreCase(value);
+                case "Room Status" -> room.getRoomStatus().equalsIgnoreCase(value);
+                case "Active Status" -> room.isActive() == value.equalsIgnoreCase("Active");
+                default -> true;
+            })
+            .collect(Collectors.toList());
+
+        filterButton.setText("Filter: " + value);
+        
+        if (!filteredRooms.isEmpty()) {
+            frame.setTitle("Manage Rooms - " + manager.getUsername() + 
+                " (Filtered: " + value + ", " + filteredRooms.size() + " rooms)");
+        }
+
+        if (currentSortCategory != null) {
+            applySorting(filteredRooms);
+        } else {
+            updateTable(filteredRooms);
+        }
+    }
+
+    private void reapplyCurrentFilter() {
+        if (currentFilterChoice != null) {
+            List<APUHostelManagement.Room> filteredRooms = roomList.stream()
+                .filter(room -> switch (currentFilterChoice) {
+                    case "Room Type" -> room.getRoomType().equalsIgnoreCase(currentFilterValue);
+                    case "Room Status" -> room.getRoomStatus().equalsIgnoreCase(currentFilterValue);
+                    case "Active Status" -> room.isActive() == currentFilterValue.equalsIgnoreCase("Active");
+                    default -> true;
+                })
+                .collect(Collectors.toList());
+            updateTable(filteredRooms);
+        } else {
+            loadRooms();
+        }
+    }
+
+    private void searchRooms(String searchQuery) {
+        if (searchQuery == null || searchQuery.trim().isEmpty() || 
+            searchQuery.equals("Search rooms...")) {
+            if (currentFilterChoice != null) {
+                reapplyCurrentFilter();
+            } else {
+                loadRooms();
+            }
+            return;
+        }
+
+        String lowerCaseQuery = searchQuery.toLowerCase();
+
+        List<APUHostelManagement.Room> searchedRooms = filteredRoomList.stream()
+            .filter(room -> room.getRoomID().toLowerCase().contains(lowerCaseQuery) ||
+                        room.getFeeRateID().toLowerCase().contains(lowerCaseQuery) ||
+                        room.getRoomType().toLowerCase().contains(lowerCaseQuery) ||
+                        String.valueOf(room.getRoomNumber()).contains(lowerCaseQuery) ||
+                        room.getRoomStatus().toLowerCase().contains(lowerCaseQuery) ||
+                        String.valueOf(room.getRoomCapacity()).contains(lowerCaseQuery) ||
+                        String.valueOf(room.isActive()).toLowerCase().contains(lowerCaseQuery))
+            .collect(Collectors.toList());
+
+        if (!searchedRooms.isEmpty()) {
+            frame.setTitle("Manage Rooms - " + manager.getUsername() + 
+                " (Found " + searchedRooms.size() + " results)");
+        }
+
+        updateTable(searchedRooms);
+    }
+
+    private void sortRooms() {
+        String[] options = {"Room Number (Ascending)", "Room Number (Descending)", 
+                        "Room Type A-Z", "Room Type Z-A"};
+        String choice = (String) JOptionPane.showInputDialog(frame, "Sort by:",
+            "Sort Rooms", JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+
+        if (choice == null) return;
+
+        currentSortCategory = choice.split(" ")[0] + " " + choice.split(" ")[1]; // "Room Number" or "Room Type"
+        currentSortOrder = choice.contains("Descending") || choice.contains("Z-A") ? 
+                        "Descending" : "Ascending";
+
+        applySorting(filteredRoomList != null ? filteredRoomList : roomList);
+    }
+
+    private void applySorting(List<APUHostelManagement.Room> listToSort) {
+        if (currentSortCategory == null || currentSortOrder == null) return;
+
+        List<APUHostelManagement.Room> sortedList = new ArrayList<>(listToSort);
+
+        Comparator<APUHostelManagement.Room> comparator = switch (currentSortCategory) {
+            case "Room Number" -> Comparator.comparing(APUHostelManagement.Room::getRoomNumber);
+            case "Room Type" -> Comparator.comparing(APUHostelManagement.Room::getRoomType);
+            default -> null;
+        };
+
+        if (comparator != null) {
+            if (currentSortOrder.equals("Descending")) {
+                comparator = comparator.reversed();
+            }
+            sortedList.sort(comparator);
+            sortButton.setText("Sort: " + currentSortCategory);
+            updateTable(sortedList);
+        } else {
+            sortButton.setText("Sort");
+        }
+    }
+
+    private void updateTable(List<APUHostelManagement.Room> rooms) {
+        tableModel.setRowCount(0);
+        
+        if (rooms.isEmpty()) {
+            JOptionPane.showMessageDialog(frame, 
+                "No rooms found.", 
+                "Information", JOptionPane.INFORMATION_MESSAGE);
+            if (currentFilterChoice == null) {
+                loadRooms();
+            }
+            return;
+        }
+        
+        // Update filtered list
+        filteredRoomList = new ArrayList<>(rooms);
+        
+        for (APUHostelManagement.Room room : rooms) {
+            tableModel.addRow(new Object[]{
+                room.getRoomID(),
+                room.getFeeRateID(),
+                room.getRoomType(),
+                room.getRoomNumber(),
+                room.getRoomStatus(),
+                room.getRoomCapacity(),
+                room.isActive()
+            });
+        }
     }
 
     private JButton createButton(String text, String iconPath) {

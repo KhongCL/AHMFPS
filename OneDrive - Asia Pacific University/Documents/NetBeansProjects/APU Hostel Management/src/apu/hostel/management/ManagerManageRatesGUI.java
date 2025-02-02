@@ -158,7 +158,6 @@ public class ManagerManageRatesGUI {
         filterSortSearchPanel.add(searchField);
         filterSortSearchPanel.add(searchButton);
         filterSortSearchPanel.add(clearButton);
-        filterSortSearchPanel.add(addButton);
 
         topPanel.add(filterSortSearchPanel, BorderLayout.EAST);
         topPanel.add(backButton, BorderLayout.WEST);
@@ -257,6 +256,7 @@ public class ManagerManageRatesGUI {
             }
         });
 
+        actionPanel.add(addButton);
         actionPanel.add(updateButton);
         actionPanel.add(deleteButton);
         actionPanel.add(restoreButton);
