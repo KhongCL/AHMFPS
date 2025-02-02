@@ -1,10 +1,16 @@
 package apu.hostel.management;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -20,6 +26,8 @@ public class ManagerManageUsersGUI {
     private List<APUHostelManagement.User> filteredUserList;
     private String currentFilterChoice = null;
     private String currentFilterValue = null;
+    private JButton filterButton;
+    private JButton sortButton;
 
     // Add new constructor
     public ManagerManageUsersGUI(APUHostelManagement.Manager manager) {
@@ -39,16 +47,48 @@ public class ManagerManageUsersGUI {
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         frame.setSize(1024, 768);
         frame.setLayout(new BorderLayout(10, 10)); // Add spacing between components
+        frame.setTitle("Manage Users - " + manager.getUsername());
 
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); // Add padding
 
         // Filter, Sort, and Search components
         JPanel filterSortSearchPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        JButton filterButton = createButton("Filter", "filter_icon.png");
-        JButton sortButton = createButton("Sort", "sort_icon.png");
+        filterButton = createButton("Filter", "filter_icon.png");
+        sortButton = createButton("Sort", "sort_icon.png");
+
         JTextField searchField = new JTextField(20);
+        searchField.setText("Search users...");
+        searchField.setForeground(Color.GRAY);
+        searchField.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(Color.GRAY),
+            BorderFactory.createEmptyBorder(5, 5, 5, 5)
+        ));
+        searchField.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                if (searchField.getText().equals("Search users...")) {
+                    searchField.setText("");
+                    searchField.setForeground(Color.BLACK);
+                }
+            }
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                if (searchField.getText().isEmpty()) {
+                    searchField.setText("Search users...");
+                    searchField.setForeground(Color.GRAY);
+                }
+            }
+        });
+
         JButton searchButton = createButton("Search", "search_icon.png");
+
+        searchField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    searchButton.doClick();
+                }
+            }
+        });
 
         filterSortSearchPanel.add(filterButton);
         filterSortSearchPanel.add(sortButton);
@@ -71,12 +111,49 @@ public class ManagerManageUsersGUI {
         frame.add(topPanel, BorderLayout.NORTH);
 
         // User table
-        tableModel = new DefaultTableModel(new Object[]{"UserID", "IC/Passport Number", "Username", "Password", "Contact Number", "Date Of Registration", "Role", "Is Active"}, 0);
+        tableModel = new DefaultTableModel(new Object[]{"UserID", "IC/Passport Number", "Username", "Password", "Contact Number", "Date Of Registration", "Role", "Is Active"}, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
         userTable = new JTable(tableModel);
+        // Add after table creation
+        userTable.getTableHeader().setReorderingAllowed(false);
+        userTable.setRowHeight(25);
+        userTable.getTableHeader().setFont(new Font("Arial", Font.BOLD, 12));
+        userTable.setFont(new Font("Arial", Font.PLAIN, 12));
+        userTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+        userTable.setSelectionBackground(new Color(230, 240, 250));
+        userTable.setSelectionForeground(Color.BLACK);
+        userTable.setGridColor(Color.LIGHT_GRAY);
+        userTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
+        // Add alternating row colors
+        userTable.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value, 
+                    boolean isSelected, boolean hasFocus, int row, int column) {
+                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                if (!isSelected) {
+                    c.setBackground(row % 2 == 0 ? Color.WHITE : new Color(245, 245, 250));
+                }
+                return c;
+            }
+        });
+        userTable.getColumnModel().getColumn(0).setPreferredWidth(80);  // UserID
+        userTable.getColumnModel().getColumn(1).setPreferredWidth(120); // IC/Passport
+        userTable.getColumnModel().getColumn(2).setPreferredWidth(100); // Username
+        userTable.getColumnModel().getColumn(3).setPreferredWidth(100); // Password
+        userTable.getColumnModel().getColumn(4).setPreferredWidth(100); // Contact Number
+        userTable.getColumnModel().getColumn(5).setPreferredWidth(150); // Date Of Registration
+        userTable.getColumnModel().getColumn(6).setPreferredWidth(80); // Role
+        userTable.getColumnModel().getColumn(7).setPreferredWidth(70); // Is Active
+
         JScrollPane scrollPane = new JScrollPane(userTable);
         frame.add(scrollPane, BorderLayout.CENTER);
 
-        userTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
 
         // Load users into the table
         loadUsers();
@@ -89,25 +166,42 @@ public class ManagerManageUsersGUI {
         JButton deleteAllButton = createButton("Delete All", "delete_all_icon.png");
         JButton restoreAllButton = createButton("Restore All", "restore_all_icon.png");
 
-        filterButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
+        filterButton.addActionListener(e -> {
+            if (filterButton.getText().startsWith("Filter: ")) {
+                int choice = JOptionPane.showConfirmDialog(frame,
+                    "Do you want to clear the current filter?",
+                    "Clear Filter",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.QUESTION_MESSAGE);
+                if (choice == JOptionPane.YES_OPTION) {
+                    filterButton.setText("Filter");
+                    currentFilterChoice = null;
+                    currentFilterValue = null;
+                    loadUsers();
+                }
+            } else {
                 filterUsers();
             }
         });
         
-        sortButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
+        sortButton.addActionListener(e -> {
+            if (sortButton.getText().startsWith("Sort: ")) {
+                int choice = JOptionPane.showConfirmDialog(frame,
+                    "Do you want to clear the current sort?",
+                    "Clear Sort",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.QUESTION_MESSAGE);
+                if (choice == JOptionPane.YES_OPTION) {
+                    sortButton.setText("Sort");
+                    updateTable(userList);
+                }
+            } else {
                 sortUsers();
             }
         });
         
-        searchButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                searchUsers(searchField.getText());
-            }
-        });
+        searchButton.addActionListener(e -> searchUsers(searchField.getText()));
 
-        searchField.addActionListener(e -> searchUsers(searchField.getText()));
         JButton clearButton = createButton("Clear", "clear_icon.png");
         clearButton.addActionListener(e -> {
             searchField.setText("");
@@ -118,6 +212,15 @@ public class ManagerManageUsersGUI {
             }
         });
         filterSortSearchPanel.add(clearButton);
+
+        userTable.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 2) {
+                    updateUser();
+                }
+            }
+        });
 
         updateButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -158,6 +261,45 @@ public class ManagerManageUsersGUI {
         frame.add(actionPanel, BorderLayout.SOUTH);
 
         frame.setVisible(true);
+
+        backButton.setMnemonic(KeyEvent.VK_B); // Alt+B
+        filterButton.setMnemonic(KeyEvent.VK_F); // Alt+F
+        sortButton.setMnemonic(KeyEvent.VK_S); // Alt+S
+        searchButton.setMnemonic(KeyEvent.VK_A); // Alt+A
+        clearButton.setMnemonic(KeyEvent.VK_C); // Alt+C
+        updateButton.setMnemonic(KeyEvent.VK_U);  // Alt+U
+        deleteButton.setMnemonic(KeyEvent.VK_D);  // Alt+D
+        restoreButton.setMnemonic(KeyEvent.VK_R); // Alt+R
+        deleteAllButton.setMnemonic(KeyEvent.VK_L); // Alt+L
+        restoreAllButton.setMnemonic(KeyEvent.VK_T); // Alt+T
+
+        backButton.setToolTipText("Go back to main page (Alt+B)");
+        filterButton.setToolTipText("Filter users (Alt+F)");
+        sortButton.setToolTipText("Sort users (Alt+S)");
+        searchButton.setToolTipText("Search by anything (case-insensitive) and press Enter"); 
+        clearButton.setToolTipText("Clear search query (Alt+C)");
+        updateButton.setToolTipText("Update selected user (Alt+U)");
+        deleteButton.setToolTipText("Delete selected user (Alt+D)");
+        restoreButton.setToolTipText("Restore selected user (Alt+R)");
+        deleteAllButton.setToolTipText("Delete all filtered users (Alt+L)");
+        restoreAllButton.setToolTipText("Restore all filtered users (Alt+T)");
+
+
+        addButtonHoverEffect(backButton);
+        addButtonHoverEffect(filterButton);
+        addButtonHoverEffect(sortButton);
+        addButtonHoverEffect(searchButton);
+        addButtonHoverEffect(clearButton);
+        addButtonHoverEffect(updateButton);
+        addButtonHoverEffect(deleteButton);
+        addButtonHoverEffect(restoreButton);
+        addButtonHoverEffect(deleteAllButton);
+        addButtonHoverEffect(restoreAllButton);
+
+        KeyStroke escapeKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
+        frame.getRootPane().registerKeyboardAction(e -> {
+            backButton.doClick();
+        }, escapeKeyStroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 
         frame.addWindowListener(new java.awt.event.WindowAdapter() {
             @Override
@@ -204,7 +346,7 @@ public class ManagerManageUsersGUI {
     }
 
     private void filterUsers() {
-        String[] filterOptions = {"Approved/Unapproved", "Role", "IsActive", "No filter"};
+        String[] filterOptions = {"Approved/Unapproved", "Role", "IsActive", "All"};
         String filterChoice = (String) JOptionPane.showInputDialog(frame, 
             "Select filter option:", "Filter Users", 
             JOptionPane.QUESTION_MESSAGE, null, filterOptions, filterOptions[0]);
@@ -214,12 +356,19 @@ public class ManagerManageUsersGUI {
         }
     
         // Reset filter if "No filter" selected
-        if (filterChoice.equals("No filter")) {
+        if (filterChoice.equals("All")) {
             currentFilterChoice = null;
             currentFilterValue = null;
             loadUsers();
             return;
         }
+
+        if (!filterChoice.equals("All")) {
+            filterButton.setText("Filter: " + filterChoice);
+        } else {
+            filterButton.setText("Filter");
+        }
+        
     
         currentFilterChoice = filterChoice;
         List<APUHostelManagement.User> filteredUsers = new ArrayList<>(userList);
@@ -230,6 +379,12 @@ public class ManagerManageUsersGUI {
                 String approvalChoice = (String) JOptionPane.showInputDialog(frame, 
                     "Select approval status:", "Filter Users",
                     JOptionPane.QUESTION_MESSAGE, null, approvalOptions, approvalOptions[0]);
+                
+                if (!filteredUsers.isEmpty()) {
+                    frame.setTitle("Manage Users - " + manager.getUsername() + 
+                        " (Filtered: " + approvalChoice + ", " + filteredUsers.size() + " users)");
+                }
+
                 if (approvalChoice == null) return;
                 currentFilterValue = approvalChoice;
                 try {
@@ -246,6 +401,12 @@ public class ManagerManageUsersGUI {
                 String roleChoice = (String) JOptionPane.showInputDialog(frame,
                     "Select role:", "Filter Users",
                     JOptionPane.QUESTION_MESSAGE, null, roleOptions, roleOptions[0]);
+
+                if (!filteredUsers.isEmpty()) {
+                    frame.setTitle("Manage Users - " + manager.getUsername() + 
+                        " (Filtered: " + roleChoice + ", " + filteredUsers.size() + " users)");
+                }
+    
                 if (roleChoice == null) return;
                 currentFilterValue = roleChoice;
                 filteredUsers = filteredUsers.stream()
@@ -257,6 +418,12 @@ public class ManagerManageUsersGUI {
                 String activeChoice = (String) JOptionPane.showInputDialog(frame,
                     "Select active status:", "Filter Users",
                     JOptionPane.QUESTION_MESSAGE, null, activeOptions, activeOptions[0]);
+
+                if (!filteredUsers.isEmpty()) {
+                    frame.setTitle("Manage Users - " + manager.getUsername() + 
+                        " (Filtered: " + activeChoice + ", " + filteredUsers.size() + " users)");
+                }
+
                 if (activeChoice == null) return;
                 currentFilterValue = activeChoice;
                 boolean isActive = activeChoice.equals("Active");
@@ -265,7 +432,6 @@ public class ManagerManageUsersGUI {
                     .collect(Collectors.toList());
             }
         }
-    
         updateTable(filteredUsers);
     }
 
@@ -304,27 +470,36 @@ public class ManagerManageUsersGUI {
     }
 
     private void sortUsers() {
-        String[] sortOptions = {"User ID Ascending", "User ID Descending", "Username Ascending", "Username Descending"};
+        String[] sortOptions = {
+            "Username A-Z", 
+            "Username Z-A",
+            "Registration Date (Newest)", 
+            "Registration Date (Oldest)"
+        };
         String sortChoice = (String) JOptionPane.showInputDialog(frame, "Select sort option:", "Sort Users", JOptionPane.QUESTION_MESSAGE, null, sortOptions, sortOptions[0]);
 
         if (sortChoice == null) {
             return; // User cancelled
         }
 
+        if (sortChoice != null) {
+            sortButton.setText("Sort: " + sortChoice.split(" ")[0]);
+        }
+
         List<APUHostelManagement.User> sortedUsers = new ArrayList<>(filteredUserList);
 
         switch (sortChoice) {
-            case "User ID Ascending":
-                sortedUsers.sort(Comparator.comparing(APUHostelManagement.User::getUserID));
-                break;
-            case "User ID Descending":
-                sortedUsers.sort(Comparator.comparing(APUHostelManagement.User::getUserID).reversed());
-                break;
-            case "Username Ascending":
+            case "Username A-Z":
                 sortedUsers.sort(Comparator.comparing(APUHostelManagement.User::getUsername));
                 break;
-            case "Username Descending":
+            case "Username Z-A":
                 sortedUsers.sort(Comparator.comparing(APUHostelManagement.User::getUsername).reversed());
+                break;
+            case "Registration Date (Newest)":
+                sortedUsers.sort(Comparator.comparing(APUHostelManagement.User::getDateOfRegistration).reversed());
+                break;
+            case "Registration Date (Oldest)":
+                sortedUsers.sort(Comparator.comparing(APUHostelManagement.User::getDateOfRegistration));
                 break;
             default:
                 break;
@@ -356,6 +531,11 @@ public class ManagerManageUsersGUI {
                                 user.getRole().toLowerCase().contains(lowerCaseQuery) ||
                                 String.valueOf(user.getIsActive()).toLowerCase().contains(lowerCaseQuery))
                 .collect(Collectors.toList());
+        
+        if (!searchedUsers.isEmpty()) {
+            frame.setTitle("Manage Users - " + manager.getUsername() + 
+                " (Found " + searchedUsers.size() + " results)");
+        }
     
         updateTable(searchedUsers);
     }
