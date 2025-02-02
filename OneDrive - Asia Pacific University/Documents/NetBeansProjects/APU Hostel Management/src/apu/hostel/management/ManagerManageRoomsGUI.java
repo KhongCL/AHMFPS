@@ -174,6 +174,9 @@ public class ManagerManageRoomsGUI {
         roomTable.setSelectionBackground(new Color(230, 240, 250));
         roomTable.setSelectionForeground(Color.BLACK);
         roomTable.setGridColor(Color.LIGHT_GRAY);
+        roomTable.setIntercellSpacing(new Dimension(5, 5));
+        roomTable.setShowGrid(true);
+        roomTable.setFillsViewportHeight(true);
 
         roomTable.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
             @Override

@@ -131,6 +131,9 @@ public class ManagerManageUsersGUI {
         userTable.setSelectionForeground(Color.BLACK);
         userTable.setGridColor(Color.LIGHT_GRAY);
         userTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        userTable.setIntercellSpacing(new Dimension(5, 5));
+        userTable.setShowGrid(true);
+        userTable.setFillsViewportHeight(true);
 
         // Add alternating row colors
         userTable.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
@@ -280,7 +283,7 @@ public class ManagerManageUsersGUI {
         backButton.setMnemonic(KeyEvent.VK_B); // Alt+B
         filterButton.setMnemonic(KeyEvent.VK_F); // Alt+F
         sortButton.setMnemonic(KeyEvent.VK_S); // Alt+S
-        searchButton.setMnemonic(KeyEvent.VK_A); // Alt+A
+        searchButton.setMnemonic(KeyEvent.VK_ENTER); // Alt+A
         clearButton.setMnemonic(KeyEvent.VK_C); // Alt+C
         updateButton.setMnemonic(KeyEvent.VK_U);  // Alt+U
         deleteButton.setMnemonic(KeyEvent.VK_D);  // Alt+D

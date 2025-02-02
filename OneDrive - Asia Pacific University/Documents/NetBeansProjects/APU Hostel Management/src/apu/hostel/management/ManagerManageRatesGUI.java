@@ -182,6 +182,9 @@ public class ManagerManageRatesGUI {
         rateTable.setSelectionBackground(new Color(230, 240, 250));
         rateTable.setSelectionForeground(Color.BLACK);
         rateTable.setGridColor(Color.LIGHT_GRAY);
+        rateTable.setIntercellSpacing(new Dimension(5, 5));
+        rateTable.setShowGrid(true);
+        rateTable.setFillsViewportHeight(true);
 
         // Add alternating row colors
         rateTable.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
@@ -280,7 +283,7 @@ public class ManagerManageRatesGUI {
         backButton.setMnemonic(KeyEvent.VK_B);  // Alt+B
         filterButton.setMnemonic(KeyEvent.VK_F); // Alt+F
         sortButton.setMnemonic(KeyEvent.VK_S); // Alt+S
-        searchButton.setMnemonic(KeyEvent.VK_A); // Alt+A
+        searchButton.setMnemonic(KeyEvent.VK_ENTER); // Alt+A
         clearButton.setMnemonic(KeyEvent.VK_C); // Alt+C
         addButton.setMnemonic(KeyEvent.VK_I);   // Alt+I
         updateButton.setMnemonic(KeyEvent.VK_U); // Alt+U 

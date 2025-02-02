@@ -171,6 +171,10 @@ public class ManagerApproveUsersRegistrationGUI {
         userTable.setSelectionBackground(new Color(230, 240, 250));
         userTable.setSelectionForeground(Color.BLACK);
         userTable.setGridColor(Color.LIGHT_GRAY);
+        userTable.setIntercellSpacing(new Dimension(5, 5));
+        userTable.setShowGrid(true);
+        userTable.setFillsViewportHeight(true);
+
         userTable.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, 
