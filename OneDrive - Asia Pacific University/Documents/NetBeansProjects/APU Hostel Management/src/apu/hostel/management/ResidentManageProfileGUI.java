@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.io.IOException;
 
 public class ResidentManageProfileGUI {
@@ -28,6 +29,7 @@ public class ResidentManageProfileGUI {
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         frame.setSize(1024, 768);
         frame.setLayout(new BorderLayout(10, 10));
+        frame.setTitle("Update Personal Information - " + resident.getUsername());
         frame.setLocationRelativeTo(null);
     
         JPanel topPanel = new JPanel(new BorderLayout());
@@ -96,9 +98,33 @@ public class ResidentManageProfileGUI {
         gbc.gridy++;
         inputPanel.add(new JLabel("Password:"), gbc);
         gbc.gridx = 1;
+        JPanel passwordPanel = new JPanel(new BorderLayout(5, 0));
         passwordField = new JPasswordField(resident.getPassword());
         passwordField.setPreferredSize(new Dimension(300, 30));
-        inputPanel.add(passwordField, gbc);
+        passwordPanel.add(passwordField, BorderLayout.CENTER);
+
+        JButton showHideButton = new JButton(new ImageIcon(new ImageIcon("images/show_icon.png")
+            .getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH)));
+        showHideButton.setPreferredSize(new Dimension(35, 35));
+        showHideButton.setBorderPainted(false);
+        showHideButton.setContentAreaFilled(false);
+        showHideButton.setFocusPainted(false);
+        showHideButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        showHideButton.setToolTipText("Show/Hide password");
+        showHideButton.addActionListener(e -> {
+            if (passwordField.getEchoChar() == '*') {
+                passwordField.setEchoChar((char) 0);
+                showHideButton.setIcon(new ImageIcon(new ImageIcon("images/hide_icon.png")
+                    .getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH)));
+            } else {
+                passwordField.setEchoChar('*');
+                showHideButton.setIcon(new ImageIcon(new ImageIcon("images/show_icon.png")
+                    .getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH)));
+            }
+        });
+        passwordPanel.add(showHideButton, BorderLayout.EAST);
+        inputPanel.add(passwordPanel, gbc);
+
         gbc.gridx = 2;
         JLabel passwordIconLabel = new JLabel();
         passwordIconLabel.setPreferredSize(new Dimension(30, 30));
@@ -150,6 +176,31 @@ public class ResidentManageProfileGUI {
         addValidationListeners(icPassportIconLabel, usernameIconLabel, passwordIconLabel, contactNumberIconLabel);
     
         frame.setVisible(true);
+
+        backButton.setMnemonic(KeyEvent.VK_B);    // Alt+B
+        updateButton.setMnemonic(KeyEvent.VK_U);   // Alt+U
+
+        backButton.setToolTipText("Go back to main page (Alt+B)");
+        updateButton.setToolTipText("Update profile information (Alt+U)");
+
+        addButtonHoverEffect(backButton);
+        addButtonHoverEffect(updateButton);
+
+        addFocusHighlight(icPassportField);
+        addFocusHighlight(usernameField);
+        addFocusHighlight(passwordField);
+        addFocusHighlight(contactNumberField);
+
+        ActionListener enterAction = e -> updateButton.doClick();
+        icPassportField.addActionListener(enterAction);
+        usernameField.addActionListener(enterAction);
+        passwordField.addActionListener(enterAction);
+        contactNumberField.addActionListener(enterAction);
+
+        KeyStroke escapeKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
+        frame.getRootPane().registerKeyboardAction(e -> {
+        backButton.doClick();
+        }, escapeKeyStroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 
         frame.addWindowListener(new java.awt.event.WindowAdapter() {
             @Override
@@ -421,6 +472,23 @@ public class ResidentManageProfileGUI {
             }
             public void mouseExited(java.awt.event.MouseEvent evt) {
                 button.setBackground(originalColor); 
+            }
+        });
+    }
+
+    private void addFocusHighlight(JTextField field) {
+        field.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                field.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(new Color(66, 133, 244)),
+                    BorderFactory.createEmptyBorder(5, 5, 5, 5)
+                ));
+            }
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                field.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(Color.GRAY),
+                    BorderFactory.createEmptyBorder(5, 5, 5, 5)
+                ));
             }
         });
     }
