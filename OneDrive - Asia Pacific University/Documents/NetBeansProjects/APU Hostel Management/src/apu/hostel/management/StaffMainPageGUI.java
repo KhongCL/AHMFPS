@@ -171,12 +171,15 @@ public class StaffMainPageGUI {
     }
 
     private void addButtonHoverEffect(JButton button) {
+        // Store the original background color
+        Color originalColor = button.getBackground();
+        
         button.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 button.setBackground(new Color(220, 220, 220));
             }
             public void mouseExited(java.awt.event.MouseEvent evt) {
-                button.setBackground(UIManager.getColor("Button.background"));
+                button.setBackground(originalColor); 
             }
         });
     }
@@ -189,7 +192,7 @@ public class StaffMainPageGUI {
             button.setIcon(icon);
             button.setHorizontalAlignment(SwingConstants.LEFT);
             // Add category-based colors
-            if (text.contains("Update")) {
+            if (text.contains("Update") || text.contains("Logout")) {
                 button.setBackground(new Color(230, 240, 250)); // Light blue for user management
             } else if (text.contains("Make") || text.contains("Generate")) {
                 button.setBackground(new Color(230, 250, 230)); // Light green for facility management

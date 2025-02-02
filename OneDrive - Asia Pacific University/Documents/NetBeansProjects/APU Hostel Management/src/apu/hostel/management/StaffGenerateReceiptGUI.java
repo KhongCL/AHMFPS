@@ -165,4 +165,18 @@ public class StaffGenerateReceiptGUI {
         // Don't set a default size here, let individual calls specify the size
         return button;
     }
+
+    private void addButtonHoverEffect(JButton button) {
+        // Store the original background color
+        Color originalColor = button.getBackground();
+        
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                button.setBackground(new Color(220, 220, 220));
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                button.setBackground(originalColor); 
+            }
+        });
+    }
 }

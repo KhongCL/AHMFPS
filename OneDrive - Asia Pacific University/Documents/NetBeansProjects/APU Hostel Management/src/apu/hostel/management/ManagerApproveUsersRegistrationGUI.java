@@ -1,12 +1,19 @@
 package apu.hostel.management;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+
 import java.awt.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -16,6 +23,11 @@ public class ManagerApproveUsersRegistrationGUI {
         private DefaultTableModel tableModel;
         private List<APUHostelManagement.User> userList;
         private APUHostelManagement.Manager manager;
+        private List<APUHostelManagement.User> filteredUserList;
+        private String currentFilterChoice = null;
+        private String currentFilterValue = null;
+        private JButton filterButton;
+        private JButton sortButton;
 
         public ManagerApproveUsersRegistrationGUI(APUHostelManagement.Manager manager) {
             this.manager = manager;
@@ -27,6 +39,7 @@ public class ManagerApproveUsersRegistrationGUI {
             frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
             frame.setSize(1024, 768);
             frame.setLayout(new BorderLayout(10, 10));
+            frame.setTitle("Approve Users - " + manager.getUsername());
 
             // Top panel
             JPanel topPanel = new JPanel(new BorderLayout());
@@ -43,9 +56,83 @@ public class ManagerApproveUsersRegistrationGUI {
 
             // Filter panel
             JPanel filterPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-            JButton filterButton = createButton("Filter", "filter_icon.png");
-            filterButton.addActionListener(e -> filterUsers());
+            filterButton = createButton("Filter", "filter_icon.png");
+            filterButton.addActionListener(e -> {
+                if (filterButton.getText().startsWith("Filter: ")) {
+                    int choice = JOptionPane.showConfirmDialog(frame,
+                        "Do you want to clear the current filter?",
+                        "Clear Filter",
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.QUESTION_MESSAGE);
+                    if (choice == JOptionPane.YES_OPTION) {
+                        filterButton.setText("Filter");
+                        currentFilterChoice = null;
+                        currentFilterValue = null;
+                        loadUnapprovedUsers();
+                    }
+                } else {
+                    filterUsers();
+                }
+            });
+
+            sortButton = createButton("Sort", "sort_icon.png");
+            sortButton.addActionListener(e -> {
+                if (sortButton.getText().startsWith("Sort: ")) {
+                    int choice = JOptionPane.showConfirmDialog(frame,
+                        "Do you want to clear the current sort?",
+                        "Clear Sort",
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.QUESTION_MESSAGE);
+                    if (choice == JOptionPane.YES_OPTION) {
+                        sortButton.setText("Sort");
+                        updateTable(userList);
+                    }
+                } else {
+                    sortUsers();
+                }
+            });
+
+            JTextField searchField = new JTextField(20);
+            searchField.setText("Search users...");
+            searchField.setForeground(Color.GRAY);
+            searchField.setPreferredSize(new Dimension(200, 30));
+            searchField.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(Color.GRAY),
+                BorderFactory.createEmptyBorder(5, 5, 5, 5)
+            ));
+            searchField.addFocusListener(new java.awt.event.FocusAdapter() {
+                public void focusGained(java.awt.event.FocusEvent evt) {
+                    if (searchField.getText().equals("Search users...")) {
+                        searchField.setText("");
+                        searchField.setForeground(Color.BLACK);
+                    }
+                }
+                public void focusLost(java.awt.event.FocusEvent evt) {
+                    if (searchField.getText().isEmpty()) {
+                        searchField.setText("Search users...");
+                        searchField.setForeground(Color.GRAY);
+                    }
+                }
+            });
+            JButton searchButton = createButton("Search", "search_icon.png");
+            searchButton.addActionListener(e -> searchUsers(searchField.getText()));
+
+            JButton clearButton = createButton("Clear", "clear_icon.png");
+            clearButton.addActionListener(e -> {
+                searchField.setText("");
+                if (currentFilterChoice != null) {
+                    reapplyCurrentFilter();
+                } else {
+                    loadUnapprovedUsers();
+                }
+            });
+
             filterPanel.add(filterButton);
+            filterPanel.add(sortButton);
+            filterPanel.add(searchField);
+            filterPanel.add(searchButton);
+            filterPanel.add(clearButton);
+
             topPanel.add(filterPanel, BorderLayout.EAST);
 
             frame.add(topPanel, BorderLayout.NORTH);
@@ -53,8 +140,41 @@ public class ManagerApproveUsersRegistrationGUI {
             // Table setup
             tableModel = new DefaultTableModel(
                 new Object[]{"UserID", "IC/Passport Number", "Username", "Password", 
-                            "Contact Number", "Date Of Registration", "Role", "Is Active"}, 0);
+                            "Contact Number", "Date Of Registration", "Role", "Is Active"}, 0) {
+                @Override
+                public boolean isCellEditable(int row, int column) {
+                    return false; // Make all cells non-editable
+                }
+            };
             userTable = new JTable(tableModel);
+            userTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+            userTable.getTableHeader().setReorderingAllowed(false);
+            userTable.setRowHeight(25); // Better readability
+            userTable.getTableHeader().setFont(new Font("Arial", Font.BOLD, 12));
+            userTable.setFont(new Font("Arial", Font.PLAIN, 12));
+            userTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+            userTable.setSelectionBackground(new Color(230, 240, 250));
+            userTable.setSelectionForeground(Color.BLACK);
+            userTable.setGridColor(Color.LIGHT_GRAY);
+            userTable.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
+                @Override
+                public Component getTableCellRendererComponent(JTable table, Object value, 
+                        boolean isSelected, boolean hasFocus, int row, int column) {
+                    Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                    if (!isSelected) {
+                        c.setBackground(row % 2 == 0 ? Color.WHITE : new Color(245, 245, 250));
+                    }
+                    return c;
+                }
+            });
+            userTable.getColumnModel().getColumn(0).setPreferredWidth(80);  // UserID
+            userTable.getColumnModel().getColumn(1).setPreferredWidth(120); // IC/Passport
+            userTable.getColumnModel().getColumn(2).setPreferredWidth(100); // Username
+            userTable.getColumnModel().getColumn(3).setPreferredWidth(100); // Password
+            userTable.getColumnModel().getColumn(4).setPreferredWidth(100); // Contact
+            userTable.getColumnModel().getColumn(5).setPreferredWidth(150); // Registration Date
+            userTable.getColumnModel().getColumn(6).setPreferredWidth(80);  // Role
+            userTable.getColumnModel().getColumn(7).setPreferredWidth(70); 
             JScrollPane scrollPane = new JScrollPane(userTable);
             frame.add(scrollPane, BorderLayout.CENTER);
 
@@ -68,6 +188,52 @@ public class ManagerApproveUsersRegistrationGUI {
 
             loadUnapprovedUsers();
             frame.setVisible(true);
+
+            userTable.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    if (e.getClickCount() == 2) {
+                        approveSelectedUser();
+                    }
+                }
+            });
+
+            searchField.addKeyListener(new KeyAdapter() {
+                @Override
+                public void keyPressed(KeyEvent e) {
+                    if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                        searchUsers(searchField.getText());
+                    }
+                }
+            });
+            searchField.setPreferredSize(new Dimension(200, 30));
+
+            backButton.setMnemonic(KeyEvent.VK_B);  // Alt+B
+            approveButton.setMnemonic(KeyEvent.VK_A); // Alt+A
+            filterButton.setMnemonic(KeyEvent.VK_F);  // Alt+F
+            sortButton.setMnemonic(KeyEvent.VK_S);
+            searchButton.setMnemonic(KeyEvent.VK_ENTER);
+            clearButton.setMnemonic(KeyEvent.VK_C); 
+
+            backButton.setToolTipText("Go back (Alt+B)");
+            approveButton.setToolTipText("Approve selected user (Alt+A)");
+            filterButton.setToolTipText("Filter users (Alt+F)");
+            sortButton.setToolTipText("Sort users (Alt+S)");
+            searchField.setToolTipText("Search by anything (case-insensitive) and press Enter");
+            clearButton.setToolTipText("Clear search and filters (Alt+C)");
+            
+
+            addButtonHoverEffect(backButton);
+            addButtonHoverEffect(approveButton);
+            addButtonHoverEffect(filterButton);
+            addButtonHoverEffect(sortButton);
+            addButtonHoverEffect(searchButton);
+            addButtonHoverEffect(clearButton);
+
+            KeyStroke escapeKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
+            frame.getRootPane().registerKeyboardAction(e -> {
+                backButton.doClick();
+            }, escapeKeyStroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 
             frame.addWindowListener(new java.awt.event.WindowAdapter() {
                 @Override
@@ -105,26 +271,22 @@ public class ManagerApproveUsersRegistrationGUI {
             }
         }
 
-        private void filterUsers() {
-            String[] roleOptions = {"All", "Manager", "Staff", "Resident"};
-            String roleChoice = (String) JOptionPane.showInputDialog(frame,
-                "Select role to filter:", "Filter Users",
-                JOptionPane.QUESTION_MESSAGE, null, roleOptions, roleOptions[0]);
-
-            if (roleChoice == null) return;
-
-            List<APUHostelManagement.User> filteredUsers = userList;
-            if (!roleChoice.equals("All")) {
-                filteredUsers = userList.stream()
-                    .filter(user -> user.getRole().equalsIgnoreCase(roleChoice))
-                    .collect(Collectors.toList());
-            }
-            
-            updateTable(filteredUsers);
-        }
-
         private void updateTable(List<APUHostelManagement.User> users) {
             tableModel.setRowCount(0);
+            
+            if (users.isEmpty()) {
+                JOptionPane.showMessageDialog(frame, 
+                    "No users found.", 
+                    "Information", JOptionPane.INFORMATION_MESSAGE);
+                if (currentFilterChoice == null) {
+                    loadUnapprovedUsers();
+                }
+                return;
+            }
+            
+            // Update filtered list
+            filteredUserList = new ArrayList<>(users);
+            
             for (APUHostelManagement.User user : users) {
                 tableModel.addRow(new Object[]{
                     user.getUserID(),
@@ -233,6 +395,109 @@ public class ManagerApproveUsersRegistrationGUI {
             }
         }
 
+        private void filterUsers() {
+            String[] roleOptions = {"All", "Manager", "Staff", "Resident"};
+            String roleChoice = (String) JOptionPane.showInputDialog(frame,
+                "Select role to filter:", "Filter Users",
+                JOptionPane.QUESTION_MESSAGE, null, roleOptions, roleOptions[0]);
+        
+            if (roleChoice == null) return;
+        
+            if (roleChoice.equals("All")) {
+                currentFilterChoice = null;
+                currentFilterValue = null;
+                loadUnapprovedUsers();
+                return;
+            }
+        
+            currentFilterChoice = "Role";
+            currentFilterValue = roleChoice;
+        
+            List<APUHostelManagement.User> filteredUsers = userList;
+            if (!roleChoice.equals("All")) {
+                filteredUsers = userList.stream()
+                    .filter(user -> user.getRole().equalsIgnoreCase(roleChoice))
+                    .collect(Collectors.toList());
+            }
+
+            if (!roleChoice.equals("All")) {
+                filterButton.setText("Filter: " + roleChoice);
+            } else {
+                filterButton.setText("Filter");
+            }
+
+            if (!filteredUsers.isEmpty()) {
+                frame.setTitle("Approve Users - " + manager.getUsername() + 
+                    " (Filtered: " + roleChoice + ", " + filteredUsers.size() + " users)");
+            }
+            
+            updateTable(filteredUsers);
+        }
+
+        private void reapplyCurrentFilter() {
+            if (currentFilterChoice != null) {
+                List<APUHostelManagement.User> filteredUsers = new ArrayList<>(userList);
+                
+                if (currentFilterChoice.equals("Role")) {
+                    if (!currentFilterValue.equals("All")) {
+                        filteredUsers = filteredUsers.stream()
+                            .filter(user -> user.getRole().equalsIgnoreCase(currentFilterValue))
+                            .collect(Collectors.toList());
+                    }
+                }
+                updateTable(filteredUsers);
+            } else {
+                loadUnapprovedUsers();
+            }
+        }
+
+        private void searchUsers(String query) {
+            if (query == null || query.trim().isEmpty()) {
+                updateTable(userList);
+                return;
+            }
+            String lowerQuery = query.toLowerCase();
+            List<APUHostelManagement.User> searchResults = userList.stream()
+                .filter(user -> user.getUserID().toLowerCase().contains(lowerQuery) ||
+                                user.getIcPassportNumber().toLowerCase().contains(lowerQuery) ||
+                                user.getUsername().toLowerCase().contains(lowerQuery) ||
+                                user.getPassword().toLowerCase().contains(lowerQuery) ||
+                                user.getContactNumber().toLowerCase().contains(lowerQuery) ||
+                                user.getDateOfRegistration().toLowerCase().contains(lowerQuery) ||
+                                user.getRole().toLowerCase().contains(lowerQuery) ||
+                                String.valueOf(user.getIsActive()).toLowerCase().contains(lowerQuery))
+                .collect(Collectors.toList());
+            if (!searchResults.isEmpty()) {
+                frame.setTitle("Approve Users - " + manager.getUsername() + 
+                    " (Found " + searchResults.size() + " results)");
+            }
+            updateTable(searchResults);
+        }
+
+        private void sortUsers() {
+            String[] options = {"Username A-Z", "Username Z-A", "Registration Date (Newest)", "Registration Date (Oldest)"};
+            String choice = (String) JOptionPane.showInputDialog(frame, "Sort by:",
+                "Sort Users", JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+        
+            if (choice != null) {
+                sortButton.setText("Sort: " + choice.split(" ")[0]);
+        
+                // Sort the filtered list instead of the full list
+                List<APUHostelManagement.User> listToSort = 
+                    (filteredUserList != null) ? new ArrayList<>(filteredUserList) : new ArrayList<>(userList);
+        
+                switch (choice) {
+                    case "Username A-Z" -> listToSort.sort(Comparator.comparing(APUHostelManagement.User::getUsername));
+                    case "Username Z-A" -> listToSort.sort(Comparator.comparing(APUHostelManagement.User::getUsername).reversed());
+                    case "Registration Date (Newest)" -> listToSort.sort(Comparator.comparing(APUHostelManagement.User::getDateOfRegistration).reversed());
+                    case "Registration Date (Oldest)" -> listToSort.sort(Comparator.comparing(APUHostelManagement.User::getDateOfRegistration));
+                }
+                updateTable(listToSort);
+            } else {
+                sortButton.setText("Sort");
+            }
+        }
+
         private JButton createButton(String text, String iconPath) {
             JButton button = new JButton(text);
             try {
@@ -243,7 +508,20 @@ public class ManagerApproveUsersRegistrationGUI {
             } catch (Exception e) {
                 System.err.println("Could not load icon: " + iconPath);
             }
-            // Don't set a default size here, let individual calls specify the size
             return button;
+        }
+
+        private void addButtonHoverEffect(JButton button) {
+            // Store the original background color
+            Color originalColor = button.getBackground();
+            
+            button.addMouseListener(new java.awt.event.MouseAdapter() {
+                public void mouseEntered(java.awt.event.MouseEvent evt) {
+                    button.setBackground(new Color(220, 220, 220));
+                }
+                public void mouseExited(java.awt.event.MouseEvent evt) {
+                    button.setBackground(originalColor); 
+                }
+            });
         }
 }
