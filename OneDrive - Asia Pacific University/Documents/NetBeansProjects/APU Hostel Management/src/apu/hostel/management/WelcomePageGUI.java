@@ -594,6 +594,15 @@ public class WelcomePageGUI extends JFrame {
                 showFormatRequirements();
             }
         });
+
+        formatLink.addMouseListener(new MouseAdapter() {
+            public void mouseEntered(MouseEvent evt) {
+                formatLink.setText("<html><a href='' style='color:#FF4081'>View Format Requirements</a></html>");
+            }
+            public void mouseExited(MouseEvent evt) {
+                formatLink.setText("<html><a href=''>View Format Requirements</a></html>");
+            }
+        });
         gbc.gridy++;
         centerPanel.add(formatLink, gbc);
     
