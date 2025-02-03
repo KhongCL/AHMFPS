@@ -22,7 +22,7 @@ public class ManagerManageUsersGUI {
     private JTable userTable;
     private DefaultTableModel tableModel;
     private List<APUHostelManagement.User> userList;
-    private APUHostelManagement.Manager manager; // Add manager field
+    private APUHostelManagement.Manager manager; 
     private List<APUHostelManagement.User> filteredUserList;
     private String currentFilterChoice = null;
     private String currentFilterValue = null;
@@ -31,7 +31,7 @@ public class ManagerManageUsersGUI {
     private String currentSortCategory = null;
     private String currentSortOrder = null;
 
-    // Add new constructor
+    
     public ManagerManageUsersGUI(APUHostelManagement.Manager manager) {
         this.manager = manager;
         this.userList = new ArrayList<>();
@@ -48,14 +48,14 @@ public class ManagerManageUsersGUI {
         frame = new JFrame("Search, Update, Delete or Restore User");
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         frame.setSize(1024, 768);
-        frame.setLayout(new BorderLayout(10, 10)); // Add spacing between components
+        frame.setLayout(new BorderLayout(10, 10)); 
         frame.setTitle("Manage Users - " + manager.getUsername());
         frame.setLocationRelativeTo(null);
 
         JPanel topPanel = new JPanel(new BorderLayout());
-        topPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); // Add padding
+        topPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); 
 
-        // Filter, Sort, and Search components
+        
         JPanel filterSortSearchPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         filterButton = createButton("Filter", "filter_icon.png");
         sortButton = createButton("Sort", "sort_icon.png");
@@ -101,12 +101,12 @@ public class ManagerManageUsersGUI {
 
         topPanel.add(filterSortSearchPanel, BorderLayout.EAST);
 
-        // Back button
+        
         JButton backButton = createButton("Back", "back_icon.png");
         backButton.setPreferredSize(new Dimension(100, 40));
         backButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                new ManagerMainPageGUI(manager); // Pass manager back
+                new ManagerMainPageGUI(manager); 
                 frame.dispose();
             }
         });
@@ -114,7 +114,7 @@ public class ManagerManageUsersGUI {
 
         frame.add(topPanel, BorderLayout.NORTH);
 
-        // User table
+        
         tableModel = new DefaultTableModel(new Object[]{"UserID", "IC/Passport Number", "Username", "Password", "Contact Number", "Date Of Registration", "Role", "Is Active"}, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -122,7 +122,7 @@ public class ManagerManageUsersGUI {
             }
         };
         userTable = new JTable(tableModel);
-        // Add after table creation
+        
         userTable.getTableHeader().setReorderingAllowed(false);
         userTable.setRowHeight(25);
         userTable.getTableHeader().setFont(new Font("Arial", Font.BOLD, 12));
@@ -136,7 +136,7 @@ public class ManagerManageUsersGUI {
         userTable.setShowGrid(true);
         userTable.setFillsViewportHeight(true);
 
-        // Add alternating row colors
+        
         userTable.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, 
@@ -148,24 +148,24 @@ public class ManagerManageUsersGUI {
                 return c;
             }
         });
-        userTable.getColumnModel().getColumn(0).setPreferredWidth(80);  // UserID
-        userTable.getColumnModel().getColumn(1).setPreferredWidth(120); // IC/Passport
-        userTable.getColumnModel().getColumn(2).setPreferredWidth(100); // Username
-        userTable.getColumnModel().getColumn(3).setPreferredWidth(100); // Password
-        userTable.getColumnModel().getColumn(4).setPreferredWidth(100); // Contact Number
-        userTable.getColumnModel().getColumn(5).setPreferredWidth(150); // Date Of Registration
-        userTable.getColumnModel().getColumn(6).setPreferredWidth(80); // Role
-        userTable.getColumnModel().getColumn(7).setPreferredWidth(70); // Is Active
+        userTable.getColumnModel().getColumn(0).setPreferredWidth(80);  
+        userTable.getColumnModel().getColumn(1).setPreferredWidth(120); 
+        userTable.getColumnModel().getColumn(2).setPreferredWidth(100); 
+        userTable.getColumnModel().getColumn(3).setPreferredWidth(100); 
+        userTable.getColumnModel().getColumn(4).setPreferredWidth(100); 
+        userTable.getColumnModel().getColumn(5).setPreferredWidth(150); 
+        userTable.getColumnModel().getColumn(6).setPreferredWidth(80); 
+        userTable.getColumnModel().getColumn(7).setPreferredWidth(70); 
 
         JScrollPane scrollPane = new JScrollPane(userTable);
         frame.add(scrollPane, BorderLayout.CENTER);
 
 
 
-        // Load users into the table
+        
         loadUsers();
 
-        // Action buttons
+        
         JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         JButton updateButton = createButton("Update", "update_icon.png");
         JButton deleteButton = createButton("Delete", "delete_icon.png");
@@ -207,7 +207,7 @@ public class ManagerManageUsersGUI {
                     sortButton.setText("Sort");
                     currentSortCategory = null;
                     currentSortOrder = null;
-                    // Reapply current filter if exists
+                    
                     if (currentFilterChoice != null) {
                         reapplyCurrentFilter();
                     } else {
@@ -281,16 +281,16 @@ public class ManagerManageUsersGUI {
 
         frame.setVisible(true);
 
-        backButton.setMnemonic(KeyEvent.VK_B); // Alt+B
-        filterButton.setMnemonic(KeyEvent.VK_F); // Alt+F
-        sortButton.setMnemonic(KeyEvent.VK_S); // Alt+S
-        searchButton.setMnemonic(KeyEvent.VK_ENTER); // Alt+A
-        clearButton.setMnemonic(KeyEvent.VK_C); // Alt+C
-        updateButton.setMnemonic(KeyEvent.VK_U);  // Alt+U
-        deleteButton.setMnemonic(KeyEvent.VK_D);  // Alt+D
-        restoreButton.setMnemonic(KeyEvent.VK_R); // Alt+R
-        deleteAllButton.setMnemonic(KeyEvent.VK_L); // Alt+L
-        restoreAllButton.setMnemonic(KeyEvent.VK_T); // Alt+T
+        backButton.setMnemonic(KeyEvent.VK_B); 
+        filterButton.setMnemonic(KeyEvent.VK_F); 
+        sortButton.setMnemonic(KeyEvent.VK_S); 
+        searchButton.setMnemonic(KeyEvent.VK_ENTER); 
+        clearButton.setMnemonic(KeyEvent.VK_C); 
+        updateButton.setMnemonic(KeyEvent.VK_U);  
+        deleteButton.setMnemonic(KeyEvent.VK_D);  
+        restoreButton.setMnemonic(KeyEvent.VK_R); 
+        deleteAllButton.setMnemonic(KeyEvent.VK_L); 
+        restoreAllButton.setMnemonic(KeyEvent.VK_T); 
 
         backButton.setToolTipText("Go back to main page (Alt+B)");
         filterButton.setToolTipText("Filter users (Alt+F)");
@@ -330,20 +330,20 @@ public class ManagerManageUsersGUI {
                 if (choice == JOptionPane.YES_OPTION) {
                     System.exit(0);
                 }
-                // No need for else as the window will stay open by default
+                
             }
         });
     }
 
     private void loadUsers() {
-        tableModel.setRowCount(0); // Clear the table
+        tableModel.setRowCount(0); 
         try {
             userList = APUHostelManagement.User.readFromFile("users.txt");
             userList.addAll(APUHostelManagement.User.readFromFile("unapproved_managers.txt"));
             userList.addAll(APUHostelManagement.User.readFromFile("unapproved_staffs.txt"));
             userList.addAll(APUHostelManagement.User.readFromFile("unapproved_residents.txt"));
             
-            // Initialize filteredUserList with all users initially
+            
             filteredUserList = new ArrayList<>(userList);
             
             for (APUHostelManagement.User user : userList) {
@@ -371,10 +371,10 @@ public class ManagerManageUsersGUI {
             JOptionPane.QUESTION_MESSAGE, null, filterOptions, filterOptions[0]);
     
         if (filterChoice == null) {
-            return; // User cancelled
+            return; 
         }
     
-        // Reset filter if "No filter" selected
+        
         if (filterChoice.equals("All")) {
             currentFilterChoice = null;
             currentFilterValue = null;
@@ -508,7 +508,7 @@ public class ManagerManageUsersGUI {
             sortButton.setText("Sort: " + sortChoice.split(" ")[0]);
         }
 
-        currentSortCategory = sortChoice.split(" ")[0]; // "Username" or "Registration Date"  
+        currentSortCategory = sortChoice.split(" ")[0]; 
         currentSortOrder = sortChoice.contains("Z-A") || sortChoice.contains("Newest") ? "Descending" : "Ascending";
 
         applySorting(filteredUserList != null ? filteredUserList : userList);
@@ -537,7 +537,7 @@ public class ManagerManageUsersGUI {
 
     private void searchUsers(String searchQuery) {
         if (searchQuery == null || searchQuery.trim().isEmpty()) {
-            // If search query is empty, reapply current filter or show all users
+            
             if (currentFilterChoice != null) {
                 reapplyCurrentFilter();
             } else {
@@ -568,19 +568,19 @@ public class ManagerManageUsersGUI {
     }
 
     private void updateTable(List<APUHostelManagement.User> users) {
-        tableModel.setRowCount(0); // Clear the table
+        tableModel.setRowCount(0); 
         
         if (users.isEmpty()) {
             JOptionPane.showMessageDialog(frame, 
                 "No users found.", 
                 "Information", JOptionPane.INFORMATION_MESSAGE);
             if (currentFilterChoice == null) {
-                loadUsers(); // Only reload if no filter is active
+                loadUsers(); 
             }
             return;
         }
         
-        // Update filtered list
+        
         filteredUserList = new ArrayList<>(users);
         
         for (APUHostelManagement.User user : users) {
@@ -828,7 +828,7 @@ public class ManagerManageUsersGUI {
             return;
         }
     
-        // Only affect filtered users
+        
         for (APUHostelManagement.User user : filteredUserList) {
             user.setIsActive(false);
         }
@@ -837,7 +837,7 @@ public class ManagerManageUsersGUI {
             for (APUHostelManagement.User user : filteredUserList) {
                 updateAllUserFiles(user);
             }
-            // Reload with same filter
+            
             reapplyCurrentFilter();
             JOptionPane.showMessageDialog(frame, "All filtered users deleted successfully.", 
                 "Success", JOptionPane.INFORMATION_MESSAGE);
@@ -856,7 +856,7 @@ public class ManagerManageUsersGUI {
             return;
         }
     
-        // Only affect filtered users
+        
         for (APUHostelManagement.User user : filteredUserList) {
             user.setIsActive(true);
         }
@@ -865,7 +865,7 @@ public class ManagerManageUsersGUI {
             for (APUHostelManagement.User user : filteredUserList) {
                 updateAllUserFiles(user);
             }
-            // Reload with same filter
+            
             reapplyCurrentFilter();
             JOptionPane.showMessageDialog(frame, "All filtered users restored successfully.", 
                 "Success", JOptionPane.INFORMATION_MESSAGE);
@@ -886,12 +886,12 @@ public class ManagerManageUsersGUI {
         } catch (Exception e) {
             System.err.println("Could not load icon: " + iconPath);
         }
-        // Don't set a default size here, let individual calls specify the size
+        
         return button;
     }
 
     private void addButtonHoverEffect(JButton button) {
-        // Store the original background color
+        
         Color originalColor = button.getBackground();
         
         button.addMouseListener(new java.awt.event.MouseAdapter() {

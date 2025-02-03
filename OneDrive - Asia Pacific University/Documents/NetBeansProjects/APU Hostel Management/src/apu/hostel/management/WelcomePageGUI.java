@@ -23,7 +23,7 @@ public class WelcomePageGUI extends JFrame {
         new APUHostelManagement();
     
         setTitle("APU Hostel Management System");
-        setSize(1024, 768); // Adjusted size
+        setSize(1024, 768); 
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         setLocationRelativeTo(null);
     
@@ -49,7 +49,7 @@ public class WelcomePageGUI extends JFrame {
         mainPanel.add(residentRegistrationPanel, "ResidentRegistration");
         mainPanel.add(staffRegistrationPanel, "StaffRegistration");
         mainPanel.add(managerLoginPanel, "ManagerLogin");
-        mainPanel.add(managerRegistrationPanel, "ManagerRegistration"); // Ensure this line is correct
+        mainPanel.add(managerRegistrationPanel, "ManagerRegistration"); 
 
     
         add(mainPanel);
@@ -63,9 +63,9 @@ public class WelcomePageGUI extends JFrame {
                         cardLayout.show(mainPanel, "RoleSelection");
                         return true;
                     case KeyEvent.VK_LEFT:
-                        // Handle back navigation for each panel
+                        
                         if (mainPanel.getComponent(0).isVisible()) {
-                            return true; // Already at home
+                            return true; 
                         }
                         cardLayout.previous(mainPanel);
                         return true;
@@ -84,7 +84,7 @@ public class WelcomePageGUI extends JFrame {
                 if (choice == JOptionPane.YES_OPTION) {
                     System.exit(0);
                 }
-                // No need for else as the window will stay open by default
+                
             }
         });
     }
@@ -99,26 +99,26 @@ public class WelcomePageGUI extends JFrame {
         });
 
         JLabel welcomeLabel = new JLabel("Welcome to APU Hostel Management Fees Payment System (AHMFPS)", SwingConstants.CENTER);
-        welcomeLabel.setFont(new Font("Arial", Font.BOLD, 28)); // Adjusted font size
-        welcomeLabel.setBorder(BorderFactory.createEmptyBorder(48, 0, 0, 0)); // Adjusted space above the welcome message
+        welcomeLabel.setFont(new Font("Arial", Font.BOLD, 28)); 
+        welcomeLabel.setBorder(BorderFactory.createEmptyBorder(48, 0, 0, 0)); 
         panel.add(welcomeLabel, BorderLayout.NORTH);
 
-        JPanel centerPanel = new JPanel(new GridLayout(5, 1, 19, 19)); // Adjusted to 5 rows
-        centerPanel.setBorder(BorderFactory.createEmptyBorder(38, 38, 38, 38)); // Adjusted border
+        JPanel centerPanel = new JPanel(new GridLayout(5, 1, 19, 19)); 
+        centerPanel.setBorder(BorderFactory.createEmptyBorder(38, 38, 38, 38)); 
 
         JLabel label = new JLabel("Select Your Role:", SwingConstants.CENTER);
-        label.setFont(new Font("Arial", Font.PLAIN, 24)); // Adjusted font size
+        label.setFont(new Font("Arial", Font.PLAIN, 24)); 
         JButton managerButton = createButton("Manager", "manager_icon.png");
         JButton staffButton = createButton("Staff","staff_icon.png");
         JButton residentButton = createButton("Resident", "resident_icon.png");
 
-        managerButton.setFont(new Font("Arial", Font.PLAIN, 24)); // Adjusted font size
-        staffButton.setFont(new Font("Arial", Font.PLAIN, 24)); // Adjusted font size
-        residentButton.setFont(new Font("Arial", Font.PLAIN, 24)); // Adjusted font size
+        managerButton.setFont(new Font("Arial", Font.PLAIN, 24)); 
+        staffButton.setFont(new Font("Arial", Font.PLAIN, 24)); 
+        residentButton.setFont(new Font("Arial", Font.PLAIN, 24)); 
 
-        managerButton.setPreferredSize(new Dimension(200, 50)); // Adjusted button size
-        staffButton.setPreferredSize(new Dimension(200, 50)); // Adjusted button size
-        residentButton.setPreferredSize(new Dimension(200, 50)); // Adjusted button size
+        managerButton.setPreferredSize(new Dimension(200, 50)); 
+        staffButton.setPreferredSize(new Dimension(200, 50)); 
+        residentButton.setPreferredSize(new Dimension(200, 50)); 
 
         managerButton.addActionListener(e -> cardLayout.show(mainPanel, "ManagerAuthCode"));
         staffButton.addActionListener(e -> cardLayout.show(mainPanel, "StaffAuthCode"));
@@ -128,7 +128,7 @@ public class WelcomePageGUI extends JFrame {
         centerPanel.add(managerButton);
         centerPanel.add(staffButton);
         centerPanel.add(residentButton);
-        centerPanel.add(Box.createVerticalStrut(38)); // Adjusted space below the buttons
+        centerPanel.add(Box.createVerticalStrut(38)); 
 
         panel.add(centerPanel, BorderLayout.CENTER);
 
@@ -140,9 +140,9 @@ public class WelcomePageGUI extends JFrame {
         addButtonHoverEffect(staffButton); 
         addButtonHoverEffect(residentButton);
 
-        managerButton.setMnemonic(KeyEvent.VK_M);  // Alt+M
-        staffButton.setMnemonic(KeyEvent.VK_S);    // Alt+S
-        residentButton.setMnemonic(KeyEvent.VK_R); // Alt+R
+        managerButton.setMnemonic(KeyEvent.VK_M);  
+        staffButton.setMnemonic(KeyEvent.VK_S);    
+        residentButton.setMnemonic(KeyEvent.VK_R); 
 
         return panel;
     }
@@ -158,10 +158,10 @@ public class WelcomePageGUI extends JFrame {
 
         JPanel topPanel = new JPanel(new BorderLayout());
         JButton backButton = createButton("Back", "back_icon.png");
-        backButton.setFont(new Font("Arial", Font.PLAIN, 21)); // Adjusted font size
-        backButton.setPreferredSize(new Dimension(150, 57)); // Adjusted button size
-        backButton.setMaximumSize(new Dimension(102, 57)); // Adjusted button size
-        backButton.setMinimumSize(new Dimension(102, 57)); // Adjusted button size
+        backButton.setFont(new Font("Arial", Font.PLAIN, 21)); 
+        backButton.setPreferredSize(new Dimension(150, 57)); 
+        backButton.setMaximumSize(new Dimension(102, 57)); 
+        backButton.setMinimumSize(new Dimension(102, 57)); 
         backButton.addActionListener(e -> cardLayout.show(mainPanel, "RoleSelection"));
         panel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
             .put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "back");
@@ -176,14 +176,14 @@ public class WelcomePageGUI extends JFrame {
         topPanel.add(backButton, BorderLayout.WEST);
         panel.add(topPanel, BorderLayout.NORTH);
 
-        JPanel centerPanel = new JPanel(new GridLayout(3, 1, 19, 19)); // Adjusted grid layout
-        centerPanel.setBorder(BorderFactory.createEmptyBorder(38, 38, 38, 38)); // Adjusted border
+        JPanel centerPanel = new JPanel(new GridLayout(3, 1, 19, 19)); 
+        centerPanel.setBorder(BorderFactory.createEmptyBorder(38, 38, 38, 38)); 
 
         JLabel titleLabel = new JLabel(title, SwingConstants.CENTER);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 28)); // Adjusted font size
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 28)); 
 
         JTextField authCodeField = new JTextField();
-        authCodeField.setFont(new Font("Arial", Font.PLAIN, 24)); // Adjusted font size
+        authCodeField.setFont(new Font("Arial", Font.PLAIN, 24)); 
         authCodeField.setForeground(Color.GRAY);
         authCodeField.setBorder(BorderFactory.createCompoundBorder(
             authCodeField.getBorder(), 
@@ -206,8 +206,8 @@ public class WelcomePageGUI extends JFrame {
         });
 
         JButton submitButton = createButton("Submit", "submit_icon.png");
-        submitButton.setFont(new Font("Arial", Font.PLAIN, 24)); // Adjusted font size
-        submitButton.setPreferredSize(new Dimension(200, 50));  // Adjusted button size
+        submitButton.setFont(new Font("Arial", Font.PLAIN, 24)); 
+        submitButton.setPreferredSize(new Dimension(200, 50));  
         authCodeField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
@@ -232,7 +232,7 @@ public class WelcomePageGUI extends JFrame {
         
         panel.add(centerPanel, BorderLayout.CENTER);
         
-        // Add a component listener to reset the auth code field when the panel is shown
+        
         panel.addComponentListener(new ComponentAdapter() {
             @Override
             public void componentShown(ComponentEvent e) {
@@ -244,10 +244,10 @@ public class WelcomePageGUI extends JFrame {
 
         addButtonHoverEffect(backButton);
         addButtonHoverEffect(submitButton);
-        backButton.setMnemonic(KeyEvent.VK_B);     // Alt+B
+        backButton.setMnemonic(KeyEvent.VK_B);     
         backButton.setToolTipText("Go back (Alt+B)");
         submitButton.setToolTipText("Submit the authorization code (Alt+S)");
-        submitButton.setMnemonic(KeyEvent.VK_S);  // Alt+S
+        submitButton.setMnemonic(KeyEvent.VK_S);  
 
         addFocusHighlight(authCodeField);
         
@@ -257,7 +257,7 @@ public class WelcomePageGUI extends JFrame {
     private JPanel createLoginPanel(String title, String menuCard) {
         JPanel panel = new JPanel(new BorderLayout());
     
-        // Back button panel at top
+        
         JPanel topPanel = new JPanel(new BorderLayout());
         JButton backButton = createButton("Back", "back_icon.png");
         backButton.setFont(new Font("Arial", Font.PLAIN, 21));
@@ -278,18 +278,18 @@ public class WelcomePageGUI extends JFrame {
         topPanel.add(backButton, BorderLayout.WEST);
         panel.add(topPanel, BorderLayout.NORTH);
     
-        // Center panel with GridBagLayout
+        
         JPanel centerPanel = new JPanel(new GridBagLayout());
         centerPanel.setBorder(BorderFactory.createEmptyBorder(38, 38, 38, 38));
         centerPanel.setPreferredSize(new Dimension(600, 400));
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(10, 10, 10, 10);
-        gbc.weightx = 1.0; // Allow horizontal stretching
-        gbc.weighty = 0.0; // Don't stretch vertically
+        gbc.weightx = 1.0; 
+        gbc.weighty = 0.0; 
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.anchor = GridBagConstraints.CENTER;
     
-        // Title
+        
         JLabel titleLabel = new JLabel(title, SwingConstants.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 28));
         gbc.gridx = 0;
@@ -297,7 +297,7 @@ public class WelcomePageGUI extends JFrame {
         gbc.gridwidth = 2;
         centerPanel.add(titleLabel, gbc);
     
-        // Username section
+        
         gbc.gridy++;
         gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.CENTER;
@@ -314,7 +314,7 @@ public class WelcomePageGUI extends JFrame {
         usernameField.setPreferredSize(new Dimension(300, 35));
         centerPanel.add(usernameField, gbc);
     
-        // Username field placeholder behavior
+        
         usernameField.addFocusListener(new FocusAdapter() {
             public void focusGained(FocusEvent evt) {
                 if (usernameField.getText().equals("Username")) {
@@ -330,7 +330,7 @@ public class WelcomePageGUI extends JFrame {
             }
         });
     
-        // Password section
+        
         gbc.gridy++;
         gbc.gridwidth = 2;
         JLabel passwordLabel = new JLabel("Password:");
@@ -347,7 +347,7 @@ public class WelcomePageGUI extends JFrame {
         passwordField.setPreferredSize(new Dimension(300, 35));
         centerPanel.add(passwordField, gbc);
     
-        // Show/Hide icon
+        
         JLabel showHideIcon = new JLabel(new ImageIcon(new ImageIcon("images/show_icon.png")
             .getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH)));
         showHideIcon.setCursor(new Cursor(Cursor.HAND_CURSOR));
@@ -355,7 +355,7 @@ public class WelcomePageGUI extends JFrame {
         gbc.gridx = 1;
         centerPanel.add(showHideIcon, gbc);
     
-        // Password field placeholder and toggle behavior
+        
         passwordField.addFocusListener(new FocusAdapter() {
             public void focusGained(FocusEvent evt) {
                 if (String.valueOf(passwordField.getPassword()).equals("Password")) {
@@ -387,7 +387,7 @@ public class WelcomePageGUI extends JFrame {
             }
         });
     
-        // Login button
+        
         gbc.gridy++;
         gbc.gridx = 0;
         gbc.gridwidth = 2;
@@ -397,7 +397,7 @@ public class WelcomePageGUI extends JFrame {
         loginButton.setPreferredSize(new Dimension(200, 35));
         centerPanel.add(loginButton, gbc);
     
-        // Register link
+        
         gbc.gridy++;
         gbc.gridwidth = 2;
         JButton registerButton = new JButton("Don't have an account? Register here");
@@ -409,7 +409,7 @@ public class WelcomePageGUI extends JFrame {
         registerButton.setFocusPainted(false);
         centerPanel.add(registerButton, gbc);
     
-        // Enter key handlers
+        
         usernameField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
@@ -428,13 +428,13 @@ public class WelcomePageGUI extends JFrame {
             }
         });
     
-        // Login action
+        
         loginButton.addActionListener(e -> {
             String username = usernameField.getText();
             String password = new String(passwordField.getPassword());
             User user = null;
         
-            // Check for empty fields first
+            
             if (username.equals("Username") || username.isEmpty()) {
                 JOptionPane.showMessageDialog(this, 
                     "Username field cannot be empty", 
@@ -490,7 +490,7 @@ public class WelcomePageGUI extends JFrame {
             }
         });
     
-        // Register button action
+        
         registerButton.addActionListener(e -> {
             if (title.equals("Resident Login Page")) {
                 cardLayout.show(mainPanel, "ResidentRegistration");
@@ -501,7 +501,7 @@ public class WelcomePageGUI extends JFrame {
             }
         });
     
-        // Reset fields when panel is shown
+        
         panel.addComponentListener(new ComponentAdapter() {
             @Override
             public void componentShown(ComponentEvent e) {
@@ -517,7 +517,7 @@ public class WelcomePageGUI extends JFrame {
             }
         });
     
-        // Button effects and mnemonics
+        
         addButtonHoverEffect(backButton);
         addButtonHoverEffect(loginButton);
     
@@ -525,14 +525,14 @@ public class WelcomePageGUI extends JFrame {
         loginButton.setMnemonic(KeyEvent.VK_L);
         registerButton.setMnemonic(KeyEvent.VK_R);
     
-        // Tooltips
+        
         backButton.setToolTipText("Go back (Alt+B)");
         loginButton.setToolTipText("Login (Alt+L)");
         registerButton.setToolTipText("Register (Alt+R)");
         usernameField.setToolTipText("3-12 characters, letters, numbers and underscore only");
         passwordField.setToolTipText("8-12 chars with uppercase, number & special char");
     
-        // Add focus highlights
+        
         addFocusHighlight(usernameField);
         addFocusHighlight(passwordField);
     
@@ -567,11 +567,11 @@ public class WelcomePageGUI extends JFrame {
         centerPanel.setBorder(BorderFactory.createEmptyBorder(38, 38, 38, 38));
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(10, 10, 10, 10);
-        gbc.weightx = 0.0; // Allow horizontal stretching
-        gbc.weighty = 0.0; // Don't stretch vertically
+        gbc.weightx = 0.0; 
+        gbc.weighty = 0.0; 
         gbc.fill = GridBagConstraints.NONE;
     
-        // Title
+        
         JLabel titleLabel = new JLabel(title, SwingConstants.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 28));
         gbc.gridx = 0;
@@ -579,7 +579,7 @@ public class WelcomePageGUI extends JFrame {
         gbc.gridwidth = 3;
         centerPanel.add(titleLabel, gbc);
     
-        // Format requirements hyperlink
+        
         gbc.gridx = 0;
         gbc.gridy = 1;
         gbc.gridwidth = 3;
@@ -597,7 +597,7 @@ public class WelcomePageGUI extends JFrame {
         gbc.gridy++;
         centerPanel.add(formatLink, gbc);
     
-        // IC/Passport section
+        
         gbc.gridy++;
         gbc.gridwidth = 3;
         gbc.gridx = 0;
@@ -625,7 +625,7 @@ public class WelcomePageGUI extends JFrame {
         icPassportIconLabel.setPreferredSize(new Dimension(30, 30));
         centerPanel.add(icPassportIconLabel, gbc);
     
-        // IC/Passport field placeholder behavior
+        
         icPassportField.addFocusListener(new FocusAdapter() {
             public void focusGained(FocusEvent evt) {
                 if (icPassportField.getText().equals("IC/Passport Number")) {
@@ -641,7 +641,7 @@ public class WelcomePageGUI extends JFrame {
             }
         });
     
-        // Username section
+        
         gbc.gridy++;
         gbc.gridwidth = 3;
         gbc.gridx = 0;
@@ -668,7 +668,7 @@ public class WelcomePageGUI extends JFrame {
         usernameIconLabel.setPreferredSize(new Dimension(30, 30));
         centerPanel.add(usernameIconLabel, gbc);
     
-        // Username field placeholder behavior
+        
         usernameField.addFocusListener(new FocusAdapter() {
             public void focusGained(FocusEvent evt) {
                 if (usernameField.getText().equals("Create Username")) {
@@ -684,7 +684,7 @@ public class WelcomePageGUI extends JFrame {
             }
         });
     
-        // Password section
+        
         gbc.gridy++;
         gbc.gridwidth = 3;
         gbc.gridx = 0;
@@ -713,7 +713,7 @@ public class WelcomePageGUI extends JFrame {
         passwordIconLabel.setPreferredSize(new Dimension(30, 30));
         centerPanel.add(passwordIconLabel, gbc);
 
-        // Password field placeholder and toggle behavior
+        
         passwordField.addFocusListener(new FocusAdapter() {
             public void focusGained(FocusEvent evt) {
                 if (String.valueOf(passwordField.getPassword()).equals("Create Password")) {
@@ -731,7 +731,7 @@ public class WelcomePageGUI extends JFrame {
             }
         });
     
-        // Show/Hide icon
+        
         gbc.gridx = 2;
         gbc.gridwidth = 1;
         JPanel iconPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
@@ -758,7 +758,7 @@ public class WelcomePageGUI extends JFrame {
             }
         });
     
-        // Contact Number section
+        
         gbc.gridy++;
         gbc.gridwidth = 3;
         gbc.gridx = 0;
@@ -786,7 +786,7 @@ public class WelcomePageGUI extends JFrame {
         contactNumberIconLabel.setPreferredSize(new Dimension(30, 30));
         centerPanel.add(contactNumberIconLabel, gbc);
 
-        // Contact Number field placeholder behavior
+        
         contactNumberField.addFocusListener(new FocusAdapter() {
             public void focusGained(FocusEvent evt) {
                 if (contactNumberField.getText().equals("Contact Number")) {
@@ -802,7 +802,7 @@ public class WelcomePageGUI extends JFrame {
             }
         });
     
-        // Register button
+        
         gbc.gridy++;
         gbc.gridx = 0;
         gbc.gridwidth = 3;
@@ -812,7 +812,7 @@ public class WelcomePageGUI extends JFrame {
         registerButton.setPreferredSize(new Dimension(200, 50));
         centerPanel.add(registerButton, gbc);
     
-        // Enter key handlers
+        
         icPassportField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
@@ -849,7 +849,7 @@ public class WelcomePageGUI extends JFrame {
             }
         });
     
-        // Register button action
+        
         registerButton.addActionListener(e -> {
             String icPassportNumber = icPassportField.getText();
             String username = usernameField.getText();
@@ -874,7 +874,7 @@ public class WelcomePageGUI extends JFrame {
     
         panel.add(centerPanel, BorderLayout.CENTER);
     
-        // Add a component listener to reset the fields when the panel is shown
+        
         panel.addComponentListener(new ComponentAdapter() {
             @Override
             public void componentShown(ComponentEvent e) {
@@ -909,7 +909,7 @@ public class WelcomePageGUI extends JFrame {
         passwordField.setToolTipText("8-12 chars with uppercase, number & special char");
         contactNumberField.setToolTipText("Contact number in the format XXX-XXXXXXX");
     
-        // Add validation listeners
+        
         addValidationListeners(icPassportField, usernameField, passwordField, contactNumberField,
             icPassportIconLabel, usernameIconLabel, passwordIconLabel, contactNumberIconLabel);
     
@@ -1015,7 +1015,7 @@ public class WelcomePageGUI extends JFrame {
             new ValidationListener(() -> validateContactNumber(contactNumberField, contactNumberIconLabel)));
     }
     
-    // Update showErrorDialog method
+    
     private void showErrorDialog(String message) {
         String userFriendlyMessage = String.format(
             "<html><body style='width: 300px'>" +
@@ -1107,7 +1107,7 @@ public class WelcomePageGUI extends JFrame {
         } catch (Exception e) {
             System.err.println("Could not load icon: " + iconPath);
         }
-        // Don't set a default size here, let individual calls specify the size
+        
         return button;
     }
 

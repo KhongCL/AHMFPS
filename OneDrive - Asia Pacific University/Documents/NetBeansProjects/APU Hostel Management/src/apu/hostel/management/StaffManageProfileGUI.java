@@ -33,9 +33,9 @@ public class StaffManageProfileGUI {
         frame.setLocationRelativeTo(null);
     
         JPanel topPanel = new JPanel(new BorderLayout());
-        topPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); // Add padding
+        topPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); 
     
-        // Back button
+        
         JButton backButton = createButton("Back", "back_icon.png");
         backButton.setPreferredSize(new Dimension(100, 40));
         backButton.addActionListener(new ActionListener() {
@@ -49,9 +49,9 @@ public class StaffManageProfileGUI {
     
         frame.add(topPanel, BorderLayout.NORTH);
     
-        // Input fields
+        
         JPanel inputPanel = new JPanel(new GridBagLayout());
-        inputPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); // Add padding
+        inputPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(10, 10, 10, 10);
         gbc.fill = GridBagConstraints.HORIZONTAL;
@@ -158,7 +158,7 @@ public class StaffManageProfileGUI {
     
         frame.add(inputPanel, BorderLayout.CENTER);
     
-        // Update button
+        
         JButton updateButton = createButton("Update Profile", "update_profile_icon.png");
         updateButton.setPreferredSize(new Dimension(150, 40));
         updateButton.addActionListener(new ActionListener() {
@@ -172,12 +172,12 @@ public class StaffManageProfileGUI {
     
         frame.add(buttonPanel, BorderLayout.SOUTH);
     
-        // Add input validation listeners
+        
         addValidationListeners(icPassportIconLabel, usernameIconLabel, passwordIconLabel, contactNumberIconLabel);
     
         frame.setVisible(true);
 
-        backButton.setMnemonic(KeyEvent.VK_B);    // Alt+B
+        backButton.setMnemonic(KeyEvent.VK_B);    
         updateButton.setMnemonic(KeyEvent.VK_U);
 
         backButton.setToolTipText("Go back to main page (Alt+B)");
@@ -212,7 +212,7 @@ public class StaffManageProfileGUI {
                 if (choice == JOptionPane.YES_OPTION) {
                     System.exit(0);
                 }
-                // No need for else as the window will stay open by default
+                
             }
         });
     }
@@ -340,7 +340,7 @@ public class StaffManageProfileGUI {
         boolean hasChanges = false;
     
         try {
-            // Check if any changes were made
+            
             if (newIcPassportNumber.equals(staff.getIcPassportNumber()) &&
                 newUsername.equals(staff.getUsername()) &&
                 newPassword.equals(staff.getPassword()) &&
@@ -350,7 +350,7 @@ public class StaffManageProfileGUI {
                 return;
             }
     
-            // IC/Passport Number
+            
             if (!newIcPassportNumber.equals(staff.getIcPassportNumber())) {
                 String icError = APUHostelManagement.validateUpdateICPassport(newIcPassportNumber, staff.getIcPassportNumber());
                 if (icError != null) {
@@ -368,7 +368,7 @@ public class StaffManageProfileGUI {
                 }
             }
     
-            // Username  
+            
             if (!newUsername.equals(staff.getUsername())) {
                 String usernameError = APUHostelManagement.validateUpdateUsername(newUsername, staff.getUsername());
                 if (usernameError != null) {
@@ -386,7 +386,7 @@ public class StaffManageProfileGUI {
                 }
             }
     
-            // Password
+            
             if (!newPassword.equals(staff.getPassword())) {
                 String passwordError = APUHostelManagement.validateUpdatePassword(newPassword, newUsername);
                 if (passwordError != null) {
@@ -404,7 +404,7 @@ public class StaffManageProfileGUI {
                 }
             }
     
-            // Contact Number
+            
             if (!newContactNumber.equals(staff.getContactNumber())) {
                 String contactError = APUHostelManagement.validateUpdateContactNumber(newContactNumber, staff.getContactNumber());
                 if (contactError != null) {
@@ -458,12 +458,12 @@ public class StaffManageProfileGUI {
         } catch (Exception e) {
             System.err.println("Could not load icon: " + iconPath);
         }
-        // Don't set a default size here, let individual calls specify the size
+        
         return button;
     }
 
     private void addButtonHoverEffect(JButton button) {
-        // Store the original background color
+        
         Color originalColor = button.getBackground();
         
         button.addMouseListener(new java.awt.event.MouseAdapter() {

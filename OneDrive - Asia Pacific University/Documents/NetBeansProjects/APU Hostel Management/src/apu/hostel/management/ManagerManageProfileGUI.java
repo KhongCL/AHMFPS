@@ -33,9 +33,9 @@ public class ManagerManageProfileGUI {
         frame.setLocationRelativeTo(null);
     
         JPanel topPanel = new JPanel(new BorderLayout());
-        topPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); // Add padding
+        topPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); 
     
-        // Back button
+        
         JButton backButton = createButton("Back", "back_icon.png");
         backButton.setPreferredSize(new Dimension(100, 40));
         backButton.addActionListener(new ActionListener() {
@@ -49,9 +49,9 @@ public class ManagerManageProfileGUI {
     
         frame.add(topPanel, BorderLayout.NORTH);
     
-        // Input fields
+        
         JPanel inputPanel = new JPanel(new GridBagLayout());
-        inputPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); // Add padding
+        inputPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(10, 10, 10, 10);
         gbc.fill = GridBagConstraints.HORIZONTAL;
@@ -98,7 +98,7 @@ public class ManagerManageProfileGUI {
         gbc.gridy++;
         inputPanel.add(new JLabel("Password:"), gbc);
         gbc.gridx = 1;
-        JPanel passwordPanel = new JPanel(new BorderLayout(5, 0));  // 5px horizontal gap
+        JPanel passwordPanel = new JPanel(new BorderLayout(5, 0));  
         passwordField = new JPasswordField(manager.getPassword());
         passwordField.setPreferredSize(new Dimension(300, 30));
         passwordPanel.add(passwordField, BorderLayout.CENTER);
@@ -159,7 +159,7 @@ public class ManagerManageProfileGUI {
     
         frame.add(inputPanel, BorderLayout.CENTER);
     
-        // Update button
+        
         JButton updateButton = createButton("Update Profile", "update_profile_icon.png");
         updateButton.setPreferredSize(new Dimension(150, 40));
         updateButton.addActionListener(new ActionListener() {
@@ -173,13 +173,13 @@ public class ManagerManageProfileGUI {
     
         frame.add(buttonPanel, BorderLayout.SOUTH);
     
-        // Add input validation listeners
+        
         addValidationListeners(icPassportIconLabel, usernameIconLabel, passwordIconLabel, contactNumberIconLabel);
     
         frame.setVisible(true);
 
-        backButton.setMnemonic(KeyEvent.VK_B);    // Alt+B
-        updateButton.setMnemonic(KeyEvent.VK_U);   // Alt+U
+        backButton.setMnemonic(KeyEvent.VK_B);    
+        updateButton.setMnemonic(KeyEvent.VK_U);   
 
         backButton.setToolTipText("Go back to main page (Alt+B)");
         updateButton.setToolTipText("Update profile information (Alt+U)");
@@ -213,7 +213,7 @@ public class ManagerManageProfileGUI {
                 if (choice == JOptionPane.YES_OPTION) {
                     System.exit(0);
                 }
-                // No need for else as the window will stay open by default
+                
             }
         });
     }
@@ -341,7 +341,7 @@ public class ManagerManageProfileGUI {
         boolean hasChanges = false;
     
         try {
-            // Check if any changes were made
+            
             if (newIcPassportNumber.equals(manager.getIcPassportNumber()) &&
                 newUsername.equals(manager.getUsername()) &&
                 newPassword.equals(manager.getPassword()) &&
@@ -351,7 +351,7 @@ public class ManagerManageProfileGUI {
                 return;
             }
     
-            // IC/Passport Number
+            
             if (!newIcPassportNumber.equals(manager.getIcPassportNumber())) {
                 String icError = APUHostelManagement.validateUpdateICPassport(newIcPassportNumber, manager.getIcPassportNumber());
                 if (icError != null) {
@@ -369,7 +369,7 @@ public class ManagerManageProfileGUI {
                 }
             }
     
-            // Username  
+            
             if (!newUsername.equals(manager.getUsername())) {
                 String usernameError = APUHostelManagement.validateUpdateUsername(newUsername, manager.getUsername());
                 if (usernameError != null) {
@@ -387,7 +387,7 @@ public class ManagerManageProfileGUI {
                 }
             }
     
-            // Password
+            
             if (!newPassword.equals(manager.getPassword())) {
                 String passwordError = APUHostelManagement.validateUpdatePassword(newPassword, newUsername);
                 if (passwordError != null) {
@@ -405,7 +405,7 @@ public class ManagerManageProfileGUI {
                 }
             }
     
-            // Contact Number
+            
             if (!newContactNumber.equals(manager.getContactNumber())) {
                 String contactError = APUHostelManagement.validateUpdateContactNumber(newContactNumber, manager.getContactNumber());
                 if (contactError != null) {
@@ -459,12 +459,12 @@ public class ManagerManageProfileGUI {
         } catch (Exception e) {
             System.err.println("Could not load icon: " + iconPath);
         }
-        // Don't set a default size here, let individual calls specify the size
+        
         return button;
     }
 
     private void addButtonHoverEffect(JButton button) {
-        // Store the original background color
+        
         Color originalColor = button.getBackground();
         
         button.addMouseListener(new java.awt.event.MouseAdapter() {

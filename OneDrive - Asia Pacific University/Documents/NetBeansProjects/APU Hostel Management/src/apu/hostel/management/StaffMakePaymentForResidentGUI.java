@@ -49,7 +49,7 @@ public class StaffMakePaymentForResidentGUI {
         frame.setTitle("Make Payment for Resident - " + staff.getUsername());
         frame.setLocationRelativeTo(null);
 
-        // Back button panel
+        
         JPanel topPanel = new JPanel(new BorderLayout());
         JButton backButton = createButton("Back", "back_icon.png");
         backButton.setPreferredSize(new Dimension(100, 40));
@@ -73,7 +73,7 @@ public class StaffMakePaymentForResidentGUI {
                     currentFilterValue = null;
                     frame.setTitle("Make Payment for Resident - " + staff.getUsername());
                     if (currentSortCategory != null) {
-                        // Use the payment details map values instead of paymentList
+                        
                         List<String[]> paymentDataList = new ArrayList<>(paymentDetailsMap.values());
                         applySorting(paymentDataList);
                     } else {
@@ -156,7 +156,7 @@ public class StaffMakePaymentForResidentGUI {
         topPanel.add(backButton, BorderLayout.WEST);
         frame.add(topPanel, BorderLayout.NORTH);
 
-        // Payment table
+        
         tableModel = new DefaultTableModel(
             new Object[]{"Payment ID", "Resident ID", "Room ID", "Start Date", "End Date", 
                         "Stay Duration (Days)", "Amount (RM)", "Payment Method"}, 0
@@ -181,7 +181,7 @@ public class StaffMakePaymentForResidentGUI {
         paymentTable.setShowGrid(true);
         paymentTable.setFillsViewportHeight(true);
 
-        // Add zebra striping
+        
         paymentTable.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, 
@@ -194,19 +194,19 @@ public class StaffMakePaymentForResidentGUI {
             }
         });
 
-        paymentTable.getColumnModel().getColumn(0).setPreferredWidth(80);  // Payment ID  
-        paymentTable.getColumnModel().getColumn(1).setPreferredWidth(80);  // Resident ID
-        paymentTable.getColumnModel().getColumn(2).setPreferredWidth(70);  // Room ID
-        paymentTable.getColumnModel().getColumn(3).setPreferredWidth(100); // Start Date
-        paymentTable.getColumnModel().getColumn(4).setPreferredWidth(100); // End Date
-        paymentTable.getColumnModel().getColumn(5).setPreferredWidth(120); // Stay Duration
-        paymentTable.getColumnModel().getColumn(6).setPreferredWidth(80);  // Amount
-        paymentTable.getColumnModel().getColumn(7).setPreferredWidth(100); // Payment Method
+        paymentTable.getColumnModel().getColumn(0).setPreferredWidth(80);  
+        paymentTable.getColumnModel().getColumn(1).setPreferredWidth(80);  
+        paymentTable.getColumnModel().getColumn(2).setPreferredWidth(70);  
+        paymentTable.getColumnModel().getColumn(3).setPreferredWidth(100); 
+        paymentTable.getColumnModel().getColumn(4).setPreferredWidth(100); 
+        paymentTable.getColumnModel().getColumn(5).setPreferredWidth(120); 
+        paymentTable.getColumnModel().getColumn(6).setPreferredWidth(80);  
+        paymentTable.getColumnModel().getColumn(7).setPreferredWidth(100); 
 
         JScrollPane scrollPane = new JScrollPane(paymentTable);
         frame.add(scrollPane, BorderLayout.CENTER);
 
-        // Make Payment button
+        
         JButton makePaymentButton = createButton("Make Payment", "payment_icon2.png");
         makePaymentButton.addActionListener(e -> showPaymentConfirmation());
         JPanel bottomPanel = new JPanel();
@@ -216,13 +216,13 @@ public class StaffMakePaymentForResidentGUI {
         loadPendingPayments();
         frame.setVisible(true);
 
-        // Add after frame.setVisible(true);
-        backButton.setMnemonic(KeyEvent.VK_B);    // Alt+B
-        filterButton.setMnemonic(KeyEvent.VK_F);  // Alt+F 
-        sortButton.setMnemonic(KeyEvent.VK_S);    // Alt+S
+        
+        backButton.setMnemonic(KeyEvent.VK_B);    
+        filterButton.setMnemonic(KeyEvent.VK_F);  
+        sortButton.setMnemonic(KeyEvent.VK_S);    
         searchButton.setMnemonic(KeyEvent.VK_ENTER);
         clearButton.setMnemonic(KeyEvent.VK_C);
-        makePaymentButton.setMnemonic(KeyEvent.VK_M);   // Alt+M
+        makePaymentButton.setMnemonic(KeyEvent.VK_M);   
 
         backButton.setToolTipText("Go back to main page (Alt+B)");
         filterButton.setToolTipText("Filter payments (Alt+F)");
@@ -231,7 +231,7 @@ public class StaffMakePaymentForResidentGUI {
         clearButton.setToolTipText("Clear search and filters (Alt+C)");
         makePaymentButton.setToolTipText("Process payment for selected booking (Alt+M)");
 
-        // Add button hover effects
+        
         addButtonHoverEffect(backButton);
         addButtonHoverEffect(filterButton);
         addButtonHoverEffect(sortButton);
@@ -248,7 +248,7 @@ public class StaffMakePaymentForResidentGUI {
             }
         });
 
-        // Add Enter key support
+        
         searchField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
@@ -258,7 +258,7 @@ public class StaffMakePaymentForResidentGUI {
             }
         });
 
-        // Add Escape key support
+        
         KeyStroke escapeKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
         frame.getRootPane().registerKeyboardAction(e -> {
             backButton.doClick();
@@ -274,7 +274,7 @@ public class StaffMakePaymentForResidentGUI {
                 if (choice == JOptionPane.YES_OPTION) {
                     System.exit(0);
                 }
-                // No need for else as the window will stay open by default
+                
             }
         });
     }
@@ -296,18 +296,18 @@ public class StaffMakePaymentForResidentGUI {
             int row = 0;
             while ((line = reader.readLine()) != null) {
                 String[] payment = line.split(",");
-                // Check if payment status is "pending" and booking status is "active"
+                
                 if (payment[7].equalsIgnoreCase("pending") && payment[10].equalsIgnoreCase("active")) {
                     paymentDetailsMap.put(row, payment);
                     tableModel.addRow(new Object[]{
-                        payment[0],  // Payment ID
-                        payment[1],  // Resident ID
-                        payment[5],  // Room ID
-                        payment[3],  // Start Date
-                        payment[4],  // End Date
-                        calculateStayDuration(payment[3], payment[4]), // Stay Duration
-                        "RM" + payment[6], // Amount
-                        payment[9]   // Payment Method
+                        payment[0],  
+                        payment[1],  
+                        payment[5],  
+                        payment[3],  
+                        payment[4],  
+                        calculateStayDuration(payment[3], payment[4]), 
+                        "RM" + payment[6], 
+                        payment[9]   
                     });
                     row++;
                 }
@@ -334,7 +334,7 @@ public class StaffMakePaymentForResidentGUI {
 
         String[] selectedPayment = paymentDetailsMap.get(selectedRow);
         
-        // Create payment details table
+        
         String[][] data = {
             {"Payment ID", selectedPayment[0]},
             {"Resident ID", selectedPayment[1]}, 
@@ -371,7 +371,7 @@ public class StaffMakePaymentForResidentGUI {
                     selectedPayment[0], 
                     staff.getStaffID())) {
                 JOptionPane.showMessageDialog(frame, "Payment processed successfully");
-                loadPendingPayments(); // Refresh table
+                loadPendingPayments(); 
             } else {
                 JOptionPane.showMessageDialog(frame, "Error processing payment", 
                     "Error", JOptionPane.ERROR_MESSAGE);
@@ -394,7 +394,7 @@ public class StaffMakePaymentForResidentGUI {
             frame.setTitle("View Receipts - " + staff.getUsername());
 
             filteredPaymentList = new ArrayList<>(paymentDetailsMap.values());
-            // Keep current sort if exists
+            
             if (currentSortCategory != null) {
                 applySorting(new ArrayList<>(filteredPaymentList));
             } else {
@@ -403,7 +403,7 @@ public class StaffMakePaymentForResidentGUI {
             return;
         }
     
-        // Get filter value based on choice
+        
         String value = null;
 
         switch (filterChoice) {
@@ -458,7 +458,7 @@ public class StaffMakePaymentForResidentGUI {
                 " (Filtered: " + currentFilterValue + ", " + filteredPaymentList.size() + " payments)");
         }
 
-        // Apply current sort if exists
+        
         if (currentSortCategory != null) {
             applySorting(filteredPaymentList);
         } else {
@@ -477,7 +477,7 @@ public class StaffMakePaymentForResidentGUI {
                 })
                 .collect(Collectors.toList());
                 
-            // Apply current sort if exists
+            
             if (currentSortCategory != null) {
                 applySorting(filteredPaymentList);
             } else {
@@ -507,7 +507,7 @@ public class StaffMakePaymentForResidentGUI {
                           choice.contains("Newest") || choice.contains("Z-A") ? "Descending" : "Ascending";
         sortButton.setText("Sort: " + currentSortCategory);
     
-        // Sort currently filtered list if exists, otherwise sort all payments
+        
         List<String[]> listToSort = filteredPaymentList != null ? 
             filteredPaymentList : new ArrayList<>(paymentDetailsMap.values());
         applySorting(listToSort);
@@ -526,15 +526,20 @@ public class StaffMakePaymentForResidentGUI {
     
         String lowerCaseQuery = searchQuery.toLowerCase();
         List<String[]> searchResults = paymentDetailsMap.values().stream()
-            .filter(payment -> 
-                payment[0].toLowerCase().contains(lowerCaseQuery) || // Payment ID
-                payment[1].toLowerCase().contains(lowerCaseQuery) || // Resident ID
-                payment[5].toLowerCase().contains(lowerCaseQuery) || // Room ID
-                payment[3].toLowerCase().contains(lowerCaseQuery) || // Start Date
-                payment[4].toLowerCase().contains(lowerCaseQuery) || // End Date
-                payment[6].toLowerCase().contains(lowerCaseQuery) || // Amount
-                payment[9].toLowerCase().contains(lowerCaseQuery)  // Payment Method
-            )
+            .filter(payment -> {
+                
+                long stayDuration = calculateStayDuration(payment[3], payment[4]);
+                String stayDurationStr = String.valueOf(stayDuration);
+                
+                return payment[0].toLowerCase().contains(lowerCaseQuery) || 
+                       payment[1].toLowerCase().contains(lowerCaseQuery) || 
+                       payment[5].toLowerCase().contains(lowerCaseQuery) || 
+                       payment[3].toLowerCase().contains(lowerCaseQuery) || 
+                       payment[4].toLowerCase().contains(lowerCaseQuery) || 
+                       stayDurationStr.contains(lowerCaseQuery) ||         
+                       payment[6].toLowerCase().contains(lowerCaseQuery) || 
+                       payment[9].toLowerCase().contains(lowerCaseQuery);   
+            })
             .collect(Collectors.toList());
     
         if (!searchResults.isEmpty()) {
@@ -546,7 +551,7 @@ public class StaffMakePaymentForResidentGUI {
             JOptionPane.showMessageDialog(frame, 
                 "No payments found matching your search.", 
                 "No Results", JOptionPane.INFORMATION_MESSAGE);
-            // Reload original data
+            
             if (currentFilterChoice != null) {
                 reapplyCurrentFilter();
             } else {
@@ -606,14 +611,14 @@ public class StaffMakePaymentForResidentGUI {
 
         for (String[] payment : paymentList) {
             tableModel.addRow(new Object[]{
-                payment[0],  // Payment ID
-                payment[1],  // Resident ID
-                payment[5],  // Room ID
-                payment[3],  // Start Date
-                payment[4],  // End Date
-                calculateStayDuration(payment[3], payment[4]),  // Stay Duration
-                payment[6],  // Amount
-                payment[9]   // Payment Method
+                payment[0],  
+                payment[1],  
+                payment[5],  
+                payment[3],  
+                payment[4],  
+                calculateStayDuration(payment[3], payment[4]),  
+                payment[6],  
+                payment[9]   
             });
         }
     }
@@ -634,12 +639,12 @@ public class StaffMakePaymentForResidentGUI {
         } catch (Exception e) {
             System.err.println("Could not load icon: " + iconPath);
         }
-        // Don't set a default size here, let individual calls specify the size
+        
         return button;
     }
 
     private void addButtonHoverEffect(JButton button) {
-        // Store the original background color
+        
         Color originalColor = button.getBackground();
         
         button.addMouseListener(new java.awt.event.MouseAdapter() {

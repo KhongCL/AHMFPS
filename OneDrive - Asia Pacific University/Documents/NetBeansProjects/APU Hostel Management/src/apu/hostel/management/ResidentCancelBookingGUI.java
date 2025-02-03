@@ -14,12 +14,12 @@ import java.util.Map;
 public class ResidentCancelBookingGUI {
     private JFrame frame;
     private JPanel cancelBookingPanel;
-    private DefaultTableModel tableModel; // Store the table model
-    private Map<Integer, String[]> paymentDetailsMap; // Map to store payment details
-    private APUHostelManagement.Resident resident; // Add resident field
+    private DefaultTableModel tableModel; 
+    private Map<Integer, String[]> paymentDetailsMap; 
+    private APUHostelManagement.Resident resident; 
     private JTable table;
 
-    // Add new constructor
+    
     public ResidentCancelBookingGUI(APUHostelManagement.Resident resident) {
         this.resident = resident;
         initialize();
@@ -48,37 +48,37 @@ public class ResidentCancelBookingGUI {
         frame.add(cancelBookingPanel, BorderLayout.CENTER);
 
         JLabel titleLabel = new JLabel("Cancel Booking", JLabel.CENTER);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 24)); // Set font size
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 24)); 
         cancelBookingPanel.add(titleLabel, BorderLayout.NORTH);
 
-        // Create table model and table
+        
         tableModel = new DefaultTableModel(new Object[]{"Room Number", "Stay Duration", "Booking Date and Time", "Payment Amount (RM)"}, 0);
         table = new JTable(tableModel) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return false; // Make table cells non-editable
+                return false; 
             }
         };
-        table.setRowHeight(30); // Increase row height
+        table.setRowHeight(30); 
         JScrollPane scrollPane = new JScrollPane(table);
         cancelBookingPanel.add(scrollPane, BorderLayout.CENTER);
 
-        // Load cancellable bookings and populate table
+        
         List<String[]> cancellableBookings = APUHostelManagement.Resident.getCancellableBookingsForResident(resident.getResidentID());
         Map<String, String> roomMap = APUHostelManagement.Resident.getRoomMap();
-        paymentDetailsMap = new HashMap<>(); // Initialize the map
+        paymentDetailsMap = new HashMap<>(); 
         int rowIndex = 0;
         for (String[] details : cancellableBookings) {
-            paymentDetailsMap.put(rowIndex, details); // Store payment details in the map
+            paymentDetailsMap.put(rowIndex, details); 
             String roomNumber = roomMap.getOrDefault(details[5], "Unknown Room");
             long stayDuration = ChronoUnit.DAYS.between(LocalDate.parse(details[3]), LocalDate.parse(details[4]));
             tableModel.addRow(new Object[]{roomNumber, stayDuration + " days", details[8], "RM" + details[6]});
             rowIndex++;
         }
 
-        // Add Cancel button
+        
         JButton cancelButton = createButton("Cancel Booking", "cancel_icon.png");
-        cancelButton.setPreferredSize(new Dimension(200, 40)); // Adjusted button size
+        cancelButton.setPreferredSize(new Dimension(200, 40)); 
         cancelButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 int selectedRow = table.getSelectedRow();
@@ -90,7 +90,7 @@ public class ResidentCancelBookingGUI {
             }
         });
 
-        // Create a panel for the bottom button
+        
         JPanel bottomPanel = new JPanel();
         bottomPanel.add(cancelButton);
         cancelBookingPanel.add(bottomPanel, BorderLayout.SOUTH);
@@ -107,7 +107,7 @@ public class ResidentCancelBookingGUI {
                 if (choice == JOptionPane.YES_OPTION) {
                     System.exit(0);
                 }
-                // No need for else as the window will stay open by default
+                
             }
         });
     }
@@ -117,10 +117,10 @@ public class ResidentCancelBookingGUI {
         LocalDate startDate = LocalDate.parse(details[3]);
         LocalDate endDate = LocalDate.parse(details[4]);
         long stayDuration = ChronoUnit.DAYS.between(startDate, endDate);
-        String username = resident.getUsername(); // Assuming there's a getUsername() method
-        String roomType = APUHostelManagement.Resident.getRoomType(details[5]); // Get room type based on room ID
+        String username = resident.getUsername(); 
+        String roomType = APUHostelManagement.Resident.getRoomType(details[5]); 
 
-        // Create a panel for booking details
+        
         JPanel detailsPanel = new JPanel();
         detailsPanel.setLayout(new BoxLayout(detailsPanel, BoxLayout.Y_AXIS));
         detailsPanel.add(new JLabel("<html><div style='text-align: left;'><b style='font-size:14px;'>Booking Details:</b><br/><br/>" +
@@ -133,7 +133,7 @@ public class ResidentCancelBookingGUI {
                                     "Booking Status: " + details[10] + "<br/>" +
                                     "Payment Amount: RM" + details[6] + "</div></html>"));
 
-        // Create confirmation dialog
+        
         JPanel panel = new JPanel(new BorderLayout(10, 10));
         panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         panel.add(detailsPanel, BorderLayout.CENTER);
@@ -152,8 +152,8 @@ public class ResidentCancelBookingGUI {
     private void cancelBooking(String paymentID, int rowIndex, String roomID) {
         if (APUHostelManagement.Resident.cancelBooking(paymentID)) {
             JOptionPane.showMessageDialog(frame, "Booking cancelled successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
-            tableModel.removeRow(rowIndex); // Remove the cancelled row from the table
-            APUHostelManagement.Resident.updateRoomStatus1(roomID, "available"); // Use existing method instead
+            tableModel.removeRow(rowIndex); 
+            APUHostelManagement.Resident.updateRoomStatus1(roomID, "available"); 
         } else {
             JOptionPane.showMessageDialog(frame, "An error occurred while cancelling the booking.", "Error", JOptionPane.ERROR_MESSAGE);
         }
@@ -169,12 +169,12 @@ public class ResidentCancelBookingGUI {
         } catch (Exception e) {
             System.err.println("Could not load icon: " + iconPath);
         }
-        // Don't set a default size here, let individual calls specify the size
+        
         return button;
     }
 
     private void addButtonHoverEffect(JButton button) {
-        // Store the original background color
+        
         Color originalColor = button.getBackground();
         
         button.addMouseListener(new java.awt.event.MouseAdapter() {

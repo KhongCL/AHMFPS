@@ -7,9 +7,9 @@ import java.awt.event.ActionListener;
 
 public class ResidentManageBookingsGUI {
     private JFrame frame;
-    private APUHostelManagement.Resident resident; // Add resident field
+    private APUHostelManagement.Resident resident; 
 
-    // Add new constructor
+    
     public ResidentManageBookingsGUI(APUHostelManagement.Resident resident) {
         this.resident = resident;
         initialize();
@@ -27,19 +27,19 @@ public class ResidentManageBookingsGUI {
         frame.setLocationRelativeTo(null);
 
         JLabel titleLabel = new JLabel("Manage Bookings", JLabel.CENTER);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 24)); // Set font size
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 24)); 
         frame.add(titleLabel, BorderLayout.NORTH);
 
         JPanel buttonPanel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(10, 10, 10, 10); // Add spacing between buttons
+        gbc.insets = new Insets(10, 10, 10, 10); 
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.gridx = 0;
         gbc.gridy = 0;
 
-        // Add Make Booking button
+        
         JButton makeBookingButton = createButton("Make Booking", "booking_icon.png");
-        makeBookingButton.setPreferredSize(new Dimension(300, 50)); // Set button size
+        makeBookingButton.setPreferredSize(new Dimension(300, 50)); 
         makeBookingButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 new ResidentMakeBookingGUI(resident);
@@ -48,10 +48,10 @@ public class ResidentManageBookingsGUI {
         });
         buttonPanel.add(makeBookingButton, gbc);
 
-        // Add Make Payment for Booking button
+        
         gbc.gridy++;
         JButton makePaymentButton = createButton("Make Payment For Booking", "payment_icon.png");
-        makePaymentButton.setPreferredSize(new Dimension(300, 50)); // Set button size
+        makePaymentButton.setPreferredSize(new Dimension(300, 50)); 
         makePaymentButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 new ResidentMakePaymentForBookingGUI(resident);
@@ -60,10 +60,10 @@ public class ResidentManageBookingsGUI {
         });
         buttonPanel.add(makePaymentButton, gbc);
 
-        // Add Cancel Booking button
+        
         gbc.gridy++;
         JButton cancelBookingButton = createButton("Cancel Booking", "cancel_icon.png");
-        cancelBookingButton.setPreferredSize(new Dimension(300, 50)); // Set button size
+        cancelBookingButton.setPreferredSize(new Dimension(300, 50)); 
         cancelBookingButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 new ResidentCancelBookingGUI(resident);
@@ -72,10 +72,10 @@ public class ResidentManageBookingsGUI {
         });
         buttonPanel.add(cancelBookingButton, gbc);
 
-        // Add Back button
+        
         gbc.gridy++;
         JButton backButton = createButton("Back", "back_icon.png");
-        backButton.setPreferredSize(new Dimension(300, 50)); // Set button size
+        backButton.setPreferredSize(new Dimension(300, 50)); 
         backButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 new ResidentMainPageGUI(resident);
@@ -98,7 +98,7 @@ public class ResidentManageBookingsGUI {
                 if (choice == JOptionPane.YES_OPTION) {
                     System.exit(0);
                 }
-                // No need for else as the window will stay open by default
+                
             }
         });
     }
@@ -110,11 +110,11 @@ public class ResidentManageBookingsGUI {
                 .getImage().getScaledInstance(24, 24, Image.SCALE_SMOOTH));
             button.setIcon(icon);
             button.setHorizontalAlignment(SwingConstants.LEFT);
-            // Add category-based colors
+            
             if (text.contains("Cancel")) {
-                button.setBackground(new Color(230, 240, 250)); // Light blue for user management
+                button.setBackground(new Color(230, 240, 250)); 
             } else if (text.contains("Make")) {
-                button.setBackground(new Color(230, 250, 230)); // Light green for facility management
+                button.setBackground(new Color(230, 250, 230)); 
             }
         } catch (Exception e) {
             System.err.println("Could not load icon: " + iconPath);
@@ -124,7 +124,7 @@ public class ResidentManageBookingsGUI {
     }
 
     private void addButtonHoverEffect(JButton button) {
-        // Store the original background color
+        
         Color originalColor = button.getBackground();
         
         button.addMouseListener(new java.awt.event.MouseAdapter() {

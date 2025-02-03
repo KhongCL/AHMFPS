@@ -46,7 +46,7 @@ public class StaffGenerateReceiptGUI {
         frame.setTitle("Generate Receipt - " + staff.getUsername());
         frame.setLocationRelativeTo(null);
 
-        // Back button panel
+        
         JPanel topPanel = new JPanel(new BorderLayout());
         JButton backButton = createButton("Back", "back_icon.png");
         backButton.setPreferredSize(new Dimension(100, 40));
@@ -142,7 +142,7 @@ public class StaffGenerateReceiptGUI {
             }
         });
 
-        // View Receipts button
+        
         JButton viewReceiptsButton = createButton("View Receipts", "view_receipt_icon.png");
         viewReceiptsButton.addActionListener(e -> {
             new StaffViewReceiptGUI(staff);
@@ -159,7 +159,7 @@ public class StaffGenerateReceiptGUI {
 
         frame.add(topPanel, BorderLayout.NORTH);
 
-        // Payment table
+        
         tableModel = new DefaultTableModel(
             new Object[]{"Payment ID", "Resident ID", "Staff ID", "Start Date", "End Date", 
                         "Room ID", "Amount (RM)", "Payment Method", "Booking Date"}, 0
@@ -196,20 +196,20 @@ public class StaffGenerateReceiptGUI {
             }
         });
 
-        paymentTable.getColumnModel().getColumn(0).setPreferredWidth(80);  // Payment ID  
-        paymentTable.getColumnModel().getColumn(1).setPreferredWidth(80);  // Resident ID
-        paymentTable.getColumnModel().getColumn(2).setPreferredWidth(80);  // Staff ID
-        paymentTable.getColumnModel().getColumn(3).setPreferredWidth(100); // Start Date
-        paymentTable.getColumnModel().getColumn(4).setPreferredWidth(100); // End Date
-        paymentTable.getColumnModel().getColumn(5).setPreferredWidth(80);  // Room ID
-        paymentTable.getColumnModel().getColumn(6).setPreferredWidth(80);  // Amount
-        paymentTable.getColumnModel().getColumn(7).setPreferredWidth(100); // Payment Method
-        paymentTable.getColumnModel().getColumn(8).setPreferredWidth(100); // Booking Date
+        paymentTable.getColumnModel().getColumn(0).setPreferredWidth(80);  
+        paymentTable.getColumnModel().getColumn(1).setPreferredWidth(80);  
+        paymentTable.getColumnModel().getColumn(2).setPreferredWidth(80);  
+        paymentTable.getColumnModel().getColumn(3).setPreferredWidth(100); 
+        paymentTable.getColumnModel().getColumn(4).setPreferredWidth(100); 
+        paymentTable.getColumnModel().getColumn(5).setPreferredWidth(80);  
+        paymentTable.getColumnModel().getColumn(6).setPreferredWidth(80);  
+        paymentTable.getColumnModel().getColumn(7).setPreferredWidth(100); 
+        paymentTable.getColumnModel().getColumn(8).setPreferredWidth(100); 
 
         JScrollPane scrollPane = new JScrollPane(paymentTable);
         frame.add(scrollPane, BorderLayout.CENTER);
 
-        // Generate Receipt button
+        
         JButton generateReceiptButton = createButton("Generate Receipt", "generate_receipt_icon.png");
         generateReceiptButton.addActionListener(e -> generateReceipt());
         JPanel bottomPanel = new JPanel();
@@ -277,7 +277,7 @@ public class StaffGenerateReceiptGUI {
                 if (choice == JOptionPane.YES_OPTION) {
                     System.exit(0);
                 }
-                // No need for else as the window will stay open by default
+                
             }
         });
     }
@@ -299,7 +299,7 @@ public class StaffGenerateReceiptGUI {
             int row = 0;
             while ((line = reader.readLine()) != null) {
                 String[] payment = line.split(",");
-                // Check if payment is eligible (has staff ID, payment method, paid status, and active status)
+                
                 if (payment[2] != null && !payment[2].isEmpty() && 
                     payment[9] != null && !payment[9].isEmpty() &&
                     payment[7].equalsIgnoreCase("paid") &&
@@ -333,7 +333,7 @@ public class StaffGenerateReceiptGUI {
 
         String[] selectedPayment = paymentDetailsMap.get(selectedRow);
         
-        // Create payment details panel for confirmation
+        
         JPanel detailsPanel = new JPanel(new BorderLayout(10,10));
         String[][] data = {
             {"Payment ID", selectedPayment[0]},
@@ -394,7 +394,7 @@ public class StaffGenerateReceiptGUI {
             return;
         }
     
-        // Get filter value based on choice
+        
         String value = null;
     
         switch (filterChoice) {
@@ -494,15 +494,15 @@ public class StaffGenerateReceiptGUI {
         String lowerCaseQuery = searchQuery.toLowerCase();
         List<String[]> searchResults = paymentDetailsMap.values().stream()
             .filter(payment -> 
-                payment[0].toLowerCase().contains(lowerCaseQuery) || // Payment ID
-                payment[1].toLowerCase().contains(lowerCaseQuery) || // Resident ID
-                payment[2].toLowerCase().contains(lowerCaseQuery) || // Staff ID
-                payment[3].toLowerCase().contains(lowerCaseQuery) || // Start Date
-                payment[4].toLowerCase().contains(lowerCaseQuery) || // End Date
-                payment[5].toLowerCase().contains(lowerCaseQuery) || // Room ID
-                payment[6].toLowerCase().contains(lowerCaseQuery) || // Amount
-                payment[9].toLowerCase().contains(lowerCaseQuery) ||   // Payment Method
-                payment[8].toLowerCase().contains(lowerCaseQuery)    // Booking Date
+                payment[0].toLowerCase().contains(lowerCaseQuery) || 
+                payment[1].toLowerCase().contains(lowerCaseQuery) || 
+                payment[2].toLowerCase().contains(lowerCaseQuery) || 
+                payment[3].toLowerCase().contains(lowerCaseQuery) || 
+                payment[4].toLowerCase().contains(lowerCaseQuery) || 
+                payment[5].toLowerCase().contains(lowerCaseQuery) || 
+                payment[6].toLowerCase().contains(lowerCaseQuery) || 
+                payment[9].toLowerCase().contains(lowerCaseQuery) ||   
+                payment[8].toLowerCase().contains(lowerCaseQuery)    
             )
             .collect(Collectors.toList());
     
@@ -576,15 +576,15 @@ public class StaffGenerateReceiptGUI {
 
         for (String[] payment : paymentList) {
             tableModel.addRow(new Object[]{
-                payment[0],  // Payment ID
-                payment[1],  // Resident ID
-                payment[2],  // Staff ID
-                payment[3],  // Start Date
-                payment[4],  // End Date
-                payment[5],  // Room ID
-                payment[6],  // Amount 
-                payment[9],  // Payment Method
-                payment[8]   // Booking Date
+                payment[0],  
+                payment[1],  
+                payment[2],  
+                payment[3],  
+                payment[4],  
+                payment[5],  
+                payment[6],  
+                payment[9],  
+                payment[8]   
             });
         }
     }
@@ -599,12 +599,12 @@ public class StaffGenerateReceiptGUI {
         } catch (Exception e) {
             System.err.println("Could not load icon: " + iconPath);
         }
-        // Don't set a default size here, let individual calls specify the size
+        
         return button;
     }
 
     private void addButtonHoverEffect(JButton button) {
-        // Store the original background color
+        
         Color originalColor = button.getBackground();
         
         button.addMouseListener(new java.awt.event.MouseAdapter() {

@@ -38,16 +38,16 @@ public class ResidentMainPageGUI {
         frame.add(headerPanel, BorderLayout.NORTH);
 
         JPanel buttonPanel = new JPanel(new GridBagLayout());
-        buttonPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20)); // Add padding around the panel
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20)); 
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(10, 10, 10, 10); // Add spacing between buttons
+        gbc.insets = new Insets(10, 10, 10, 10); 
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.gridx = 0;
         gbc.gridy = 0;
 
-        // Update Personal Information button
+        
         JButton updateInfoButton = createButton("Update Personal Information", "update_icon.png");
-        updateInfoButton.setPreferredSize(new Dimension(300, 50)); // Set button size
+        updateInfoButton.setPreferredSize(new Dimension(300, 50)); 
         updateInfoButton.addActionListener(e -> {
             if (resident != null) {
                 new ResidentManageProfileGUI(resident);
@@ -59,10 +59,10 @@ public class ResidentMainPageGUI {
         });
         buttonPanel.add(updateInfoButton, gbc);
 
-        // Add View Payment Records button
+        
         gbc.gridy++;
         JButton viewPaymentRecordsButton = createButton("View Payment Records", "payment_icon.png");
-        viewPaymentRecordsButton.setPreferredSize(new Dimension(300, 50)); // Set button size
+        viewPaymentRecordsButton.setPreferredSize(new Dimension(300, 50)); 
         viewPaymentRecordsButton.addActionListener(e -> {
             if (resident != null) {
                 new ResidentViewPaymentRecordsGUI(resident);
@@ -74,10 +74,10 @@ public class ResidentMainPageGUI {
         });
         buttonPanel.add(viewPaymentRecordsButton, gbc);
 
-        // Add Manage Bookings button
+        
         gbc.gridy++;
         JButton manageBookingsButton = createButton("Manage Bookings", "booking_icon.png");
-        manageBookingsButton.setPreferredSize(new Dimension(300, 50)); // Set button size
+        manageBookingsButton.setPreferredSize(new Dimension(300, 50)); 
         manageBookingsButton.addActionListener(e -> {
             if (resident != null) {
                 new ResidentManageBookingsGUI(resident);
@@ -89,10 +89,10 @@ public class ResidentMainPageGUI {
         });
         buttonPanel.add(manageBookingsButton, gbc);
 
-        // Add Logout button
+        
         gbc.gridy++;
         JButton logoutButton = createButton("Logout", "logout_icon.png");
-        logoutButton.setPreferredSize(new Dimension(300, 50)); // Set button size
+        logoutButton.setPreferredSize(new Dimension(300, 50)); 
         logoutButton.addActionListener(e -> {
             int choice = JOptionPane.showConfirmDialog(
                 frame,
@@ -111,13 +111,13 @@ public class ResidentMainPageGUI {
 
         frame.setVisible(true);
 
-        // Add after creating buttons
-        updateInfoButton.setMnemonic(KeyEvent.VK_U);     // Alt+U
-        viewPaymentRecordsButton.setMnemonic(KeyEvent.VK_V);   // Alt+V
-        manageBookingsButton.setMnemonic(KeyEvent.VK_M);      // Alt+M
-        logoutButton.setMnemonic(KeyEvent.VK_L);       // Alt+L
+        
+        updateInfoButton.setMnemonic(KeyEvent.VK_U);     
+        viewPaymentRecordsButton.setMnemonic(KeyEvent.VK_V);   
+        manageBookingsButton.setMnemonic(KeyEvent.VK_M);      
+        logoutButton.setMnemonic(KeyEvent.VK_L);       
 
-        // Add tooltips
+        
         updateInfoButton.setToolTipText("Update your personal information (Alt+U)");
         viewPaymentRecordsButton.setToolTipText("View your payment history (Alt+V)");
         manageBookingsButton.setToolTipText("Manage your room bookings (Alt+M)");
@@ -138,13 +138,13 @@ public class ResidentMainPageGUI {
                 if (choice == JOptionPane.YES_OPTION) {
                     System.exit(0);
                 }
-                // No need for else as the window will stay open by default
+                
             }
         });
 
-        frame.setLocationRelativeTo(null); // Center window on screen
+        frame.setLocationRelativeTo(null); 
 
-        // Add escape key listener for logout
+        
         KeyStroke escapeKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
         frame.getRootPane().registerKeyboardAction(e -> {
             int choice = JOptionPane.showConfirmDialog(frame, 
@@ -171,7 +171,7 @@ public class ResidentMainPageGUI {
     }
 
     private void addButtonHoverEffect(JButton button) {
-        // Store the original background color
+        
         Color originalColor = button.getBackground();
         
         button.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -191,11 +191,11 @@ public class ResidentMainPageGUI {
                 .getImage().getScaledInstance(24, 24, Image.SCALE_SMOOTH));
             button.setIcon(icon);
             button.setHorizontalAlignment(SwingConstants.LEFT);
-            // Add category-based colors
+            
             if (text.contains("Update") || text.contains("View") || text.contains("Logout")) {
-                button.setBackground(new Color(230, 240, 250)); // Light blue for user management
+                button.setBackground(new Color(230, 240, 250)); 
             } else if (text.contains("Manage") || text.contains("Make")) {
-                button.setBackground(new Color(230, 250, 230)); // Light green for facility management
+                button.setBackground(new Color(230, 250, 230)); 
             }
         } catch (Exception e) {
             System.err.println("Could not load icon: " + iconPath);

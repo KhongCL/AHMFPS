@@ -30,7 +30,7 @@ public class StaffMainPageGUI {
         titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
         frame.add(titleLabel, BorderLayout.NORTH);
 
-        // Add header panel with welcome message
+        
         JPanel headerPanel = new JPanel(new BorderLayout());
         JLabel welcomeLabel = new JLabel("Welcome, " + staffName, JLabel.LEFT);
         welcomeLabel.setFont(new Font("Arial", Font.PLAIN, 14));
@@ -40,16 +40,16 @@ public class StaffMainPageGUI {
         frame.add(headerPanel, BorderLayout.NORTH);
 
         JPanel buttonPanel = new JPanel(new GridBagLayout());
-        buttonPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20)); // Add padding around the panel
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20)); 
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(10, 10, 10, 10); // Add spacing between buttons
+        gbc.insets = new Insets(10, 10, 10, 10); 
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.gridx = 0;
         gbc.gridy = 0;
 
-        // Update Personal Information button
+        
         JButton updateProfileButton = createButton("Update Personal Information", "profile_icon.png");
-        updateProfileButton.setPreferredSize(new Dimension(300, 50)); // Set button size
+        updateProfileButton.setPreferredSize(new Dimension(300, 50)); 
         updateProfileButton.addActionListener(e -> {
             if (staff != null) {
                 new StaffManageProfileGUI(staff);
@@ -61,10 +61,10 @@ public class StaffMainPageGUI {
         });
         buttonPanel.add(updateProfileButton, gbc);
 
-        // Make Payment for Resident button
+        
         gbc.gridy++;
         JButton makePaymentButton = createButton("Make Payment for Resident", "payment_icon.png");
-        makePaymentButton.setPreferredSize(new Dimension(300, 50)); // Set button size
+        makePaymentButton.setPreferredSize(new Dimension(300, 50)); 
         makePaymentButton.addActionListener(e -> {
             if (staff != null) {
                 new StaffMakePaymentForResidentGUI(staff);
@@ -76,10 +76,10 @@ public class StaffMainPageGUI {
         });
         buttonPanel.add(makePaymentButton, gbc);
 
-        // Generate Receipt button
+        
         gbc.gridy++;
         JButton generateReceiptButton = createButton("Generate Receipt", "generate_receipt_icon.png");
-        generateReceiptButton.setPreferredSize(new Dimension(300, 50)); // Set button size
+        generateReceiptButton.setPreferredSize(new Dimension(300, 50)); 
         generateReceiptButton.addActionListener(e -> {
             if (staff != null) {
                 new StaffGenerateReceiptGUI(staff);
@@ -91,10 +91,10 @@ public class StaffMainPageGUI {
         });
         buttonPanel.add(generateReceiptButton, gbc);
 
-        // Logout button
+        
         gbc.gridy++;
         JButton logoutButton = createButton("Logout", "logout_icon.png");
-        logoutButton.setPreferredSize(new Dimension(300, 50)); // Set button size
+        logoutButton.setPreferredSize(new Dimension(300, 50)); 
         logoutButton.addActionListener(e -> {
             int choice = JOptionPane.showConfirmDialog(
                 frame,
@@ -112,10 +112,10 @@ public class StaffMainPageGUI {
         frame.add(buttonPanel, BorderLayout.CENTER);
         frame.setVisible(true);
 
-        updateProfileButton.setMnemonic(KeyEvent.VK_U); // Alt + U to update profile
-        makePaymentButton.setMnemonic(KeyEvent.VK_M); // Alt + M to make payment
-        generateReceiptButton.setMnemonic(KeyEvent.VK_G); // Alt + G to generate receipt
-        logoutButton.setMnemonic(KeyEvent.VK_L); // Alt + L to logout
+        updateProfileButton.setMnemonic(KeyEvent.VK_U); 
+        makePaymentButton.setMnemonic(KeyEvent.VK_M); 
+        generateReceiptButton.setMnemonic(KeyEvent.VK_G); 
+        logoutButton.setMnemonic(KeyEvent.VK_L); 
 
         updateProfileButton.setToolTipText("Update your personal information (Alt+U)");
         makePaymentButton.setToolTipText("Make payment for a resident (Alt+M)");
@@ -137,13 +137,13 @@ public class StaffMainPageGUI {
                 if (choice == JOptionPane.YES_OPTION) {
                     System.exit(0);
                 }
-                // No need for else as the window will stay open by default
+                
             }
         });
 
-        frame.setLocationRelativeTo(null); // Center window on screen
+        frame.setLocationRelativeTo(null); 
 
-        // Add escape key listener for logout
+        
         KeyStroke escapeKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
         frame.getRootPane().registerKeyboardAction(e -> {
             int choice = JOptionPane.showConfirmDialog(frame, 
@@ -170,7 +170,7 @@ public class StaffMainPageGUI {
     }
 
     private void addButtonHoverEffect(JButton button) {
-        // Store the original background color
+        
         Color originalColor = button.getBackground();
         
         button.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -190,11 +190,11 @@ public class StaffMainPageGUI {
                 .getImage().getScaledInstance(24, 24, Image.SCALE_SMOOTH));
             button.setIcon(icon);
             button.setHorizontalAlignment(SwingConstants.LEFT);
-            // Add category-based colors
+            
             if (text.contains("Update") || text.contains("Logout")) {
-                button.setBackground(new Color(230, 240, 250)); // Light blue for user management
+                button.setBackground(new Color(230, 240, 250)); 
             } else if (text.contains("Make") || text.contains("Generate")) {
-                button.setBackground(new Color(230, 250, 230)); // Light green for facility management
+                button.setBackground(new Color(230, 250, 230)); 
             }
         } catch (Exception e) {
             System.err.println("Could not load icon: " + iconPath);

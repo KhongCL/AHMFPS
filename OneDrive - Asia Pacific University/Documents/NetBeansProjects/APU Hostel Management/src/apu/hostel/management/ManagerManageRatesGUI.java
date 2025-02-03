@@ -22,7 +22,7 @@ public class ManagerManageRatesGUI {
     private JTable rateTable;
     private DefaultTableModel tableModel;
     private List<APUHostelManagement.FeeRate> rateList;
-    private APUHostelManagement.Manager manager; // Add manager field
+    private APUHostelManagement.Manager manager; 
     private List<APUHostelManagement.FeeRate> filteredRateList;
     private String currentFilterChoice = null;
     private String currentFilterValue = null;
@@ -31,7 +31,7 @@ public class ManagerManageRatesGUI {
     private JButton filterButton;
     private JButton sortButton;
 
-    // Add new constructor
+    
     public ManagerManageRatesGUI(APUHostelManagement.Manager manager) {
         this.manager = manager;
         initialize();
@@ -50,9 +50,9 @@ public class ManagerManageRatesGUI {
         frame.setLocationRelativeTo(null);
 
         JPanel topPanel = new JPanel(new BorderLayout());
-        topPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); // Add padding
+        topPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); 
 
-        // Add button
+        
         JButton addButton = createButton("Set Initial Rates", "add_icon.png");
         addButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -60,12 +60,12 @@ public class ManagerManageRatesGUI {
             }
         });
 
-        // Back button
+        
         JButton backButton = createButton("Back", "back_icon.png");
         backButton.setPreferredSize(new Dimension(100, 40));
         backButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                new ManagerMainPageGUI(manager); // Pass manager back
+                new ManagerMainPageGUI(manager); 
                 frame.dispose();
             }
         });
@@ -107,7 +107,7 @@ public class ManagerManageRatesGUI {
                     sortButton.setText("Sort");
                     currentSortCategory = null;
                     currentSortOrder = null;
-                    // Reapply current filter if exists
+                    
                     if (currentFilterChoice != null) {
                         reapplyCurrentFilter();
                     } else {
@@ -164,15 +164,15 @@ public class ManagerManageRatesGUI {
 
         frame.add(topPanel, BorderLayout.NORTH);
 
-        // Rate table
+        
         tableModel = new DefaultTableModel(new Object[]{"FeeRateID", "RoomType", "DailyRate (RM)", "WeeklyRate (RM)", "MonthlyRate (RM)", "YearlyRate (RM)", "IsActive"}, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return false; // Make all cells non-editable
+                return false; 
             }
         };
         rateTable = new JTable(tableModel);
-        // Add after rateTable creation
+        
         rateTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         rateTable.getTableHeader().setReorderingAllowed(false);
         rateTable.setRowHeight(25);
@@ -186,7 +186,7 @@ public class ManagerManageRatesGUI {
         rateTable.setShowGrid(true);
         rateTable.setFillsViewportHeight(true);
 
-        // Add alternating row colors
+        
         rateTable.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, 
@@ -199,13 +199,13 @@ public class ManagerManageRatesGUI {
             }
         });
 
-        rateTable.getColumnModel().getColumn(0).setPreferredWidth(80);  // FeeRateID
-        rateTable.getColumnModel().getColumn(1).setPreferredWidth(100); // RoomType  
-        rateTable.getColumnModel().getColumn(2).setPreferredWidth(100); // DailyRate
-        rateTable.getColumnModel().getColumn(3).setPreferredWidth(100); // WeeklyRate
-        rateTable.getColumnModel().getColumn(4).setPreferredWidth(100); // MonthlyRate
-        rateTable.getColumnModel().getColumn(5).setPreferredWidth(100); // YearlyRate
-        rateTable.getColumnModel().getColumn(6).setPreferredWidth(70);  // IsActive
+        rateTable.getColumnModel().getColumn(0).setPreferredWidth(80);  
+        rateTable.getColumnModel().getColumn(1).setPreferredWidth(100); 
+        rateTable.getColumnModel().getColumn(2).setPreferredWidth(100); 
+        rateTable.getColumnModel().getColumn(3).setPreferredWidth(100); 
+        rateTable.getColumnModel().getColumn(4).setPreferredWidth(100); 
+        rateTable.getColumnModel().getColumn(5).setPreferredWidth(100); 
+        rateTable.getColumnModel().getColumn(6).setPreferredWidth(70);  
 
         rateTable.addMouseListener(new MouseAdapter() {
             @Override 
@@ -218,10 +218,10 @@ public class ManagerManageRatesGUI {
         JScrollPane scrollPane = new JScrollPane(rateTable);
         frame.add(scrollPane, BorderLayout.CENTER);
 
-        // Load rates into the table
+        
         loadRates();
 
-        // Action buttons
+        
         JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         JButton updateButton = createButton("Update", "update_profile_icon.png");
         JButton deleteButton = createButton("Delete", "delete_icon.png");
@@ -279,20 +279,20 @@ public class ManagerManageRatesGUI {
             }
         });
 
-        // Add mnemonics
-        backButton.setMnemonic(KeyEvent.VK_B);  // Alt+B
-        filterButton.setMnemonic(KeyEvent.VK_F); // Alt+F
-        sortButton.setMnemonic(KeyEvent.VK_S); // Alt+S
-        searchButton.setMnemonic(KeyEvent.VK_ENTER); // Alt+A
-        clearButton.setMnemonic(KeyEvent.VK_C); // Alt+C
-        addButton.setMnemonic(KeyEvent.VK_I);   // Alt+I
-        updateButton.setMnemonic(KeyEvent.VK_U); // Alt+U 
-        deleteButton.setMnemonic(KeyEvent.VK_D); // Alt+D
-        restoreButton.setMnemonic(KeyEvent.VK_R); // Alt+R
-        deleteAllButton.setMnemonic(KeyEvent.VK_L); // Alt+L  
-        restoreAllButton.setMnemonic(KeyEvent.VK_T); // Alt+T
+        
+        backButton.setMnemonic(KeyEvent.VK_B);  
+        filterButton.setMnemonic(KeyEvent.VK_F); 
+        sortButton.setMnemonic(KeyEvent.VK_S); 
+        searchButton.setMnemonic(KeyEvent.VK_ENTER); 
+        clearButton.setMnemonic(KeyEvent.VK_C); 
+        addButton.setMnemonic(KeyEvent.VK_I);   
+        updateButton.setMnemonic(KeyEvent.VK_U); 
+        deleteButton.setMnemonic(KeyEvent.VK_D); 
+        restoreButton.setMnemonic(KeyEvent.VK_R); 
+        deleteAllButton.setMnemonic(KeyEvent.VK_L); 
+        restoreAllButton.setMnemonic(KeyEvent.VK_T); 
 
-        // Add tooltips
+        
         backButton.setToolTipText("Go back to main page (Alt+B)");
         filterButton.setToolTipText("Filter rates (Alt+F)");
         sortButton.setToolTipText("Sort rates (Alt+S)");
@@ -332,13 +332,13 @@ public class ManagerManageRatesGUI {
                 if (choice == JOptionPane.YES_OPTION) {
                     System.exit(0);
                 }
-                // No need for else as the window will stay open by default
+                
             }
         });
     }
 
     private void loadRates() {
-        tableModel.setRowCount(0); // Clear the table
+        tableModel.setRowCount(0); 
         try {
             rateList = APUHostelManagement.FeeRate.readFromFile("fee_rates.txt");
             filteredRateList = new ArrayList<>(rateList);
@@ -372,7 +372,7 @@ public class ManagerManageRatesGUI {
             double monthlyRate = APUHostelManagement.Manager.validateRate("Monthly Rate", getValidatedRate("Monthly Rate", 0)); 
             double yearlyRate = APUHostelManagement.Manager.validateRate("Yearly Rate", getValidatedRate("Yearly Rate", 0));
     
-            // Show fee rate details and confirm
+            
             String message = String.format("""
                 Fee Rate Details:
                 Fee Rate ID: %s
@@ -396,10 +396,10 @@ public class ManagerManageRatesGUI {
             saveRatesToFile();
             loadRates();
             
-            // Ask if user wants to add another rate
+            
             int addMore = JOptionPane.showConfirmDialog(frame, "Do you want to add another rate?","Add Another Rate", JOptionPane.YES_NO_OPTION);
             if (addMore == JOptionPane.YES_OPTION) {
-                setInitialRates(); // Recursive call to add another rate
+                setInitialRates(); 
             }
             
         } catch (IllegalArgumentException e) {
@@ -420,7 +420,7 @@ public class ManagerManageRatesGUI {
         String attributeToUpdate = (String) JOptionPane.showInputDialog(frame, "Select attribute to update:", "Update Rate", JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
     
         if (attributeToUpdate == null) {
-            return; // User cancelled
+            return; 
         }
     
         List<String> restrictedFeeRateIDs = APUHostelManagement.Manager.getRestrictedFeeRateIDs();
@@ -463,7 +463,7 @@ public class ManagerManageRatesGUI {
         }
     
         saveRatesToFile();
-        loadRates(); // Refresh the table
+        loadRates(); 
         JOptionPane.showMessageDialog(frame, "Rate updated successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
     }
 
@@ -495,7 +495,7 @@ public class ManagerManageRatesGUI {
         rateToDelete.setActive(false);
 
         saveRatesToFile();
-        loadRates(); // Refresh the table
+        loadRates(); 
         JOptionPane.showMessageDialog(frame, "Rate deleted successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
     }
 
@@ -521,7 +521,7 @@ public class ManagerManageRatesGUI {
         rateToRestore.setActive(true);
 
         saveRatesToFile();
-        loadRates(); // Refresh the table
+        loadRates(); 
         JOptionPane.showMessageDialog(frame, "Rate restored successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
     }
 
@@ -550,7 +550,7 @@ public class ManagerManageRatesGUI {
         }
 
         saveRatesToFile();
-        loadRates(); // Refresh the table
+        loadRates(); 
         JOptionPane.showMessageDialog(frame, "All rates deleted successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
     }
 
@@ -565,7 +565,7 @@ public class ManagerManageRatesGUI {
         }
 
         saveRatesToFile();
-        loadRates(); // Refresh the table
+        loadRates(); 
         JOptionPane.showMessageDialog(frame, "All rates restored successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
     }
 
@@ -574,7 +574,7 @@ public class ManagerManageRatesGUI {
         while (rate <= 0) {
             String input = JOptionPane.showInputDialog(frame, "Enter " + rateType + ":", currentRate);
             if (input == null) {
-                return -1; // User cancelled
+                return -1; 
             }
             try {
                 rate = Double.parseDouble(input);
@@ -724,7 +724,7 @@ public class ManagerManageRatesGUI {
     
     private void searchRates(String searchQuery) {
         if (searchQuery == null || searchQuery.trim().isEmpty() || searchQuery.equals("Search rates...")) {
-            // If search query is empty, reapply current filter or show all rates
+            
             if (currentFilterChoice != null) {
                 reapplyCurrentFilter();
             } else {
@@ -811,12 +811,12 @@ public class ManagerManageRatesGUI {
         } catch (Exception e) {
             System.err.println("Could not load icon: " + iconPath);
         }
-        // Don't set a default size here, let individual calls specify the size
+        
         return button;
     }
 
     private void addButtonHoverEffect(JButton button) {
-        // Store the original background color
+        
         Color originalColor = button.getBackground();
         
         button.addMouseListener(new java.awt.event.MouseAdapter() {

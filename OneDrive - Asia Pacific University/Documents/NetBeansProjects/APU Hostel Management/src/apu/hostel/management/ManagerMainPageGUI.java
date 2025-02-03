@@ -18,7 +18,7 @@ public class ManagerMainPageGUI {
     }
 
     private void initialize() {
-        // Update frame title to include manager's name
+        
         String managerName = (manager != null) ? manager.getUsername() : "Unknown Manager";
         frame = new JFrame("Manager Menu - " + managerName);
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
@@ -27,7 +27,7 @@ public class ManagerMainPageGUI {
         frame.setLocationRelativeTo(null);
 
         JLabel managerLabel = new JLabel("Manager Menu", JLabel.CENTER);
-        managerLabel.setFont(new Font("Arial", Font.BOLD, 24)); // Set font size
+        managerLabel.setFont(new Font("Arial", Font.BOLD, 24)); 
         frame.add(managerLabel, BorderLayout.NORTH);
 
         JPanel headerPanel = new JPanel(new BorderLayout());
@@ -39,9 +39,9 @@ public class ManagerMainPageGUI {
         frame.add(headerPanel, BorderLayout.NORTH);
 
         JPanel buttonPanel = new JPanel(new GridBagLayout());
-        buttonPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20)); // Add padding around the panel
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20)); 
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(10, 10, 10, 10); // Add spacing between buttons
+        gbc.insets = new Insets(10, 10, 10, 10); 
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.gridx = 0;
         gbc.gridy = 0;
@@ -135,12 +135,12 @@ public class ManagerMainPageGUI {
         frame.add(buttonPanel, BorderLayout.CENTER);
         frame.setVisible(true);
 
-        approveUserButton.setMnemonic(KeyEvent.VK_A);  // Alt+A
-        searchUserButton.setMnemonic(KeyEvent.VK_S);   // Alt+S
-        fixRateButton.setMnemonic(KeyEvent.VK_F);      // Alt+F
-        manageRoomsButton.setMnemonic(KeyEvent.VK_M);  // Alt+M
-        updatePersonalInfoButton.setMnemonic(KeyEvent.VK_U); // Alt+U
-        logoutButton.setMnemonic(KeyEvent.VK_L);       // Alt+L
+        approveUserButton.setMnemonic(KeyEvent.VK_A);  
+        searchUserButton.setMnemonic(KeyEvent.VK_S);   
+        fixRateButton.setMnemonic(KeyEvent.VK_F);      
+        manageRoomsButton.setMnemonic(KeyEvent.VK_M);  
+        updatePersonalInfoButton.setMnemonic(KeyEvent.VK_U); 
+        logoutButton.setMnemonic(KeyEvent.VK_L);       
 
         approveUserButton.setToolTipText("Approve pending user registrations (Alt+A)");
         searchUserButton.setToolTipText("Search and manage user accounts (Alt+S)");
@@ -166,14 +166,14 @@ public class ManagerMainPageGUI {
                 if (choice == JOptionPane.YES_OPTION) {
                     System.exit(0);
                 }
-                // No need for else as the window will stay open by default
+                
             }
         });
 
-        // Add after frame setup
-        frame.setLocationRelativeTo(null); // Center window on screen
+        
+        frame.setLocationRelativeTo(null); 
 
-        // Add escape key listener for logout
+        
         KeyStroke escapeKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
         frame.getRootPane().registerKeyboardAction(e -> {
             int choice = JOptionPane.showConfirmDialog(frame, 
@@ -200,7 +200,7 @@ public class ManagerMainPageGUI {
     }
 
     private void addButtonHoverEffect(JButton button) {
-        // Store the original background color
+        
         Color originalColor = button.getBackground();
         
         button.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -220,11 +220,11 @@ public class ManagerMainPageGUI {
                 .getImage().getScaledInstance(24, 24, Image.SCALE_SMOOTH));
             button.setIcon(icon);
             button.setHorizontalAlignment(SwingConstants.LEFT);
-            // Add category-based colors
+            
             if (text.contains("Approve") || text.contains("Search") || text.contains("Update") || text.contains("Logout")) {
-                button.setBackground(new Color(230, 240, 250)); // Light blue for user management
+                button.setBackground(new Color(230, 240, 250)); 
             } else if (text.contains("Fix") || text.contains("Rooms")) {
-                button.setBackground(new Color(230, 250, 230)); // Light green for facility management
+                button.setBackground(new Color(230, 250, 230)); 
             }
         } catch (Exception e) {
             System.err.println("Could not load icon: " + iconPath);

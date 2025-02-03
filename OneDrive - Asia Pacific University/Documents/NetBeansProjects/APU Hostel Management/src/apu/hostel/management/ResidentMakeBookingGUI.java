@@ -21,9 +21,9 @@ public class ResidentMakeBookingGUI {
     private JButton standardButton;
     private JButton largeButton;
     private JButton familyButton;
-    private APUHostelManagement.Resident resident; // Add resident field
+    private APUHostelManagement.Resident resident; 
 
-    // Add new constructor
+    
     public ResidentMakeBookingGUI(APUHostelManagement.Resident resident) {
         this.resident = resident;
         initialize();
@@ -36,15 +36,15 @@ public class ResidentMakeBookingGUI {
         frame.setLayout(new BorderLayout(10, 10));
         frame.setLocationRelativeTo(null);
         
-        // Title Label
+        
         JLabel titleLabel = new JLabel("Make Booking", JLabel.CENTER);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 24)); // Set font size
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 24)); 
         frame.add(titleLabel, BorderLayout.NORTH);
 
-        // Main Panel to hold table and other components
+        
         JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
 
-        // Room Pricing Table
+        
         JPanel pricingPanel = new JPanel(new BorderLayout());
         JLabel pricingLabel = new JLabel("Room Pricing", JLabel.CENTER);
         pricingLabel.setFont(new Font("Arial", Font.BOLD, 18));
@@ -56,7 +56,7 @@ public class ResidentMakeBookingGUI {
         JScrollPane scrollPane = new JScrollPane(pricingTable);
         pricingPanel.add(scrollPane, BorderLayout.CENTER);
 
-        // Add hyperlink below the table
+        
         JLabel hyperlinkLabel = new JLabel("<html><a href=''>How do we calculate our pricing?</a></html>");
         hyperlinkLabel.setHorizontalAlignment(SwingConstants.CENTER);
         hyperlinkLabel.setCursor(new Cursor(Cursor.HAND_CURSOR));
@@ -68,19 +68,19 @@ public class ResidentMakeBookingGUI {
         });
         pricingPanel.add(hyperlinkLabel, BorderLayout.SOUTH);
 
-        // Adjust the size of the pricing panel
+        
         pricingPanel.setPreferredSize(new Dimension(1024, 200));
 
         mainPanel.add(pricingPanel, BorderLayout.NORTH);
 
-        // Display room pricing
+        
         displayRoomPricing(tableModel);
 
-        // Room Type Selection and Date Input Fields
+        
         JPanel selectionAndDatePanel = new JPanel(new BorderLayout(10, 10));
-        selectionAndDatePanel.setPreferredSize(new Dimension(1024, 300)); // Adjust the size of the panel
+        selectionAndDatePanel.setPreferredSize(new Dimension(1024, 300)); 
 
-        // Room Type Selection
+        
         JPanel selectionPanel = new JPanel(new BorderLayout());
         JLabel selectionLabel = new JLabel("Select Room Type:", JLabel.CENTER);
         selectionLabel.setFont(new Font("Arial", Font.BOLD, 18));
@@ -91,8 +91,8 @@ public class ResidentMakeBookingGUI {
         largeButton = createButton("Large", "large_icon.png");
         familyButton = createButton("Family", "family_icon.png");
 
-        // Adjust button size
-        Dimension buttonSize = new Dimension(512, 30); // Half the width of the frame
+        
+        Dimension buttonSize = new Dimension(512, 30); 
         standardButton.setPreferredSize(buttonSize);
         largeButton.setPreferredSize(buttonSize);
         familyButton.setPreferredSize(buttonSize);
@@ -112,7 +112,7 @@ public class ResidentMakeBookingGUI {
 
         selectionAndDatePanel.add(selectionPanel, BorderLayout.NORTH);
 
-        // Date Input Fields
+        
         JPanel datePanel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
@@ -120,21 +120,21 @@ public class ResidentMakeBookingGUI {
 
         JLabel startDateLabel = new JLabel("Enter start date of your stay (yyyy-MM-dd): ");
         JLabel endDateLabel = new JLabel("Enter end date of your stay (yyyy-MM-dd): ");
-        startDateField = new JTextField(20); // Increase the length of the text field
-        endDateField = new JTextField(20); // Increase the length of the text field
+        startDateField = new JTextField(20); 
+        endDateField = new JTextField(20); 
 
-        // Set placeholder text
+        
         startDateField.setText("yyyy-MM-dd");
         endDateField.setText("yyyy-MM-dd");
         startDateField.setForeground(Color.GRAY);
         endDateField.setForeground(Color.GRAY);
 
-        // Shrink the height of the text input boxes
+        
         Dimension textFieldDimension = new Dimension(200, 25);
         startDateField.setPreferredSize(textFieldDimension);
         endDateField.setPreferredSize(textFieldDimension);
 
-        // Add focus listeners to clear placeholder text
+        
         startDateField.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusGained(java.awt.event.FocusEvent evt) {
                 if (startDateField.getText().equals("yyyy-MM-dd")) {
@@ -178,10 +178,10 @@ public class ResidentMakeBookingGUI {
         gbc.gridx = 1;
         datePanel.add(endDateField, gbc);
 
-        // Add the datePanel to the selectionAndDatePanel
+        
         selectionAndDatePanel.add(datePanel, BorderLayout.CENTER);
 
-        // Make Booking Button
+        
         JButton makeBookingButton = createButton("Make Booking", "booking_icon.png");
         makeBookingButton.addActionListener(e -> showBookingDetails());
 
@@ -190,14 +190,14 @@ public class ResidentMakeBookingGUI {
 
         selectionAndDatePanel.add(makeBookingButtonPanel, BorderLayout.SOUTH);
 
-        // Add the selectionAndDatePanel to the center of the main panel
+        
         mainPanel.add(selectionAndDatePanel, BorderLayout.CENTER);
 
         frame.add(mainPanel, BorderLayout.CENTER);
 
-        // Back Button
+        
         JButton backButton = createButton("Back", "back_icon.png");
-        backButton.setPreferredSize(new Dimension(frame.getWidth(), 50)); // Set button size
+        backButton.setPreferredSize(new Dimension(frame.getWidth(), 50)); 
         backButton.addActionListener(e -> {
             new ResidentManageBookingsGUI(resident);
             frame.dispose();
@@ -220,13 +220,13 @@ public class ResidentMakeBookingGUI {
                 if (choice == JOptionPane.YES_OPTION) {
                     System.exit(0);
                 }
-                // No need for else as the window will stay open by default
+                
             }
         });
     }
 
     private void displayRoomPricing(DefaultTableModel tableModel) {
-        // Call the getRoomPricing method from APUHostelManagement and populate the table
+        
         List<String[]> roomPricing = APUHostelManagement.Resident.getRoomPricing();
         for (String[] row : roomPricing) {
             tableModel.addRow(row);
@@ -253,13 +253,13 @@ public class ResidentMakeBookingGUI {
     }
 
     private void showBookingDetails() {
-        // Validate room type selection
+        
         if (selectedRoomType == null) {
             JOptionPane.showMessageDialog(frame, "Please select a room type.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        // Validate start date
+        
         LocalDate startDate = null;
         try {
             startDate = LocalDate.parse(startDateField.getText(), DateTimeFormatter.ofPattern("yyyy-MM-dd"));
@@ -280,7 +280,7 @@ public class ResidentMakeBookingGUI {
             return;
         }
 
-        // Validate end date
+        
         LocalDate endDate = null;
         try {
             endDate = LocalDate.parse(endDateField.getText(), DateTimeFormatter.ofPattern("yyyy-MM-dd"));
@@ -301,30 +301,30 @@ public class ResidentMakeBookingGUI {
             return;
         }
 
-        // Select an available room based on room type
+        
         String roomID = APUHostelManagement.Resident.selectAvailableRoomByType1(selectedRoomType);
         if (roomID == null) {
             JOptionPane.showMessageDialog(frame, "No available rooms of the selected type.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        // Generate a new PaymentID
+        
         String paymentID = APUHostelManagement.Resident.generatePaymentID1();
 
-        // Get the ResidentID of the logged-in user
+        
         String residentID = resident.getResidentID();
 
-        // Calculate the payment amount
+        
         String feeRateID = APUHostelManagement.Resident.getFeeRateID(roomID);
         double paymentAmount = APUHostelManagement.Resident.calculatePaymentAmount(startDate, endDate, feeRateID);
 
-        // Get the current date and time for BookingDateTime
+        
         String bookingDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 
-        // Show booking details confirmation dialog
+        
         long daysBetween = ChronoUnit.DAYS.between(startDate, endDate);
         String roomNumber = APUHostelManagement.Resident.getRoomNumber(roomID);
-        String username = resident.getUsername(); // Assuming there's a getUsername() method
+        String username = resident.getUsername(); 
         String bookingDetails = "<html><b style='font-size:14px;'>Booking Details:</b><br/><br/>" +
                                 "Username: " + username + "<br/>" +
                                 "Start Date: " + startDate + "<br/>" +
@@ -336,23 +336,23 @@ public class ResidentMakeBookingGUI {
 
         int confirm = JOptionPane.showConfirmDialog(frame, bookingDetails + "\n\nAre you sure you want to confirm this booking?", "Booking Details", JOptionPane.YES_NO_OPTION);
         if (confirm == JOptionPane.YES_OPTION) {
-            // Add a new line to payments.txt
+            
             boolean bookingSuccess = APUHostelManagement.Resident.addBookingToFile(paymentID, residentID, startDate, endDate, roomID, paymentAmount, bookingDateTime);
             if (!bookingSuccess) {
                 JOptionPane.showMessageDialog(frame, "An error occurred while saving the booking.", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
-            // Update room status to unavailable
+            
             APUHostelManagement.Resident.updateRoomStatus1(roomID, "unavailable");
 
-            // Print confirmation message
+            
             JOptionPane.showMessageDialog(frame, "Booking successful.", "Success", JOptionPane.INFORMATION_MESSAGE);
 
-            // Reset fields after successful booking
+            
             resetFields();
         } else {
-            // Reset fields if booking is not confirmed
+            
             resetFields();
         }
     }
@@ -416,12 +416,12 @@ public class ResidentMakeBookingGUI {
         } catch (Exception e) {
             System.err.println("Could not load icon: " + iconPath);
         }
-        // Don't set a default size here, let individual calls specify the size
+        
         return button;
     }
 
     private void addButtonHoverEffect(JButton button) {
-        // Store the original background color
+        
         Color originalColor = button.getBackground();
         
         button.addMouseListener(new java.awt.event.MouseAdapter() {

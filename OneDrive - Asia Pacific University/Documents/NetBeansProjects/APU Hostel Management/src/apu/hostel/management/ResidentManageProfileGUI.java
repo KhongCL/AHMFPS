@@ -33,9 +33,9 @@ public class ResidentManageProfileGUI {
         frame.setLocationRelativeTo(null);
     
         JPanel topPanel = new JPanel(new BorderLayout());
-        topPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); // Add padding
+        topPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); 
     
-        // Back button
+        
         JButton backButton = createButton("Back", "back_icon.png");
         backButton.setPreferredSize(new Dimension(100, 40));
         backButton.addActionListener(new ActionListener() {
@@ -49,9 +49,9 @@ public class ResidentManageProfileGUI {
     
         frame.add(topPanel, BorderLayout.NORTH);
     
-        // Input fields
+        
         JPanel inputPanel = new JPanel(new GridBagLayout());
-        inputPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); // Add padding
+        inputPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(10, 10, 10, 10);
         gbc.fill = GridBagConstraints.HORIZONTAL;
@@ -158,7 +158,7 @@ public class ResidentManageProfileGUI {
     
         frame.add(inputPanel, BorderLayout.CENTER);
     
-        // Update button
+        
         JButton updateButton = createButton("Update Profile", "update_profile_icon.png");
         updateButton.setPreferredSize(new Dimension(150, 40));
         updateButton.addActionListener(new ActionListener() {
@@ -172,13 +172,13 @@ public class ResidentManageProfileGUI {
     
         frame.add(buttonPanel, BorderLayout.SOUTH);
     
-        // Add input validation listeners
+        
         addValidationListeners(icPassportIconLabel, usernameIconLabel, passwordIconLabel, contactNumberIconLabel);
     
         frame.setVisible(true);
 
-        backButton.setMnemonic(KeyEvent.VK_B);    // Alt+B
-        updateButton.setMnemonic(KeyEvent.VK_U);   // Alt+U
+        backButton.setMnemonic(KeyEvent.VK_B);    
+        updateButton.setMnemonic(KeyEvent.VK_U);   
 
         backButton.setToolTipText("Go back to main page (Alt+B)");
         updateButton.setToolTipText("Update profile information (Alt+U)");
@@ -212,7 +212,7 @@ public class ResidentManageProfileGUI {
                 if (choice == JOptionPane.YES_OPTION) {
                     System.exit(0);
                 }
-                // No need for else as the window will stay open by default
+                
             }
         });
     }
@@ -340,7 +340,7 @@ public class ResidentManageProfileGUI {
         boolean hasChanges = false;
     
         try {
-            // Check if any changes were made
+            
             if (newIcPassportNumber.equals(resident.getIcPassportNumber()) &&
                 newUsername.equals(resident.getUsername()) &&
                 newPassword.equals(resident.getPassword()) &&
@@ -350,7 +350,7 @@ public class ResidentManageProfileGUI {
                 return;
             }
     
-            // IC/Passport Number
+            
             if (!newIcPassportNumber.equals(resident.getIcPassportNumber())) {
                 String icError = APUHostelManagement.validateUpdateICPassport(newIcPassportNumber, resident.getIcPassportNumber());
                 if (icError != null) {
@@ -368,7 +368,7 @@ public class ResidentManageProfileGUI {
                 }
             }
     
-            // Username  
+            
             if (!newUsername.equals(resident.getUsername())) {
                 String usernameError = APUHostelManagement.validateUpdateUsername(newUsername, resident.getUsername());
                 if (usernameError != null) {
@@ -386,7 +386,7 @@ public class ResidentManageProfileGUI {
                 }
             }
     
-            // Password
+            
             if (!newPassword.equals(resident.getPassword())) {
                 String passwordError = APUHostelManagement.validateUpdatePassword(newPassword, newUsername);
                 if (passwordError != null) {
@@ -404,7 +404,7 @@ public class ResidentManageProfileGUI {
                 }
             }
     
-            // Contact Number
+            
             if (!newContactNumber.equals(resident.getContactNumber())) {
                 String contactError = APUHostelManagement.validateUpdateContactNumber(newContactNumber, resident.getContactNumber());
                 if (contactError != null) {
@@ -458,12 +458,12 @@ public class ResidentManageProfileGUI {
         } catch (Exception e) {
             System.err.println("Could not load icon: " + iconPath);
         }
-        // Don't set a default size here, let individual calls specify the size
+        
         return button;
     }
 
     private void addButtonHoverEffect(JButton button) {
-        // Store the original background color
+        
         Color originalColor = button.getBackground();
         
         button.addMouseListener(new java.awt.event.MouseAdapter() {

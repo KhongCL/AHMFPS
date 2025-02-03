@@ -22,7 +22,7 @@ public class ManagerManageRoomsGUI {
     private JTable roomTable;
     private DefaultTableModel tableModel;
     private List<APUHostelManagement.Room> roomList;
-    private APUHostelManagement.Manager manager; // Add manager field
+    private APUHostelManagement.Manager manager; 
     private List<APUHostelManagement.Room> filteredRoomList;
     private String currentFilterChoice = null;
     private String currentFilterValue = null;
@@ -31,7 +31,7 @@ public class ManagerManageRoomsGUI {
     private String currentSortCategory = null;
     private String currentSortOrder = null;
 
-    // Add new constructor
+    
     public ManagerManageRoomsGUI(APUHostelManagement.Manager manager) {
         this.manager = manager;
         initialize();
@@ -50,14 +50,14 @@ public class ManagerManageRoomsGUI {
         frame.setLocationRelativeTo(null);
         
         JPanel topPanel = new JPanel(new BorderLayout());
-        topPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); // Add padding
+        topPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); 
 
-        // Back button
+        
         JButton backButton = createButton("Back", "back_icon.png");
         backButton.setPreferredSize(new Dimension(100, 40));
         backButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                new ManagerMainPageGUI(manager); // Pass manager back
+                new ManagerMainPageGUI(manager); 
                 frame.dispose();
             }
         });
@@ -157,7 +157,7 @@ public class ManagerManageRoomsGUI {
 
         frame.add(topPanel, BorderLayout.NORTH);
 
-        // Room table
+        
         tableModel = new DefaultTableModel(new Object[]{"RoomID", "FeeRateID", "RoomType", "RoomNumber", "RoomStatus", "RoomCapacity", "IsActive"}, 0){
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -190,32 +190,32 @@ public class ManagerManageRoomsGUI {
             }
         });
 
-        roomTable.getColumnModel().getColumn(0).setPreferredWidth(80);  // RoomID
-        roomTable.getColumnModel().getColumn(1).setPreferredWidth(100); // FeeRateID  
-        roomTable.getColumnModel().getColumn(2).setPreferredWidth(100); // RoomType
-        roomTable.getColumnModel().getColumn(3).setPreferredWidth(80);  // RoomNumber
-        roomTable.getColumnModel().getColumn(4).setPreferredWidth(100); // RoomStatus
-        roomTable.getColumnModel().getColumn(5).setPreferredWidth(80);  // RoomCapacity
-        roomTable.getColumnModel().getColumn(6).setPreferredWidth(70);  // IsActive
+        roomTable.getColumnModel().getColumn(0).setPreferredWidth(80);  
+        roomTable.getColumnModel().getColumn(1).setPreferredWidth(100); 
+        roomTable.getColumnModel().getColumn(2).setPreferredWidth(100); 
+        roomTable.getColumnModel().getColumn(3).setPreferredWidth(80);  
+        roomTable.getColumnModel().getColumn(4).setPreferredWidth(100); 
+        roomTable.getColumnModel().getColumn(5).setPreferredWidth(80);  
+        roomTable.getColumnModel().getColumn(6).setPreferredWidth(70);  
 
         JScrollPane scrollPane = new JScrollPane(roomTable);
         frame.add(scrollPane, BorderLayout.CENTER);
 
-        // Load rooms into the table
+        
         loadRooms();
 
-        // Action buttons
+        
         JPanel actionPanel = new JPanel(new BorderLayout(5, 5));
         actionPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
-        // First row panel
+        
         JPanel firstRowPanel = new JPanel(new GridLayout(1, 4, 5, 0));
         JButton addButton = createButton("Add Room", "add_icon.png");
         JButton updateStatusButton = createButton("Update Room Status", "update_icon.png");
         JButton updateFeeRateButton = createButton("Update Fee Rate for Room Type", "update_icon.png");
         JButton deleteButton = createButton("Delete Room", "delete_icon.png");
 
-        // Second row panel
+        
         JPanel secondRowPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
         JButton restoreButton = createButton("Restore Room", "restore_icon.png");
         JButton deleteAllButton = createButton("Delete All Room", "delete_all_icon.png");
@@ -267,7 +267,7 @@ public class ManagerManageRoomsGUI {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount() == 2) {
-                    updateRoomStatus(); // Or any other primary action
+                    updateRoomStatus(); 
                 }
             }
         });
@@ -307,8 +307,8 @@ public class ManagerManageRoomsGUI {
         frame.setVisible(true);
 
         backButton.setMnemonic(KeyEvent.VK_B);
-        filterButton.setMnemonic(KeyEvent.VK_F);  // Alt+F
-        sortButton.setMnemonic(KeyEvent.VK_S);    // Alt+S
+        filterButton.setMnemonic(KeyEvent.VK_F);  
+        sortButton.setMnemonic(KeyEvent.VK_S);    
         searchButton.setMnemonic(KeyEvent.VK_ENTER);
         clearButton.setMnemonic(KeyEvent.VK_C);
         addButton.setMnemonic(KeyEvent.VK_A);
@@ -360,7 +360,7 @@ public class ManagerManageRoomsGUI {
                 if (choice == JOptionPane.YES_OPTION) {
                     System.exit(0);
                 }
-                // No need for else as the window will stay open by default
+                
             }
         });
     }
@@ -413,7 +413,7 @@ public class ManagerManageRoomsGUI {
     
         APUHostelManagement.Room newRoom = new APUHostelManagement.Room(roomId, selectedFeeRate.getFeeRateID(), selectedRoomType, roomNumber, "available", roomCapacity, true);
     
-        // Show room details and confirm
+        
         String message = String.format("""
             Room Details:
             Room ID: %s
@@ -437,13 +437,13 @@ public class ManagerManageRoomsGUI {
         saveRoomsToFile();
         loadRooms();
         
-        // Ask if user wants to add another room
+        
         int addMore = JOptionPane.showConfirmDialog(frame, 
             "Do you want to add another room?",
             "Add Another Room", 
             JOptionPane.YES_NO_OPTION);
         if (addMore == JOptionPane.YES_OPTION) {
-            addRoom(); // Recursive call to add another room
+            addRoom(); 
         }
     }
 
@@ -465,7 +465,7 @@ public class ManagerManageRoomsGUI {
         }
 
         saveRoomsToFile();
-        loadRooms(); // Refresh the table
+        loadRooms(); 
         JOptionPane.showMessageDialog(frame, "Room status updated successfully to " + newStatus + ".", "Success", JOptionPane.INFORMATION_MESSAGE);
     }
 
@@ -516,7 +516,7 @@ public class ManagerManageRoomsGUI {
         }
 
         saveRoomsToFile();
-        loadRooms(); // Refresh the table
+        loadRooms(); 
         JOptionPane.showMessageDialog(frame, "Rooms updated successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
     }
 
@@ -546,7 +546,7 @@ public class ManagerManageRoomsGUI {
     
         roomToDelete.setActive(false);
         saveRoomsToFile();
-        loadRooms(); // Refresh the table
+        loadRooms(); 
         JOptionPane.showMessageDialog(frame, "Room deleted successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
     }
 
@@ -571,7 +571,7 @@ public class ManagerManageRoomsGUI {
 
         roomToRestore.setActive(true);
         saveRoomsToFile();
-        loadRooms(); // Refresh the table
+        loadRooms(); 
         JOptionPane.showMessageDialog(frame, "Room restored successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
     }
 
@@ -595,7 +595,7 @@ public class ManagerManageRoomsGUI {
         }
 
         saveRoomsToFile();
-        loadRooms(); // Refresh the table
+        loadRooms(); 
         JOptionPane.showMessageDialog(frame, "All active and available rooms deleted successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
     }
 
@@ -619,7 +619,7 @@ public class ManagerManageRoomsGUI {
         }
 
         saveRoomsToFile();
-        loadRooms(); // Refresh the table
+        loadRooms(); 
         JOptionPane.showMessageDialog(frame, "All inactive rooms restored successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
     }
 
@@ -738,7 +738,7 @@ public class ManagerManageRoomsGUI {
 
         if (choice == null) return;
 
-        currentSortCategory = choice.split(" ")[0] + " " + choice.split(" ")[1]; // "Room Number" or "Room Type"
+        currentSortCategory = choice.split(" ")[0] + " " + choice.split(" ")[1]; 
         currentSortOrder = choice.contains("Descending") || choice.contains("Z-A") ? 
                         "Descending" : "Ascending";
 
@@ -781,7 +781,7 @@ public class ManagerManageRoomsGUI {
             return;
         }
         
-        // Update filtered list
+        
         filteredRoomList = new ArrayList<>(rooms);
         
         for (APUHostelManagement.Room room : rooms) {
@@ -807,12 +807,12 @@ public class ManagerManageRoomsGUI {
         } catch (Exception e) {
             System.err.println("Could not load icon: " + iconPath);
         }
-        // Don't set a default size here, let individual calls specify the size
+        
         return button;
     }
 
     private void addButtonHoverEffect(JButton button) {
-        // Store the original background color
+        
         Color originalColor = button.getBackground();
         
         button.addMouseListener(new java.awt.event.MouseAdapter() {
