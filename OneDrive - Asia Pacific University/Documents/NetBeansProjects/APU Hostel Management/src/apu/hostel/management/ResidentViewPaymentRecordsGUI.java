@@ -3,7 +3,6 @@ package apu.hostel.management;
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
-
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -12,7 +11,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyAdapter;
 import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -169,11 +167,16 @@ public class ResidentViewPaymentRecordsGUI {
 
         
         tableModel = new DefaultTableModel(
-            new Object[]{"Room Number", "Stay Duration", "Booking Date and Time", "Payment Amount (RM)"}, 0
+            new Object[]{"Room Number", "Stay Duration", "Booking Date and Time", "Payment Amount (RM)", "Payment Method"}, 0
         ) {
             @Override
             public boolean isCellEditable(int row, int column) {
                 return false;
+            }
+            
+            @Override
+            public Class<?> getColumnClass(int column) {
+                return String.class;
             }
         };
         table = new JTable(tableModel);
@@ -190,7 +193,6 @@ public class ResidentViewPaymentRecordsGUI {
         table.setShowGrid(true);
         table.setFillsViewportHeight(true);
 
-        
         table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, 
@@ -208,6 +210,7 @@ public class ResidentViewPaymentRecordsGUI {
         table.getColumnModel().getColumn(1).setPreferredWidth(100); 
         table.getColumnModel().getColumn(2).setPreferredWidth(150); 
         table.getColumnModel().getColumn(3).setPreferredWidth(100); 
+        table.getColumnModel().getColumn(4).setPreferredWidth(100);
 
         JScrollPane scrollPane = new JScrollPane(table);
         viewPaymentRecordsPanel.add(scrollPane, BorderLayout.CENTER);
@@ -252,7 +255,7 @@ public class ResidentViewPaymentRecordsGUI {
         searchField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
-                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER && !searchField.getText().equals("Search payments...")) {
                     searchButton.doClick();
                 }
             }
@@ -314,38 +317,61 @@ public class ResidentViewPaymentRecordsGUI {
     }
 
     private void showPaymentDetailsPopup(String[] details) {
-        try {
-            String roomNumber = APUHostelManagement.Resident.getRoomNumber(details[5]);
-            LocalDate startDate = LocalDate.parse(details[3]);
-            LocalDate endDate = LocalDate.parse(details[4]); 
-            long stayDuration = ChronoUnit.DAYS.between(startDate, endDate);
-
-            String[][] data = {
-                {"Payment Status", details[7]},
-                {"Start Date", startDate.toString()},
-                {"End Date", endDate.toString()},
-                {"Stay Duration", stayDuration + " days"},
-                {"Payment Amount", "RM" + details[6]},
-                {"Booking Date", details[8]},
-                {"Room Number", roomNumber},
-                {"Payment Method", details[9]},
-                {"Booking Status", details[10]}
-            };
-
-            String[] columnNames = {"Category", "Details"};
-            JTable detailsTable = new JTable(data, columnNames);
-            JScrollPane scrollPane = new JScrollPane(detailsTable);
-
-            JOptionPane optionPane = new JOptionPane(scrollPane, 
-                JOptionPane.INFORMATION_MESSAGE, JOptionPane.DEFAULT_OPTION);
-            JDialog dialog = optionPane.createDialog(frame, "Payment Details");
-            dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-            dialog.setVisible(true);
-        } catch (DateTimeParseException e) {
+        if (details == null) {
             JOptionPane.showMessageDialog(frame, 
-                "Error parsing dates in payment record", 
-                "Error", JOptionPane.ERROR_MESSAGE);
+                "Please select a payment record to view.", 
+                "Warning", JOptionPane.WARNING_MESSAGE);
+            return;
         }
+    
+        // Convert view index to model index if table is sorted
+        int selectedRow = table.getSelectedRow();
+        if (selectedRow != -1 && table.getRowSorter() != null) {
+            selectedRow = table.convertRowIndexToModel(selectedRow);
+        }
+        
+        // Get payment details from current map state
+        String[] paymentDetails = paymentDetailsMap.get(selectedRow);
+        if (paymentDetails == null) {
+            return;
+        }
+        
+        // Rest of the method remains the same
+        String roomNumber = APUHostelManagement.Resident.getRoomNumber(paymentDetails[5]);
+        long stayDuration = calculateStayDuration(paymentDetails[3], paymentDetails[4]);
+    
+        JPanel paymentPanel = new JPanel();
+        paymentPanel.setLayout(new BoxLayout(paymentPanel, BoxLayout.Y_AXIS));
+        paymentPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+    
+        JLabel headerLabel = new JLabel("APU HOSTEL PAYMENT DETAILS");
+        headerLabel.setFont(new Font("Arial", Font.BOLD, 20));
+        headerLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        paymentPanel.add(headerLabel);
+        paymentPanel.add(Box.createVerticalStrut(20));
+    
+        String[][] detailsArray = {
+            {"Payment ID:", details[0]},
+            {"Payment Status:", details[7]},
+            {"Start Date:", details[3]},
+            {"End Date:", details[4]},
+            {"Stay Duration:", stayDuration + " days"},
+            {"Room Number:", roomNumber},
+            {"Payment Amount:", "RM " + details[6]},
+            {"Booking Date:", details[8]},
+            {"Payment Method:", formatPaymentMethod(details[9])},
+            {"Booking Status:", details[10]}
+        };
+    
+        for (String[] detail : detailsArray) {
+            JPanel detailPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+            detailPanel.add(new JLabel(detail[0]));
+            detailPanel.add(new JLabel(detail[1]));
+            paymentPanel.add(detailPanel);
+        }
+    
+        JOptionPane.showMessageDialog(frame, paymentPanel, 
+            "Payment Details", JOptionPane.PLAIN_MESSAGE);
     }
 
     private void loadPaymentRecords() {
@@ -370,37 +396,49 @@ public class ResidentViewPaymentRecordsGUI {
         int rowIndex = 0;
         for (String[] details : relevantPayments) {
             paymentDetailsMap.put(rowIndex, details);
-            String roomNumber = APUHostelManagement.Resident.getRoomNumber(details[5]); 
+            String roomNumber = APUHostelManagement.Resident.getRoomNumber(details[5]);
             long stayDuration = ChronoUnit.DAYS.between(LocalDate.parse(details[3]), LocalDate.parse(details[4]));
-            tableModel.addRow(new Object[]{roomNumber, stayDuration + " days", details[8], "RM" + details[6]});
+            String paymentMethod = details[9] != null && !details[9].equals("null") ? 
+                capitalize(details[9].replace("_", " ")) : "-";
+                
+            tableModel.addRow(new Object[]{
+                roomNumber,
+                stayDuration + " days", 
+                details[8],
+                "RM" + details[6],
+                paymentMethod
+            });
             rowIndex++;
         }
     }
 
     private void filterPayments() {
-        String[] filterOptions = {"All", "Payment Method", "Room ID"};
+        String[] filterOptions = {"All", "Payment Method", "Room Number"};
         String filterChoice = (String) JOptionPane.showInputDialog(frame,
             "Filter by:", "Filter Payments", 
             JOptionPane.QUESTION_MESSAGE, null, filterOptions, filterOptions[0]);
-
+    
         if (filterChoice == null) return;
-
+    
+        // Create a backup of original data for filtering
+        List<String[]> originalData = new ArrayList<>(paymentDetailsMap.values());
+    
         if (filterChoice.equals("All")) {
             currentFilterChoice = null;
             currentFilterValue = null;
             filterButton.setText("Filter");
             frame.setTitle("View Payment Records - " + resident.getUsername());
-            filteredPaymentList = new ArrayList<>(paymentDetailsMap.values());
             if (currentSortCategory != null) {
-                applySorting(new ArrayList<>(filteredPaymentList));
+                applySorting(originalData);
             } else {
-                loadPaymentRecords();
+                updateTable(originalData);
             }
             return;
         }
-
+    
         String value = null;
-
+        String displayValue = null;
+    
         switch (filterChoice) {
             case "Payment Method" -> {
                 String[] methods = {"credit_card", "cash", "bank_transfer"};
@@ -411,42 +449,51 @@ public class ResidentViewPaymentRecordsGUI {
                     null, displayMethods, displayMethods[0]);
                 if (index >= 0) {
                     value = methods[index];
+                    displayValue = displayMethods[index];
                 }
             }
-            case "Room ID" -> {
+            case "Room Number" -> {
                 Set<String> uniqueRooms = paymentDetailsMap.values().stream()
-                    .map(p -> p[5])
+                    .map(p -> APUHostelManagement.Resident.getRoomNumber(p[5]))
                     .collect(Collectors.toSet());
                 String[] rooms = uniqueRooms.toArray(new String[0]);
                 value = (String) JOptionPane.showInputDialog(frame,
-                    "Select Room ID:", "Filter Payments",
+                    "Select Room Number:", "Filter Payments",
                     JOptionPane.QUESTION_MESSAGE, null, rooms, rooms[0]);
+                displayValue = value;
             }
         }
-
+    
         if (value == null) return;
-
+    
         currentFilterChoice = filterChoice;
         currentFilterValue = value;
-        filterButton.setText("Filter: " + value);
-
-        filteredPaymentList = paymentDetailsMap.values().stream()
+        filterButton.setText("Filter: " + displayValue);
+    
+        List<String[]> filtered = originalData.stream()
             .filter(payment -> switch (currentFilterChoice) {
-                case "Payment Method" -> payment[9].equalsIgnoreCase(currentFilterValue);
-                case "Room ID" -> payment[5].equalsIgnoreCase(currentFilterValue);
+                case "Payment Method" -> payment[9] != null && 
+                                    !payment[9].equals("null") && 
+                                    payment[9].equalsIgnoreCase(currentFilterValue);
+                case "Room Number" -> APUHostelManagement.Resident.getRoomNumber(payment[5])
+                                    .equals(currentFilterValue);
                 default -> true;
             })
             .collect(Collectors.toList());
-
-        if (!filteredPaymentList.isEmpty()) {
-            frame.setTitle("View Payment Records - " + resident.getUsername() + 
-                " (Filtered: " + currentFilterValue + ", " + filteredPaymentList.size() + " payments)");
-        }
-
-        if (currentSortCategory != null) {
-            applySorting(filteredPaymentList);
+    
+        if (filtered.isEmpty()) {
+            JOptionPane.showMessageDialog(frame,
+                "No payments found for selected filter.",
+                "No Results", JOptionPane.INFORMATION_MESSAGE);
+            updateTable(originalData);
         } else {
-            updateTable(filteredPaymentList);
+            frame.setTitle("View Payment Records - " + resident.getUsername() + 
+                " (Filtered: " + displayValue + ", " + filtered.size() + " payments)");
+            if (currentSortCategory != null) {
+                applySorting(filtered);
+            } else {
+                updateTable(filtered);
+            }
         }
     }
 
@@ -521,8 +568,11 @@ public class ResidentViewPaymentRecordsGUI {
         if (currentFilterChoice != null) {
             filteredPaymentList = paymentDetailsMap.values().stream()
                 .filter(payment -> switch (currentFilterChoice) {
-                    case "Payment Method" -> payment[9].equalsIgnoreCase(currentFilterValue);
-                    case "Room ID" -> payment[5].equalsIgnoreCase(currentFilterValue);
+                    case "Payment Method" -> payment[9] != null && 
+                                        !payment[9].equals("null") && 
+                                        payment[9].equalsIgnoreCase(currentFilterValue);
+                    case "Room Number" -> APUHostelManagement.Resident.getRoomNumber(payment[5])
+                                        .equals(currentFilterValue);
                     default -> true;
                 })
                 .collect(Collectors.toList());
@@ -533,7 +583,11 @@ public class ResidentViewPaymentRecordsGUI {
                 updateTable(filteredPaymentList);
             }
         } else {
-            loadPaymentRecords();
+            if (currentSortCategory != null) {
+                applySorting(new ArrayList<>(paymentDetailsMap.values()));
+            } else {
+                loadPaymentRecords();
+            }
         }
     }
 
@@ -548,16 +602,13 @@ public class ResidentViewPaymentRecordsGUI {
             case "Booking" -> Comparator.comparing(p -> p[8]);
             default -> null;
         };
-
+    
         if (comparator != null) {
             if (currentSortOrder.equals("Descending")) {
                 comparator = comparator.reversed();
             }
             sortedList.sort(comparator);
-            sortButton.setText("Sort: " + currentSortCategory.split(" ")[0]);
             updateTable(sortedList);
-        } else {
-            sortButton.setText("Sort");
         }
     }
 
@@ -565,15 +616,19 @@ public class ResidentViewPaymentRecordsGUI {
         tableModel.setRowCount(0);
         filteredPaymentList = new ArrayList<>(paymentList);
         
+        int rowIndex = 0;
         for (String[] payment : paymentList) {
             String roomNumber = APUHostelManagement.Resident.getRoomNumber(payment[5]);
             long stayDuration = calculateStayDuration(payment[3], payment[4]);
+            
             tableModel.addRow(new Object[]{
                 roomNumber,
                 stayDuration + " days",
-                payment[8],  // Booking Date
-                "RM" + payment[6] // Amount
+                payment[8],
+                "RM" + payment[6],
+                formatPaymentMethod(payment[9])
             });
+            rowIndex++;
         }
     }
 
@@ -609,5 +664,17 @@ public class ResidentViewPaymentRecordsGUI {
                 button.setBackground(originalColor); 
             }
         });
+    }
+
+    private String capitalize(String str) {
+        if (str == null || str.isEmpty()) return str;
+        return str.substring(0, 1).toUpperCase() + str.substring(1).toLowerCase();
+    }
+
+    private String formatPaymentMethod(String method) {
+        if (method == null || method.equals("null")) {
+            return "-";
+        }
+        return capitalize(method.replace("_", " "));
     }
 }
