@@ -378,7 +378,16 @@ public class ManagerManageUsersGUI {
         if (filterChoice.equals("All")) {
             currentFilterChoice = null;
             currentFilterValue = null;
-            loadUsers();
+            filterButton.setText("Filter");
+            frame.setTitle("Manage Users - " + manager.getUsername());
+            
+            filteredUserList = new ArrayList<>(userList); // Use existing users instead of reloading
+            
+            if (currentSortCategory != null) {
+                applySorting(filteredUserList); // Apply current sorting if active
+            } else {
+                updateTable(filteredUserList); // Just update table if no sorting
+            }
             return;
         }
 
@@ -537,7 +546,6 @@ public class ManagerManageUsersGUI {
 
     private void searchUsers(String searchQuery) {
         if (searchQuery == null || searchQuery.trim().isEmpty()) {
-            
             if (currentFilterChoice != null) {
                 reapplyCurrentFilter();
             } else {
@@ -547,8 +555,11 @@ public class ManagerManageUsersGUI {
         }
     
         String lowerCaseQuery = searchQuery.toLowerCase();
+        
+        List<APUHostelManagement.User> searchList = filteredUserList != null ? 
+            filteredUserList : new ArrayList<>(userList);
     
-        List<APUHostelManagement.User> searchedUsers = filteredUserList.stream()
+        List<APUHostelManagement.User> searchedUsers = searchList.stream()
                 .filter(user -> user.getUserID().toLowerCase().contains(lowerCaseQuery) ||
                                 user.getIcPassportNumber().toLowerCase().contains(lowerCaseQuery) ||
                                 user.getUsername().toLowerCase().contains(lowerCaseQuery) ||
@@ -562,9 +573,18 @@ public class ManagerManageUsersGUI {
         if (!searchedUsers.isEmpty()) {
             frame.setTitle("Manage Users - " + manager.getUsername() + 
                 " (Found " + searchedUsers.size() + " results)");
+            updateTable(searchedUsers);
+        } else {
+            frame.setTitle("Manage Users - " + manager.getUsername());
+            JOptionPane.showMessageDialog(frame, 
+                "No users found matching your search.", 
+                "No Results", JOptionPane.INFORMATION_MESSAGE);
+            if (currentFilterChoice != null) {
+                reapplyCurrentFilter();
+            } else {
+                loadUsers();
+            }
         }
-    
-        updateTable(searchedUsers);
     }
 
     private void updateTable(List<APUHostelManagement.User> users) {

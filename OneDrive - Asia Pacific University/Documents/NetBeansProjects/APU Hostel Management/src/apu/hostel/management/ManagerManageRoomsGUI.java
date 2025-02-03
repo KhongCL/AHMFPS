@@ -34,6 +34,8 @@ public class ManagerManageRoomsGUI {
     
     public ManagerManageRoomsGUI(APUHostelManagement.Manager manager) {
         this.manager = manager;
+        this.roomList = new ArrayList<>();
+        this.filteredRoomList = new ArrayList<>(); 
         initialize();
     }
 
@@ -435,7 +437,7 @@ public class ManagerManageRoomsGUI {
     
         roomList.add(newRoom);
         saveRoomsToFile();
-        loadRooms();
+        reapplyCurrentFilter();
         
         
         int addMore = JOptionPane.showConfirmDialog(frame, 
@@ -453,20 +455,24 @@ public class ManagerManageRoomsGUI {
             JOptionPane.showMessageDialog(frame, "Please select a room to update.", "Warning", JOptionPane.WARNING_MESSAGE);
             return;
         }
-
-        APUHostelManagement.Room roomToUpdate = roomList.get(selectedIndex);
-
+    
+        APUHostelManagement.Room roomToUpdate = filteredRoomList.get(selectedIndex); // Changed from roomList
+    
         String newStatus = roomToUpdate.getRoomStatus().equals("available") ? "unavailable" : "available";
-        roomToUpdate.setRoomStatus(newStatus);
-
-        int confirm = JOptionPane.showConfirmDialog(frame, "Do you want to update the selected room's status from " + (roomToUpdate.getRoomStatus().equals("available") ? "unavailable" : "available") + " to " + newStatus + "?\n" + roomToUpdate, "Confirm Update", JOptionPane.YES_NO_OPTION);
+        String oldStatus = roomToUpdate.getRoomStatus();
+        
+        int confirm = JOptionPane.showConfirmDialog(frame, 
+            "Do you want to update the selected room's status from " + oldStatus + " to " + newStatus + "?\n" + roomToUpdate, 
+            "Confirm Update", JOptionPane.YES_NO_OPTION);
         if (confirm != JOptionPane.YES_OPTION) {
             return;
         }
-
+    
+        roomToUpdate.setRoomStatus(newStatus);
         saveRoomsToFile();
-        loadRooms(); 
-        JOptionPane.showMessageDialog(frame, "Room status updated successfully to " + newStatus + ".", "Success", JOptionPane.INFORMATION_MESSAGE);
+        reapplyCurrentFilter(); // Changed from loadRooms()
+        JOptionPane.showMessageDialog(frame, "Room status updated successfully to " + newStatus + ".", 
+            "Success", JOptionPane.INFORMATION_MESSAGE);
     }
 
     private void updateRoomType() {
@@ -516,7 +522,7 @@ public class ManagerManageRoomsGUI {
         }
 
         saveRoomsToFile();
-        loadRooms(); 
+        reapplyCurrentFilter();  
         JOptionPane.showMessageDialog(frame, "Rooms updated successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
     }
 
@@ -527,7 +533,7 @@ public class ManagerManageRoomsGUI {
             return;
         }
     
-        APUHostelManagement.Room roomToDelete = roomList.get(selectedIndex);
+        APUHostelManagement.Room roomToDelete = filteredRoomList.get(selectedIndex); // Changed from roomList
     
         if (!roomToDelete.isActive()) {
             JOptionPane.showMessageDialog(frame, "The selected room is already deleted.", "Warning", JOptionPane.WARNING_MESSAGE);
@@ -546,32 +552,32 @@ public class ManagerManageRoomsGUI {
     
         roomToDelete.setActive(false);
         saveRoomsToFile();
-        loadRooms(); 
+        reapplyCurrentFilter();
         JOptionPane.showMessageDialog(frame, "Room deleted successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
     }
-
+    
     private void restoreRoom() {
         int selectedIndex = roomTable.getSelectedRow();
         if (selectedIndex == -1) {
             JOptionPane.showMessageDialog(frame, "Please select a room to restore.", "Warning", JOptionPane.WARNING_MESSAGE);
             return;
         }
-
-        APUHostelManagement.Room roomToRestore = roomList.get(selectedIndex);
-
+    
+        APUHostelManagement.Room roomToRestore = filteredRoomList.get(selectedIndex); // Changed from roomList
+    
         if (roomToRestore.isActive()) {
             JOptionPane.showMessageDialog(frame, "The selected room is already active.", "Warning", JOptionPane.WARNING_MESSAGE);
             return;
         }
-
+    
         int confirm = JOptionPane.showConfirmDialog(frame, "Are you sure you want to restore this room?\n" + roomToRestore, "Confirm Restoration", JOptionPane.YES_NO_OPTION);
         if (confirm != JOptionPane.YES_OPTION) {
             return;
         }
-
+    
         roomToRestore.setActive(true);
         saveRoomsToFile();
-        loadRooms(); 
+        reapplyCurrentFilter();
         JOptionPane.showMessageDialog(frame, "Room restored successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
     }
 
@@ -595,7 +601,7 @@ public class ManagerManageRoomsGUI {
         }
 
         saveRoomsToFile();
-        loadRooms(); 
+        reapplyCurrentFilter();
         JOptionPane.showMessageDialog(frame, "All active and available rooms deleted successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
     }
 
@@ -619,7 +625,7 @@ public class ManagerManageRoomsGUI {
         }
 
         saveRoomsToFile();
-        loadRooms(); 
+        reapplyCurrentFilter();
         JOptionPane.showMessageDialog(frame, "All inactive rooms restored successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
     }
 
@@ -638,7 +644,16 @@ public class ManagerManageRoomsGUI {
         if (filterChoice.equals("All")) {
             currentFilterChoice = null;
             currentFilterValue = null;
-            loadRooms();
+            filterButton.setText("Filter");
+            frame.setTitle("Manage Rooms - " + manager.getUsername());
+            
+            filteredRoomList = new ArrayList<>(roomList); // Use existing rates
+            
+            if (currentSortCategory != null) {
+                applySorting(filteredRoomList); // Apply current sorting if active
+            } else {
+                updateTable(filteredRoomList); // Just update table if no sorting
+            }
             return;
         }
 
@@ -709,10 +724,12 @@ public class ManagerManageRoomsGUI {
             }
             return;
         }
-
+    
         String lowerCaseQuery = searchQuery.toLowerCase();
-
-        List<APUHostelManagement.Room> searchedRooms = filteredRoomList.stream()
+        List<APUHostelManagement.Room> searchList = filteredRoomList != null ? 
+            filteredRoomList : new ArrayList<>(roomList);
+    
+        List<APUHostelManagement.Room> searchedRooms = searchList.stream()
             .filter(room -> room.getRoomID().toLowerCase().contains(lowerCaseQuery) ||
                         room.getFeeRateID().toLowerCase().contains(lowerCaseQuery) ||
                         room.getRoomType().toLowerCase().contains(lowerCaseQuery) ||
@@ -721,13 +738,22 @@ public class ManagerManageRoomsGUI {
                         String.valueOf(room.getRoomCapacity()).contains(lowerCaseQuery) ||
                         String.valueOf(room.isActive()).toLowerCase().contains(lowerCaseQuery))
             .collect(Collectors.toList());
-
+    
         if (!searchedRooms.isEmpty()) {
             frame.setTitle("Manage Rooms - " + manager.getUsername() + 
                 " (Found " + searchedRooms.size() + " results)");
+            updateTable(searchedRooms);
+        } else {
+            frame.setTitle("Manage Rooms - " + manager.getUsername());
+            JOptionPane.showMessageDialog(frame, 
+                "No rooms found matching your search.", 
+                "No Results", JOptionPane.INFORMATION_MESSAGE);
+            if (currentFilterChoice != null) {
+                reapplyCurrentFilter();
+            } else {
+                loadRooms();
+            }
         }
-
-        updateTable(searchedRooms);
     }
 
     private void sortRooms() {

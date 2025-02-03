@@ -45,6 +45,7 @@ public class ResidentMakePaymentForBookingGUI {
 
     public ResidentMakePaymentForBookingGUI(APUHostelManagement.Resident resident) {
         this.resident = resident;
+        this.filteredPaymentList = new ArrayList<>();
         initialize();
     }
 
@@ -187,12 +188,7 @@ public class ResidentMakePaymentForBookingGUI {
                 return String.class;
             }
         };
-        table = new JTable(tableModel) {
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return false; 
-            }
-        };
+        table = new JTable(tableModel);
         table.setRowHeight(30); 
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         table.getTableHeader().setReorderingAllowed(false);
@@ -228,13 +224,15 @@ public class ResidentMakePaymentForBookingGUI {
         JScrollPane scrollPane = new JScrollPane(table);
         makePaymentPanel.add(scrollPane, BorderLayout.CENTER);
 
-        
         List<String[]> unpaidBookings = APUHostelManagement.Resident.getUnpaidBookingsForResident(resident.getResidentID());
         Map<String, String> roomMap = APUHostelManagement.Resident.getRoomMap();
-        paymentDetailsMap = new HashMap<>(); 
+        paymentDetailsMap = new HashMap<>();
+        filteredPaymentList = new ArrayList<>();
+        
         int rowIndex = 0;
         for (String[] details : unpaidBookings) {
-            paymentDetailsMap.put(rowIndex, details); 
+            paymentDetailsMap.put(rowIndex, details);
+            filteredPaymentList.add(details);
             String roomNumber = roomMap.getOrDefault(details[5], "Unknown Room");
             long stayDuration = ChronoUnit.DAYS.between(LocalDate.parse(details[3]), LocalDate.parse(details[4]));
             tableModel.addRow(new Object[]{roomNumber, stayDuration + " days", details[8], "RM" + details[6]});
@@ -248,9 +246,11 @@ public class ResidentMakePaymentForBookingGUI {
             public void actionPerformed(ActionEvent e) {
                 int selectedRow = table.getSelectedRow();
                 if (selectedRow != -1) {
-                    showPaymentDetailsPopup(paymentDetailsMap.get(selectedRow), selectedRow);
+                    String[] details = filteredPaymentList.get(selectedRow);
+                    showPaymentDetailsPopup(details, selectedRow);
                 } else {
-                    JOptionPane.showMessageDialog(frame, "Please select a booking to pay for.", "Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(frame, "Please select a booking to pay for.", 
+                        "Error", JOptionPane.ERROR_MESSAGE);
                 }
             }
         });
@@ -292,7 +292,8 @@ public class ResidentMakePaymentForBookingGUI {
                 if (e.getClickCount() == 2) {
                     int row = table.getSelectedRow();
                     if (row != -1) {
-                        showPaymentDetailsPopup(paymentDetailsMap.get(row), row);
+                        String[] details = filteredPaymentList.get(row);
+                        showPaymentDetailsPopup(details, row);
                     }
                 }
             }
@@ -333,7 +334,12 @@ public class ResidentMakePaymentForBookingGUI {
         if (selectedRow != -1 && table.getRowSorter() != null) {
             selectedRow = table.convertRowIndexToModel(selectedRow);
         }
-        String[] paymentDetails = paymentDetailsMap.get(selectedRow);
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(frame, "Please select a booking to pay for.", 
+                "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        String[] paymentDetails = filteredPaymentList.get(selectedRow); 
         if (paymentDetails == null) return;
 
         String roomNumber = APUHostelManagement.Resident.getRoomMap().getOrDefault(details[5], "Unknown Room");
@@ -345,33 +351,34 @@ public class ResidentMakePaymentForBookingGUI {
 
         
         JPanel detailsPanel = new JPanel();
-    detailsPanel.setLayout(new BoxLayout(detailsPanel, BoxLayout.Y_AXIS));
-    detailsPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        detailsPanel.setLayout(new BoxLayout(detailsPanel, BoxLayout.Y_AXIS));
+        detailsPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-    JLabel headerLabel = new JLabel("APU HOSTEL PAYMENT DETAILS");
-    headerLabel.setFont(new Font("Arial", Font.BOLD, 20));
-    headerLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-    detailsPanel.add(headerLabel);
-    detailsPanel.add(Box.createVerticalStrut(20));
+        JLabel headerLabel = new JLabel("APU HOSTEL PAYMENT DETAILS");
+        headerLabel.setFont(new Font("Arial", Font.BOLD, 20));
+        headerLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        detailsPanel.add(headerLabel);
+        detailsPanel.add(Box.createVerticalStrut(20));
 
-    String[][] detailsArray = {
-        {"Payment ID:", details[0]},
-        {"Username:", username},
-        {"Start Date:", startDate.toString()},
-        {"End Date:", endDate.toString()},
-        {"Stay Duration:", stayDuration + " days"},
-        {"Room Type:", roomType},
-        {"Room Number:", roomNumber},
-        {"Booking Status:", details[10]},
-        {"Payment Amount:", "RM " + details[6]}
-    };
+        String[][] detailsArray = {
+            {"Payment ID:", details[0]},
+            {"Username:", username},
+            {"Start Date:", startDate.toString()},
+            {"End Date:", endDate.toString()},
+            {"Stay Duration:", stayDuration + " days"},
+            {"Booking Date and Time:", details[8]},
+            {"Room Type:", roomType},
+            {"Room Number:", roomNumber},
+            {"Booking Status:", details[10]},
+            {"Payment Amount:", "RM " + details[6]}
+        };
 
-    for (String[] detail : detailsArray) {
-        JPanel detailRow = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        detailRow.add(new JLabel(detail[0]));
-        detailRow.add(new JLabel(detail[1]));
-        detailsPanel.add(detailRow);
-    }
+        for (String[] detail : detailsArray) {
+            JPanel detailRow = new JPanel(new FlowLayout(FlowLayout.LEFT));
+            detailRow.add(new JLabel(detail[0]));
+            detailRow.add(new JLabel(detail[1]));
+            detailsPanel.add(detailRow);
+        }
 
         
         JPanel paymentPanel = new JPanel(new GridLayout(5, 1, 10, 10));
@@ -417,7 +424,7 @@ public class ResidentMakePaymentForBookingGUI {
         
         JButton confirmPaymentButton = createButton("Confirm Payment", "approve_icon.png");
         confirmPaymentButton.setPreferredSize(buttonSize);
-        confirmPaymentButton.addActionListener(e -> confirmPayment(details[0], rowIndex));
+        confirmPaymentButton.addActionListener(e -> confirmPayment(details[0]));
 
         addButtonHoverEffect(confirmPaymentButton);
 
@@ -470,12 +477,11 @@ public class ResidentMakePaymentForBookingGUI {
         }
     }
 
-    private void confirmPayment(String paymentID, int rowIndex) {
+    private void confirmPayment(String paymentID) {
         int selectedRow = table.getSelectedRow();
-        if (selectedRow != -1 && table.getRowSorter() != null) {
-            selectedRow = table.convertRowIndexToModel(selectedRow);
-        }
-        String[] paymentDetails = paymentDetailsMap.get(selectedRow);
+        if (selectedRow == -1) return;
+    
+        String[] paymentDetails = filteredPaymentList.get(selectedRow);
         if (paymentDetails == null) return;
     
         if (selectedPaymentMethod == null) {
@@ -483,7 +489,6 @@ public class ResidentMakePaymentForBookingGUI {
             return;
         }
     
-        // Add confirmation dialog
         int confirmChoice = JOptionPane.showConfirmDialog(frame,
             "Are you sure you want to proceed with the payment?\nPayment Method: " + 
             selectedPaymentMethod.replace("_", " ").toUpperCase() +
@@ -493,11 +498,11 @@ public class ResidentMakePaymentForBookingGUI {
             JOptionPane.QUESTION_MESSAGE);
     
         if (confirmChoice == JOptionPane.YES_OPTION) {
-            boolean success = APUHostelManagement.Resident.updatePaymentStatusAndMethod(paymentID, selectedPaymentMethod);
+            boolean success = APUHostelManagement.Resident.updatePaymentStatusAndMethod(paymentDetails[0], selectedPaymentMethod);
             paymentDetailsDialog.dispose();
             if (success) {
                 JOptionPane.showMessageDialog(frame, "Payment successful.", "Success", JOptionPane.INFORMATION_MESSAGE);
-                tableModel.removeRow(rowIndex);
+                tableModel.removeRow(selectedRow); // Use selectedRow instead of rowIndex
             } else {
                 JOptionPane.showMessageDialog(frame, "An error occurred while processing the payment.", "Error", JOptionPane.ERROR_MESSAGE);
             }
@@ -524,7 +529,9 @@ public class ResidentMakePaymentForBookingGUI {
         }
         
         int rowIndex = 0;
+        filteredPaymentList = new ArrayList<>();
         for (String[] details : unpaidBookings) {
+            filteredPaymentList.add(details);
             paymentDetailsMap.put(rowIndex, details);
             String roomNumber = APUHostelManagement.Resident.getRoomNumber(details[5]);
             long stayDuration = ChronoUnit.DAYS.between(LocalDate.parse(details[3]), LocalDate.parse(details[4]));
@@ -633,7 +640,10 @@ public class ResidentMakePaymentForBookingGUI {
         }
 
         String lowerCaseQuery = searchQuery.toLowerCase();
-        List<String[]> searchResults = paymentDetailsMap.values().stream()
+        List<String[]> searchList = filteredPaymentList != null ? 
+            filteredPaymentList : new ArrayList<>(paymentDetailsMap.values());
+            
+        List<String[]> searchResults = searchList.stream()
             .filter(booking -> {
                 String roomNumber = APUHostelManagement.Resident.getRoomNumber(booking[5]);
                 long stayDuration = ChronoUnit.DAYS.between(
@@ -710,6 +720,18 @@ public class ResidentMakePaymentForBookingGUI {
 
     private void updateTable(List<String[]> bookingList) {
         tableModel.setRowCount(0);
+    
+        if (bookingList.isEmpty()) {
+            JOptionPane.showMessageDialog(frame,
+                "No bookings found.",
+                "No Results", JOptionPane.INFORMATION_MESSAGE);
+            currentFilterChoice = null;
+            currentFilterValue = null;
+            filterButton.setText("Filter");
+            loadPayments();
+            return;
+        }
+        
         filteredPaymentList = new ArrayList<>(bookingList);
         
         int rowIndex = 0;

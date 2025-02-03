@@ -282,8 +282,8 @@ public class StaffMakePaymentForResidentGUI {
     private void loadPendingPayments() {
         paymentDetailsMap = new HashMap<>();
         tableModel.setRowCount(0);
-
-        filteredPaymentList = null;
+    
+        filteredPaymentList = new ArrayList<>();
         currentFilterChoice = null;
         currentFilterValue = null;
         currentSortCategory = null;
@@ -312,6 +312,10 @@ public class StaffMakePaymentForResidentGUI {
                     row++;
                 }
             }
+            
+            // Initialize filteredPaymentList after populating paymentDetailsMap
+            filteredPaymentList = new ArrayList<>(paymentDetailsMap.values());
+            
             if (row == 0) {
                 JOptionPane.showMessageDialog(frame, 
                     "No pending payments found.", 
@@ -324,16 +328,28 @@ public class StaffMakePaymentForResidentGUI {
     }
 
     private void showPaymentConfirmation() {
-        int selectedRow = paymentTable.getSelectedRow();
-        if (selectedRow == -1) {
+        int selectedIndex = paymentTable.getSelectedRow();
+        if (selectedIndex == -1) {
             JOptionPane.showMessageDialog(frame, 
                 "Please select a payment to make payment for.", 
                 "Warning", JOptionPane.WARNING_MESSAGE);
             return;
         }
-
-        String[] selectedPayment = paymentDetailsMap.get(selectedRow);
+    
+        // Get the payment ID from the table model
+        String paymentId = (String)tableModel.getValueAt(selectedIndex, 0);
         
+        // Find the corresponding payment in filteredPaymentList
+        String[] selectedPayment = filteredPaymentList.stream()
+            .filter(payment -> payment[0].equals(paymentId))
+            .findFirst()
+            .orElse(null);
+    
+        if (selectedPayment == null) {
+            JOptionPane.showMessageDialog(frame, "Error finding payment details", 
+                "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
         
         String[][] data = {
             {"Payment ID", selectedPayment[0]},
@@ -348,7 +364,7 @@ public class StaffMakePaymentForResidentGUI {
             {"Payment Method", selectedPayment[9]},
             {"Booking Status", selectedPayment[10]}
         };
-
+    
         String[] columnNames = {"Field", "Value"};
         JTable detailsTable = new JTable(data, columnNames);
         detailsTable.setEnabled(false);
@@ -371,7 +387,7 @@ public class StaffMakePaymentForResidentGUI {
                     selectedPayment[0], 
                     staff.getStaffID())) {
                 JOptionPane.showMessageDialog(frame, "Payment processed successfully");
-                loadPendingPayments(); 
+                reapplyCurrentFilter(); // Changed from loadPendingPayments()
             } else {
                 JOptionPane.showMessageDialog(frame, "Error processing payment", 
                     "Error", JOptionPane.ERROR_MESSAGE);
@@ -391,14 +407,14 @@ public class StaffMakePaymentForResidentGUI {
             currentFilterChoice = null;
             currentFilterValue = null;
             filterButton.setText("Filter");
-            frame.setTitle("View Receipts - " + staff.getUsername());
-
+            frame.setTitle("Make Payment for Resident - " + staff.getUsername());
+            
             filteredPaymentList = new ArrayList<>(paymentDetailsMap.values());
             
             if (currentSortCategory != null) {
-                applySorting(new ArrayList<>(filteredPaymentList));
+                applySorting(filteredPaymentList);  // Apply current sorting to all payments
             } else {
-                loadPendingPayments();
+                updateTable(filteredPaymentList);  // Just update table without sorting
             }
             return;
         }
@@ -525,9 +541,11 @@ public class StaffMakePaymentForResidentGUI {
         }
     
         String lowerCaseQuery = searchQuery.toLowerCase();
-        List<String[]> searchResults = paymentDetailsMap.values().stream()
+        List<String[]> searchList = filteredPaymentList != null ? 
+            filteredPaymentList : new ArrayList<>(paymentDetailsMap.values());
+    
+        List<String[]> searchResults = searchList.stream()
             .filter(payment -> {
-                
                 long stayDuration = calculateStayDuration(payment[3], payment[4]);
                 String stayDurationStr = String.valueOf(stayDuration);
                 
@@ -586,29 +604,25 @@ public class StaffMakePaymentForResidentGUI {
         }
     }
 
-    private void updateFilteredPayments() {
-        List<String[]> filteredPaymentList = paymentDetailsMap.values().stream()
-            .filter(payment -> switch (currentFilterChoice) {
-                case "Payment Method" -> payment[9].equalsIgnoreCase(currentFilterValue);
-                case "Room ID" -> payment[5].equalsIgnoreCase(currentFilterValue);
-                case "Resident ID" -> payment[1].equalsIgnoreCase(currentFilterValue);
-                default -> true;
-            })
-            .collect(Collectors.toList());
-
-        if (!filteredPaymentList.isEmpty()) {
-            frame.setTitle("Make Payment for Resident - " + staff.getUsername() + 
-                " (Filtered: " + currentFilterValue + ", " + filteredPaymentList.size() + " payments)");
-        }
-
-        updateTable(filteredPaymentList);
-    }
-
     private void updateTable(List<String[]> paymentList) {
         tableModel.setRowCount(0);
-
         filteredPaymentList = new ArrayList<>(paymentList);
-
+        
+        if (paymentList.isEmpty()) {
+            JOptionPane.showMessageDialog(frame, 
+                "No payments found.", 
+                "Information", JOptionPane.INFORMATION_MESSAGE);
+            
+            if (currentFilterChoice != null) {
+                currentFilterChoice = null;
+                currentFilterValue = null;
+                filterButton.setText("Filter");
+                frame.setTitle("Make Payment for Resident - " + staff.getUsername());
+                loadPendingPayments();
+            }
+            return;
+        }
+    
         for (String[] payment : paymentList) {
             tableModel.addRow(new Object[]{
                 payment[0],  

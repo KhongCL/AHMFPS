@@ -394,7 +394,7 @@ public class ManagerManageRatesGUI {
     
             rateList.add(new APUHostelManagement.FeeRate(feeRateID, roomType.toLowerCase(), dailyRate, weeklyRate, monthlyRate, yearlyRate, true));
             saveRatesToFile();
-            loadRates();
+            reapplyCurrentFilter();
             
             
             int addMore = JOptionPane.showConfirmDialog(frame, "Do you want to add another rate?","Add Another Rate", JOptionPane.YES_NO_OPTION);
@@ -408,63 +408,97 @@ public class ManagerManageRatesGUI {
     }
     
     private void updateRate() {
-        int selectedIndex = rateTable.getSelectedRow();
-        if (selectedIndex == -1) {
+        int selectedRow = rateTable.getSelectedRow();
+        if (selectedRow == -1) {
             JOptionPane.showMessageDialog(frame, "Please select a rate to update.", "Warning", JOptionPane.WARNING_MESSAGE);
             return;
         }
     
-        APUHostelManagement.FeeRate rateToUpdate = rateList.get(selectedIndex);
-    
+        APUHostelManagement.FeeRate rateToUpdate = filteredRateList.get(selectedRow);
         String[] options = {"Room Type", "Daily Rate", "Weekly Rate", "Monthly Rate", "Yearly Rate"};
-        String attributeToUpdate = (String) JOptionPane.showInputDialog(frame, "Select attribute to update:", "Update Rate", JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+        String attributeToUpdate = (String) JOptionPane.showInputDialog(frame, 
+            "Select attribute to update:", "Update Rate", 
+            JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
     
-        if (attributeToUpdate == null) {
-            return; 
-        }
+        if (attributeToUpdate == null) return;
     
         List<String> restrictedFeeRateIDs = APUHostelManagement.Manager.getRestrictedFeeRateIDs();
+        boolean updated = false;
     
         switch (attributeToUpdate) {
-            case "Room Type":
+            case "Room Type" -> {
                 if (restrictedFeeRateIDs.contains(rateToUpdate.getFeeRateID())) {
-                    JOptionPane.showMessageDialog(frame, "Cannot update room type for fee rate ID: " + rateToUpdate.getFeeRateID() + " as it is currently being used.", "Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(frame, 
+                        "Cannot update room type for fee rate ID: " + rateToUpdate.getFeeRateID() + 
+                        " as it is currently being used.", "Error", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
                 String[] roomTypes = {"Standard", "Large", "Family"};
-                String newRoomType = (String) JOptionPane.showInputDialog(frame, "Select new Room Type:", "Update Room Type", JOptionPane.QUESTION_MESSAGE, null, roomTypes, roomTypes[0]);
+                String newRoomType = (String) JOptionPane.showInputDialog(frame, 
+                    "Select new Room Type:", "Update Room Type", 
+                    JOptionPane.QUESTION_MESSAGE, null, roomTypes, roomTypes[0]);
                 if (newRoomType == null) return;
+                if (newRoomType.toLowerCase().equals(rateToUpdate.getRoomType())) {
+                    showSameValueMessage("Room Type");
+                    return;
+                }
                 rateToUpdate.setRoomType(newRoomType.toLowerCase());
-                break;
-            case "Daily Rate":
-                double newDailyRate = getValidatedRate("Daily Rate", rateToUpdate.getDailyRate());
-                if (newDailyRate != -1) {
-                    rateToUpdate.setDailyRate(newDailyRate);
+                updated = true;
+            }
+            case "Daily Rate" -> {
+                double newRate = getValidatedRate("Daily Rate", rateToUpdate.getDailyRate());
+                if (newRate == -1) return;
+                if (newRate == rateToUpdate.getDailyRate()) {
+                    showSameValueMessage("Daily Rate");
+                    return;
                 }
-                break;
-            case "Weekly Rate":
-                double newWeeklyRate = getValidatedRate("Weekly Rate", rateToUpdate.getWeeklyRate());
-                if (newWeeklyRate != -1) {
-                    rateToUpdate.setWeeklyRate(newWeeklyRate);
+                rateToUpdate.setDailyRate(newRate);
+                updated = true;
+            }
+            case "Weekly Rate" -> {
+                double newRate = getValidatedRate("Weekly Rate", rateToUpdate.getWeeklyRate());
+                if (newRate == -1) return;
+                if (newRate == rateToUpdate.getWeeklyRate()) {
+                    showSameValueMessage("Weekly Rate");
+                    return;
                 }
-                break;
-            case "Monthly Rate":
-                double newMonthlyRate = getValidatedRate("Monthly Rate", rateToUpdate.getMonthlyRate());
-                if (newMonthlyRate != -1) {
-                    rateToUpdate.setMonthlyRate(newMonthlyRate);
+                rateToUpdate.setWeeklyRate(newRate);
+                updated = true;
+            }
+            case "Monthly Rate" -> {
+                double newRate = getValidatedRate("Monthly Rate", rateToUpdate.getMonthlyRate());
+                if (newRate == -1) return;
+                if (newRate == rateToUpdate.getMonthlyRate()) {
+                    showSameValueMessage("Monthly Rate");
+                    return;
                 }
-                break;
-            case "Yearly Rate":
-                double newYearlyRate = getValidatedRate("Yearly Rate", rateToUpdate.getYearlyRate());
-                if (newYearlyRate != -1) {
-                    rateToUpdate.setYearlyRate(newYearlyRate);
+                rateToUpdate.setMonthlyRate(newRate);
+                updated = true;
+            }
+            case "Yearly Rate" -> {
+                double newRate = getValidatedRate("Yearly Rate", rateToUpdate.getYearlyRate());
+                if (newRate == -1) return;
+                if (newRate == rateToUpdate.getYearlyRate()) {
+                    showSameValueMessage("Yearly Rate");
+                    return;
                 }
-                break;
+                rateToUpdate.setYearlyRate(newRate);
+                updated = true;
+            }
         }
     
-        saveRatesToFile();
-        loadRates(); 
-        JOptionPane.showMessageDialog(frame, "Rate updated successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
+        if (updated) {
+            saveRatesToFile();
+            reapplyCurrentFilter();
+            JOptionPane.showMessageDialog(frame, "Rate updated successfully.", 
+                "Success", JOptionPane.INFORMATION_MESSAGE);
+        }
+    }
+    
+    private void showSameValueMessage(String fieldName) {
+        JOptionPane.showMessageDialog(frame,
+            "The " + fieldName + " is the same as the original value.",
+            "Information", JOptionPane.INFORMATION_MESSAGE);
     }
 
     private void deleteRate() {
@@ -474,7 +508,7 @@ public class ManagerManageRatesGUI {
             return;
         }
 
-        APUHostelManagement.FeeRate rateToDelete = rateList.get(selectedIndex);
+        APUHostelManagement.FeeRate rateToDelete = filteredRateList.get(selectedIndex);
 
         if (!rateToDelete.isActive()) {
             JOptionPane.showMessageDialog(frame, "The selected rate is already deleted.", "Warning", JOptionPane.WARNING_MESSAGE);
@@ -495,7 +529,7 @@ public class ManagerManageRatesGUI {
         rateToDelete.setActive(false);
 
         saveRatesToFile();
-        loadRates(); 
+        reapplyCurrentFilter();
         JOptionPane.showMessageDialog(frame, "Rate deleted successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
     }
 
@@ -506,7 +540,7 @@ public class ManagerManageRatesGUI {
             return;
         }
 
-        APUHostelManagement.FeeRate rateToRestore = rateList.get(selectedIndex);
+        APUHostelManagement.FeeRate rateToRestore = filteredRateList.get(selectedIndex);
 
         if (rateToRestore.isActive()) {
             JOptionPane.showMessageDialog(frame, "The selected rate is already restored.", "Warning", JOptionPane.WARNING_MESSAGE);
@@ -521,7 +555,7 @@ public class ManagerManageRatesGUI {
         rateToRestore.setActive(true);
 
         saveRatesToFile();
-        loadRates(); 
+        reapplyCurrentFilter();
         JOptionPane.showMessageDialog(frame, "Rate restored successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
     }
 
@@ -550,7 +584,7 @@ public class ManagerManageRatesGUI {
         }
 
         saveRatesToFile();
-        loadRates(); 
+        reapplyCurrentFilter();
         JOptionPane.showMessageDialog(frame, "All rates deleted successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
     }
 
@@ -565,24 +599,34 @@ public class ManagerManageRatesGUI {
         }
 
         saveRatesToFile();
-        loadRates(); 
+        reapplyCurrentFilter();
         JOptionPane.showMessageDialog(frame, "All rates restored successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
     }
 
     private double getValidatedRate(String rateType, double currentRate) {
         double rate = -1;
         while (rate <= 0) {
-            String input = JOptionPane.showInputDialog(frame, "Enter " + rateType + ":", currentRate);
+            String input = JOptionPane.showInputDialog(frame, 
+                "Enter " + rateType + ":", String.valueOf(currentRate));
             if (input == null) {
-                return -1; 
+                return -1;
+            }
+            if (input.trim().isEmpty()) {
+                return -1;
             }
             try {
                 rate = Double.parseDouble(input);
                 if (rate <= 0) {
-                    JOptionPane.showMessageDialog(frame, rateType + " must be greater than zero. Please enter a valid rate.", "Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(frame, 
+                        rateType + " must be greater than zero. Please enter a valid rate.", 
+                        "Error", JOptionPane.ERROR_MESSAGE);
+                    continue;
                 }
+                return rate;
             } catch (NumberFormatException e) {
-                JOptionPane.showMessageDialog(frame, "Invalid input. Please enter a valid " + rateType + ".", "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(frame, 
+                    "Invalid input. Please enter a valid " + rateType + ".", 
+                    "Error", JOptionPane.ERROR_MESSAGE);
             }
         }
         return rate;
@@ -603,8 +647,16 @@ public class ManagerManageRatesGUI {
         if (choice.equals("All")) {
             currentFilterChoice = null;
             currentFilterValue = null;
-            loadRates();
             filterButton.setText("Filter");
+            frame.setTitle("Manage Rates - " + manager.getUsername());
+            
+            filteredRateList = new ArrayList<>(rateList); // Use existing rates instead of reloading
+            
+            if (currentSortCategory != null) {
+                applySorting(filteredRateList); // Apply current sorting if active
+            } else {
+                updateTable(filteredRateList); // Just update table if no sorting
+            }
             return;
         }
 
@@ -724,7 +776,6 @@ public class ManagerManageRatesGUI {
     
     private void searchRates(String searchQuery) {
         if (searchQuery == null || searchQuery.trim().isEmpty() || searchQuery.equals("Search rates...")) {
-            
             if (currentFilterChoice != null) {
                 reapplyCurrentFilter();
             } else {
@@ -734,7 +785,10 @@ public class ManagerManageRatesGUI {
         }
     
         String lowerQuery = searchQuery.toLowerCase();
-        List<APUHostelManagement.FeeRate> searchResults = filteredRateList.stream()
+        List<APUHostelManagement.FeeRate> searchList = filteredRateList != null ? 
+            filteredRateList : new ArrayList<>(rateList);
+    
+        List<APUHostelManagement.FeeRate> searchResults = searchList.stream()
             .filter(rate -> 
                 rate.getFeeRateID().toLowerCase().contains(lowerQuery) ||
                 rate.getRoomType().toLowerCase().contains(lowerQuery) ||
@@ -748,8 +802,18 @@ public class ManagerManageRatesGUI {
         if (!searchResults.isEmpty()) {
             frame.setTitle("Manage Rates - " + manager.getUsername() + 
                 " (Found " + searchResults.size() + " results)");
+            updateTable(searchResults);
+        } else {
+            frame.setTitle("Manage Rates - " + manager.getUsername());
+            JOptionPane.showMessageDialog(frame, 
+                "No rates found matching your search.", 
+                "No Results", JOptionPane.INFORMATION_MESSAGE);
+            if (currentFilterChoice != null) {
+                reapplyCurrentFilter();
+            } else {
+                loadRates();
+            }
         }
-        updateTable(searchResults);
     }
     
     private void updateTable(List<APUHostelManagement.FeeRate> rates) {

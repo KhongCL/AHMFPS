@@ -321,13 +321,17 @@ public class ManagerApproveUsersRegistrationGUI {
     }
 
     private void approveSelectedUser() {
-        int selectedIndex = userTable.getSelectedRow();
-        if (selectedIndex == -1) {
+        int selectedRow = userTable.getSelectedRow();
+        if (selectedRow == -1) {
             JOptionPane.showMessageDialog(frame, "Please select a user to approve.", 
                 "Warning", JOptionPane.WARNING_MESSAGE);
             return;
         }
     
+        // Get the selected user from filteredUserList instead of userList
+        APUHostelManagement.User userToApprove = filteredUserList.get(selectedRow);
+        String role = userToApprove.getRole();
+        
         int confirm = JOptionPane.showConfirmDialog(frame, 
             "Are you sure you want to approve this user?", 
             "Confirm Approval", JOptionPane.YES_NO_OPTION);
@@ -335,8 +339,6 @@ public class ManagerApproveUsersRegistrationGUI {
             return;
         }
     
-        APUHostelManagement.User userToApprove = userList.get(selectedIndex);
-        String role = (String) userTable.getValueAt(selectedIndex, 6);
         String currentDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
     
         try {
@@ -350,7 +352,8 @@ public class ManagerApproveUsersRegistrationGUI {
                 managerToApprove.setIsActive(true);
                 managerToApprove.saveToFile("users.txt");
                 managerToApprove.saveToManagerFile(managerID, userID, "approved_managers.txt");
-                userList.remove(selectedIndex);
+                userList.remove(userToApprove);
+                filteredUserList.remove(selectedRow);
                 APUHostelManagement.Manager.saveUnapprovedUsers(
                     userList.stream()
                         .filter(u -> u.getRole().equals("manager"))
@@ -370,7 +373,8 @@ public class ManagerApproveUsersRegistrationGUI {
                 staffToApprove.setIsActive(true);
                 staffToApprove.saveToFile("users.txt");
                 staffToApprove.saveToStaffFile(staffID, userID, "approved_staffs.txt");
-                userList.remove(selectedIndex);
+                userList.remove(userToApprove);
+                filteredUserList.remove(selectedRow);
                 APUHostelManagement.Manager.saveUnapprovedUsers(
                     userList.stream()
                         .filter(u -> u.getRole().equals("staff"))
@@ -390,7 +394,8 @@ public class ManagerApproveUsersRegistrationGUI {
                 residentToApprove.setIsActive(true);
                 residentToApprove.saveToFile("users.txt");
                 residentToApprove.saveToResidentFile(residentID, userID, "approved_residents.txt");
-                userList.remove(selectedIndex);
+                userList.remove(userToApprove);
+                filteredUserList.remove(selectedRow);
                 APUHostelManagement.Manager.saveUnapprovedUsers(
                     userList.stream()
                         .filter(u -> u.getRole().equals("resident"))
@@ -405,7 +410,7 @@ public class ManagerApproveUsersRegistrationGUI {
                     "Error", JOptionPane.ERROR_MESSAGE);
             }
     
-            updateTable(userList); 
+            updateTable(filteredUserList);
     
         } catch (IOException e) {
             JOptionPane.showMessageDialog(frame, 
@@ -425,7 +430,16 @@ public class ManagerApproveUsersRegistrationGUI {
         if (roleChoice.equals("All")) {
             currentFilterChoice = null;
             currentFilterValue = null;
-            loadUnapprovedUsers();
+            filterButton.setText("Filter");
+            frame.setTitle("Approve Users - " + manager.getUsername());
+            
+            filteredUserList = new ArrayList<>(userList); // Use existing users instead of reloading
+            
+            if (currentSortCategory != null) {
+                applySorting(filteredUserList); // Apply current sorting if active
+            } else {
+                updateTable(filteredUserList); // Just update table if no sorting
+            }
             return;
         }
     
@@ -476,7 +490,6 @@ public class ManagerApproveUsersRegistrationGUI {
 
     private void searchUsers(String searchQuery) {
         if (searchQuery == null || searchQuery.trim().isEmpty()) {
-            
             if (currentFilterChoice != null) {
                 reapplyCurrentFilter();
             } else {
@@ -486,8 +499,11 @@ public class ManagerApproveUsersRegistrationGUI {
         }
     
         String lowerCaseQuery = searchQuery.toLowerCase();
+        
+        List<APUHostelManagement.User> searchList = filteredUserList != null ? 
+            filteredUserList : new ArrayList<>(userList);
     
-        List<APUHostelManagement.User> searchedUsers = filteredUserList.stream()
+        List<APUHostelManagement.User> searchedUsers = searchList.stream()
                 .filter(user -> user.getUserID().toLowerCase().contains(lowerCaseQuery) ||
                                 user.getIcPassportNumber().toLowerCase().contains(lowerCaseQuery) ||
                                 user.getUsername().toLowerCase().contains(lowerCaseQuery) ||
@@ -499,11 +515,20 @@ public class ManagerApproveUsersRegistrationGUI {
                 .collect(Collectors.toList());
         
         if (!searchedUsers.isEmpty()) {
-            frame.setTitle("Manage Users - " + manager.getUsername() + 
+            frame.setTitle("Approve Users - " + manager.getUsername() + 
                 " (Found " + searchedUsers.size() + " results)");
+            updateTable(searchedUsers);
+        } else {
+            frame.setTitle("Approve Users - " + manager.getUsername());
+            JOptionPane.showMessageDialog(frame, 
+                "No users found matching your search.", 
+                "No Results", JOptionPane.INFORMATION_MESSAGE);
+            if (currentFilterChoice != null) {
+                reapplyCurrentFilter();
+            } else {
+                loadUnapprovedUsers();
+            }
         }
-    
-        updateTable(searchedUsers);
     }
 
     private void sortUsers() {

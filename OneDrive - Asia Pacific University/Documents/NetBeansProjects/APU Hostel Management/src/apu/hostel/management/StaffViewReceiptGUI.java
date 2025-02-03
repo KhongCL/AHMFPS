@@ -29,6 +29,7 @@ public class StaffViewReceiptGUI {
 
     public StaffViewReceiptGUI(APUHostelManagement.Staff staff) {
         this.staff = staff;
+        this.filteredPaymentList = new ArrayList<>();
         initialize();
     }
 
@@ -318,6 +319,8 @@ public class StaffViewReceiptGUI {
                     row++;
                 }
             }
+
+            filteredPaymentList = new ArrayList<>(paymentDetailsMap.values());
             if (row == 0) {
                 JOptionPane.showMessageDialog(frame, 
                     "No completed payments found.", 
@@ -337,7 +340,7 @@ public class StaffViewReceiptGUI {
             return;
         }
 
-        String[] receiptDetails = paymentDetailsMap.get(selectedRow);
+        String[] receiptDetails = filteredPaymentList.get(selectedRow);
         
         
         JPanel receiptPanel = new JPanel();
@@ -392,9 +395,9 @@ public class StaffViewReceiptGUI {
             frame.setTitle("View Receipts - " + staff.getUsername());
             filteredPaymentList = new ArrayList<>(paymentDetailsMap.values());
             if (currentSortCategory != null) {
-                applySorting(new ArrayList<>(filteredPaymentList));
+                applySorting(filteredPaymentList);
             } else {
-                loadCompletedPayments();
+                updateTable(filteredPaymentList);
             }
             return;
         }
@@ -494,9 +497,12 @@ public class StaffViewReceiptGUI {
             }
             return;
         }
-
-        String lowerCaseQuery = searchQuery.toLowerCase();
-        List<String[]> searchResults = paymentDetailsMap.values().stream()
+    
+        String lowerCaseQuery = searchQuery.toLowerCase(); 
+        List<String[]> searchList = filteredPaymentList != null ?
+            filteredPaymentList : new ArrayList<>(paymentDetailsMap.values());
+    
+        List<String[]> searchResults = searchList.stream()
             .filter(receipt -> 
                 receipt[0].toLowerCase().contains(lowerCaseQuery) || 
                 receipt[1].toLowerCase().contains(lowerCaseQuery) || 
@@ -510,7 +516,7 @@ public class StaffViewReceiptGUI {
                 receipt[9].toLowerCase().contains(lowerCaseQuery)    
             )
             .collect(Collectors.toList());
-
+    
         if (!searchResults.isEmpty()) {
             frame.setTitle("View Receipts - " + staff.getUsername() + 
                 " (Found " + searchResults.size() + " results)");
@@ -523,7 +529,7 @@ public class StaffViewReceiptGUI {
             if (currentFilterChoice != null) {
                 reapplyCurrentFilter();
             } else {
-                loadCompletedPayments();
+                loadCompletedPayments(); 
             }
         }
     }
@@ -576,6 +582,16 @@ public class StaffViewReceiptGUI {
 
     private void updateTable(List<String[]> receiptList) {
         tableModel.setRowCount(0);
+
+        if (receiptList.isEmpty()) {
+            JOptionPane.showMessageDialog(frame, 
+                "No receipts found.", 
+                "Information", JOptionPane.INFORMATION_MESSAGE);
+            if (currentFilterChoice == null) {
+                loadCompletedPayments();
+            }
+            return;
+        }
         
         filteredPaymentList = new ArrayList<>(receiptList);
         

@@ -35,6 +35,8 @@ public class StaffGenerateReceiptGUI {
 
     public StaffGenerateReceiptGUI(APUHostelManagement.Staff staff) {
         this.staff = staff;
+        this.filteredPaymentList = new ArrayList<>();
+        this.paymentDetailsMap = new HashMap<>();
         initialize();
     }
 
@@ -98,8 +100,9 @@ public class StaffGenerateReceiptGUI {
                     currentFilterChoice = null;
                     currentFilterValue = null;
                     frame.setTitle("Generate Receipt - " + staff.getUsername());
+                    filteredPaymentList = new ArrayList<>(paymentDetailsMap.values());
                     if (currentSortCategory != null) {
-                        applySorting(new ArrayList<>(paymentDetailsMap.values()));
+                        applySorting(filteredPaymentList); // Use filteredPaymentList instead of paymentDetailsMap.values()
                     } else {
                         loadEligiblePayments();
                     }
@@ -285,8 +288,8 @@ public class StaffGenerateReceiptGUI {
     private void loadEligiblePayments() {
         paymentDetailsMap = new HashMap<>();
         tableModel.setRowCount(0);
-
-        filteredPaymentList = null;
+        filteredPaymentList = new ArrayList<>(); // Initialize here
+        
         currentFilterChoice = null;
         currentFilterValue = null;
         currentSortCategory = null;
@@ -299,7 +302,6 @@ public class StaffGenerateReceiptGUI {
             int row = 0;
             while ((line = reader.readLine()) != null) {
                 String[] payment = line.split(",");
-                
                 if (payment[2] != null && !payment[2].isEmpty() && 
                     payment[9] != null && !payment[9].isEmpty() &&
                     payment[7].equalsIgnoreCase("paid") &&
@@ -313,13 +315,16 @@ public class StaffGenerateReceiptGUI {
                     row++;
                 }
             }
+            filteredPaymentList.addAll(paymentDetailsMap.values());
+            
             if (row == 0) {
                 JOptionPane.showMessageDialog(frame, 
                     "No eligible payments found.", 
                     "Information", JOptionPane.INFORMATION_MESSAGE);
             }
         } catch (IOException e) {
-            JOptionPane.showMessageDialog(frame, "Error loading payments", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(frame, "Error loading payments", 
+                "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -331,7 +336,7 @@ public class StaffGenerateReceiptGUI {
             return;
         }
 
-        String[] selectedPayment = paymentDetailsMap.get(selectedRow);
+        String[] selectedPayment = filteredPaymentList.get(selectedRow);
         
         
         JPanel detailsPanel = new JPanel(new BorderLayout(10,10));
@@ -364,7 +369,7 @@ public class StaffGenerateReceiptGUI {
                     staff.getStaffID())) {
                 JOptionPane.showMessageDialog(frame, "Receipt generated successfully!", 
                     "Success", JOptionPane.INFORMATION_MESSAGE);
-                loadEligiblePayments();
+                reapplyCurrentFilter();
             } else {
                 JOptionPane.showMessageDialog(frame, "Error generating receipt", 
                     "Error", JOptionPane.ERROR_MESSAGE);
@@ -384,12 +389,12 @@ public class StaffGenerateReceiptGUI {
             currentFilterChoice = null;
             currentFilterValue = null;
             filterButton.setText("Filter");
-            frame.setTitle("View Receipts - " + staff.getUsername());
+            frame.setTitle("Generate Receipt - " + staff.getUsername());
             filteredPaymentList = new ArrayList<>(paymentDetailsMap.values());
             if (currentSortCategory != null) {
-                applySorting(new ArrayList<>(filteredPaymentList));
+                applySorting(filteredPaymentList);
             } else {
-                loadEligiblePayments();
+                updateTable(filteredPaymentList); // Changed from loadEligiblePayments()
             }
             return;
         }
@@ -447,12 +452,20 @@ public class StaffGenerateReceiptGUI {
         if (!filteredPaymentList.isEmpty()) {
             frame.setTitle("Generate Receipt - " + staff.getUsername() + 
                 " (Filtered: " + currentFilterValue + ", " + filteredPaymentList.size() + " receipts)");
-        }
-    
-        if (currentSortCategory != null) {
-            applySorting(filteredPaymentList);
+            if (currentSortCategory != null) {
+                applySorting(filteredPaymentList);
+            } else {
+                updateTable(filteredPaymentList);
+            }
         } else {
-            updateTable(filteredPaymentList);
+            JOptionPane.showMessageDialog(frame, 
+                "No receipts found with the selected filter.", 
+                "Information", JOptionPane.INFORMATION_MESSAGE);
+            currentFilterChoice = null;
+            currentFilterValue = null;
+            filterButton.setText("Filter");
+            frame.setTitle("Generate Receipt - " + staff.getUsername());
+            loadEligiblePayments();
         }
     }
     
@@ -492,7 +505,10 @@ public class StaffGenerateReceiptGUI {
         }
     
         String lowerCaseQuery = searchQuery.toLowerCase();
-        List<String[]> searchResults = paymentDetailsMap.values().stream()
+        List<String[]> searchList = filteredPaymentList != null ? 
+            filteredPaymentList : new ArrayList<>(paymentDetailsMap.values());
+    
+        List<String[]> searchResults = searchList.stream()
             .filter(payment -> 
                 payment[0].toLowerCase().contains(lowerCaseQuery) || 
                 payment[1].toLowerCase().contains(lowerCaseQuery) || 
@@ -571,20 +587,23 @@ public class StaffGenerateReceiptGUI {
     
     private void updateTable(List<String[]> paymentList) {
         tableModel.setRowCount(0);
-
+        
+        if (paymentList.isEmpty()) {
+            JOptionPane.showMessageDialog(frame, 
+                "No receipts found.", 
+                "Information", JOptionPane.INFORMATION_MESSAGE);
+            if (currentFilterChoice == null) {
+                loadEligiblePayments();
+            }
+            return;
+        }
+    
         filteredPaymentList = new ArrayList<>(paymentList);
-
+    
         for (String[] payment : paymentList) {
             tableModel.addRow(new Object[]{
-                payment[0],  
-                payment[1],  
-                payment[2],  
-                payment[3],  
-                payment[4],  
-                payment[5],  
-                payment[6],  
-                payment[9],  
-                payment[8]   
+                payment[0], payment[1], payment[2], payment[3], payment[4],
+                payment[5], payment[6], payment[9], payment[8]
             });
         }
     }
