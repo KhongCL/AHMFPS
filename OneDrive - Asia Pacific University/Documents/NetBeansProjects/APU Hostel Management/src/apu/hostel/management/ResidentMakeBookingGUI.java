@@ -1,28 +1,30 @@
 package apu.hostel.management;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyAdapter;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.Year;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 public class ResidentMakeBookingGUI {
     private JFrame frame;
     private String selectedRoomType = null;
-    private JTextField startDateField;
-    private JTextField endDateField;
     private JButton standardButton;
     private JButton largeButton;
     private JButton familyButton;
     private APUHostelManagement.Resident resident; 
-
+    private JTable pricingTable;
+    private JSpinner startDateSpinner;
+    private JSpinner endDateSpinner;
     
     public ResidentMakeBookingGUI(APUHostelManagement.Resident resident) {
         this.resident = resident;
@@ -34,25 +36,95 @@ public class ResidentMakeBookingGUI {
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         frame.setSize(1024, 768);
         frame.setLayout(new BorderLayout(10, 10));
+        frame.setTitle("Make Booking - " + resident.getUsername());
         frame.setLocationRelativeTo(null);
-        
-        
+
+        JPanel topPanel = new JPanel(new BorderLayout());
+        JButton backButton = createButton("Back", "back_icon.png");
+        backButton.setPreferredSize(new Dimension(100, 40));
+        backButton.addActionListener(e -> {
+            new ResidentManageBookingsGUI(resident);
+            frame.dispose();
+        });
+        topPanel.add(backButton, BorderLayout.WEST);
+        frame.add(topPanel, BorderLayout.NORTH);
+
+        JPanel titlePanel = new JPanel(new BorderLayout());
         JLabel titleLabel = new JLabel("Make Booking", JLabel.CENTER);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 24)); 
-        frame.add(titleLabel, BorderLayout.NORTH);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
+        titlePanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0)); // Add some vertical padding
+        titlePanel.add(titleLabel, BorderLayout.CENTER);
 
-        
         JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
+        frame.add(mainPanel, BorderLayout.CENTER);
 
-        
+        mainPanel.add(titlePanel, BorderLayout.NORTH);
+
+        JPanel contentPanel = new JPanel(new BorderLayout(10, 10));
+
         JPanel pricingPanel = new JPanel(new BorderLayout());
         JLabel pricingLabel = new JLabel("Room Pricing", JLabel.CENTER);
         pricingLabel.setFont(new Font("Arial", Font.BOLD, 18));
         pricingPanel.add(pricingLabel, BorderLayout.NORTH);
 
         String[] columnNames = {"Room Type", "Room Capacity", "Daily Rate (RM)", "Weekly Rate (RM)", "Monthly Rate (RM)", "Yearly Rate (RM)"};
-        DefaultTableModel tableModel = new DefaultTableModel(columnNames, 0);
+        DefaultTableModel tableModel = new DefaultTableModel(columnNames, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+            
+            @Override
+            public Class<?> getColumnClass(int column) {
+                return String.class;
+            }
+        };
         JTable pricingTable = new JTable(tableModel);
+
+        pricingTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        pricingTable.getTableHeader().setReorderingAllowed(false);
+        pricingTable.setRowHeight(30);
+        pricingTable.getTableHeader().setFont(new Font("Arial", Font.BOLD, 12));
+        pricingTable.setFont(new Font("Arial", Font.PLAIN, 12));
+        pricingTable.setGridColor(Color.LIGHT_GRAY);
+        pricingTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+        pricingTable.setSelectionBackground(new Color(230, 240, 250));
+        pricingTable.setSelectionForeground(Color.BLACK);
+        pricingTable.setIntercellSpacing(new Dimension(5, 5));
+        pricingTable.setShowGrid(true);
+        pricingTable.setFillsViewportHeight(true);
+
+        pricingTable.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value, 
+                    boolean isSelected, boolean hasFocus, int row, int column) {
+                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                if (!isSelected) {
+                    c.setBackground(row % 2 == 0 ? Color.WHITE : new Color(245, 245, 250));
+                }
+                return c;
+            }
+        });
+
+        pricingTable.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 2) {
+                    int row = pricingTable.getSelectedRow();
+                    if (row != -1) {
+                        showDetailedPricing(row);
+                    }
+                }
+            }
+        });
+
+        pricingTable.getColumnModel().getColumn(0).setPreferredWidth(100); // Room Type
+        pricingTable.getColumnModel().getColumn(1).setPreferredWidth(100); // Capacity
+        pricingTable.getColumnModel().getColumn(2).setPreferredWidth(100); // Daily Rate
+        pricingTable.getColumnModel().getColumn(3).setPreferredWidth(100); // Weekly Rate
+        pricingTable.getColumnModel().getColumn(4).setPreferredWidth(100); // Monthly Rate
+        pricingTable.getColumnModel().getColumn(5).setPreferredWidth(100);
+
         JScrollPane scrollPane = new JScrollPane(pricingTable);
         pricingPanel.add(scrollPane, BorderLayout.CENTER);
 
@@ -66,16 +138,22 @@ public class ResidentMakeBookingGUI {
                 showPricingExplanation();
             }
         });
+        
+        hyperlinkLabel.addMouseListener(new MouseAdapter() {
+            public void mouseEntered(MouseEvent evt) {
+                hyperlinkLabel.setText("<html><a href='' style='color:#FF4081'>How do we calculate our pricing?</a></html>");
+            }
+            public void mouseExited(MouseEvent evt) {
+                hyperlinkLabel.setText("<html><a href=''>How do we calculate our pricing?</a></html>");
+            }
+        });
+
         pricingPanel.add(hyperlinkLabel, BorderLayout.SOUTH);
 
         
         pricingPanel.setPreferredSize(new Dimension(1024, 200));
-
-        mainPanel.add(pricingPanel, BorderLayout.NORTH);
-
         
         displayRoomPricing(tableModel);
-
         
         JPanel selectionAndDatePanel = new JPanel(new BorderLayout(10, 10));
         selectionAndDatePanel.setPreferredSize(new Dimension(1024, 300)); 
@@ -115,68 +193,33 @@ public class ResidentMakeBookingGUI {
         
         JPanel datePanel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.insets = new Insets(10, 10, 10, 10);
         gbc.anchor = GridBagConstraints.WEST;
 
         JLabel startDateLabel = new JLabel("Enter start date of your stay (yyyy-MM-dd): ");
         JLabel endDateLabel = new JLabel("Enter end date of your stay (yyyy-MM-dd): ");
-        startDateField = new JTextField(20); 
-        endDateField = new JTextField(20); 
+        startDateSpinner = new JSpinner(new SpinnerDateModel());
+        endDateSpinner = new JSpinner(new SpinnerDateModel());
 
-        
-        startDateField.setText("yyyy-MM-dd");
-        endDateField.setText("yyyy-MM-dd");
-        startDateField.setForeground(Color.GRAY);
-        endDateField.setForeground(Color.GRAY);
+        JSpinner.DateEditor startDateEditor = new JSpinner.DateEditor(startDateSpinner, "yyyy-MM-dd");
+        JSpinner.DateEditor endDateEditor = new JSpinner.DateEditor(endDateSpinner, "yyyy-MM-dd");
+        startDateSpinner.setEditor(startDateEditor);
+        endDateSpinner.setEditor(endDateEditor);
 
-        
         Dimension textFieldDimension = new Dimension(200, 25);
-        startDateField.setPreferredSize(textFieldDimension);
-        endDateField.setPreferredSize(textFieldDimension);
-
-        
-        startDateField.addFocusListener(new java.awt.event.FocusAdapter() {
-            public void focusGained(java.awt.event.FocusEvent evt) {
-                if (startDateField.getText().equals("yyyy-MM-dd")) {
-                    startDateField.setText("");
-                    startDateField.setForeground(Color.BLACK);
-                }
-            }
-
-            public void focusLost(java.awt.event.FocusEvent evt) {
-                if (startDateField.getText().isEmpty()) {
-                    startDateField.setText("yyyy-MM-dd");
-                    startDateField.setForeground(Color.GRAY);
-                }
-            }
-        });
-
-        endDateField.addFocusListener(new java.awt.event.FocusAdapter() {
-            public void focusGained(java.awt.event.FocusEvent evt) {
-                if (endDateField.getText().equals("yyyy-MM-dd")) {
-                    endDateField.setText("");
-                    endDateField.setForeground(Color.BLACK);
-                }
-            }
-
-            public void focusLost(java.awt.event.FocusEvent evt) {
-                if (endDateField.getText().isEmpty()) {
-                    endDateField.setText("yyyy-MM-dd");
-                    endDateField.setForeground(Color.GRAY);
-                }
-            }
-        });
+        startDateSpinner.setPreferredSize(textFieldDimension);
+        endDateSpinner.setPreferredSize(textFieldDimension);
 
         gbc.gridx = 0;
         gbc.gridy = 0;
         datePanel.add(startDateLabel, gbc);
         gbc.gridx = 1;
-        datePanel.add(startDateField, gbc);
+        datePanel.add(startDateSpinner, gbc);
         gbc.gridx = 0;
         gbc.gridy = 1;
         datePanel.add(endDateLabel, gbc);
         gbc.gridx = 1;
-        datePanel.add(endDateField, gbc);
+        datePanel.add(endDateSpinner, gbc);
 
         
         selectionAndDatePanel.add(datePanel, BorderLayout.CENTER);
@@ -190,25 +233,82 @@ public class ResidentMakeBookingGUI {
 
         selectionAndDatePanel.add(makeBookingButtonPanel, BorderLayout.SOUTH);
 
+        contentPanel.add(pricingPanel, BorderLayout.NORTH);
+        contentPanel.add(selectionAndDatePanel, BorderLayout.CENTER);
         
-        mainPanel.add(selectionAndDatePanel, BorderLayout.CENTER);
+        mainPanel.add(contentPanel, BorderLayout.CENTER);
 
         frame.add(mainPanel, BorderLayout.CENTER);
+        frame.setVisible(true);
 
-        
-        JButton backButton = createButton("Back", "back_icon.png");
-        backButton.setPreferredSize(new Dimension(frame.getWidth(), 50)); 
-        backButton.addActionListener(e -> {
-            new ResidentManageBookingsGUI(resident);
-            frame.dispose();
+        this.pricingTable = pricingTable;
+
+        JComponent startComp = startDateSpinner.getEditor();
+        JFormattedTextField startField = ((JSpinner.DefaultEditor) startComp).getTextField();
+        startField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    endDateSpinner.requestFocus();
+                }
+            }
         });
 
-        JPanel bottomPanel = new JPanel(new BorderLayout());
-        bottomPanel.add(backButton, BorderLayout.SOUTH);
+        JComponent endComp = endDateSpinner.getEditor();
+        JFormattedTextField endField = ((JSpinner.DefaultEditor) endComp).getTextField();
+        endField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    makeBookingButton.doClick();
+                }
+            }
+        });
+ 
+        startField.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                startDateSpinner.setBorder(BorderFactory.createLineBorder(new Color(100, 150, 255)));
+            }
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                startDateSpinner.setBorder(null);
+                validateDates();
+            }
+        });
 
-        frame.add(bottomPanel, BorderLayout.SOUTH);
+        endField.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                endDateSpinner.setBorder(BorderFactory.createLineBorder(new Color(100, 150, 255)));
+            }
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                endDateSpinner.setBorder(null);
+                validateDates();
+            }
+        });
 
-        frame.setVisible(true);
+        backButton.setMnemonic(KeyEvent.VK_B);
+        makeBookingButton.setMnemonic(KeyEvent.VK_M);
+        standardButton.setMnemonic(KeyEvent.VK_S);
+        largeButton.setMnemonic(KeyEvent.VK_L);
+        familyButton.setMnemonic(KeyEvent.VK_F);
+
+        backButton.setToolTipText("Go back to manage bookings (Alt+B)");
+        makeBookingButton.setToolTipText("Confirm booking details (Alt+M)");
+        standardButton.setToolTipText("Select standard room type (Alt+S)");
+        largeButton.setToolTipText("Select large room type (Alt+L)");
+        familyButton.setToolTipText("Select family room type (Alt+F)");
+        startDateSpinner.setToolTipText("<html>Click the up/down arrows to change date<br/>or type directly in yyyy-MM-dd format<br/>You can also click inside to edit manually<br/>Press Enter to move to end date<br/></html>");
+        endDateSpinner.setToolTipText("<html>Click the up/down arrows to change date<br/>or type directly in yyyy-MM-dd format<br/>You can also click inside to edit manually<br/>Press Enter to confirm booking<br/></html>");
+
+        addButtonHoverEffect(backButton);
+        addButtonHoverEffect(standardButton);
+        addButtonHoverEffect(largeButton);
+        addButtonHoverEffect(familyButton);
+        addButtonHoverEffect(makeBookingButton);
+
+        KeyStroke escapeKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
+        frame.getRootPane().registerKeyboardAction(e -> {
+            backButton.doClick();
+        }, escapeKeyStroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 
         frame.addWindowListener(new java.awt.event.WindowAdapter() {
             @Override
@@ -235,96 +335,76 @@ public class ResidentMakeBookingGUI {
 
     private void selectRoomType(String roomType) {
         selectedRoomType = roomType;
+        Color selectedColor = new Color(200, 200, 200);
         standardButton.setBackground(null);
         largeButton.setBackground(null);
         familyButton.setBackground(null);
-
+        
+        // Reset all button states
+        standardButton.putClientProperty("selected", false);
+        largeButton.putClientProperty("selected", false);
+        familyButton.putClientProperty("selected", false);
+    
         switch (roomType) {
-            case "Standard":
-                standardButton.setBackground(Color.LIGHT_GRAY);
-                break;
-            case "Large":
-                largeButton.setBackground(Color.LIGHT_GRAY);
-                break;
-            case "Family":
-                familyButton.setBackground(Color.LIGHT_GRAY);
-                break;
+            case "Standard" -> {
+                standardButton.putClientProperty("selected", true);
+                standardButton.setBackground(selectedColor);
+            }
+            case "Large" -> {
+                largeButton.putClientProperty("selected", true);
+                largeButton.setBackground(selectedColor);
+            }
+            case "Family" -> {
+                familyButton.putClientProperty("selected", true);
+                familyButton.setBackground(selectedColor);
+            }
         }
     }
 
     private void showBookingDetails() {
-        
         if (selectedRoomType == null) {
             JOptionPane.showMessageDialog(frame, "Please select a room type.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
-
-        
-        LocalDate startDate = null;
-        try {
-            startDate = LocalDate.parse(startDateField.getText(), DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-            if (startDate.isBefore(LocalDate.now())) {
-                JOptionPane.showMessageDialog(frame, "You cannot travel back in time. Please enter a valid start date.", "Error", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-            String[] dateParts = startDateField.getText().split("-");
-            int year = Integer.parseInt(dateParts[0]);
-            int month = Integer.parseInt(dateParts[1]);
-            int day = Integer.parseInt(dateParts[2]);
-            if (isInvalidDate(year, month, day)) {
-                JOptionPane.showMessageDialog(frame, "This date does not exist, please input a valid date.", "Error", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-        } catch (DateTimeParseException | NumberFormatException e) {
-            JOptionPane.showMessageDialog(frame, "Invalid date format. Please enter the date in yyyy-MM-dd format.", "Error", JOptionPane.ERROR_MESSAGE);
+    
+        java.util.Date startSpinnerDate = (java.util.Date) startDateSpinner.getValue();
+        java.util.Date endSpinnerDate = (java.util.Date) endDateSpinner.getValue();
+    
+        LocalDate startDate = startSpinnerDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        LocalDate endDate = endSpinnerDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+    
+        if (startDate.isBefore(LocalDate.now())) {
+            startDateSpinner.setBorder(BorderFactory.createLineBorder(Color.RED));
+            JOptionPane.showMessageDialog(frame, 
+                "You cannot travel back in time. Please enter a valid start date.", 
+                "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
-
-        
-        LocalDate endDate = null;
-        try {
-            endDate = LocalDate.parse(endDateField.getText(), DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-            if (!endDate.isAfter(startDate)) {
-                JOptionPane.showMessageDialog(frame, "The end date must be after the start date.", "Error", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-            String[] dateParts = endDateField.getText().split("-");
-            int year = Integer.parseInt(dateParts[0]);
-            int month = Integer.parseInt(dateParts[1]);
-            int day = Integer.parseInt(dateParts[2]);
-            if (isInvalidDate(year, month, day)) {
-                JOptionPane.showMessageDialog(frame, "This date does not exist, please input a valid date.", "Error", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-        } catch (DateTimeParseException | NumberFormatException e) {
-            JOptionPane.showMessageDialog(frame, "Invalid date format. Please enter the date in yyyy-MM-dd format.", "Error", JOptionPane.ERROR_MESSAGE);
+        startDateSpinner.setBorder(null);
+    
+        if (!endDate.isAfter(startDate)) {
+            endDateSpinner.setBorder(BorderFactory.createLineBorder(Color.RED));
+            JOptionPane.showMessageDialog(frame, "The end date must be after the start date.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
-
-        
+        endDateSpinner.setBorder(null);
+    
         String roomID = APUHostelManagement.Resident.selectAvailableRoomByType1(selectedRoomType);
         if (roomID == null) {
             JOptionPane.showMessageDialog(frame, "No available rooms of the selected type.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
-
-        
+    
         String paymentID = APUHostelManagement.Resident.generatePaymentID1();
-
-        
         String residentID = resident.getResidentID();
-
-        
         String feeRateID = APUHostelManagement.Resident.getFeeRateID(roomID);
         double paymentAmount = APUHostelManagement.Resident.calculatePaymentAmount(startDate, endDate, feeRateID);
-
-        
         String bookingDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-
         
         long daysBetween = ChronoUnit.DAYS.between(startDate, endDate);
         String roomNumber = APUHostelManagement.Resident.getRoomNumber(roomID);
-        String username = resident.getUsername(); 
+        String username = resident.getUsername();
+
         String bookingDetails = "<html><b style='font-size:14px;'>Booking Details:</b><br/><br/>" +
                                 "Username: " + username + "<br/>" +
                                 "Start Date: " + startDate + "<br/>" +
@@ -357,36 +437,46 @@ public class ResidentMakeBookingGUI {
         }
     }
 
+    private void showDetailedPricing(int row) {
+        String roomType = (String) pricingTable.getValueAt(row, 0);
+        String capacity = (String) pricingTable.getValueAt(row, 1);
+        String dailyRate = (String) pricingTable.getValueAt(row, 2);
+        String weeklyRate = (String) pricingTable.getValueAt(row, 3);
+        String monthlyRate = (String) pricingTable.getValueAt(row, 4);
+        String yearlyRate = (String) pricingTable.getValueAt(row, 5);
+    
+        String details = String.format("""
+            <html>
+            <h2>%s Room Details</h2>
+            <table>
+            <tr><td>Capacity:</td><td>%s</td></tr>
+            <tr><td>Daily Rate:</td><td>RM %s</td></tr>
+            <tr><td>Weekly Rate:</td><td>RM %s</td></tr>
+            <tr><td>Monthly Rate:</td><td>RM %s</td></tr>
+            <tr><td>Yearly Rate:</td><td>RM %s</td></tr>
+            </table>
+            </html>""", 
+            roomType, capacity, dailyRate, weeklyRate, monthlyRate, yearlyRate);
+    
+        JOptionPane.showMessageDialog(frame, details, 
+            roomType + " Room Details", JOptionPane.INFORMATION_MESSAGE);
+    }
+
     private void resetFields() {
         selectedRoomType = null;
-        startDateField.setText("yyyy-MM-dd");
-        startDateField.setForeground(Color.GRAY);
-        endDateField.setText("yyyy-MM-dd");
-        endDateField.setForeground(Color.GRAY);
+        startDateSpinner.setValue(new java.util.Date());
+        endDateSpinner.setValue(new java.util.Date());
+        startDateSpinner.setBorder(null);
+        endDateSpinner.setBorder(null);
+        
+        // Reset all button states
+        standardButton.putClientProperty("selected", false);
+        largeButton.putClientProperty("selected", false);
+        familyButton.putClientProperty("selected", false);
+        
         standardButton.setBackground(null);
         largeButton.setBackground(null);
         familyButton.setBackground(null);
-    }
-
-    private boolean isInvalidDate(int year, int month, int day) {
-        switch (month) {
-            case 2 -> {
-                if (day > 29 || (day == 29 && !Year.isLeap(year))) {
-                    return true;
-                }
-            }
-            case 4, 6, 9, 11 -> {
-                if (day > 30) {
-                    return true;
-                }
-            }
-            default -> {
-                if (day > 31) {
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 
     private void showPricingExplanation() {
@@ -406,6 +496,20 @@ public class ResidentMakeBookingGUI {
         JOptionPane.showMessageDialog(frame, explanation, "Pricing Explanation", JOptionPane.INFORMATION_MESSAGE);
     }
 
+    private void validateDates() {
+        java.util.Date startDate = (java.util.Date) startDateSpinner.getValue();
+        java.util.Date endDate = (java.util.Date) endDateSpinner.getValue();
+        LocalDate start = startDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        LocalDate end = endDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        
+        if (start.isBefore(LocalDate.now())) {
+            startDateSpinner.setBorder(BorderFactory.createLineBorder(Color.RED));
+        }
+        if (!end.isAfter(start)) {
+            endDateSpinner.setBorder(BorderFactory.createLineBorder(Color.RED));
+        }
+    }
+    
     private JButton createButton(String text, String iconPath) {
         JButton button = new JButton(text);
         try {
@@ -421,15 +525,19 @@ public class ResidentMakeBookingGUI {
     }
 
     private void addButtonHoverEffect(JButton button) {
-        
-        Color originalColor = button.getBackground();
-        
         button.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
-                button.setBackground(new Color(220, 220, 220));
+                if (button.getClientProperty("selected") == null || 
+                    !((Boolean)button.getClientProperty("selected"))) {
+                    button.setBackground(new Color(220, 220, 220));
+                }
             }
+            
             public void mouseExited(java.awt.event.MouseEvent evt) {
-                button.setBackground(originalColor); 
+                if (button.getClientProperty("selected") == null || 
+                    !((Boolean)button.getClientProperty("selected"))) {
+                    button.setBackground(null);
+                }
             }
         });
     }

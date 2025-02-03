@@ -60,6 +60,17 @@ public class ResidentViewPaymentRecordsGUI {
             }
         });
         topPanel.add(backButton, BorderLayout.WEST);
+        frame.add(topPanel, BorderLayout.NORTH);
+
+        JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
+        frame.add(mainPanel, BorderLayout.CENTER);
+
+        JPanel titlePanel = new JPanel(new BorderLayout());
+        JLabel titleLabel = new JLabel("View Payment Records", JLabel.CENTER);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 24)); 
+        titlePanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
+        titlePanel.add(titleLabel, BorderLayout.CENTER);
+        mainPanel.add(titlePanel, BorderLayout.NORTH);
 
         JPanel filterPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         filterButton = createButton("Filter", "filter_icon.png");
@@ -154,17 +165,11 @@ public class ResidentViewPaymentRecordsGUI {
         filterPanel.add(searchButton);
         filterPanel.add(clearButton);
 
-        topPanel.add(filterPanel, BorderLayout.EAST);
-
         frame.add(topPanel, BorderLayout.NORTH);
 
         viewPaymentRecordsPanel = new JPanel(new BorderLayout(10, 10));
-        frame.add(viewPaymentRecordsPanel, BorderLayout.CENTER);
-
-        JLabel titleLabel = new JLabel("View Payment Records", JLabel.CENTER);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 24)); 
-        viewPaymentRecordsPanel.add(titleLabel, BorderLayout.NORTH);
-
+        viewPaymentRecordsPanel.add(filterPanel, BorderLayout.NORTH);
+        mainPanel.add(viewPaymentRecordsPanel, BorderLayout.CENTER);
         
         tableModel = new DefaultTableModel(
             new Object[]{"Room Number", "Stay Duration", "Booking Date and Time", "Payment Amount (RM)", "Payment Method"}, 0

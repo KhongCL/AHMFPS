@@ -3355,10 +3355,10 @@ public class APUHostelManagement {
                     roomPricing.add(new String[]{
                             roomType.substring(0, 1).toUpperCase() + roomType.substring(1),
                             getRoomCapacity(roomType),
-                            String.format("RM %.2f", rates[0]),
-                            String.format("RM %.2f", rates[1]),
-                            String.format("RM %.2f", rates[2]),
-                            String.format("RM %.2f", rates[3])
+                            String.format("%.2f", rates[0]),
+                            String.format("%.2f", rates[1]),
+                            String.format("%.2f", rates[2]),
+                            String.format("%.2f", rates[3])
                     });
                 }
             }
