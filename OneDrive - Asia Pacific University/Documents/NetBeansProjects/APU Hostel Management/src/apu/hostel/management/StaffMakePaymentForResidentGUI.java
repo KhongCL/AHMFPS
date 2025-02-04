@@ -49,14 +49,27 @@ public class StaffMakePaymentForResidentGUI {
         frame.setTitle("Make Payment for Resident - " + staff.getUsername());
         frame.setLocationRelativeTo(null);
 
-        
-        JPanel topPanel = new JPanel(new BorderLayout());
         JButton backButton = createButton("Back", "back_icon.png");
         backButton.setPreferredSize(new Dimension(125, 40));
         backButton.addActionListener(e -> {
             new StaffMainPageGUI(staff);
             frame.dispose();
         });
+
+        JPanel topPanel = new JPanel(new BorderLayout());
+        topPanel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
+
+        JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
+        frame.add(mainPanel, BorderLayout.CENTER);
+
+        JLabel titleLabel = new JLabel("Make Payment for Resident", JLabel.CENTER);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 0));
+        topPanel.add(titleLabel, BorderLayout.SOUTH);
+
+        // Create a panel to hold the table and approve button
+        JPanel contentPanel = new JPanel(new BorderLayout(10, 10));
+        mainPanel.add(contentPanel, BorderLayout.CENTER);
 
         JPanel filterPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         filterButton = createButton("Filter", "filter_icon.png");
@@ -150,8 +163,7 @@ public class StaffMakePaymentForResidentGUI {
         filterPanel.add(searchField);
         filterPanel.add(searchButton);
         filterPanel.add(clearButton);
-
-        topPanel.add(filterPanel, BorderLayout.EAST);
+        contentPanel.add(filterPanel, BorderLayout.NORTH);
 
         topPanel.add(backButton, BorderLayout.WEST);
         frame.add(topPanel, BorderLayout.NORTH);
@@ -204,14 +216,14 @@ public class StaffMakePaymentForResidentGUI {
         paymentTable.getColumnModel().getColumn(7).setPreferredWidth(100); 
 
         JScrollPane scrollPane = new JScrollPane(paymentTable);
-        frame.add(scrollPane, BorderLayout.CENTER);
+        contentPanel.add(scrollPane, BorderLayout.CENTER);
 
         
         JButton makePaymentButton = createButton("Make Payment", "payment_icon2.png");
         makePaymentButton.addActionListener(e -> showPaymentConfirmation());
         JPanel bottomPanel = new JPanel();
         bottomPanel.add(makePaymentButton);
-        frame.add(bottomPanel, BorderLayout.SOUTH);
+        contentPanel.add(bottomPanel, BorderLayout.SOUTH);
 
         loadPendingPayments();
         frame.setVisible(true);

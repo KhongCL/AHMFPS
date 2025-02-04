@@ -39,28 +39,27 @@ public class ResidentMakeBookingGUI {
         frame.setTitle("Make Booking - " + resident.getUsername());
         frame.setLocationRelativeTo(null);
 
-        JPanel topPanel = new JPanel(new BorderLayout());
         JButton backButton = createButton("Back", "back_icon.png");
         backButton.setPreferredSize(new Dimension(125, 40));
         backButton.addActionListener(e -> {
             new ResidentManageBookingsGUI(resident);
             frame.dispose();
         });
-        topPanel.add(backButton, BorderLayout.WEST);
-        frame.add(topPanel, BorderLayout.NORTH);
 
-        JPanel titlePanel = new JPanel(new BorderLayout());
-        JLabel titleLabel = new JLabel("Make Booking", JLabel.CENTER);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
-        titlePanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0)); // Add some vertical padding
-        titlePanel.add(titleLabel, BorderLayout.CENTER);
+        JPanel topPanel = new JPanel(new BorderLayout());
+        topPanel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
 
         JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
         frame.add(mainPanel, BorderLayout.CENTER);
 
-        mainPanel.add(titlePanel, BorderLayout.NORTH);
+        JLabel titleLabel = new JLabel("Make Booking", JLabel.CENTER);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 0));
+        topPanel.add(titleLabel, BorderLayout.SOUTH);
 
+        // Create a panel to hold the table and approve button
         JPanel contentPanel = new JPanel(new BorderLayout(10, 10));
+        mainPanel.add(contentPanel, BorderLayout.CENTER);
 
         JPanel pricingPanel = new JPanel(new BorderLayout());
         JLabel pricingLabel = new JLabel("Room Pricing", JLabel.CENTER);
@@ -127,8 +126,10 @@ public class ResidentMakeBookingGUI {
 
         JScrollPane scrollPane = new JScrollPane(pricingTable);
         pricingPanel.add(scrollPane, BorderLayout.CENTER);
+        topPanel.add(backButton, BorderLayout.WEST);
 
-        
+        frame.add(topPanel, BorderLayout.NORTH);
+
         JLabel hyperlinkLabel = new JLabel("<html><a href=''>How do we calculate our pricing?</a></html>");
         hyperlinkLabel.setHorizontalAlignment(SwingConstants.CENTER);
         hyperlinkLabel.setCursor(new Cursor(Cursor.HAND_CURSOR));
@@ -235,8 +236,6 @@ public class ResidentMakeBookingGUI {
 
         contentPanel.add(pricingPanel, BorderLayout.NORTH);
         contentPanel.add(selectionAndDatePanel, BorderLayout.CENTER);
-        
-        mainPanel.add(contentPanel, BorderLayout.CENTER);
 
         frame.add(mainPanel, BorderLayout.CENTER);
         frame.setVisible(true);

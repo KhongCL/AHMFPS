@@ -52,7 +52,7 @@ public class ManagerManageRoomsGUI {
         frame.setLocationRelativeTo(null);
         
         JPanel topPanel = new JPanel(new BorderLayout());
-        topPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); 
+        topPanel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10)); 
 
         
         JButton backButton = createButton("Back", "back_icon.png");
@@ -63,6 +63,18 @@ public class ManagerManageRoomsGUI {
                 frame.dispose();
             }
         });
+
+        JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
+        frame.add(mainPanel, BorderLayout.CENTER);
+
+        JLabel titleLabel = new JLabel("Manage Rooms", JLabel.CENTER);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 0));
+        topPanel.add(titleLabel, BorderLayout.SOUTH);
+
+        // Create a panel to hold the table and approve button
+        JPanel contentPanel = new JPanel(new BorderLayout(10, 10));
+        mainPanel.add(contentPanel, BorderLayout.CENTER);
 
         JPanel filterPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         filterButton = createButton("Filter", "filter_icon.png");
@@ -154,8 +166,8 @@ public class ManagerManageRoomsGUI {
         filterPanel.add(searchButton);
         filterPanel.add(clearButton);
 
-        topPanel.add(filterPanel, BorderLayout.EAST);
         topPanel.add(backButton, BorderLayout.WEST);
+        contentPanel.add(filterPanel, BorderLayout.NORTH);
 
         frame.add(topPanel, BorderLayout.NORTH);
 
@@ -201,7 +213,7 @@ public class ManagerManageRoomsGUI {
         roomTable.getColumnModel().getColumn(6).setPreferredWidth(70);  
 
         JScrollPane scrollPane = new JScrollPane(roomTable);
-        frame.add(scrollPane, BorderLayout.CENTER);
+        contentPanel.add(scrollPane, BorderLayout.CENTER);
 
         
         loadRooms();
@@ -304,7 +316,7 @@ public class ManagerManageRoomsGUI {
         deleteAllButton.setPreferredSize(new Dimension(200,40));
         restoreAllButton.setPreferredSize(new Dimension(200,40));
 
-        frame.add(actionPanel, BorderLayout.SOUTH);
+        contentPanel.add(actionPanel, BorderLayout.SOUTH);
 
         frame.setVisible(true);
 

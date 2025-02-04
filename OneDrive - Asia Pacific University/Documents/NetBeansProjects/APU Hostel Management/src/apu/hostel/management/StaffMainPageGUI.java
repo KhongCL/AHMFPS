@@ -23,20 +23,24 @@ public class StaffMainPageGUI {
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         frame.setSize(1024, 768);
         frame.setLayout(new BorderLayout(10, 10));
+        frame.setTitle("Staff Menu - " + staffName);
         frame.setLocationRelativeTo(null);
 
+        JPanel headerPanel = new JPanel(new BorderLayout(0, 10));
+        headerPanel.setBackground(new Color(245, 245, 245));
+        headerPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
         JLabel titleLabel = new JLabel("Staff Menu", JLabel.CENTER);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
-        frame.add(titleLabel, BorderLayout.NORTH);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 32));
+        titleLabel.setForeground(new Color(51, 51, 51));
 
-        
-        JPanel headerPanel = new JPanel(new BorderLayout());
         JLabel welcomeLabel = new JLabel("Welcome, " + staffName, JLabel.LEFT);
-        welcomeLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+        welcomeLabel.setFont(new Font("Arial", Font.PLAIN, 24));
+        welcomeLabel.setForeground(new Color(100, 100, 100));
         welcomeLabel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
-        headerPanel.add(welcomeLabel, BorderLayout.NORTH);
-        headerPanel.add(titleLabel, BorderLayout.CENTER);
+        
+        headerPanel.add(titleLabel, BorderLayout.NORTH);
+        headerPanel.add(welcomeLabel, BorderLayout.CENTER);
         frame.add(headerPanel, BorderLayout.NORTH);
 
         JPanel buttonPanel = new JPanel(new GridBagLayout());

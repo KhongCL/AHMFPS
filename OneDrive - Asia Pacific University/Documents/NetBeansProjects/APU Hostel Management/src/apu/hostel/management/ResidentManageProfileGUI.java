@@ -35,7 +35,6 @@ public class ResidentManageProfileGUI {
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); 
     
-        
         JButton backButton = createButton("Back", "back_icon.png");
         backButton.setPreferredSize(new Dimension(125, 40));
         backButton.addActionListener(new ActionListener() {
@@ -44,12 +43,15 @@ public class ResidentManageProfileGUI {
                 frame.dispose();
             }
         });
-    
         topPanel.add(backButton, BorderLayout.WEST);
+    
+        JLabel titleLabel = new JLabel("Update Personal Information", JLabel.CENTER);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 0));
+        topPanel.add(titleLabel, BorderLayout.SOUTH);
     
         frame.add(topPanel, BorderLayout.NORTH);
     
-        
         JPanel inputPanel = new JPanel(new GridBagLayout());
         inputPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); 
         GridBagConstraints gbc = new GridBagConstraints();

@@ -48,15 +48,27 @@ public class StaffGenerateReceiptGUI {
         frame.setTitle("Generate Receipt - " + staff.getUsername());
         frame.setLocationRelativeTo(null);
 
-        
-        JPanel topPanel = new JPanel(new BorderLayout());
         JButton backButton = createButton("Back", "back_icon.png");
         backButton.setPreferredSize(new Dimension(125, 40));
         backButton.addActionListener(e -> {
             new StaffMainPageGUI(staff);
             frame.dispose();
         });
-        topPanel.add(backButton, BorderLayout.WEST);
+
+        JPanel topPanel = new JPanel(new BorderLayout());
+        topPanel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
+
+        JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
+        frame.add(mainPanel, BorderLayout.CENTER);
+
+        JLabel titleLabel = new JLabel("Generate Receipt", JLabel.CENTER);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 0));
+        topPanel.add(titleLabel, BorderLayout.SOUTH);
+
+        // Create a panel to hold the table and approve button
+        JPanel contentPanel = new JPanel(new BorderLayout(10, 10));
+        mainPanel.add(contentPanel, BorderLayout.CENTER);
 
         JPanel filterPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         filterButton = createButton("Filter", "filter_icon.png");
@@ -158,9 +170,11 @@ public class StaffGenerateReceiptGUI {
         filterPanel.add(searchButton);
         filterPanel.add(clearButton);
 
-        topPanel.add(filterPanel, BorderLayout.CENTER);
+        contentPanel.add(filterPanel, BorderLayout.NORTH);
+        topPanel.add(backButton, BorderLayout.WEST);
 
         frame.add(topPanel, BorderLayout.NORTH);
+
 
         
         tableModel = new DefaultTableModel(
@@ -210,7 +224,7 @@ public class StaffGenerateReceiptGUI {
         paymentTable.getColumnModel().getColumn(8).setPreferredWidth(100); 
 
         JScrollPane scrollPane = new JScrollPane(paymentTable);
-        frame.add(scrollPane, BorderLayout.CENTER);
+        contentPanel.add(scrollPane, BorderLayout.CENTER);
 
         
         JButton generateReceiptButton = createButton("Generate Receipt", "generate_receipt_icon.png");
@@ -218,7 +232,7 @@ public class StaffGenerateReceiptGUI {
         JPanel bottomPanel = new JPanel();
         bottomPanel.add(generateReceiptButton);
         bottomPanel.add(viewReceiptsButton);
-        frame.add(bottomPanel, BorderLayout.SOUTH);
+        contentPanel.add(bottomPanel, BorderLayout.SOUTH);
 
         loadEligiblePayments();
         frame.setVisible(true);

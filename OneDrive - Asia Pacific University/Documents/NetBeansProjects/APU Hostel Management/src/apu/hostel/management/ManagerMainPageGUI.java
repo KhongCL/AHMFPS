@@ -24,6 +24,7 @@ public class ManagerMainPageGUI {
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         frame.setSize(1024, 768);
         frame.setLayout(new BorderLayout(10, 10));
+        frame.setTitle("Manager Menu - " + managerName);
         frame.setLocationRelativeTo(null);
 
         JPanel headerPanel = new JPanel(new BorderLayout(0, 10));
@@ -38,6 +39,7 @@ public class ManagerMainPageGUI {
         welcomeLabel.setFont(new Font("Arial", Font.BOLD, 24));
         welcomeLabel.setForeground(new Color(100, 100, 100));
         welcomeLabel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
+        
         headerPanel.add(managerLabel, BorderLayout.NORTH);
         headerPanel.add(welcomeLabel, BorderLayout.CENTER);
         frame.add(headerPanel, BorderLayout.NORTH);

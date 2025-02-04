@@ -22,7 +22,6 @@ import java.util.stream.Collectors;
 
 public class ResidentViewPaymentRecordsGUI {
     private JFrame frame;
-    private JPanel viewPaymentRecordsPanel;
     private Map<Integer, String[]> paymentDetailsMap; 
     private APUHostelManagement.Resident resident; 
     private JTable table;
@@ -49,9 +48,7 @@ public class ResidentViewPaymentRecordsGUI {
         frame.setLayout(new BorderLayout(10, 10));
         frame.setTitle("View Payment Records - " + resident.getUsername());
         frame.setLocationRelativeTo(null);
-        
-        
-        JPanel topPanel = new JPanel(new BorderLayout());
+    
         JButton backButton = createButton("Back", "back_icon.png");
         backButton.setPreferredSize(new Dimension(125, 40));
         backButton.addActionListener(new ActionListener() {
@@ -60,18 +57,21 @@ public class ResidentViewPaymentRecordsGUI {
                 frame.dispose();
             }
         });
-        topPanel.add(backButton, BorderLayout.WEST);
-        frame.add(topPanel, BorderLayout.NORTH);
+
+        JPanel topPanel = new JPanel(new BorderLayout());
+        topPanel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
 
         JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
         frame.add(mainPanel, BorderLayout.CENTER);
 
-        JPanel titlePanel = new JPanel(new BorderLayout());
         JLabel titleLabel = new JLabel("View Payment Records", JLabel.CENTER);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 24)); 
-        titlePanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
-        titlePanel.add(titleLabel, BorderLayout.CENTER);
-        mainPanel.add(titlePanel, BorderLayout.NORTH);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 0));
+        topPanel.add(titleLabel, BorderLayout.SOUTH);
+
+        // Create a panel to hold the table and approve button
+        JPanel contentPanel = new JPanel(new BorderLayout(10, 10));
+        mainPanel.add(contentPanel, BorderLayout.CENTER);
 
         JPanel filterPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         filterButton = createButton("Filter", "filter_icon.png");
@@ -166,11 +166,10 @@ public class ResidentViewPaymentRecordsGUI {
         filterPanel.add(searchButton);
         filterPanel.add(clearButton);
 
-        frame.add(topPanel, BorderLayout.NORTH);
+        contentPanel.add(filterPanel, BorderLayout.NORTH);
+        topPanel.add(backButton, BorderLayout.WEST);
 
-        viewPaymentRecordsPanel = new JPanel(new BorderLayout(10, 10));
-        viewPaymentRecordsPanel.add(filterPanel, BorderLayout.NORTH);
-        mainPanel.add(viewPaymentRecordsPanel, BorderLayout.CENTER);
+        frame.add(topPanel, BorderLayout.NORTH);
         
         tableModel = new DefaultTableModel(
             new Object[]{"Room Number", "Stay Duration", "Booking Date and Time", "Payment Amount (RM)", "Payment Method"}, 0
@@ -219,7 +218,7 @@ public class ResidentViewPaymentRecordsGUI {
         table.getColumnModel().getColumn(4).setPreferredWidth(100);
 
         JScrollPane scrollPane = new JScrollPane(table);
-        viewPaymentRecordsPanel.add(scrollPane, BorderLayout.CENTER);
+        contentPanel.add(scrollPane, BorderLayout.CENTER);
 
         
         List<String[]> relevantPayments = APUHostelManagement.Resident.viewPaymentRecords(resident.getResidentID());
@@ -255,7 +254,7 @@ public class ResidentViewPaymentRecordsGUI {
         
         JPanel bottomPanel = new JPanel();
         bottomPanel.add(viewButton);
-        viewPaymentRecordsPanel.add(bottomPanel, BorderLayout.SOUTH);
+        contentPanel.add(bottomPanel, BorderLayout.SOUTH);
 
         loadPaymentRecords();
         frame.setVisible(true);

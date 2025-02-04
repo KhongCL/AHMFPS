@@ -50,7 +50,19 @@ public class ManagerManageRatesGUI {
         frame.setLocationRelativeTo(null);
 
         JPanel topPanel = new JPanel(new BorderLayout());
-        topPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); 
+        topPanel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
+
+        JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
+        frame.add(mainPanel, BorderLayout.CENTER);
+
+        JLabel titleLabel = new JLabel("Manage Rates", JLabel.CENTER);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 0));
+        topPanel.add(titleLabel, BorderLayout.SOUTH);
+
+        // Create a panel to hold the table and approve button
+        JPanel contentPanel = new JPanel(new BorderLayout(10, 10));
+        mainPanel.add(contentPanel, BorderLayout.CENTER);
 
         
         JButton addButton = createButton("Set Initial Rates", "add_icon.png");
@@ -159,8 +171,8 @@ public class ManagerManageRatesGUI {
         filterSortSearchPanel.add(searchButton);
         filterSortSearchPanel.add(clearButton);
 
-        topPanel.add(filterSortSearchPanel, BorderLayout.EAST);
         topPanel.add(backButton, BorderLayout.WEST);
+        contentPanel.add(filterSortSearchPanel, BorderLayout.NORTH);
 
         frame.add(topPanel, BorderLayout.NORTH);
 
@@ -216,7 +228,7 @@ public class ManagerManageRatesGUI {
             }
         });
         JScrollPane scrollPane = new JScrollPane(rateTable);
-        frame.add(scrollPane, BorderLayout.CENTER);
+        contentPanel.add(scrollPane, BorderLayout.CENTER);
 
         
         loadRates();
@@ -266,7 +278,7 @@ public class ManagerManageRatesGUI {
         actionPanel.add(deleteAllButton);
         actionPanel.add(restoreAllButton);
 
-        frame.add(actionPanel, BorderLayout.SOUTH);
+        contentPanel.add(actionPanel, BorderLayout.SOUTH);
 
         frame.setVisible(true);
 

@@ -2,7 +2,6 @@ package apu.hostel.management;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.RenderingHints.Key;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -26,11 +25,26 @@ public class ResidentManageBookingsGUI {
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         frame.setSize(1024, 768);
         frame.setLayout(new BorderLayout(10, 10));
+        frame.setTitle("Manage Bookings - " + resident.getUsername());
         frame.setLocationRelativeTo(null);
 
+        JPanel topPanel = new JPanel(new BorderLayout());
+        topPanel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
+
+        JButton backButton = createButton("Back", "back_icon.png");
+        backButton.setPreferredSize(new Dimension(125, 40)); // Match other pages size
+        backButton.addActionListener(e -> {
+            new ResidentMainPageGUI(resident);
+            frame.dispose();
+        });
+        topPanel.add(backButton, BorderLayout.WEST);
+
         JLabel titleLabel = new JLabel("Manage Bookings", JLabel.CENTER);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 24)); 
-        frame.add(titleLabel, BorderLayout.NORTH);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 0));
+        topPanel.add(titleLabel, BorderLayout.SOUTH);
+    
+        frame.add(topPanel, BorderLayout.NORTH);
 
         JPanel buttonPanel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
@@ -50,7 +64,6 @@ public class ResidentManageBookingsGUI {
         });
         buttonPanel.add(makeBookingButton, gbc);
 
-        
         gbc.gridy++;
         JButton makePaymentButton = createButton("Make Payment For Booking", "payment_icon.png");
         makePaymentButton.setPreferredSize(new Dimension(300, 50)); 
@@ -62,7 +75,6 @@ public class ResidentManageBookingsGUI {
         });
         buttonPanel.add(makePaymentButton, gbc);
 
-        
         gbc.gridy++;
         JButton cancelBookingButton = createButton("Cancel Booking", "cancel_icon.png");
         cancelBookingButton.setPreferredSize(new Dimension(300, 50)); 
@@ -74,30 +86,21 @@ public class ResidentManageBookingsGUI {
         });
         buttonPanel.add(cancelBookingButton, gbc);
 
-        
-        gbc.gridy++;
-        JButton backButton = createButton("Back", "back_icon.png");
-        backButton.setPreferredSize(new Dimension(125, 50)); 
-        backButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                new ResidentMainPageGUI(resident);
-                frame.dispose();
-            }
-        });
-        buttonPanel.add(backButton, gbc);
-
         frame.add(buttonPanel, BorderLayout.CENTER);
 
         frame.setVisible(true);
 
+        backButton.setMnemonic(KeyEvent.VK_B);
         makeBookingButton.setMnemonic(KeyEvent.VK_M);
         makePaymentButton.setMnemonic(KeyEvent.VK_P);
         cancelBookingButton.setMnemonic(KeyEvent.VK_C);
 
+        backButton.setToolTipText("Go back to the main page (Alt + B)");
         makeBookingButton.setToolTipText("Make a new booking (Alt + M)");
         makePaymentButton.setToolTipText("Make payment for a booking (Alt + P)");
         cancelBookingButton.setToolTipText("Cancel a booking (Alt + C)");
 
+        addButtonHoverEffect(backButton);
         addButtonHoverEffect(makeBookingButton);
         addButtonHoverEffect(makePaymentButton);
         addButtonHoverEffect(cancelBookingButton);

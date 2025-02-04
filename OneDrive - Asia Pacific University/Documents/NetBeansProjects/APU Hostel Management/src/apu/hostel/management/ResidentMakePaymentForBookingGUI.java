@@ -25,7 +25,6 @@ import java.util.stream.Collectors;
 
 public class ResidentMakePaymentForBookingGUI {
     private JFrame frame;
-    private JPanel makePaymentPanel;
     private Map<Integer, String[]> paymentDetailsMap; 
     private String selectedPaymentMethod = null; 
     private JButton creditCardButton;
@@ -57,8 +56,6 @@ public class ResidentMakePaymentForBookingGUI {
         frame.setTitle("Make Payment for Booking - " + resident.getUsername());
         frame.setLocationRelativeTo(null);
         
-        
-        JPanel topPanel = new JPanel(new BorderLayout());
         JButton backButton = createButton("Back", "back_icon.png");
         backButton.setPreferredSize(new Dimension(125, 40));
         backButton.addActionListener(new ActionListener() {
@@ -67,21 +64,21 @@ public class ResidentMakePaymentForBookingGUI {
                 frame.dispose();
             }
         });
-        topPanel.add(backButton, BorderLayout.WEST);
-        frame.add(topPanel, BorderLayout.NORTH);
+
+        JPanel topPanel = new JPanel(new BorderLayout());
+        topPanel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
 
         JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
         frame.add(mainPanel, BorderLayout.CENTER);
 
-        JPanel titlePanel = new JPanel(new BorderLayout());
         JLabel titleLabel = new JLabel("Make Payment for Booking", JLabel.CENTER);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 24)); 
-        titleLabel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
-        titlePanel.add(titleLabel, BorderLayout.CENTER);
-        mainPanel.add(titlePanel, BorderLayout.NORTH);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 0));
+        topPanel.add(titleLabel, BorderLayout.SOUTH);
 
-        makePaymentPanel = new JPanel(new BorderLayout(10, 10));
-        mainPanel.add(makePaymentPanel, BorderLayout.CENTER);
+        // Create a panel to hold the table and approve button
+        JPanel contentPanel = new JPanel(new BorderLayout(10, 10));
+        mainPanel.add(contentPanel, BorderLayout.CENTER);
 
         JPanel filterPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         filterButton = createButton("Filter", "filter_icon.png");
@@ -175,6 +172,11 @@ public class ResidentMakePaymentForBookingGUI {
         filterPanel.add(searchButton);
         filterPanel.add(clearButton);
 
+        contentPanel.add(filterPanel, BorderLayout.NORTH);
+        topPanel.add(backButton, BorderLayout.WEST);
+
+        frame.add(topPanel, BorderLayout.NORTH);
+
         tableModel = new DefaultTableModel(
             new Object[]{"Room Number", "Stay Duration", "Booking Date and Time", "Payment Amount (RM)"}, 0
         ) {
@@ -222,7 +224,7 @@ public class ResidentMakePaymentForBookingGUI {
         table.getColumnModel().getColumn(3).setPreferredWidth(100);
 
         JScrollPane scrollPane = new JScrollPane(table);
-        makePaymentPanel.add(scrollPane, BorderLayout.CENTER);
+        contentPanel.add(scrollPane, BorderLayout.CENTER);
 
         List<String[]> unpaidBookings = APUHostelManagement.Resident.getUnpaidBookingsForResident(resident.getResidentID());
         Map<String, String> roomMap = APUHostelManagement.Resident.getRoomMap();
@@ -258,8 +260,7 @@ public class ResidentMakePaymentForBookingGUI {
         
         JPanel bottomPanel = new JPanel();
         bottomPanel.add(payButton);
-        makePaymentPanel.add(filterPanel, BorderLayout.NORTH);
-        makePaymentPanel.add(bottomPanel, BorderLayout.SOUTH);
+        contentPanel.add(bottomPanel, BorderLayout.SOUTH);
 
         frame.setVisible(true);
 

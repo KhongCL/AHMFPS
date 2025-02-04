@@ -25,7 +25,6 @@ import java.util.stream.Collectors;
 
 public class ResidentCancelBookingGUI {
     private JFrame frame;
-    private JPanel cancelBookingPanel;
     private DefaultTableModel tableModel; 
     private Map<Integer, String[]> paymentDetailsMap; 
     private APUHostelManagement.Resident resident; 
@@ -49,9 +48,9 @@ public class ResidentCancelBookingGUI {
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         frame.setSize(1024, 768);
         frame.setLayout(new BorderLayout(10, 10)); 
+        frame.setTitle("Cancel Booking - " + resident.getUsername());
         frame.setLocationRelativeTo(null);
         
-        JPanel topPanel = new JPanel(new BorderLayout());
         JButton backButton = createButton("Back", "back_icon.png");
         backButton.setPreferredSize(new Dimension(125, 40));
         backButton.addActionListener(new ActionListener() {
@@ -60,21 +59,21 @@ public class ResidentCancelBookingGUI {
                 frame.dispose();
             }
         });
-        topPanel.add(backButton, BorderLayout.WEST);
-        frame.add(topPanel, BorderLayout.NORTH);
+
+        JPanel topPanel = new JPanel(new BorderLayout());
+        topPanel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
 
         JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
         frame.add(mainPanel, BorderLayout.CENTER);
 
-        JPanel titlePanel = new JPanel(new BorderLayout());
         JLabel titleLabel = new JLabel("Cancel Booking", JLabel.CENTER);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 24)); 
-        titleLabel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
-        titlePanel.add(titleLabel, BorderLayout.CENTER);
-        mainPanel.add(titlePanel, BorderLayout.NORTH);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 0));
+        topPanel.add(titleLabel, BorderLayout.SOUTH);
 
-        cancelBookingPanel = new JPanel(new BorderLayout(10, 10));
-        frame.add(cancelBookingPanel, BorderLayout.CENTER);
+        // Create a panel to hold the table and approve button
+        JPanel contentPanel = new JPanel(new BorderLayout(10, 10));
+        mainPanel.add(contentPanel, BorderLayout.CENTER);
 
         JPanel filterPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         filterButton = createButton("Filter", "filter_icon.png");
@@ -167,6 +166,11 @@ public class ResidentCancelBookingGUI {
         filterPanel.add(searchField);
         filterPanel.add(searchButton);
         filterPanel.add(clearButton);
+
+        contentPanel.add(filterPanel, BorderLayout.NORTH);
+        topPanel.add(backButton, BorderLayout.WEST);
+
+        frame.add(topPanel, BorderLayout.NORTH);
         
         tableModel = new DefaultTableModel(
             new Object[]{"Room Number", "Stay Duration", "Booking Date and Time", "Payment Amount (RM)"}, 0
@@ -214,7 +218,7 @@ public class ResidentCancelBookingGUI {
         table.getColumnModel().getColumn(3).setPreferredWidth(100);
 
         JScrollPane scrollPane = new JScrollPane(table);
-        cancelBookingPanel.add(scrollPane, BorderLayout.CENTER);
+        contentPanel.add(scrollPane, BorderLayout.CENTER);
 
         List<String[]> cancellableBookings = APUHostelManagement.Resident.getCancellableBookingsForResident(resident.getResidentID());
         Map<String, String> roomMap = APUHostelManagement.Resident.getRoomMap();
@@ -250,8 +254,7 @@ public class ResidentCancelBookingGUI {
         
         JPanel bottomPanel = new JPanel();
         bottomPanel.add(cancelButton);
-        cancelBookingPanel.add(filterPanel, BorderLayout.NORTH);
-        cancelBookingPanel.add(bottomPanel, BorderLayout.SOUTH);
+        contentPanel.add(bottomPanel, BorderLayout.SOUTH);
 
         frame.setVisible(true);
 

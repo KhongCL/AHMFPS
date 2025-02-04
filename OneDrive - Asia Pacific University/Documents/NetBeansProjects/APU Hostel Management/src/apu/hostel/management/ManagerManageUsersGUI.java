@@ -53,9 +53,20 @@ public class ManagerManageUsersGUI {
         frame.setLocationRelativeTo(null);
 
         JPanel topPanel = new JPanel(new BorderLayout());
-        topPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); 
+        topPanel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
 
-        
+        JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
+        frame.add(mainPanel, BorderLayout.CENTER);
+
+        JLabel titleLabel = new JLabel("Manage Users", JLabel.CENTER);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 0));
+        topPanel.add(titleLabel, BorderLayout.SOUTH);
+
+        // Create a panel to hold the table and approve button
+        JPanel contentPanel = new JPanel(new BorderLayout(10, 10));
+        mainPanel.add(contentPanel, BorderLayout.CENTER);
+
         JPanel filterSortSearchPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         filterButton = createButton("Filter", "filter_icon.png");
         sortButton = createButton("Sort", "sort_icon.png");
@@ -99,7 +110,7 @@ public class ManagerManageUsersGUI {
         filterSortSearchPanel.add(searchField);
         filterSortSearchPanel.add(searchButton);
 
-        topPanel.add(filterSortSearchPanel, BorderLayout.EAST);
+        contentPanel.add(filterSortSearchPanel, BorderLayout.NORTH);
 
         
         JButton backButton = createButton("Back", "back_icon.png");
@@ -158,14 +169,10 @@ public class ManagerManageUsersGUI {
         userTable.getColumnModel().getColumn(7).setPreferredWidth(70); 
 
         JScrollPane scrollPane = new JScrollPane(userTable);
-        frame.add(scrollPane, BorderLayout.CENTER);
+        contentPanel.add(scrollPane, BorderLayout.CENTER);
 
-
-
-        
         loadUsers();
 
-        
         JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         JButton updateButton = createButton("Update", "update_icon.png");
         JButton deleteButton = createButton("Delete", "delete_icon.png");
@@ -277,7 +284,7 @@ public class ManagerManageUsersGUI {
         actionPanel.add(deleteAllButton);
         actionPanel.add(restoreAllButton);
 
-        frame.add(actionPanel, BorderLayout.SOUTH);
+        contentPanel.add(actionPanel, BorderLayout.SOUTH);
 
         frame.setVisible(true);
 

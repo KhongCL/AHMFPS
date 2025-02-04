@@ -46,8 +46,7 @@ public class ManagerApproveUsersRegistrationGUI {
 
         
         JPanel topPanel = new JPanel(new BorderLayout());
-        topPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-
+        topPanel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
         
         JButton backButton = createButton("Back", "back_icon.png");
         backButton.setPreferredSize(new Dimension(125, 40));
@@ -57,6 +56,19 @@ public class ManagerApproveUsersRegistrationGUI {
         });
         topPanel.add(backButton, BorderLayout.WEST);
 
+        JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
+        frame.add(mainPanel, BorderLayout.CENTER);
+
+
+        JLabel titleLabel = new JLabel("Approve Users", JLabel.CENTER);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 0));
+        topPanel.add(titleLabel, BorderLayout.SOUTH);
+
+
+        // Create a panel to hold the table and approve button
+        JPanel contentPanel = new JPanel(new BorderLayout(10, 10));
+        mainPanel.add(contentPanel, BorderLayout.CENTER);
         
         JPanel filterPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         filterButton = createButton("Filter", "filter_icon.png");
@@ -148,9 +160,8 @@ public class ManagerApproveUsersRegistrationGUI {
         filterPanel.add(searchButton);
         filterPanel.add(clearButton);
 
-        topPanel.add(filterPanel, BorderLayout.EAST);
-
         frame.add(topPanel, BorderLayout.NORTH);
+        contentPanel.add(filterPanel, BorderLayout.NORTH);
 
         
         tableModel = new DefaultTableModel(
@@ -196,7 +207,7 @@ public class ManagerApproveUsersRegistrationGUI {
         userTable.getColumnModel().getColumn(7).setPreferredWidth(70); 
         
         JScrollPane scrollPane = new JScrollPane(userTable);
-        frame.add(scrollPane, BorderLayout.CENTER);
+        contentPanel.add(scrollPane, BorderLayout.CENTER);
 
         
         JPanel approvePanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
@@ -204,7 +215,7 @@ public class ManagerApproveUsersRegistrationGUI {
         approveButton.setPreferredSize(new Dimension(150, 40));
         approveButton.addActionListener(e -> approveSelectedUser());
         approvePanel.add(approveButton);
-        frame.add(approvePanel, BorderLayout.SOUTH);
+        contentPanel.add(approvePanel, BorderLayout.SOUTH);
 
         loadUnapprovedUsers();
         frame.setVisible(true);
