@@ -180,7 +180,7 @@ public class WelcomePageGUI extends JFrame {
         JPanel topPanel = new JPanel(new BorderLayout());
         JButton backButton = createButton("Back", "back_icon.png");
         backButton.setFont(new Font("Arial", Font.PLAIN, 21)); 
-        backButton.setPreferredSize(new Dimension(150, 57)); 
+        backButton.setPreferredSize(new Dimension(125, 57)); 
         backButton.setMaximumSize(new Dimension(102, 57)); 
         backButton.setMinimumSize(new Dimension(102, 57)); 
         backButton.addActionListener(e -> cardLayout.show(mainPanel, "RoleSelection"));
@@ -289,7 +289,7 @@ public class WelcomePageGUI extends JFrame {
         JPanel topPanel = new JPanel(new BorderLayout());
         JButton backButton = createButton("Back", "back_icon.png");
         backButton.setFont(new Font("Arial", Font.PLAIN, 21));
-        backButton.setPreferredSize(new Dimension(150, 57));
+        backButton.setPreferredSize(new Dimension(125, 57));
         backButton.setMaximumSize(new Dimension(102, 57));
         backButton.setMinimumSize(new Dimension(102, 57));
         
@@ -592,7 +592,7 @@ public class WelcomePageGUI extends JFrame {
         JPanel topPanel = new JPanel(new BorderLayout());
         JButton backButton = createButton("Back", "back_icon.png");
         backButton.setFont(new Font("Arial", Font.PLAIN, 21));
-        backButton.setPreferredSize(new Dimension(150, 57));
+        backButton.setPreferredSize(new Dimension(125, 57));
         backButton.setMaximumSize(new Dimension(102, 57));
         backButton.setMinimumSize(new Dimension(102, 57));
         
@@ -1071,17 +1071,6 @@ public class WelcomePageGUI extends JFrame {
         );
     }
     
-    private void addButtonHoverEffect(JButton button) {
-        button.addMouseListener(new MouseAdapter() {
-            public void mouseEntered(MouseEvent e) {
-                button.setBackground(new Color(220, 220, 220));
-            }
-            public void mouseExited(MouseEvent e) {
-                button.setBackground(UIManager.getColor("Button.background"));
-            }
-        });
-    }
-    
     private JLabel createFieldLabel(String text) {
         JLabel label = new JLabel(text);
         label.setFont(new Font("Arial", Font.PLAIN, 14));
@@ -1129,13 +1118,78 @@ public class WelcomePageGUI extends JFrame {
             "Format Requirements", JOptionPane.INFORMATION_MESSAGE);
     }
 
+    private void addButtonHoverEffect(JButton button) {
+        Color originalColor = button.getBackground();
+        Color darkerColor = getDarkerColor(originalColor);
+        
+        button.addMouseListener(new MouseAdapter() {
+            public void mouseEntered(MouseEvent e) {
+                button.setBackground(darkerColor);
+                button.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(button.getForeground(), 2),
+                    BorderFactory.createEmptyBorder(3, 13, 3, 13)
+                ));
+            }
+            public void mouseExited(MouseEvent e) {
+                button.setBackground(originalColor);
+                button.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(button.getForeground(), 1),
+                    BorderFactory.createEmptyBorder(4, 14, 4, 14)
+                ));
+            }
+        });
+    }
+    
+    private Color getDarkerColor(Color color) {
+        float[] hsb = Color.RGBtoHSB(color.getRed(), color.getGreen(), color.getBlue(), null);
+        return Color.getHSBColor(hsb[0], Math.min(1f, hsb[1] * 1.1f), Math.max(0, hsb[2] - 0.15f));
+    }
+    
     private JButton createButton(String text, String iconPath) {
         JButton button = new JButton(text);
+        button.setFont(new Font("Arial", Font.PLAIN, 16));
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        button.setFocusPainted(false);
+        button.setBorderPainted(true);
+        button.setContentAreaFilled(true);
+        
         try {
             ImageIcon icon = new ImageIcon(new ImageIcon("images/" + iconPath)
                 .getImage().getScaledInstance(24, 24, Image.SCALE_SMOOTH));
             button.setIcon(icon);
-            button.setHorizontalAlignment(SwingConstants.CENTER);
+            button.setIconTextGap(15);
+            button.setHorizontalAlignment(SwingConstants.LEFT);
+            
+            // Enhanced Material Design colors with better contrast
+            if (text.contains("Back")) {
+                button.setBackground(new Color(245, 245, 245));
+                button.setForeground(new Color(66, 66, 66));
+            } else if (text.contains("Login") || text.contains("Submit")) {
+                button.setBackground(new Color(227, 242, 253));
+                button.setForeground(new Color(21, 101, 192));
+            } else if (text.contains("Register")) {
+                button.setBackground(new Color(225, 245, 254));
+                button.setForeground(new Color(0, 131, 143));
+            } else {
+                button.setBackground(new Color(250, 250, 250));
+                button.setForeground(new Color(33, 33, 33));
+            }
+            
+            // Add default border matching text color
+            button.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(button.getForeground(), 1),
+                BorderFactory.createEmptyBorder(4, 14, 4, 14)
+            ));
+            
+            // Add shadow effect
+            button.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(button.getForeground(), 1),
+                BorderFactory.createCompoundBorder(
+                    BorderFactory.createEmptyBorder(4, 14, 4, 14),
+                    BorderFactory.createEmptyBorder(0, 0, 2, 0)
+                )
+            ));
+            
         } catch (Exception e) {
             System.err.println("Could not load icon: " + iconPath);
         }

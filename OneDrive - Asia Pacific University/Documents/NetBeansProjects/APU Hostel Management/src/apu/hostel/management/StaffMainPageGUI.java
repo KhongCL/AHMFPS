@@ -170,35 +170,78 @@ public class StaffMainPageGUI {
     }
 
     private void addButtonHoverEffect(JButton button) {
-        
         Color originalColor = button.getBackground();
+        Color darkerColor = getDarkerColor(originalColor);
         
         button.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
-                button.setBackground(new Color(220, 220, 220));
+                button.setBackground(darkerColor);
+                button.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(button.getForeground(), 2),
+                    BorderFactory.createEmptyBorder(3, 13, 3, 13)
+                ));
             }
             public void mouseExited(java.awt.event.MouseEvent evt) {
-                button.setBackground(originalColor); 
+                button.setBackground(originalColor);
+                button.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(button.getForeground(), 1),
+                    BorderFactory.createEmptyBorder(4, 14, 4, 14)
+                ));
             }
         });
     }
-
+    
+    private Color getDarkerColor(Color color) {
+        float[] hsb = Color.RGBtoHSB(color.getRed(), color.getGreen(), color.getBlue(), null);
+        return Color.getHSBColor(hsb[0], Math.min(1f, hsb[1] * 1.1f), Math.max(0, hsb[2] - 0.15f));
+    }
+    
     private JButton createButton(String text, String iconPath) {
         JButton button = new JButton(text);
+        button.setFont(new Font("Arial", Font.PLAIN, 16));
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        button.setFocusPainted(false);
+        button.setBorderPainted(true);
+        button.setContentAreaFilled(true);
+        
         try {
             ImageIcon icon = new ImageIcon(new ImageIcon("images/" + iconPath)
                 .getImage().getScaledInstance(24, 24, Image.SCALE_SMOOTH));
             button.setIcon(icon);
+            button.setIconTextGap(15);
             button.setHorizontalAlignment(SwingConstants.LEFT);
             
-            if (text.contains("Update") || text.contains("Logout")) {
-                button.setBackground(new Color(230, 240, 250)); 
+            // Enhanced Material Design colors with better contrast
+            if (text.contains("Update")) {
+                button.setBackground(new Color(225, 190, 231));    // Light Purple
+                button.setForeground(new Color(106, 27, 154));    // Dark Purple
             } else if (text.contains("Make") || text.contains("Generate")) {
-                button.setBackground(new Color(230, 250, 230)); 
+                button.setBackground(new Color(200, 230, 201));    // Light Green
+                button.setForeground(new Color(46, 125, 50));     // Dark Green
+            } else if (text.contains("Logout")) {
+                button.setBackground(new Color(255, 205, 210));    // Light Red
+                button.setForeground(new Color(198, 40, 40));     // Dark Red
             }
+            
+            // Add default border matching text color
+            button.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(button.getForeground(), 1),
+                BorderFactory.createEmptyBorder(4, 14, 4, 14)
+            ));
+            
+            // Add shadow effect
+            button.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(button.getForeground(), 1),
+                BorderFactory.createCompoundBorder(
+                    BorderFactory.createEmptyBorder(4, 14, 4, 14),
+                    BorderFactory.createEmptyBorder(0, 0, 2, 0)
+                )
+            ));
+            
         } catch (Exception e) {
             System.err.println("Could not load icon: " + iconPath);
         }
+        
         button.setPreferredSize(new Dimension(300, 50));
         return button;
     }

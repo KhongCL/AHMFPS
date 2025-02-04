@@ -26,16 +26,20 @@ public class ManagerMainPageGUI {
         frame.setLayout(new BorderLayout(10, 10));
         frame.setLocationRelativeTo(null);
 
-        JLabel managerLabel = new JLabel("Manager Menu", JLabel.CENTER);
-        managerLabel.setFont(new Font("Arial", Font.BOLD, 24)); 
-        frame.add(managerLabel, BorderLayout.NORTH);
+        JPanel headerPanel = new JPanel(new BorderLayout(0, 10));
+        headerPanel.setBackground(new Color(245, 245, 245));
+        headerPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        JPanel headerPanel = new JPanel(new BorderLayout());
+        JLabel managerLabel = new JLabel("Manager Menu", JLabel.CENTER);
+        managerLabel.setFont(new Font("Arial", Font.BOLD, 32)); 
+        managerLabel.setForeground(new Color(51, 51, 51));
+
         JLabel welcomeLabel = new JLabel("Welcome, " + managerName, JLabel.LEFT);
-        welcomeLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+        welcomeLabel.setFont(new Font("Arial", Font.BOLD, 24));
+        welcomeLabel.setForeground(new Color(100, 100, 100));
         welcomeLabel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
-        headerPanel.add(welcomeLabel, BorderLayout.NORTH);
-        headerPanel.add(managerLabel, BorderLayout.CENTER);
+        headerPanel.add(managerLabel, BorderLayout.NORTH);
+        headerPanel.add(welcomeLabel, BorderLayout.CENTER);
         frame.add(headerPanel, BorderLayout.NORTH);
 
         JPanel buttonPanel = new JPanel(new GridBagLayout());
@@ -61,7 +65,7 @@ public class ManagerMainPageGUI {
 
         gbc.gridy++;
         JButton searchUserButton = createButton("Search, Update, Delete or Restore User", "search_icon.png");
-        searchUserButton.setPreferredSize(new Dimension(300, 50));
+        searchUserButton.setPreferredSize(new Dimension(375, 50));
         searchUserButton.addActionListener(e -> {
             if (manager != null) {
                 new ManagerManageUsersGUI(manager);
@@ -75,7 +79,7 @@ public class ManagerMainPageGUI {
 
         gbc.gridy++;
         JButton fixRateButton = createButton("Fix, Update, Delete or Restore Rate", "rate_icon.png");
-        fixRateButton.setPreferredSize(new Dimension(300, 50));
+        fixRateButton.setPreferredSize(new Dimension(375, 50));
         fixRateButton.addActionListener(e -> {
             if (manager != null) {
                 new ManagerManageRatesGUI(manager);
@@ -200,35 +204,81 @@ public class ManagerMainPageGUI {
     }
 
     private void addButtonHoverEffect(JButton button) {
-        
         Color originalColor = button.getBackground();
+        Color darkerColor = getDarkerColor(originalColor);
         
         button.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
-                button.setBackground(new Color(220, 220, 220));
+                button.setBackground(darkerColor);
+                button.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(button.getForeground(), 2),
+                    BorderFactory.createEmptyBorder(3, 13, 3, 13)
+                ));
             }
             public void mouseExited(java.awt.event.MouseEvent evt) {
-                button.setBackground(originalColor); 
+                button.setBackground(originalColor);
+                button.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(button.getForeground(), 1),
+                    BorderFactory.createEmptyBorder(4, 14, 4, 14)
+                ));
             }
         });
     }
-
+    
+    private Color getDarkerColor(Color color) {
+        float[] hsb = Color.RGBtoHSB(color.getRed(), color.getGreen(), color.getBlue(), null);
+        return Color.getHSBColor(hsb[0], Math.min(1f, hsb[1] * 1.1f), Math.max(0, hsb[2] - 0.15f));
+    }
+    
     private JButton createButton(String text, String iconPath) {
         JButton button = new JButton(text);
+        button.setFont(new Font("Arial", Font.PLAIN, 16));
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        button.setFocusPainted(false);
+        button.setBorderPainted(true);
+        button.setContentAreaFilled(true);
+        
         try {
             ImageIcon icon = new ImageIcon(new ImageIcon("images/" + iconPath)
                 .getImage().getScaledInstance(24, 24, Image.SCALE_SMOOTH));
             button.setIcon(icon);
+            button.setIconTextGap(15);
             button.setHorizontalAlignment(SwingConstants.LEFT);
             
-            if (text.contains("Approve") || text.contains("Search") || text.contains("Update") || text.contains("Logout")) {
-                button.setBackground(new Color(230, 240, 250)); 
+            // Enhanced Material Design colors with better contrast
+            if (text.contains("Approve") || text.contains("Search")) {
+                button.setBackground(new Color(187, 222, 251)); // Light Blue
+                button.setForeground(new Color(25, 118, 210)); // Darker Blue Text
             } else if (text.contains("Fix") || text.contains("Rooms")) {
-                button.setBackground(new Color(230, 250, 230)); 
+                button.setBackground(new Color(200, 230, 201)); // Light Green
+                button.setForeground(new Color(46, 125, 50)); // Darker Green Text
+            } else if (text.contains("Update")) {
+                button.setBackground(new Color(225, 190, 231)); // Light Purple
+                button.setForeground(new Color(106, 27, 154)); // Darker Purple Text
+            } else if (text.contains("Logout")) {
+                button.setBackground(new Color(255, 205, 210)); // Light Red
+                button.setForeground(new Color(198, 40, 40)); // Darker Red Text
             }
+            
+            // Add default border matching text color
+            button.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(button.getForeground(), 1),
+                BorderFactory.createEmptyBorder(4, 14, 4, 14)
+            ));
+            
+            // Add shadow effect
+            button.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(button.getForeground(), 1),
+                BorderFactory.createCompoundBorder(
+                    BorderFactory.createEmptyBorder(4, 14, 4, 14),
+                    BorderFactory.createEmptyBorder(0, 0, 2, 0)
+                )
+            ));
+            
         } catch (Exception e) {
             System.err.println("Could not load icon: " + iconPath);
         }
+        
         button.setPreferredSize(new Dimension(300, 50));
         return button;
     }

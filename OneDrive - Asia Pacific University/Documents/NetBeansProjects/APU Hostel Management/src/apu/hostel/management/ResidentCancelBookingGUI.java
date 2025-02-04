@@ -53,7 +53,7 @@ public class ResidentCancelBookingGUI {
         
         JPanel topPanel = new JPanel(new BorderLayout());
         JButton backButton = createButton("Back", "back_icon.png");
-        backButton.setPreferredSize(new Dimension(100, 40));
+        backButton.setPreferredSize(new Dimension(125, 40));
         backButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 new ResidentManageBookingsGUI(resident);
@@ -638,35 +638,85 @@ public class ResidentCancelBookingGUI {
         }
     }
 
+    private void addButtonHoverEffect(JButton button) {
+        Color originalColor = button.getBackground();
+        Color darkerColor = getDarkerColor(originalColor);
+        
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                button.setBackground(darkerColor);
+                button.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(button.getForeground(), 2),
+                    BorderFactory.createEmptyBorder(3, 13, 3, 13)
+                ));
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                button.setBackground(originalColor);
+                button.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(button.getForeground(), 1),
+                    BorderFactory.createEmptyBorder(4, 14, 4, 14)
+                ));
+            }
+        });
+    }
+    
+    private Color getDarkerColor(Color color) {
+        float[] hsb = Color.RGBtoHSB(color.getRed(), color.getGreen(), color.getBlue(), null);
+        return Color.getHSBColor(hsb[0], Math.min(1f, hsb[1] * 1.1f), Math.max(0, hsb[2] - 0.15f));
+    }
+    
     private JButton createButton(String text, String iconPath) {
         JButton button = new JButton(text);
+        button.setFont(new Font("Arial", Font.PLAIN, 16));
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        button.setFocusPainted(false);
+        button.setBorderPainted(true);
+        button.setContentAreaFilled(true);
+        
         try {
             ImageIcon icon = new ImageIcon(new ImageIcon("images/" + iconPath)
                 .getImage().getScaledInstance(24, 24, Image.SCALE_SMOOTH));
             button.setIcon(icon);
-            button.setHorizontalAlignment(SwingConstants.CENTER);
+            button.setIconTextGap(15);
+            button.setHorizontalAlignment(SwingConstants.LEFT);
+            
+            // Enhanced Material Design colors with better contrast
+            if (text.contains("Back")) {
+                button.setBackground(new Color(245, 245, 245));    // Light Gray
+                button.setForeground(new Color(66, 66, 66));      // Dark Gray
+            } else if (text.contains("Filter") || text.contains("Sort")) {
+                button.setBackground(new Color(187, 222, 251));    // Light Blue
+                button.setForeground(new Color(25, 118, 210));    // Dark Blue
+            } else if (text.contains("Search")) {
+                button.setBackground(new Color(225, 190, 231));    // Light Purple
+                button.setForeground(new Color(106, 27, 154));    // Dark Purple
+            } else if (text.contains("Clear")) {
+                button.setBackground(new Color(255, 205, 210));    // Light Red
+                button.setForeground(new Color(198, 40, 40));     // Dark Red
+            } else if (text.contains("Cancel")) {
+                button.setBackground(new Color(255, 205, 210));    // Light Red
+                button.setForeground(new Color(198, 40, 40));     // Dark Red
+            }
+            
+            // Add default border matching text color
+            button.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(button.getForeground(), 1),
+                BorderFactory.createEmptyBorder(4, 14, 4, 14)
+            ));
+            
+            // Add shadow effect
+            button.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(button.getForeground(), 1),
+                BorderFactory.createCompoundBorder(
+                    BorderFactory.createEmptyBorder(4, 14, 4, 14),
+                    BorderFactory.createEmptyBorder(0, 0, 2, 0)
+                )
+            ));
+            
         } catch (Exception e) {
             System.err.println("Could not load icon: " + iconPath);
         }
         
         return button;
-    }
-
-    private void addButtonHoverEffect(JButton button) {
-        button.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                if (button.getClientProperty("selected") == null || 
-                    !((Boolean)button.getClientProperty("selected"))) {
-                    button.setBackground(new Color(220, 220, 220));
-                }
-            }
-            
-            public void mouseExited(java.awt.event.MouseEvent evt) {
-                if (button.getClientProperty("selected") == null || 
-                    !((Boolean)button.getClientProperty("selected"))) {
-                    button.setBackground(null);
-                }
-            }
-        });
     }
 }
