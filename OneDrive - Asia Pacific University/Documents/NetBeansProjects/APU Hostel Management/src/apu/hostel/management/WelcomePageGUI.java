@@ -233,7 +233,7 @@ public class WelcomePageGUI extends JFrame {
 
         JButton submitButton = createButton("Submit", "submit_icon.png");
         submitButton.setFont(new Font("Arial", Font.PLAIN, 24)); 
-        submitButton.setPreferredSize(new Dimension(200, 50));
+        submitButton.setPreferredSize(new Dimension(150, 50));
         authCodeField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
@@ -1058,7 +1058,6 @@ public class WelcomePageGUI extends JFrame {
             "<ul>" +
             "<li>Input formats are correct</li>" +
             "<li>Required fields are filled</li>" +
-            "<li>Network connection is stable</li>" +
             "</ul>" +
             "</body></html>",
             message
@@ -1158,7 +1157,7 @@ public class WelcomePageGUI extends JFrame {
                 .getImage().getScaledInstance(24, 24, Image.SCALE_SMOOTH));
             button.setIcon(icon);
             button.setIconTextGap(15);
-            button.setHorizontalAlignment(SwingConstants.LEFT);
+            button.setHorizontalAlignment(SwingConstants.CENTER);
             
             // Enhanced Material Design colors with better contrast
             if (text.contains("Back")) {

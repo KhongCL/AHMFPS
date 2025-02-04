@@ -793,7 +793,7 @@ public class ResidentMakePaymentForBookingGUI {
                 .getImage().getScaledInstance(24, 24, Image.SCALE_SMOOTH));
             button.setIcon(icon);
             button.setIconTextGap(15);
-            button.setHorizontalAlignment(SwingConstants.LEFT);
+            button.setHorizontalAlignment(SwingConstants.CENTER);
             
             // Enhanced Material Design colors with better contrast
             if (text.contains("Back")) {

@@ -943,7 +943,7 @@ public class ManagerManageUsersGUI {
                 .getImage().getScaledInstance(24, 24, Image.SCALE_SMOOTH));
             button.setIcon(icon);
             button.setIconTextGap(15);
-            button.setHorizontalAlignment(SwingConstants.LEFT);
+            button.setHorizontalAlignment(SwingConstants.CENTER);
             
             // Enhanced Material Design colors with better contrast
             if (text.contains("Back")) {
@@ -962,8 +962,8 @@ public class ManagerManageUsersGUI {
                 button.setBackground(new Color(200, 230, 201));    // Light Green
                 button.setForeground(new Color(46, 125, 50));     // Dark Green
             } else if (text.contains("Clear")) {
-                button.setBackground(new Color(255, 236, 179));    // Light Amber
-                button.setForeground(new Color(255, 111, 0));     // Dark Amber
+                button.setBackground(new Color(255, 205, 210)); // Light Red
+                button.setForeground(new Color(198, 40, 40));    // Dark Amber
             }
             
             // Add default border matching text color

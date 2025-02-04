@@ -875,7 +875,7 @@ public class ManagerManageRoomsGUI {
                 .getImage().getScaledInstance(24, 24, Image.SCALE_SMOOTH));
             button.setIcon(icon);
             button.setIconTextGap(15);
-            button.setHorizontalAlignment(SwingConstants.LEFT);
+            button.setHorizontalAlignment(SwingConstants.CENTER);
             
             // Enhanced Material Design colors with better contrast
             if (text.contains("Back")) {
@@ -897,8 +897,8 @@ public class ManagerManageRoomsGUI {
                 button.setBackground(new Color(255, 236, 179));    // Light Amber
                 button.setForeground(new Color(255, 111, 0));     // Dark Amber
             } else if (text.contains("Clear")) {
-                button.setBackground(new Color(224, 224, 224));    // Light Gray
-                button.setForeground(new Color(97, 97, 97));      // Dark Gray
+                button.setBackground(new Color(255, 205, 210)); // Light Red
+                button.setForeground(new Color(198, 40, 40));     // Dark Gray
             }
             
             // Add default border matching text color

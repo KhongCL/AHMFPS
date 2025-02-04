@@ -171,7 +171,7 @@ public class ResidentMakeBookingGUI {
         familyButton = createButton("Family", "family_icon.png");
 
         
-        Dimension buttonSize = new Dimension(512, 30); 
+        Dimension buttonSize = new Dimension(250, 40); 
         standardButton.setPreferredSize(buttonSize);
         largeButton.setPreferredSize(buttonSize);
         familyButton.setPreferredSize(buttonSize);
@@ -560,7 +560,7 @@ public class ResidentMakeBookingGUI {
                 .getImage().getScaledInstance(24, 24, Image.SCALE_SMOOTH));
             button.setIcon(icon);
             button.setIconTextGap(15);
-            button.setHorizontalAlignment(SwingConstants.LEFT);
+            button.setHorizontalAlignment(SwingConstants.CENTER);
             
             // Enhanced Material Design colors with better contrast
             if (text.contains("Back")) {

@@ -33,7 +33,7 @@ public class ResidentManageProfileGUI {
         frame.setLocationRelativeTo(null);
     
         JPanel topPanel = new JPanel(new BorderLayout());
-        topPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); 
+        topPanel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
     
         JButton backButton = createButton("Back", "back_icon.png");
         backButton.setPreferredSize(new Dimension(125, 40));
@@ -44,18 +44,19 @@ public class ResidentManageProfileGUI {
             }
         });
         topPanel.add(backButton, BorderLayout.WEST);
+        frame.add(topPanel, BorderLayout.NORTH);
+
+        JPanel centerPanel = new JPanel(new BorderLayout(5, 5)); // Reduced from 10,10
+        centerPanel.setBorder(BorderFactory.createEmptyBorder(0, 10, 5, 10)); 
     
         JLabel titleLabel = new JLabel("Update Personal Information", JLabel.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
-        titleLabel.setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 0));
-        topPanel.add(titleLabel, BorderLayout.SOUTH);
-    
-        frame.add(topPanel, BorderLayout.NORTH);
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 5, 0));
+        centerPanel.add(titleLabel, BorderLayout.NORTH);
     
         JPanel inputPanel = new JPanel(new GridBagLayout());
-        inputPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); 
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(10, 10, 10, 10);
+        gbc.insets = new Insets(5, 10, 0, 10);
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.gridx = 0;
         gbc.gridy = 0;
@@ -73,9 +74,11 @@ public class ResidentManageProfileGUI {
         gbc.gridx = 1;
         gbc.gridy++;
         gbc.gridwidth = 2;
+        gbc.insets = new Insets(0, 10, 5, 10);
         icPassportErrorLabel = createErrorLabel();
         inputPanel.add(icPassportErrorLabel, gbc);
         gbc.gridwidth = 1;
+        gbc.insets = new Insets(5, 10, 0, 10);
     
         gbc.gridx = 0;
         gbc.gridy++;
@@ -92,15 +95,17 @@ public class ResidentManageProfileGUI {
         gbc.gridx = 1;
         gbc.gridy++;
         gbc.gridwidth = 2;
+        gbc.insets = new Insets(0, 10, 5, 10);
         usernameErrorLabel = createErrorLabel();
         inputPanel.add(usernameErrorLabel, gbc);
         gbc.gridwidth = 1;
+        gbc.insets = new Insets(5, 10, 0, 10);
     
         gbc.gridx = 0;
         gbc.gridy++;
         inputPanel.add(new JLabel("Password:"), gbc);
         gbc.gridx = 1;
-        JPanel passwordPanel = new JPanel(new BorderLayout(5, 0));
+        JPanel passwordPanel = new JPanel(new BorderLayout(5, 0));  
         passwordField = new JPasswordField(resident.getPassword());
         passwordField.setPreferredSize(new Dimension(300, 30));
         passwordPanel.add(passwordField, BorderLayout.CENTER);
@@ -121,10 +126,11 @@ public class ResidentManageProfileGUI {
             } else {
                 passwordField.setEchoChar('*');
                 showHideButton.setIcon(new ImageIcon(new ImageIcon("images/show_icon.png")
-                    .getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH)));
+                    .getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH))); 
             }
         });
         passwordPanel.add(showHideButton, BorderLayout.EAST);
+
         inputPanel.add(passwordPanel, gbc);
 
         gbc.gridx = 2;
@@ -135,9 +141,11 @@ public class ResidentManageProfileGUI {
         gbc.gridx = 1;
         gbc.gridy++;
         gbc.gridwidth = 2;
+        gbc.insets = new Insets(0, 10, 5, 10);
         passwordErrorLabel = createErrorLabel();
         inputPanel.add(passwordErrorLabel, gbc);
         gbc.gridwidth = 1;
+        gbc.insets = new Insets(5, 10, 0, 10);
     
         gbc.gridx = 0;
         gbc.gridy++;
@@ -154,24 +162,22 @@ public class ResidentManageProfileGUI {
         gbc.gridx = 1;
         gbc.gridy++;
         gbc.gridwidth = 2;
+        gbc.insets = new Insets(0, 10, 5, 10);
         contactNumberErrorLabel = createErrorLabel();
         inputPanel.add(contactNumberErrorLabel, gbc);
         gbc.gridwidth = 1;
+        gbc.insets = new Insets(5, 10, 0, 10);
     
-        frame.add(inputPanel, BorderLayout.CENTER);
+        centerPanel.add(inputPanel, BorderLayout.CENTER);
+        frame.add(centerPanel, BorderLayout.CENTER);
     
-        
+
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 0));
         JButton updateButton = createButton("Update Profile", "update_profile_icon.png");
         updateButton.setPreferredSize(new Dimension(175, 40));
-        updateButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                updateProfile();
-            }
-        });
-    
-        JPanel buttonPanel = new JPanel();
+        updateButton.addActionListener(e -> updateProfile());
         buttonPanel.add(updateButton);
-    
         frame.add(buttonPanel, BorderLayout.SOUTH);
     
         
@@ -201,7 +207,7 @@ public class ResidentManageProfileGUI {
 
         KeyStroke escapeKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
         frame.getRootPane().registerKeyboardAction(e -> {
-        backButton.doClick();
+            backButton.doClick();
         }, escapeKeyStroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 
         frame.addWindowListener(new java.awt.event.WindowAdapter() {
@@ -221,8 +227,8 @@ public class ResidentManageProfileGUI {
 
     private JTextArea createErrorLabel() {
         JTextArea errorLabel = new JTextArea();
-        errorLabel.setPreferredSize(new Dimension(300, 60));
-        errorLabel.setMaximumSize(new Dimension(300, 60));
+        errorLabel.setPreferredSize(new Dimension(300, 20));
+        errorLabel.setMaximumSize(new Dimension(300, 20));
         errorLabel.setLineWrap(true);
         errorLabel.setWrapStyleWord(true);
         errorLabel.setEditable(false);
@@ -490,7 +496,7 @@ public class ResidentManageProfileGUI {
                 .getImage().getScaledInstance(24, 24, Image.SCALE_SMOOTH));
             button.setIcon(icon);
             button.setIconTextGap(15);
-            button.setHorizontalAlignment(SwingConstants.LEFT);
+            button.setHorizontalAlignment(SwingConstants.CENTER);
             
             // Enhanced Material Design colors with better contrast
             if (text.contains("Back")) {
