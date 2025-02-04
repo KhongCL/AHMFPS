@@ -40,6 +40,7 @@ public class ResidentCancelBookingGUI {
 
     public ResidentCancelBookingGUI(APUHostelManagement.Resident resident) {
         this.resident = resident;
+        this.filteredBookingList = new ArrayList<>();
         initialize();
     }
 
@@ -116,7 +117,7 @@ public class ResidentCancelBookingGUI {
                     filterButton.setText("Filter");
                     currentFilterChoice = null;
                     currentFilterValue = null;
-                    frame.setTitle("Make Payment for Booking - " + resident.getUsername());
+                    frame.setTitle("Cancel Booking - " + resident.getUsername());
                     if (currentSortCategory != null) {
                         applySorting(new ArrayList<>(paymentDetailsMap.values()));
                     } else {
@@ -237,9 +238,11 @@ public class ResidentCancelBookingGUI {
             public void actionPerformed(ActionEvent e) {
                 int selectedRow = table.getSelectedRow();
                 if (selectedRow != -1) {
-                    showCancelBookingPopup(paymentDetailsMap.get(selectedRow), selectedRow);
+                    // Use filteredBookingList instead of paymentDetailsMap
+                    showCancelBookingPopup(filteredBookingList.get(selectedRow), selectedRow);
                 } else {
-                    JOptionPane.showMessageDialog(frame, "Please select a booking to cancel.", "Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(frame, "Please select a booking to cancel.", 
+                        "Error", JOptionPane.ERROR_MESSAGE);
                 }
             }
         });
@@ -281,7 +284,7 @@ public class ResidentCancelBookingGUI {
                 if (e.getClickCount() == 2) {
                     int row = table.getSelectedRow();
                     if (row != -1) {
-                        showCancelBookingPopup(paymentDetailsMap.get(row), row);
+                        showCancelBookingPopup(filteredBookingList.get(row), row);
                     }
                 }
             }
@@ -440,7 +443,7 @@ public class ResidentCancelBookingGUI {
             currentFilterChoice = null;
             currentFilterValue = null;
             filterButton.setText("Filter");
-            frame.setTitle("Make Payment for Booking - " + resident.getUsername());
+            frame.setTitle("Cancel Booking - " + resident.getUsername());
             if (currentSortCategory != null) {
                 applySorting(originalData);
             } else {
@@ -471,11 +474,15 @@ public class ResidentCancelBookingGUI {
 
         if (filtered.isEmpty()) {
             JOptionPane.showMessageDialog(frame,
-                "No bookings found for selected filter.",
-                "No Results", JOptionPane.INFORMATION_MESSAGE);
+            "No bookings found for selected filter.",
+            "No Results", JOptionPane.INFORMATION_MESSAGE);
+            currentFilterChoice = null;
+            currentFilterValue = null;
+            filterButton.setText("Filter");
             updateTable(originalData);
+            return;
         } else {
-            frame.setTitle("Make Payment for Booking - " + resident.getUsername() + 
+            frame.setTitle("Cancel Booking - " + resident.getUsername() + 
                 " (Filtered: " + value + ")");
             if (currentSortCategory != null) {
                 applySorting(filtered);
@@ -539,11 +546,11 @@ public class ResidentCancelBookingGUI {
             .collect(Collectors.toList());
 
         if (!searchResults.isEmpty()) {
-            frame.setTitle("Make Payment for Booking - " + resident.getUsername() + 
+            frame.setTitle("Cancel Booking - " + resident.getUsername() + 
                 " (Found " + searchResults.size() + " results)");
             updateTable(searchResults);
         } else {
-            frame.setTitle("Make Payment for Booking - " + resident.getUsername());
+            frame.setTitle("Cancel Booking - " + resident.getUsername());
             JOptionPane.showMessageDialog(frame, 
                 "No bookings found matching your search.", 
                 "No Results", JOptionPane.INFORMATION_MESSAGE);
