@@ -371,7 +371,7 @@ public class WelcomePageGUI extends JFrame {
                 // Override to prevent border painting
             }
         };
-        passwordPanel.setPreferredSize(new Dimension(300, 40));
+        passwordPanel.setPreferredSize(new Dimension(320, 40));
         passwordPanel.setOpaque(false);
         passwordPanel.add(passwordField, BorderLayout.CENTER);
 
@@ -612,23 +612,14 @@ public class WelcomePageGUI extends JFrame {
         centerPanel.setBorder(BorderFactory.createEmptyBorder(38, 38, 38, 38));
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(10, 10, 10, 10);
-        gbc.weightx = 0.0; 
-        gbc.weighty = 0.0; 
-        gbc.fill = GridBagConstraints.NONE;
     
-        
+        gbc.gridwidth = GridBagConstraints.REMAINDER;
+        gbc.anchor = GridBagConstraints.CENTER;
         JLabel titleLabel = new JLabel(title, SwingConstants.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 28));
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        gbc.gridwidth = 3;
         centerPanel.add(titleLabel, gbc);
     
         
-        gbc.gridx = 0;
-        gbc.gridy = 1;
-        gbc.gridwidth = 3;
-        gbc.anchor = GridBagConstraints.CENTER;
         JLabel formatLink = new JLabel("<html><u>View Format Requirements</u></html>");
         formatLink.setHorizontalAlignment(SwingConstants.CENTER);
         formatLink.setForeground(Color.BLUE);
@@ -648,20 +639,21 @@ public class WelcomePageGUI extends JFrame {
                 formatLink.setText("<html><a href=''>View Format Requirements</a></html>");
             }
         });
-        gbc.gridy++;
         centerPanel.add(formatLink, gbc);
     
-        
-        gbc.gridy++;
-        gbc.gridwidth = 3;
-        gbc.gridx = 0;
-        gbc.anchor = GridBagConstraints.WEST;
-        JLabel icPassportLabel = createFieldLabel("IC/Passport Number:");
-        centerPanel.add(icPassportLabel, gbc);
+        JPanel formPanel = new JPanel(new GridBagLayout());
+        GridBagConstraints formGbc = new GridBagConstraints();
+        formGbc.insets = new Insets(5, 5, 5, 5);
+        formGbc.anchor = GridBagConstraints.WEST;
 
-        gbc.gridy++;
-        gbc.gridx = 0;
-        gbc.gridwidth = 2;
+        formGbc.gridx = 0;
+        formGbc.gridy = 0;
+        formGbc.gridwidth = 2;
+        JLabel icPassportLabel = createFieldLabel("IC/Passport Number:");
+        formPanel.add(icPassportLabel, formGbc);
+
+        formGbc.gridy = 1;
+        formGbc.gridwidth = 1;
         JTextField icPassportField = new JTextField();
         icPassportField.setFont(new Font("Arial", Font.PLAIN, 24));
         icPassportField.setForeground(Color.GRAY);
@@ -671,13 +663,12 @@ public class WelcomePageGUI extends JFrame {
             BorderFactory.createLineBorder(Color.RED),
             BorderFactory.createEmptyBorder(5, 5, 5, 5)
         ));
-        centerPanel.add(icPassportField, gbc);
+        formPanel.add(icPassportField, formGbc);
 
-        gbc.gridx = 2;
-        gbc.gridwidth = 1;
+        formGbc.gridx = 1;
         JLabel icPassportIconLabel = new JLabel();
         icPassportIconLabel.setPreferredSize(new Dimension(30, 30));
-        centerPanel.add(icPassportIconLabel, gbc);
+        formPanel.add(icPassportIconLabel, formGbc);
     
         
         icPassportField.addFocusListener(new FocusAdapter() {
@@ -695,16 +686,14 @@ public class WelcomePageGUI extends JFrame {
             }
         });
     
-        
-        gbc.gridy++;
-        gbc.gridwidth = 3;
-        gbc.gridx = 0;
+        formGbc.gridx = 0;
+        formGbc.gridy = 2;
+        formGbc.gridwidth = 2;
         JLabel createUsernameLabel = createFieldLabel("Create Username:");
-        centerPanel.add(createUsernameLabel, gbc);
+        formPanel.add(createUsernameLabel, formGbc);
 
-        gbc.gridy++;
-        gbc.gridx = 0;
-        gbc.gridwidth = 2;
+        formGbc.gridy = 3;
+        formGbc.gridwidth = 1;
         JTextField usernameField = new JTextField();
         usernameField.setFont(new Font("Arial", Font.PLAIN, 24));
         usernameField.setForeground(Color.GRAY);
@@ -714,15 +703,13 @@ public class WelcomePageGUI extends JFrame {
             BorderFactory.createLineBorder(Color.RED),
             BorderFactory.createEmptyBorder(5, 5, 5, 5)
         ));
-        centerPanel.add(usernameField, gbc);
+        formPanel.add(usernameField, formGbc);
 
-        gbc.gridx = 2;
-        gbc.gridwidth = 1;
+        formGbc.gridx = 1;
         JLabel usernameIconLabel = new JLabel();
         usernameIconLabel.setPreferredSize(new Dimension(30, 30));
-        centerPanel.add(usernameIconLabel, gbc);
+        formPanel.add(usernameIconLabel, formGbc);
     
-        
         usernameField.addFocusListener(new FocusAdapter() {
             public void focusGained(FocusEvent evt) {
                 if (usernameField.getText().equals("Create Username")) {
@@ -739,16 +726,18 @@ public class WelcomePageGUI extends JFrame {
         });
     
         
-        gbc.gridy++;
-        gbc.gridwidth = 3;
-        gbc.gridx = 0;
+        formGbc.gridx = 0;
+        formGbc.gridy = 4;
+        formGbc.gridwidth = 2;
         JLabel createPasswordLabel = createFieldLabel("Create Password:");
-        centerPanel.add(createPasswordLabel, gbc);
+        formPanel.add(createPasswordLabel, formGbc);
 
+        formGbc.gridy = 5;
+        formGbc.gridwidth = 1;
+        JPanel passwordPanel = new JPanel(new BorderLayout());
+        passwordPanel.setPreferredSize(new Dimension(300, 40));
+        passwordPanel.setOpaque(false);
 
-        gbc.gridy++;
-        gbc.gridx = 0;
-        gbc.gridwidth = 2;
         JPasswordField passwordField = new JPasswordField();
         passwordField.setFont(new Font("Arial", Font.PLAIN, 24));
         passwordField.setForeground(Color.GRAY);
@@ -759,13 +748,21 @@ public class WelcomePageGUI extends JFrame {
             BorderFactory.createLineBorder(Color.RED),
             BorderFactory.createEmptyBorder(5, 5, 5, 5)
         ));
-        centerPanel.add(passwordField, gbc);
+        passwordPanel.add(passwordField, BorderLayout.CENTER);
 
-        gbc.gridx = 2;
-        gbc.gridwidth = 1;
+        JLabel showHideIcon = new JLabel(new ImageIcon(new ImageIcon("images/show_icon.png")
+            .getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH)));
+        showHideIcon.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        showHideIcon.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 5));
+        showHideIcon.setOpaque(false);
+        passwordPanel.add(showHideIcon, BorderLayout.EAST);
+        
+        formPanel.add(passwordPanel, formGbc);
+        
+        formGbc.gridx = 1;
         JLabel passwordIconLabel = new JLabel();
         passwordIconLabel.setPreferredSize(new Dimension(30, 30));
-        centerPanel.add(passwordIconLabel, gbc);
+        formPanel.add(passwordIconLabel, formGbc);
 
         
         passwordField.addFocusListener(new FocusAdapter() {
@@ -785,19 +782,6 @@ public class WelcomePageGUI extends JFrame {
             }
         });
     
-        
-        gbc.gridx = 2;
-        gbc.gridwidth = 1;
-        JPanel iconPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
-        JLabel showHideIcon = new JLabel(new ImageIcon(new ImageIcon("images/show_icon.png")
-            .getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH)));
-        showHideIcon.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        showHideIcon.setPreferredSize(new Dimension(20, 20));
-        passwordIconLabel.setPreferredSize(new Dimension(30, 30));
-        iconPanel.add(showHideIcon);
-        iconPanel.add(passwordIconLabel);
-        centerPanel.add(iconPanel, gbc);
-    
         showHideIcon.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent evt) {
                 if (passwordField.getEchoChar() == '*') {
@@ -811,18 +795,15 @@ public class WelcomePageGUI extends JFrame {
                 }
             }
         });
-    
         
-        gbc.gridy++;
-        gbc.gridwidth = 3;
-        gbc.gridx = 0;
+        formGbc.gridx = 0;
+        formGbc.gridy = 6;
+        formGbc.gridwidth = 2;
         JLabel contactNumberLabel = createFieldLabel("Contact Number:");
-        centerPanel.add(contactNumberLabel, gbc);
+        formPanel.add(contactNumberLabel, formGbc);
 
-
-        gbc.gridy++;
-        gbc.gridx = 0;
-        gbc.gridwidth = 2;
+        formGbc.gridy = 7;
+        formGbc.gridwidth = 1;
         JTextField contactNumberField = new JTextField();
         contactNumberField.setFont(new Font("Arial", Font.PLAIN, 24));
         contactNumberField.setForeground(Color.GRAY);
@@ -832,15 +813,13 @@ public class WelcomePageGUI extends JFrame {
             BorderFactory.createLineBorder(Color.RED),
             BorderFactory.createEmptyBorder(5, 5, 5, 5)
         ));
-        centerPanel.add(contactNumberField, gbc);
+        formPanel.add(contactNumberField, formGbc);
 
-        gbc.gridx = 2;
-        gbc.gridwidth = 1;
+        formGbc.gridx = 1;
         JLabel contactNumberIconLabel = new JLabel();
         contactNumberIconLabel.setPreferredSize(new Dimension(30, 30));
-        centerPanel.add(contactNumberIconLabel, gbc);
+        formPanel.add(contactNumberIconLabel, formGbc);
 
-        
         contactNumberField.addFocusListener(new FocusAdapter() {
             public void focusGained(FocusEvent evt) {
                 if (contactNumberField.getText().equals("Contact Number")) {
@@ -855,11 +834,10 @@ public class WelcomePageGUI extends JFrame {
                 }
             }
         });
+
+        gbc.anchor = GridBagConstraints.CENTER;
+        centerPanel.add(formPanel, gbc);
     
-        
-        gbc.gridy++;
-        gbc.gridx = 0;
-        gbc.gridwidth = 3;
         gbc.anchor = GridBagConstraints.CENTER;
         JButton registerButton = createButton("Register", "register_icon.png");
         registerButton.setFont(new Font("Arial", Font.PLAIN, 24));
