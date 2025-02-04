@@ -91,6 +91,7 @@ public class WelcomePageGUI extends JFrame {
 
     private JPanel createRoleSelectionPanel() {
         JPanel panel = new JPanel(new BorderLayout());
+        panel.setBackground(new Color(245, 245, 245));
         panel.addComponentListener(new ComponentAdapter() {
             @Override
             public void componentShown(ComponentEvent e) {
@@ -103,33 +104,53 @@ public class WelcomePageGUI extends JFrame {
         welcomeLabel.setBorder(BorderFactory.createEmptyBorder(48, 0, 0, 0)); 
         panel.add(welcomeLabel, BorderLayout.NORTH);
 
-        JPanel centerPanel = new JPanel(new GridLayout(5, 1, 19, 19)); 
-        centerPanel.setBorder(BorderFactory.createEmptyBorder(38, 38, 38, 38)); 
+        JPanel centerPanel = new JPanel();
+        centerPanel.setBackground(new Color(245, 245, 245));
+        centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
+        centerPanel.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
+    
+        // APU Logo
+        JLabel apuLogo = new JLabel(new ImageIcon(new ImageIcon("images/apu_logo.png")
+        .getImage().getScaledInstance(250, 250, Image.SCALE_SMOOTH)));
+        apuLogo.setAlignmentX(Component.CENTER_ALIGNMENT);
+        centerPanel.add(apuLogo);
+        centerPanel.add(Box.createVerticalStrut(30));
 
-        JLabel label = new JLabel("Select Your Role:", SwingConstants.CENTER);
-        label.setFont(new Font("Arial", Font.PLAIN, 24)); 
+        JLabel roleLabel = new JLabel("Select Your Role:", SwingConstants.CENTER);
+        roleLabel.setFont(new Font("Arial", Font.PLAIN, 24));
+        roleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        centerPanel.add(roleLabel);
+        centerPanel.add(Box.createVerticalStrut(20));
+
+        JPanel buttonsPanel = new JPanel();
+        buttonsPanel.setBackground(new Color(245, 245, 245));
+        buttonsPanel.setLayout(new BoxLayout(buttonsPanel, BoxLayout.Y_AXIS));
+        buttonsPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
         JButton managerButton = createButton("Manager", "manager_icon.png");
         JButton staffButton = createButton("Staff","staff_icon.png");
         JButton residentButton = createButton("Resident", "resident_icon.png");
 
-        managerButton.setFont(new Font("Arial", Font.PLAIN, 24)); 
-        staffButton.setFont(new Font("Arial", Font.PLAIN, 24)); 
-        residentButton.setFont(new Font("Arial", Font.PLAIN, 24)); 
-
-        managerButton.setPreferredSize(new Dimension(200, 50)); 
-        staffButton.setPreferredSize(new Dimension(200, 50)); 
-        residentButton.setPreferredSize(new Dimension(200, 50)); 
+        Dimension buttonSize = new Dimension(250, 50);
+        Font buttonFont = new Font("Arial", Font.PLAIN, 24);
+        
+        for (JButton button : new JButton[]{managerButton, staffButton, residentButton}) {
+            button.setPreferredSize(buttonSize);
+            button.setMaximumSize(buttonSize);
+            button.setMinimumSize(buttonSize);
+            button.setFont(buttonFont);
+            button.setAlignmentX(Component.CENTER_ALIGNMENT);
+            buttonsPanel.add(button);
+            buttonsPanel.add(Box.createVerticalStrut(15));
+        }
 
         managerButton.addActionListener(e -> cardLayout.show(mainPanel, "ManagerAuthCode"));
         staffButton.addActionListener(e -> cardLayout.show(mainPanel, "StaffAuthCode"));
         residentButton.addActionListener(e -> cardLayout.show(mainPanel, "ResidentLogin"));
-
-        centerPanel.add(label);
-        centerPanel.add(managerButton);
-        centerPanel.add(staffButton);
-        centerPanel.add(residentButton);
-        centerPanel.add(Box.createVerticalStrut(38)); 
-
+    
+        centerPanel.add(buttonsPanel);
+        centerPanel.add(Box.createVerticalStrut(20));
+    
         panel.add(centerPanel, BorderLayout.CENTER);
 
         managerButton.setToolTipText("Login as Manager (Alt+M)");
@@ -176,8 +197,11 @@ public class WelcomePageGUI extends JFrame {
         topPanel.add(backButton, BorderLayout.WEST);
         panel.add(topPanel, BorderLayout.NORTH);
 
-        JPanel centerPanel = new JPanel(new GridLayout(3, 1, 19, 19)); 
-        centerPanel.setBorder(BorderFactory.createEmptyBorder(38, 38, 38, 38)); 
+        JPanel centerPanel = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(10, 10, 10, 10);
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.anchor = GridBagConstraints.CENTER;
 
         JLabel titleLabel = new JLabel(title, SwingConstants.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 28)); 
@@ -185,6 +209,8 @@ public class WelcomePageGUI extends JFrame {
         JTextField authCodeField = new JTextField();
         authCodeField.setFont(new Font("Arial", Font.PLAIN, 24)); 
         authCodeField.setForeground(Color.GRAY);
+        authCodeField.setPreferredSize(new Dimension(300, 40));
+
         authCodeField.setBorder(BorderFactory.createCompoundBorder(
             authCodeField.getBorder(), 
             BorderFactory.createEmptyBorder(5, 5, 5, 5)
@@ -207,7 +233,7 @@ public class WelcomePageGUI extends JFrame {
 
         JButton submitButton = createButton("Submit", "submit_icon.png");
         submitButton.setFont(new Font("Arial", Font.PLAIN, 24)); 
-        submitButton.setPreferredSize(new Dimension(200, 50));  
+        submitButton.setPreferredSize(new Dimension(200, 50));
         authCodeField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
@@ -226,9 +252,12 @@ public class WelcomePageGUI extends JFrame {
             }
         });
         
-        centerPanel.add(titleLabel);
-        centerPanel.add(authCodeField);
-        centerPanel.add(submitButton);
+        gbc.gridy = 0;
+        centerPanel.add(titleLabel, gbc);
+        gbc.gridy = 1;
+        centerPanel.add(authCodeField, gbc);
+        gbc.gridy = 2;
+        centerPanel.add(submitButton, gbc);
         
         panel.add(centerPanel, BorderLayout.CENTER);
         
@@ -256,7 +285,6 @@ public class WelcomePageGUI extends JFrame {
 
     private JPanel createLoginPanel(String title, String menuCard) {
         JPanel panel = new JPanel(new BorderLayout());
-    
         
         JPanel topPanel = new JPanel(new BorderLayout());
         JButton backButton = createButton("Back", "back_icon.png");
@@ -280,38 +308,31 @@ public class WelcomePageGUI extends JFrame {
     
         
         JPanel centerPanel = new JPanel(new GridBagLayout());
-        centerPanel.setBorder(BorderFactory.createEmptyBorder(38, 38, 38, 38));
-        centerPanel.setPreferredSize(new Dimension(600, 400));
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(10, 10, 10, 10);
-        gbc.weightx = 1.0; 
-        gbc.weighty = 0.0; 
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.anchor = GridBagConstraints.CENTER;
-    
-        
-        JLabel titleLabel = new JLabel(title, SwingConstants.CENTER);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 28));
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.anchor = GridBagConstraints.WEST;
+
         gbc.gridx = 0;
         gbc.gridy = 0;
-        gbc.gridwidth = 2;
+        gbc.gridwidth = 3;
+        gbc.anchor = GridBagConstraints.CENTER;
+        JLabel titleLabel = new JLabel(title, SwingConstants.CENTER);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 28));
         centerPanel.add(titleLabel, gbc);
     
-        
         gbc.gridy++;
-        gbc.gridwidth = 2;
-        gbc.anchor = GridBagConstraints.CENTER;
-        JLabel usernameLabel = new JLabel("Username:");
-        usernameLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+        gbc.gridwidth = 1;
+        gbc.anchor = GridBagConstraints.WEST;
+        JLabel usernameLabel = createFieldLabel("Username:");
         centerPanel.add(usernameLabel, gbc);
     
         gbc.gridy++;
-        gbc.gridwidth = 2;
         JTextField usernameField = new JTextField();
         usernameField.setFont(new Font("Arial", Font.PLAIN, 24));
         usernameField.setForeground(Color.GRAY);
         usernameField.setText("Username");
-        usernameField.setPreferredSize(new Dimension(300, 35));
+        usernameField.setPreferredSize(new Dimension(300, 40));
         centerPanel.add(usernameField, gbc);
     
         
@@ -332,30 +353,38 @@ public class WelcomePageGUI extends JFrame {
     
         
         gbc.gridy++;
-        gbc.gridwidth = 2;
-        JLabel passwordLabel = new JLabel("Password:");
-        passwordLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+        JLabel passwordLabel = createFieldLabel("Password:");
         centerPanel.add(passwordLabel, gbc);
     
         gbc.gridy++;
-        gbc.gridwidth = 1;
         JPasswordField passwordField = new JPasswordField();
         passwordField.setFont(new Font("Arial", Font.PLAIN, 24));
         passwordField.setForeground(Color.GRAY);
         passwordField.setText("Password");
         passwordField.setEchoChar((char) 0);
-        passwordField.setPreferredSize(new Dimension(300, 35));
-        centerPanel.add(passwordField, gbc);
+        passwordField.setPreferredSize(new Dimension(300, 40));
+        passwordField.setMargin(new Insets(0, 5, 0, 25));
     
-        
-        JLabel showHideIcon = new JLabel(new ImageIcon(new ImageIcon("images/show_icon.png")
-            .getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH)));
+        JPanel passwordPanel = new JPanel(new BorderLayout(0, 0)) {
+            @Override
+            public void paintBorder(Graphics g) {
+                // Override to prevent border painting
+            }
+        };
+        passwordPanel.setPreferredSize(new Dimension(300, 40));
+        passwordPanel.setOpaque(false);
+        passwordPanel.add(passwordField, BorderLayout.CENTER);
+
+        JLabel showHideIcon = new JLabel(new ImageIcon("images/show_icon.png"));
         showHideIcon.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        showHideIcon.setPreferredSize(new Dimension(35, 35));
-        gbc.gridx = 1;
-        centerPanel.add(showHideIcon, gbc);
-    
+        showHideIcon.setPreferredSize(new Dimension(20, 20));
+        showHideIcon.setBorder(null);
+        showHideIcon.setOpaque(false);
+        showHideIcon.setVerticalAlignment(SwingConstants.CENTER);
+        passwordPanel.add(showHideIcon, BorderLayout.EAST);
         
+        centerPanel.add(passwordPanel, gbc);
+    
         passwordField.addFocusListener(new FocusAdapter() {
             public void focusGained(FocusEvent evt) {
                 if (String.valueOf(passwordField.getPassword()).equals("Password")) {
@@ -392,9 +421,10 @@ public class WelcomePageGUI extends JFrame {
         gbc.gridx = 0;
         gbc.gridwidth = 2;
         gbc.fill = GridBagConstraints.NONE;
+        gbc.anchor = GridBagConstraints.CENTER;
         JButton loginButton = createButton("Login", "login_icon.png");
         loginButton.setFont(new Font("Arial", Font.PLAIN, 24));
-        loginButton.setPreferredSize(new Dimension(200, 35));
+        loginButton.setPreferredSize(new Dimension(200, 50));
         centerPanel.add(loginButton, gbc);
     
         
@@ -408,6 +438,15 @@ public class WelcomePageGUI extends JFrame {
         registerButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
         registerButton.setFocusPainted(false);
         centerPanel.add(registerButton, gbc);
+
+        registerButton.addMouseListener(new MouseAdapter() {
+            public void mouseEntered(MouseEvent e) {
+                registerButton.setForeground(new Color(255, 64, 129)); // Material Design pink
+            }
+            public void mouseExited(MouseEvent e) {
+                registerButton.setForeground(Color.BLUE);
+            }
+        });
     
         
         usernameField.addKeyListener(new KeyAdapter() {
@@ -535,6 +574,12 @@ public class WelcomePageGUI extends JFrame {
         
         addFocusHighlight(usernameField);
         addFocusHighlight(passwordField);
+
+        JLabel decorativeBanner = new JLabel(new ImageIcon("images/hostel_banner.jpg"));
+        panel.add(decorativeBanner, BorderLayout.SOUTH);
+
+        // Add subtle background pattern
+        panel.setBackground(new Color(245, 245, 245));
     
         panel.add(centerPanel, BorderLayout.CENTER);
     
@@ -1064,7 +1109,7 @@ public class WelcomePageGUI extends JFrame {
         label.setFont(new Font("Arial", Font.PLAIN, 14));
         return label;
     }
-    
+
     private void addFocusHighlight(JComponent field) {
         field.addFocusListener(new FocusAdapter() {
             public void focusGained(FocusEvent e) {
