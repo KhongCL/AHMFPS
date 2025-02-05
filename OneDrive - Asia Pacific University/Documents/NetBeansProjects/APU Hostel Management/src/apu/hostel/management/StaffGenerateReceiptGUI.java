@@ -114,7 +114,7 @@ public class StaffGenerateReceiptGUI {
                     frame.setTitle("Generate Receipt - " + staff.getUsername());
                     filteredPaymentList = new ArrayList<>(paymentDetailsMap.values());
                     if (currentSortCategory != null) {
-                        applySorting(filteredPaymentList); // Use filteredPaymentList instead of paymentDetailsMap.values()
+                        applySorting(filteredPaymentList);
                     } else {
                         loadEligiblePayments();
                     }
@@ -302,7 +302,7 @@ public class StaffGenerateReceiptGUI {
     private void loadEligiblePayments() {
         paymentDetailsMap = new HashMap<>();
         tableModel.setRowCount(0);
-        filteredPaymentList = new ArrayList<>(); // Initialize here
+        filteredPaymentList = new ArrayList<>();
         
         currentFilterChoice = null;
         currentFilterValue = null;
@@ -408,7 +408,7 @@ public class StaffGenerateReceiptGUI {
             if (currentSortCategory != null) {
                 applySorting(filteredPaymentList);
             } else {
-                updateTable(filteredPaymentList); // Changed from loadEligiblePayments()
+                updateTable(filteredPaymentList);
             }
             return;
         }
@@ -664,7 +664,6 @@ public class StaffGenerateReceiptGUI {
             button.setIconTextGap(15);
             button.setHorizontalAlignment(SwingConstants.CENTER);
             
-            // Enhanced Material Design colors with better contrast
             if (text.contains("Back")) {
                 button.setBackground(new Color(245, 245, 245));    // Light Gray
                 button.setForeground(new Color(66, 66, 66));      // Dark Gray

@@ -46,7 +46,7 @@ public class StaffManageProfileGUI {
         topPanel.add(backButton, BorderLayout.WEST);
         frame.add(topPanel, BorderLayout.NORTH);
 
-        JPanel centerPanel = new JPanel(new BorderLayout(5, 5)); // Reduced from 10,10
+        JPanel centerPanel = new JPanel(new BorderLayout(5, 5));
         centerPanel.setBorder(BorderFactory.createEmptyBorder(0, 10, 5, 10)); 
     
         JLabel titleLabel = new JLabel("Update Personal Information", JLabel.CENTER);
@@ -498,7 +498,6 @@ public class StaffManageProfileGUI {
             button.setIconTextGap(15);
             button.setHorizontalAlignment(SwingConstants.CENTER);
             
-            // Enhanced Material Design colors with better contrast
             if (text.contains("Back")) {
                 button.setBackground(new Color(245, 245, 245));    // Light Gray
                 button.setForeground(new Color(66, 66, 66));      // Dark Gray

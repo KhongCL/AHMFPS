@@ -32,7 +32,7 @@ public class ResidentManageBookingsGUI {
         topPanel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
 
         JButton backButton = createButton("Back", "back_icon.png");
-        backButton.setPreferredSize(new Dimension(125, 40)); // Match other pages size
+        backButton.setPreferredSize(new Dimension(125, 40));
         backButton.addActionListener(e -> {
             new ResidentMainPageGUI(resident);
             frame.dispose();
@@ -162,7 +162,6 @@ public class ResidentManageBookingsGUI {
             button.setIconTextGap(15);
             button.setHorizontalAlignment(SwingConstants.CENTER);
             
-            // Enhanced Material Design colors with better contrast
             if (text.contains("Back")) {
                 button.setBackground(new Color(245, 245, 245));    // Light Gray
                 button.setForeground(new Color(66, 66, 66));      // Dark Gray

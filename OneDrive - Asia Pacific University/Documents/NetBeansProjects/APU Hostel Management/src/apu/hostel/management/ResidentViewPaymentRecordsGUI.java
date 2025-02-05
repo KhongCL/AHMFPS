@@ -339,7 +339,6 @@ public class ResidentViewPaymentRecordsGUI {
             return;
         }
         
-        // Rest of the method remains the same
         String roomNumber = APUHostelManagement.Resident.getRoomNumber(details[5]);
         long stayDuration = calculateStayDuration(details[3], details[4]);
     
@@ -701,7 +700,6 @@ public class ResidentViewPaymentRecordsGUI {
             button.setIconTextGap(15);
             button.setHorizontalAlignment(SwingConstants.CENTER);
             
-            // Enhanced Material Design colors with better contrast
             if (text.contains("Back")) {
                 button.setBackground(new Color(245, 245, 245));    // Light Gray
                 button.setForeground(new Color(66, 66, 66));      // Dark Gray

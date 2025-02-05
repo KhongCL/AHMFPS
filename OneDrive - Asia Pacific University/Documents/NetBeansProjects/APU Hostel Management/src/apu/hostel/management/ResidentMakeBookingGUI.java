@@ -122,7 +122,7 @@ public class ResidentMakeBookingGUI {
         pricingTable.getColumnModel().getColumn(2).setPreferredWidth(100); // Daily Rate
         pricingTable.getColumnModel().getColumn(3).setPreferredWidth(100); // Weekly Rate
         pricingTable.getColumnModel().getColumn(4).setPreferredWidth(100); // Monthly Rate
-        pricingTable.getColumnModel().getColumn(5).setPreferredWidth(100);
+        pricingTable.getColumnModel().getColumn(5).setPreferredWidth(100); // Yearly Rate
 
         JScrollPane scrollPane = new JScrollPane(pricingTable);
         pricingPanel.add(scrollPane, BorderLayout.CENTER);
@@ -417,7 +417,7 @@ public class ResidentMakeBookingGUI {
 
         int confirm = JOptionPane.showConfirmDialog(frame, bookingDetails + "\n\nAre you sure you want to confirm this booking?", "Booking Details", JOptionPane.YES_NO_OPTION);
         if (confirm == JOptionPane.YES_OPTION) {
-            
+            // Save booking details to file
             boolean bookingSuccess = APUHostelManagement.Resident.addBookingToFile(paymentID, residentID, startDate, endDate, roomID, paymentAmount, bookingDateTime);
             if (!bookingSuccess) {
                 JOptionPane.showMessageDialog(frame, "An error occurred while saving the booking.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -562,7 +562,6 @@ public class ResidentMakeBookingGUI {
             button.setIconTextGap(15);
             button.setHorizontalAlignment(SwingConstants.CENTER);
             
-            // Enhanced Material Design colors with better contrast
             if (text.contains("Back")) {
                 button.setBackground(new Color(245, 245, 245));    // Light Gray
                 button.setForeground(new Color(66, 66, 66));      // Dark Gray

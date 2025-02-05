@@ -503,7 +503,7 @@ public class ResidentMakePaymentForBookingGUI {
             paymentDetailsDialog.dispose();
             if (success) {
                 JOptionPane.showMessageDialog(frame, "Payment successful.", "Success", JOptionPane.INFORMATION_MESSAGE);
-                tableModel.removeRow(selectedRow); // Use selectedRow instead of rowIndex
+                tableModel.removeRow(selectedRow);
             } else {
                 JOptionPane.showMessageDialog(frame, "An error occurred while processing the payment.", "Error", JOptionPane.ERROR_MESSAGE);
             }
@@ -735,7 +735,6 @@ public class ResidentMakePaymentForBookingGUI {
         
         filteredPaymentList = new ArrayList<>(bookingList);
         
-        int rowIndex = 0;
         for (String[] booking : bookingList) {
             String roomNumber = APUHostelManagement.Resident.getRoomNumber(booking[5]);
             long stayDuration = ChronoUnit.DAYS.between(
@@ -749,7 +748,6 @@ public class ResidentMakePaymentForBookingGUI {
                 booking[8],
                 "RM" + booking[6]
             });
-            rowIndex++;
         }
     }
 
@@ -795,7 +793,6 @@ public class ResidentMakePaymentForBookingGUI {
             button.setIconTextGap(15);
             button.setHorizontalAlignment(SwingConstants.CENTER);
             
-            // Enhanced Material Design colors with better contrast
             if (text.contains("Back")) {
                 button.setBackground(new Color(245, 245, 245));    // Light Gray
                 button.setForeground(new Color(66, 66, 66));      // Dark Gray

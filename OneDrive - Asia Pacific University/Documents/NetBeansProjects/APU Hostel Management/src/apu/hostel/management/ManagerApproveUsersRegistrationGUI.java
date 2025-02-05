@@ -339,7 +339,6 @@ public class ManagerApproveUsersRegistrationGUI {
             return;
         }
     
-        // Get the selected user from filteredUserList instead of userList
         APUHostelManagement.User userToApprove = filteredUserList.get(selectedRow);
         String role = userToApprove.getRole();
         
@@ -620,7 +619,6 @@ public class ManagerApproveUsersRegistrationGUI {
             button.setIconTextGap(15);
             button.setHorizontalAlignment(SwingConstants.CENTER);
             
-            // Enhanced Material Design colors with better contrast
             if (text.contains("Approve")) {
                 button.setBackground(new Color(200, 230, 201)); // Light Green
                 button.setForeground(new Color(46, 125, 50));  // Dark Green

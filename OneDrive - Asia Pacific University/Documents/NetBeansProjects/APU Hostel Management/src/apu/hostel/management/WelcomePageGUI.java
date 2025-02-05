@@ -441,7 +441,7 @@ public class WelcomePageGUI extends JFrame {
 
         registerButton.addMouseListener(new MouseAdapter() {
             public void mouseEntered(MouseEvent e) {
-                registerButton.setForeground(new Color(255, 64, 129)); // Material Design pink
+                registerButton.setForeground(new Color(255, 64, 129)); // pink
             }
             public void mouseExited(MouseEvent e) {
                 registerButton.setForeground(Color.BLUE);
@@ -1159,7 +1159,6 @@ public class WelcomePageGUI extends JFrame {
             button.setIconTextGap(15);
             button.setHorizontalAlignment(SwingConstants.CENTER);
             
-            // Enhanced Material Design colors with better contrast
             if (text.contains("Back")) {
                 button.setBackground(new Color(245, 245, 245));
                 button.setForeground(new Color(66, 66, 66));

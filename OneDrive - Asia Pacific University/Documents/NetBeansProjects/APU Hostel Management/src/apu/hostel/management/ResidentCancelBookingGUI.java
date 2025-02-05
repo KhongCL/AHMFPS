@@ -242,7 +242,6 @@ public class ResidentCancelBookingGUI {
             public void actionPerformed(ActionEvent e) {
                 int selectedRow = table.getSelectedRow();
                 if (selectedRow != -1) {
-                    // Use filteredBookingList instead of paymentDetailsMap
                     showCancelBookingPopup(filteredBookingList.get(selectedRow), selectedRow);
                 } else {
                     JOptionPane.showMessageDialog(frame, "Please select a booking to cancel.", 
@@ -384,7 +383,6 @@ public class ResidentCancelBookingGUI {
             tableModel.removeRow(rowIndex);
             APUHostelManagement.Resident.updateRoomStatus1(roomID, "available");
             
-            // Add this check
             if (filteredBookingList.isEmpty()) {
                 if (currentFilterChoice != null) {
                     reapplyCurrentFilter();
@@ -623,7 +621,6 @@ public class ResidentCancelBookingGUI {
 
         filteredBookingList = new ArrayList<>(bookingList);
         
-        int rowIndex = 0;
         for (String[] booking : bookingList) {
             String roomNumber = APUHostelManagement.Resident.getRoomNumber(booking[5]);
             long stayDuration = ChronoUnit.DAYS.between(
@@ -637,7 +634,6 @@ public class ResidentCancelBookingGUI {
                 booking[8],
                 "RM" + booking[6]
             });
-            rowIndex++;
         }
     }
 
@@ -683,7 +679,6 @@ public class ResidentCancelBookingGUI {
             button.setIconTextGap(15);
             button.setHorizontalAlignment(SwingConstants.CENTER);
             
-            // Enhanced Material Design colors with better contrast
             if (text.contains("Back")) {
                 button.setBackground(new Color(245, 245, 245));    // Light Gray
                 button.setForeground(new Color(66, 66, 66));      // Dark Gray

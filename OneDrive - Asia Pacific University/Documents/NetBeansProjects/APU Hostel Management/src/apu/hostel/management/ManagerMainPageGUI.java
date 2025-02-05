@@ -247,7 +247,6 @@ public class ManagerMainPageGUI {
             button.setIconTextGap(15);
             button.setHorizontalAlignment(SwingConstants.CENTER);
             
-            // Enhanced Material Design colors with better contrast
             if (text.contains("Approve") || text.contains("Search")) {
                 button.setBackground(new Color(187, 222, 251)); // Light Blue
                 button.setForeground(new Color(25, 118, 210)); // Darker Blue Text

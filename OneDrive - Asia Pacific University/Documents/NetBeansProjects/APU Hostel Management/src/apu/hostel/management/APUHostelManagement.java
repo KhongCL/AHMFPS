@@ -10,8 +10,16 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.time.format.DateTimeParseException;
 
+/**
+ * Main class for APU Hostel Management System.
+ * Handles user management, authentication, room bookings and payments.
+ */
 public class APUHostelManagement {
 
+    /**
+     * Abstract base class for all user types in the system.
+     * Contains common user properties and methods.
+     */
     public abstract static class User {
         protected String userID;
         protected String icPassportNumber;
@@ -22,8 +30,7 @@ public class APUHostelManagement {
         protected String role;
         protected boolean isActive;
 
-        
-
+        // Constructor
         public User(String userID, String icPassportNumber, String username, String password, String contactNumber, String dateOfRegistration, String role, boolean isActive) {
             this.userID = userID;
             this.icPassportNumber = icPassportNumber;
@@ -40,6 +47,7 @@ public class APUHostelManagement {
             return "UserID: " + userID + ", IC/Passport Number: " + icPassportNumber + ", Username: " + username + ", Contact Number: " + contactNumber + ", Date of Registration: " + dateOfRegistration + ", Role: " + role + ", IsActive: " + isActive;
         }
 
+        // Getters and setters
         public void setUserID(String userID) {
             this.userID = userID;
         }
@@ -109,7 +117,7 @@ public class APUHostelManagement {
             }
         }
 
-        
+        // Method to read users from file
         public static List<User> readFromFile(String filename) throws IOException {
             List<User> users = new ArrayList<>();
             try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
@@ -139,6 +147,7 @@ public class APUHostelManagement {
         }
 
 
+        // Method to find user by username and password
         public static User findUser(String username, String password, String filename) throws IOException {
             List<User> users = User.readFromFile(filename);
             for (User user : users) {
@@ -149,7 +158,7 @@ public class APUHostelManagement {
             return null;
         }
 
-
+        
         public static boolean isUnique(String icPassportNumber, String username, String contactNumber) throws IOException {
             List<User> users = new ArrayList<>();
             users.addAll(User.readFromFile("users.txt"));
@@ -286,7 +295,6 @@ public class APUHostelManagement {
             }
             return null;
         }
-
 
         private static final Scanner scanner = new Scanner(System.in);
 
@@ -531,7 +539,7 @@ public class APUHostelManagement {
             }
         }
         
-
+        //Method to save unapproved users to file
         static void saveUnapprovedUsers(List<User> users, String filename) throws IOException {
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
                 for (User user : users) {
@@ -680,11 +688,12 @@ public class APUHostelManagement {
             }
         }
         
-        
+        //Method to read approved users from file
         public static List<User> readApprovedUsers() throws IOException {
             return User.readFromFileForSearch("users.txt");
         }
         
+        //Method to read unapproved users from file
         public static List<User> readUnapprovedUsers() throws IOException {
             List<User> unapprovedUsers = new ArrayList<>();
             unapprovedUsers.addAll(User.readFromFileForSearch("unapproved_managers.txt"));
@@ -978,6 +987,7 @@ public class APUHostelManagement {
             }
         }
         
+        //Method to update user information in file
         static void updateFile(String filename, User updatedUser) throws IOException {
             List<User> users = User.readFromFile(filename);
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
@@ -1033,6 +1043,7 @@ public class APUHostelManagement {
             }
         }
 
+        //Method to read rates from file
         public static List<FeeRate> readRatesFromFile(String filename) throws IOException {
             List<FeeRate> feeRates = new ArrayList<>();
             try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
@@ -1446,6 +1457,7 @@ public class APUHostelManagement {
             }
         }
 
+        //Get fee rate that are currently being used
         public static List<String> getRestrictedFeeRateIDs() {
             List<String> restrictedFeeRateIDs = new ArrayList<>();
             List<Room> rooms = readRoomsFromFile("rooms.txt");
@@ -1457,6 +1469,7 @@ public class APUHostelManagement {
             return restrictedFeeRateIDs;
         }
 
+        //Method to validate rate
         public static double validateRate(String rateType, double currentRate) {
             if (currentRate <= 0) {
                 throw new IllegalArgumentException(rateType + " must be greater than zero");
@@ -1464,12 +1477,13 @@ public class APUHostelManagement {
             return currentRate;
         }
 
+        //Method to generate Fee Rate ID
         public static String generateFeeRateID(int currentSize) {
             return "FR" + String.format("%02d", currentSize + 1);
         }
 
 
-        
+        //Method to save rates to file
         static void saveRatesToFile(List<FeeRate> rates) {
             try (BufferedWriter writer = new BufferedWriter(new FileWriter("fee_rates.txt"))) {
                 for (FeeRate rate : rates) {
@@ -1816,6 +1830,7 @@ public class APUHostelManagement {
             }
         }
 
+        //Method to read rooms from file
         static List<Room> readRoomsFromFile(String filename) {
             List<Room> rooms = new ArrayList<>();
             try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
@@ -1832,6 +1847,7 @@ public class APUHostelManagement {
             return rooms;
         }
 
+        //Method to save rooms to file
         static void saveRoomsToFile(List<Room> rooms) {
             try (BufferedWriter writer = new BufferedWriter(new FileWriter("rooms.txt"))) {
                 for (Room room : rooms) {
@@ -2210,7 +2226,8 @@ public class APUHostelManagement {
             } catch (IOException e) {
             }
         }
-                
+               
+        //Method to process pending payment
         public static boolean processPendingPayment(String paymentId, String staffId) {
             List<String[]> payments = new ArrayList<>();
             boolean success = false;
@@ -2266,8 +2283,8 @@ public class APUHostelManagement {
             return false;
         }
 
+        //Method to generate receipt
         public static boolean generateReceipt(String paymentId, String staffId) {
-            List<String[]> payments = new ArrayList<>();
             List<String[]> receipts = new ArrayList<>();
             boolean success = false;
             
@@ -2584,6 +2601,7 @@ public class APUHostelManagement {
             }
         }
 
+        //Method to view payment records
         public static List<String[]> viewPaymentRecords(String residentID) {
             List<String[]> paymentRecords = new ArrayList<>();
             try (BufferedReader reader = new BufferedReader(new FileReader("payments.txt"))) {
@@ -2834,6 +2852,7 @@ public class APUHostelManagement {
             System.out.println("Your payment is successful.");
         }
 
+        //Method to filter unpaid bookings for a resident
         public static List<String[]> getUnpaidBookingsForResident(String residentID) {
             List<String[]> payments = new ArrayList<>();
             List<String[]> unpaidBookings = new ArrayList<>();
@@ -2859,6 +2878,7 @@ public class APUHostelManagement {
             return unpaidBookings;
         }
     
+        // Helper method to get the room map    
         public static Map<String, String> getRoomMap() {
             Map<String, String> roomMap = new HashMap<>();
             try (BufferedReader roomReader = new BufferedReader(new FileReader("rooms.txt"))) {
@@ -2875,6 +2895,7 @@ public class APUHostelManagement {
             return roomMap;
         }
 
+        // Helper method to get the room type based on the room ID
         public static String getRoomType(String roomID) {
             try (BufferedReader br = new BufferedReader(new FileReader("rooms.txt"))) {
                 String line;
@@ -2890,6 +2911,7 @@ public class APUHostelManagement {
             return "Unknown Room Type";
         }
 
+        //Method to update the payment status and method
         public static boolean updatePaymentStatusAndMethod(String paymentID, String paymentMethod) {
             List<String[]> payments = new ArrayList<>();
     
@@ -3040,6 +3062,7 @@ public class APUHostelManagement {
             System.out.println("This booking has been successfully cancelled.");
         }
         
+        // Method to get the list of cancellable bookings for a resident
         public static List<String[]> getCancellableBookingsForResident(String residentID) {
             List<String[]> payments = new ArrayList<>();
             List<String[]> cancellableBookings = new ArrayList<>();
@@ -3065,6 +3088,7 @@ public class APUHostelManagement {
             return cancellableBookings;
         }
 
+        // Method to update the booking status to cancelled
         public static boolean cancelBooking(String paymentID) {
             List<String[]> payments = new ArrayList<>();
             boolean bookingCancelled = false;
@@ -3099,6 +3123,7 @@ public class APUHostelManagement {
             return bookingCancelled;
         }
 
+        // Method to update the room status to available after a booking is cancelled
         public static void updateRoomStatus1(String roomID, String status) {
             List<String[]> rooms = new ArrayList<>();
             try (BufferedReader reader = new BufferedReader(new FileReader("rooms.txt"))) {
@@ -3295,6 +3320,7 @@ public class APUHostelManagement {
             System.out.println("Please go back to Manage Bookings to make payment for this booking.");
         }
 
+        //Method to get room number based on room ID
         public static String getRoomNumber(String roomID) {
             String roomNumber = "Unknown Room";
             try (BufferedReader roomReader = new BufferedReader(new FileReader("rooms.txt"))) {
@@ -3312,6 +3338,7 @@ public class APUHostelManagement {
             return roomNumber;
         }
 
+        //Method to get the room pricing
         public static List<String[]> getRoomPricing() {
             List<String[]> roomPricing = new ArrayList<>();
             Map<String, String> roomTypeToFeeRateID = new HashMap<>();
@@ -3378,6 +3405,7 @@ public class APUHostelManagement {
             }
         }
 
+        //Method to get available rooms based on room type
         public static String selectAvailableRoomByType1(String roomType) {
             List<String> availableRooms = new ArrayList<>();
             try (BufferedReader roomReader = new BufferedReader(new FileReader("rooms.txt"))) {
@@ -3399,6 +3427,7 @@ public class APUHostelManagement {
             return null;
         }
 
+        //Method to generate payment ID
         public static String generatePaymentID1() {
             int id = 1;
             String filename = "payments.txt";
@@ -3426,6 +3455,7 @@ public class APUHostelManagement {
             return "P" + String.format("%02d", id);
         }
 
+        //Method to get Fee Rate ID based on room ID
         public static String getFeeRateID(String roomID) {
             String feeRateID = null;
             try (BufferedReader roomReader = new BufferedReader(new FileReader("rooms.txt"))) {
@@ -3454,6 +3484,7 @@ public class APUHostelManagement {
             }
         }
 
+        //Method to calculate payment amount
         static double calculatePaymentAmount(LocalDate startDate, LocalDate endDate, String feeRateID) {
             long totalDays = ChronoUnit.DAYS.between(startDate, endDate); 
             System.out.println("Total days: " + totalDays);
@@ -3739,7 +3770,7 @@ public class APUHostelManagement {
         }
     }
 
-    
+    //Fee Rate class
     public static class FeeRate {
         private String feeRateID;
         private String roomType;
@@ -3749,6 +3780,7 @@ public class APUHostelManagement {
         private double yearlyRate;
         private boolean isActive;
     
+        // Constructor
         public FeeRate(String feeRateID, String roomType, double dailyRate, double weeklyRate, double monthlyRate, double yearlyRate, boolean isActive) {
             this.feeRateID = feeRateID;
             this.roomType = roomType;
@@ -3837,6 +3869,7 @@ public class APUHostelManagement {
             return cost;
         }
     
+        // Read fee rates from file
         public static List<FeeRate> readFromFile(String filename) throws IOException {
             List<FeeRate> feeRates = new ArrayList<>();
             try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
@@ -3853,6 +3886,7 @@ public class APUHostelManagement {
         }
     }
 
+    //Room class
     public static class Room {
         private String roomID;
         private String feeRateID;
@@ -3862,6 +3896,7 @@ public class APUHostelManagement {
         private int roomCapacity;
         private boolean isActive;
     
+        // Constructor
         public Room(String roomID, String feeRateID, String roomType, int roomNumber, String roomStatus, int roomCapacity, boolean isActive) {
             this.roomID = roomID;
             this.feeRateID = feeRateID;
@@ -3934,30 +3969,9 @@ public class APUHostelManagement {
         }
     }
 
-
-
-
-    
-    private static final Scanner scanner = new Scanner(System.in);
-
-    private static int getValidatedChoice(Scanner scanner, int min, int max) {
-            int choice = -1;
-            while (choice < min || choice > max) {
-                if (scanner.hasNextInt()) {
-                    choice = scanner.nextInt();
-                    scanner.nextLine(); 
-                    if (choice < min || choice > max) {
-                        System.out.println("Invalid choice. Please enter a number between " + min + " and " + max + ".");
-                    }
-                } else {
-                    System.out.println("Invalid input. Please enter a number between " + min + " and " + max + ".");
-                    scanner.nextLine(); 
-                }
-            }
-            return choice;
-        }
-
-    
+    /**
+     * Validates uniqueness of IC/Passport number, username, and contact number
+     */
     public static boolean isUnique(String icPassportNumber, String username, String contactNumber) throws IOException {
         List<User> users = new ArrayList<>();
         users.addAll(User.readFromFile("users.txt"));
@@ -3978,7 +3992,9 @@ public class APUHostelManagement {
         return true;
     }
 
-    
+    /**
+     * Validates IC/Passport number format and uniqueness
+     */
     public static void validateICPassport(String icPassport) throws Exception {
         
         if (icPassport.length() == 14) {
@@ -4012,6 +4028,9 @@ public class APUHostelManagement {
         }
     }
     
+    /**
+     * Validates username format and uniqueness
+     */
     public static void validateUsername(String username) throws Exception {
         if (username.length() < 3 || username.length() > 12) {
             throw new Exception("Username must be between 3 and 12 characters long");
@@ -4034,6 +4053,9 @@ public class APUHostelManagement {
         }
     }
     
+    /**
+     * Validates password format and uniqueness
+     */
     public static void validatePassword(String password, String username) throws Exception {
         if (password.length() < 8 || password.length() > 12) {
             throw new Exception("Password must be between 8 and 12 characters long");
@@ -4084,7 +4106,7 @@ public class APUHostelManagement {
         }
     }
 
-    
+    // Validate the authorization code
     public static boolean isValidAuthCode(String authCode, String role) {
         
         Map<String, List<String>> validAuthCodes = new HashMap<>();
@@ -4094,7 +4116,7 @@ public class APUHostelManagement {
         return validAuthCodes.getOrDefault(role, Collections.emptyList()).contains(authCode);
     }
 
-    
+    // Register a new manager
     public static void registerManager(String icPassportNumber, String username, String password, String contactNumber) throws Exception {
         
         if (icPassportNumber.isEmpty() || username.isEmpty() || password.isEmpty() || contactNumber.isEmpty()) {
@@ -4116,6 +4138,7 @@ public class APUHostelManagement {
         manager.saveToManagerFile(null, null, "unapproved_managers.txt");
     }
     
+    // Register a new staff
     public static void registerStaff(String icPassportNumber, String username, String password, String contactNumber) throws Exception {
         
         if (icPassportNumber.isEmpty() || username.isEmpty() || password.isEmpty() || contactNumber.isEmpty()) {
@@ -4137,6 +4160,7 @@ public class APUHostelManagement {
         staff.saveToStaffFile(null, null, "unapproved_staffs.txt");
     }
     
+    // Register a new resident
     public static void registerResident(String icPassportNumber, String username, String password, String contactNumber) throws Exception {
         
         if (icPassportNumber.isEmpty() || username.isEmpty() || password.isEmpty() || contactNumber.isEmpty()) {
@@ -4158,7 +4182,7 @@ public class APUHostelManagement {
         resident.saveToResidentFile(null, null, "unapproved_residents.txt");
     }
 
-    
+    // Login as a manager
     public static User loginManager(String username, String password) {
         try {
             User user = User.findUser(username, password, "approved_managers.txt");
@@ -4171,7 +4195,7 @@ public class APUHostelManagement {
         return null;
     }
 
-    
+    // Login as a staff
     public static User loginStaff(String username, String password) {
         try {
             User user = User.findUser(username, password, "approved_staffs.txt");
@@ -4184,7 +4208,7 @@ public class APUHostelManagement {
         return null;
     }
 
-    
+    // Login as a resident
     public static User loginResident(String username, String password) {
         try {
             User user = User.findUser(username, password, "approved_residents.txt");
@@ -4197,11 +4221,7 @@ public class APUHostelManagement {
         return null;
     }
 
-    
-
-
-
-    
+    // Generate unique user ID based on role
     static String generateUserID(String prefix) {
         int id = 1;
         String filename = null;
@@ -4238,6 +4258,7 @@ public class APUHostelManagement {
         return prefix + String.format("%02d", id);
     }
 
+    // Validate user IC/Passport number for updating user details
     public static String validateUpdateICPassport(String icPassport, String currentICPassport) {
         try {
             validateICPassport(icPassport);
@@ -4246,7 +4267,8 @@ public class APUHostelManagement {
             return e.getMessage();
         }
     }
-    
+  
+    // Validate user username for updating user details
     public static String validateUpdateUsername(String username, String currentUsername) {
         try {
             validateUsername(username);
@@ -4256,6 +4278,7 @@ public class APUHostelManagement {
         }
     }
     
+    // Validate user password for updating user details
     public static String validateUpdatePassword(String password, String username) {
         try {
             validatePassword(password, username);
@@ -4265,6 +4288,7 @@ public class APUHostelManagement {
         }
     }
     
+    // Validate user contact number for updating user details
     public static String validateUpdateContactNumber(String contactNumber, String currentContactNumber) {
         try {
             validateContactNumber(contactNumber);

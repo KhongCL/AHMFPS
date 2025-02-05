@@ -218,7 +218,6 @@ public class ResidentMainPageGUI {
             button.setIconTextGap(15);
             button.setHorizontalAlignment(SwingConstants.CENTER);
             
-            // Enhanced Material Design colors with better contrast
             if (text.contains("Update")) {
                 button.setBackground(new Color(225, 190, 231));    // Light Purple
                 button.setForeground(new Color(106, 27, 154));    // Dark Purple

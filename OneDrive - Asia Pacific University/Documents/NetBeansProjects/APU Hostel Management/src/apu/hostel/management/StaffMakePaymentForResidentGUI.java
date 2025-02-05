@@ -325,7 +325,6 @@ public class StaffMakePaymentForResidentGUI {
                 }
             }
             
-            // Initialize filteredPaymentList after populating paymentDetailsMap
             filteredPaymentList = new ArrayList<>(paymentDetailsMap.values());
             
             if (row == 0) {
@@ -399,7 +398,7 @@ public class StaffMakePaymentForResidentGUI {
                     selectedPayment[0], 
                     staff.getStaffID())) {
                 JOptionPane.showMessageDialog(frame, "Payment processed successfully");
-                reapplyCurrentFilter(); // Changed from loadPendingPayments()
+                reapplyCurrentFilter();
             } else {
                 JOptionPane.showMessageDialog(frame, "Error processing payment", 
                     "Error", JOptionPane.ERROR_MESSAGE);
@@ -697,7 +696,6 @@ public class StaffMakePaymentForResidentGUI {
             button.setIconTextGap(15);
             button.setHorizontalAlignment(SwingConstants.CENTER);
             
-            // Enhanced Material Design colors with better contrast
             if (text.contains("Back")) {
                 button.setBackground(new Color(245, 245, 245));    // Light Gray
                 button.setForeground(new Color(66, 66, 66));      // Dark Gray
