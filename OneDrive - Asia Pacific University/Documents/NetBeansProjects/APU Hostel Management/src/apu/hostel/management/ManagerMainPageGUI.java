@@ -1,3 +1,6 @@
+// KHONG CHEE LEONG TP075846
+// JUSTIN NG KEN HONG TP073469
+
 package apu.hostel.management;
 
 import javax.swing.*;
@@ -10,10 +13,6 @@ public class ManagerMainPageGUI {
 
     public ManagerMainPageGUI(APUHostelManagement.Manager manager) {
         this.manager = manager;
-        initialize();
-    }
-
-    public ManagerMainPageGUI() {
         initialize();
     }
 

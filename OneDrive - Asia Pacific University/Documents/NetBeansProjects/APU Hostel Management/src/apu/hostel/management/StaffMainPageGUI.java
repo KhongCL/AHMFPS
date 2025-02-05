@@ -1,3 +1,6 @@
+// KHONG CHEE LEONG TP075846
+// JUSTIN NG KEN HONG TP073469
+
 package apu.hostel.management;
 
 import javax.swing.*;
@@ -10,10 +13,6 @@ public class StaffMainPageGUI {
 
     public StaffMainPageGUI(APUHostelManagement.Staff staff) {
         this.staff = staff;
-        initialize();
-    }
-
-    public StaffMainPageGUI() {
         initialize();
     }
 
