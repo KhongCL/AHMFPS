@@ -3,7 +3,7 @@ RM02,FR02,large,102,available,3,true
 RM03,FR02,large,103,available,3,true
 RM04,FR02,large,104,unavailable,3,true
 RM05,FR02,large,105,unavailable,3,true
-RM06,FR01,standard,106,unavailable,1,true
+RM06,FR01,standard,106,available,1,true
 RM07,FR01,standard,107,unavailable,1,true
 RM08,FR01,standard,108,available,1,true
 RM09,FR02,large,109,available,3,true
@@ -20,6 +20,6 @@ RM19,FR01,standard,119,unavailable,1,true
 RM20,FR03,family,120,unavailable,6,true
 RM21,FR02,large,121,unavailable,3,true
 RM22,FR01,standard,122,unavailable,1,true
-RM23,FR02,large,123,available,3,true
+RM23,FR02,large,123,unavailable,3,true
 RM24,FR03,family,124,available,6,false
 RM25,FR03,family,125,unavailable,6,true

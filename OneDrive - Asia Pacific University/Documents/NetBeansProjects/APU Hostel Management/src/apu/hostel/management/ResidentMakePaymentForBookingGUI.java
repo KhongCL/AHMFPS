@@ -456,9 +456,11 @@ public class ResidentMakePaymentForBookingGUI {
     private void selectPaymentMethod(String paymentMethod) {
         selectedPaymentMethod = paymentMethod;
         Color selectedColor = new Color(200, 200, 200);
-        creditCardButton.setBackground(null);
-        bankTransferButton.setBackground(null);
-        cashButton.setBackground(null);
+        
+        // Reset buttons to their original Material Design colors
+        creditCardButton.setBackground(new Color(255, 236, 179));    // Light Amber
+        bankTransferButton.setBackground(new Color(225, 190, 231));  // Light Purple
+        cashButton.setBackground(new Color(200, 230, 201));         // Light Green
         
         // Reset all button states
         creditCardButton.putClientProperty("selected", false);
@@ -472,7 +474,7 @@ public class ResidentMakePaymentForBookingGUI {
             }
             case "bank_transfer" -> {
                 bankTransferButton.putClientProperty("selected", true);
-                bankTransferButton.setBackground(selectedColor); 
+                bankTransferButton.setBackground(selectedColor);
             }
             case "cash" -> {
                 cashButton.putClientProperty("selected", true);
@@ -760,18 +762,26 @@ public class ResidentMakePaymentForBookingGUI {
         
         button.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
-                button.setBackground(darkerColor);
-                button.setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createLineBorder(button.getForeground(), 2),
-                    BorderFactory.createEmptyBorder(3, 13, 3, 13)
-                ));
+                // Only apply hover effect if button is not selected
+                if (button.getClientProperty("selected") == null || 
+                    !(boolean)button.getClientProperty("selected")) {
+                    button.setBackground(darkerColor);
+                    button.setBorder(BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(button.getForeground(), 2),
+                        BorderFactory.createEmptyBorder(3, 13, 3, 13)
+                    ));
+                }
             }
             public void mouseExited(java.awt.event.MouseEvent evt) {
-                button.setBackground(originalColor);
-                button.setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createLineBorder(button.getForeground(), 1),
-                    BorderFactory.createEmptyBorder(4, 14, 4, 14)
-                ));
+                // Only restore original color if button is not selected
+                if (button.getClientProperty("selected") == null || 
+                    !(boolean)button.getClientProperty("selected")) {
+                    button.setBackground(originalColor);
+                    button.setBorder(BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(button.getForeground(), 1),
+                        BorderFactory.createEmptyBorder(4, 14, 4, 14)
+                    ));
+                }
             }
         });
     }
