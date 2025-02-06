@@ -951,7 +951,7 @@ public class WelcomePageGUI extends JFrame {
         icPassportField.setToolTipText("IC/Passport number in the format XXXXXX-XX-XXXX");
         usernameField.setToolTipText("3-12 characters, letters, numbers and underscore only");
         passwordField.setToolTipText("8-12 chars with uppercase, number & special char");
-        contactNumberField.setToolTipText("Contact number in the format XXX-XXXXXXX");
+        contactNumberField.setToolTipText("Contact number in the format 01X-XXX-XXXX");
     
         
         addValidationListeners(icPassportField, usernameField, passwordField, contactNumberField,
