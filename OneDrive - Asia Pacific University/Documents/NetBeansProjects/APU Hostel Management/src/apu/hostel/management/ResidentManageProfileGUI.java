@@ -230,8 +230,8 @@ public class ResidentManageProfileGUI {
 
     private JTextArea createErrorLabel() {
         JTextArea errorLabel = new JTextArea();
-        errorLabel.setPreferredSize(new Dimension(300, 20));
-        errorLabel.setMaximumSize(new Dimension(300, 20));
+        errorLabel.setPreferredSize(new Dimension(300, 30));
+        errorLabel.setMaximumSize(new Dimension(300, 30));
         errorLabel.setLineWrap(true);
         errorLabel.setWrapStyleWord(true);
         errorLabel.setEditable(false);

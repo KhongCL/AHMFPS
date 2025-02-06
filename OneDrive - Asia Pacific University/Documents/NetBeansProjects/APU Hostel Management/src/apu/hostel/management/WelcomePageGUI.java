@@ -608,6 +608,15 @@ public class WelcomePageGUI extends JFrame {
                 cardLayout.show(mainPanel, "StaffLogin");
             }
         });
+        panel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
+            .put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "back");
+        panel.getActionMap().put("back", new AbstractAction() {
+            private static final long serialVersionUID = 1L;
+            @Override 
+            public void actionPerformed(ActionEvent e) {
+                backButton.doClick();
+            }
+        });
         topPanel.add(backButton, BorderLayout.WEST);
         panel.add(topPanel, BorderLayout.NORTH);
     
