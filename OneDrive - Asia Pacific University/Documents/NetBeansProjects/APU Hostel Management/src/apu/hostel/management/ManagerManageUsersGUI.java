@@ -630,7 +630,13 @@ public class ManagerManageUsersGUI {
             "Enter new " + fieldToUpdate + ":", 
             getCurrentValue(userToUpdate, fieldToUpdate));
     
-        if (newValue == null || newValue.trim().isEmpty()) return;
+        if (newValue == null || newValue.trim().isEmpty()) {
+            JOptionPane.showMessageDialog(frame,
+                fieldToUpdate + " cannot be empty.",
+                "Error",
+                JOptionPane.ERROR_MESSAGE);
+            return;
+        }
     
         try {
             switch (fieldToUpdate) {
