@@ -380,33 +380,23 @@ public class ManagerManageUsersGUI {
             "Select filter option:", "Filter Users", 
             JOptionPane.QUESTION_MESSAGE, null, filterOptions, filterOptions[0]);
     
-        if (filterChoice == null) {
-            return; 
-        }
+        if (filterChoice == null) return;
     
-        
         if (filterChoice.equals("All")) {
             currentFilterChoice = null;
             currentFilterValue = null;
             filterButton.setText("Filter");
             frame.setTitle("Manage Users - " + manager.getUsername());
             
-            filteredUserList = new ArrayList<>(userList); // Use existing users instead of reloading
+            filteredUserList = new ArrayList<>(userList);
             
             if (currentSortCategory != null) {
-                applySorting(filteredUserList); // Apply current sorting if active
+                applySorting(filteredUserList);
             } else {
-                updateTable(filteredUserList); // Just update table if no sorting
+                updateTable(filteredUserList);
             }
             return;
         }
-
-        if (!filterChoice.equals("All")) {
-            filterButton.setText("Filter: " + filterChoice);
-        } else {
-            filterButton.setText("Filter");
-        }
-        
     
         currentFilterChoice = filterChoice;
         List<APUHostelManagement.User> filteredUsers = new ArrayList<>(userList);
@@ -417,12 +407,7 @@ public class ManagerManageUsersGUI {
                 String approvalChoice = (String) JOptionPane.showInputDialog(frame, 
                     "Select approval status:", "Filter Users",
                     JOptionPane.QUESTION_MESSAGE, null, approvalOptions, approvalOptions[0]);
-                
-                if (!filteredUsers.isEmpty()) {
-                    frame.setTitle("Manage Users - " + manager.getUsername() + 
-                        " (Filtered: " + approvalChoice + ", " + filteredUsers.size() + " users)");
-                }
-
+    
                 if (approvalChoice == null) return;
                 currentFilterValue = approvalChoice;
                 try {
@@ -439,11 +424,6 @@ public class ManagerManageUsersGUI {
                 String roleChoice = (String) JOptionPane.showInputDialog(frame,
                     "Select role:", "Filter Users",
                     JOptionPane.QUESTION_MESSAGE, null, roleOptions, roleOptions[0]);
-
-                if (!filteredUsers.isEmpty()) {
-                    frame.setTitle("Manage Users - " + manager.getUsername() + 
-                        " (Filtered: " + roleChoice + ", " + filteredUsers.size() + " users)");
-                }
     
                 if (roleChoice == null) return;
                 currentFilterValue = roleChoice;
@@ -456,12 +436,7 @@ public class ManagerManageUsersGUI {
                 String activeChoice = (String) JOptionPane.showInputDialog(frame,
                     "Select active status:", "Filter Users",
                     JOptionPane.QUESTION_MESSAGE, null, activeOptions, activeOptions[0]);
-
-                if (!filteredUsers.isEmpty()) {
-                    frame.setTitle("Manage Users - " + manager.getUsername() + 
-                        " (Filtered: " + activeChoice + ", " + filteredUsers.size() + " users)");
-                }
-
+    
                 if (activeChoice == null) return;
                 currentFilterValue = activeChoice;
                 boolean isActive = activeChoice.equals("Active");
@@ -470,6 +445,14 @@ public class ManagerManageUsersGUI {
                     .collect(Collectors.toList());
             }
         }
+    
+        filterButton.setText("Filter: " + currentFilterValue);
+        
+        if (!filteredUsers.isEmpty()) {
+            frame.setTitle("Manage Users - " + manager.getUsername() + 
+                " (Filtered: " + currentFilterValue + ", " + filteredUsers.size() + " users)");
+        }
+    
         if (currentSortCategory != null) {
             applySorting(filteredUsers);
         } else {
