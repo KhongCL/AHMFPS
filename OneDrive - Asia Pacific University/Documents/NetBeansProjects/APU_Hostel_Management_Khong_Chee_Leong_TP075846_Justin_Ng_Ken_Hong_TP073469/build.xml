@@ -8,7 +8,7 @@
 <!-- You can turn off the Compile on Save (or Deploy on Save) setting -->
 <!-- in the project's Project Properties dialog box.-->
 <project name="APU_Hostel_Management_Khong_Chee_Leong_TP075846_Justin_Ng_Ken_Hong_TP073469" default="default" basedir=".">
-    <description>Builds, tests, and runs the project APU Hostel Management Khong Chee Leong TP075846 Justin Ng Ken Hong TP073469.</description>
+    <description>Builds, tests, and runs the project APU_Hostel_Management_Khong_Chee_Leong_TP075846_Justin_Ng_Ken_Hong_TP073469.</description>
     <import file="nbproject/build-impl.xml"/>
     <!--
 
