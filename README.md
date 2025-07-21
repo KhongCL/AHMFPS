@@ -62,7 +62,7 @@ Follow these steps to set up AHMFPS on your local machine:
 
 1.  **Clone the Repository:**
     ```bash
-    git clone [https://github.com/KhongCL/AHMFPS.git](https://github.com/KhongCL/AHMFPS.git) # Replace with your actual repo URL if different
+    git clone https://github.com/KhongCL/AHMFPS.git
     cd AHMFPS
     ```
 
