@@ -43,22 +43,21 @@ AHMFPS provides a robust set of functionalities categorized by user roles and sy
 ## 🚀 Technologies Used
 
 * **Language:** Java
-* **Database:** Data stored in text files
-* **Development Environment:** Java Development Kit (JDK)
+* **Development Environment:** NetBeans IDE
+* **Data Storage:** Text Files
 
 ---
 
-## 💻 Local Setup Instructions
+## 💻 Local Setup (From Source Code in NetBeans)
 
-To run the APU Hostel Management Fees Payment System locally, you will need a Java Development Kit (JDK) installed on your machine.
+To set up and run the AHMFPS application directly from its source code in NetBeans:
 
 ### Prerequisites
 
 * **Java Development Kit (JDK):** Ensure you have JDK 8 or higher installed. You can download it from [Oracle](https://www.oracle.com/java/technologies/downloads/) or [OpenJDK](https://openjdk.org/install/).
+* **NetBeans IDE:** Install NetBeans IDE.
 
 ### Installation Steps
-
-Follow these steps to set up AHMFPS on your local machine:
 
 1.  **Clone the Repository:**
     ```bash
@@ -66,22 +65,49 @@ Follow these steps to set up AHMFPS on your local machine:
     cd AHMFPS
     ```
 
-2.  **Open in an IDE:**
-    * Open the `AHMFPS` project folder in your preferred Java IDE (e.g., IntelliJ IDEA, Eclipse, NetBeans).
-    * The IDE should automatically detect the project structure and dependencies.
+2.  **Open in NetBeans:**
+    * Open NetBeans IDE.
+    * Go to `File` -> `Open Project...`
+    * Navigate to the `AHMFPS` folder you just cloned and click `Open Project`.
 
-3.  **Compile and Run:**
-    * Locate the main class (e.g., `Main.java` or `App.java`) that contains the `public static void main(String[] args)` method.
-    * Run the main class directly from your IDE.
+3.  **Run the Application:**
+    * In NetBeans, go to `Run` -> `Run Project` (or press `F6`).
+    * The application's main window should appear.
 
-*(Optional: If your project builds into a JAR file)*
+---
 
-4.  **Run from JAR (if applicable):**
-    * After building the project (e.g., using Maven or Gradle, or your IDE's build tools), navigate to the `target` or `build` directory where the `.jar` file is located.
-    * Run the application from your terminal:
-        ```bash
-        java -jar YourProjectName.jar
-        ```
+## 📦 Distribution (Running the Executable JAR)
+
+For users who want to run the application without setting up a development environment, a pre-built executable `.jar` file will be provided in the GitHub Releases section of this repository.
+
+### Prerequisites
+
+* **Java Runtime Environment (JRE):** Ensure you have JRE 8 or higher installed.
+
+### How to Run:
+
+1.  **Download the Release:**
+    * Go to the [Releases section](https://github.com/KhongCL/AHMFPS/releases) of this GitHub repository.
+    * Download the latest `.zip` file containing the application.
+
+2.  **Extract Files:**
+    * Extract the contents of the downloaded `.zip` file to a folder on your computer.
+
+3.  **Place Data Files:**
+    * **Important:** Ensure that the `.txt` data files (e.g., `users.txt`, `rooms.txt`, etc., are placed **in the same directory** as the `AHMFPS.jar` file.
+
+4.  **Run the Application:**
+    * **Graphical Interface:** Double-click the `AHMFPS.jar` file.
+    * **Command Line (Recommended for troubleshooting):**
+        * Open your command prompt or terminal.
+        * Navigate to the directory where you extracted the files:
+            ```bash
+            cd path/to/extracted/folder
+            ```
+        * Run the JAR file:
+            ```bash
+            java -jar AHMFPS.jar
+            ```
 
 ---
 
