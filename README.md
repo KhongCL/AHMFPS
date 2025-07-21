@@ -75,6 +75,7 @@ Follow these steps to set up AHMFPS on your local machine:
     * Run the main class directly from your IDE.
 
 *(Optional: If your project builds into a JAR file)*
+
 4.  **Run from JAR (if applicable):**
     * After building the project (e.g., using Maven or Gradle, or your IDE's build tools), navigate to the `target` or `build` directory where the `.jar` file is located.
     * Run the application from your terminal:
