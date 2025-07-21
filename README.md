@@ -48,66 +48,75 @@ AHMFPS provides a robust set of functionalities categorized by user roles and sy
 
 ---
 
-## 💻 Local Setup (From Source Code in NetBeans)
+## ⬇️ Downloads & Running the Application
 
-To set up and run the AHMFPS application directly from its source code in NetBeans:
+You can download a single `.zip` file from the GitHub Releases that contains everything you need: the runnable `.jar` file, all necessary data files (`.txt` files), image assets, and the full NetBeans project source code.
 
-### Prerequisites
+#### Prerequisites:
+* **Java Runtime Environment (JRE):** Ensure you have JRE 8 or higher installed to run the application.
+* **Java Development Kit (JDK) & NetBeans IDE (Optional for developers):** If you plan to explore the source code or develop further, you'll need JDK 8+ and NetBeans IDE.
 
-* **Java Development Kit (JDK):** Ensure you have JDK 8 or higher installed. You can download it from [Oracle](https://www.oracle.com/java/technologies/downloads/) or [OpenJDK](https://openjdk.org/install/).
-* **NetBeans IDE:** Install NetBeans IDE.
+### How to Get Started:
 
-### Installation Steps
-
-1.  **Clone the Repository:**
-    ```bash
-    git clone https://github.com/KhongCL/AHMFPS.git
-    cd AHMFPS
-    ```
-
-2.  **Open in NetBeans:**
-    * Open NetBeans IDE.
-    * Go to `File` -> `Open Project...`
-    * Navigate to the `AHMFPS` folder you just cloned and click `Open Project`.
-
-3.  **Run the Application:**
-    * In NetBeans, go to `Run` -> `Run Project` (or press `F6`).
-    * The application's main window should appear.
-
----
-
-## 📦 Distribution (Running the Executable JAR)
-
-For users who want to run the application without setting up a development environment, a pre-built executable `.jar` file will be provided in the GitHub Releases section of this repository.
-
-### Prerequisites
-
-* **Java Runtime Environment (JRE):** Ensure you have JRE 8 or higher installed.
-
-### How to Run:
-
-1.  **Download the Release:**
+1.  **Download Release:**
     * Go to the [Releases section](https://github.com/KhongCL/AHMFPS/releases) of this GitHub repository.
-    * Download the latest `.zip` file containing the application.
-
+    * Download the latest `.zip` file (eg. `AHMFPS-v1.0.0.zip`).
 2.  **Extract Files:**
-    * Extract the contents of the downloaded `.zip` file to a folder on your computer.
+    * Extract the contents of the downloaded `.zip` file to a folder on your computer. This will create the main project folder (e.g., `AHMFPS-v1.0.0`).
 
-3.  **Place Data Files:**
-    * **Important:** Ensure that the `.txt` data files (e.g., `users.txt`, `rooms.txt`, etc., are placed **in the same directory** as the `AHMFPS.jar` file.
+### Running the Application (For End-Users):
 
-4.  **Run the Application:**
-    * **Graphical Interface:** Double-click the `AHMFPS.jar` file.
+1.  **Navigate to Executable:**
+    * Inside the extracted `AHMFPS` project folder, navigate to the `dist` sub-folder.
+    * You will find the `AHMFPS-v1.0.0.jar` file here.
+    * All required `.txt` data files and image assets are already placed correctly within this `dist` folder.
+2.  **Run:**
+    * **Graphical Interface:** Simply **double-click the `AHMFPS.jar` file** to launch the application.
     * **Command Line (Recommended for troubleshooting):**
         * Open your command prompt or terminal.
-        * Navigate to the directory where you extracted the files:
+        * Navigate to the `dist` directory:
             ```bash
-            cd path/to/extracted/folder
+            cd path/to/extracted/AHMFPS/dist
             ```
         * Run the JAR file:
             ```bash
             java -jar AHMFPS.jar
             ```
+
+### Opening the Project in NetBeans (For Developers):
+
+There are two ways to open the project in NetBeans after downloading:
+
+#### Option 1: Import Directly from Zip (Recommended for initial setup)
+
+1.  **Launch NetBeans IDE.**
+2.  Go to `File` -> `Import Project` -> `From Zip File...`.
+3.  Navigate to and select the **downloaded `AHMFPS-v1.0.0.zip` file**.
+4.  Follow the on-screen prompts to import the project. NetBeans will handle the extraction and setup.
+
+#### Option 2: Open Extracted Project Folder
+
+1.  **Ensure you have extracted the `AHMFPS-complete-v1.0.0.zip` file** (as described in "How to Get Started" step 2).
+2.  **Launch NetBeans IDE.**
+3.  Go to `File` -> `Open Project...`.
+4.  Navigate to the **extracted root `AHMFPS` folder** (the one containing `src`, `build`, `nbproject`, etc. – it should have the NetBeans project icon) and click `Open Project`.
+
+#### Run from IDE (After Opening/Importing):
+
+* Once the project is open in NetBeans, go to `Run` -> `Run Project` (or press `F6`).
+
+---
+
+## 🔑 Initial Authentication Codes
+
+To access the restricted areas of the system, use the following authorization codes on the respective login/registration pages:
+
+* **Manager Authorization Code:** `AUTH789`
+* **Staff Authorization Code:** `AUTH456`
+
+### Pre-existing User Data:
+
+For testing login and registration functionalities, you can refer to the `users.txt` file located in the `dist` folder. This file contains pre-populated user accounts with various roles (manager, staff, resident) and their respective usernames (3rd attribute) and passwords (4th attribute). You can use these credentials to log in and explore different user interfaces.
 
 ---
 
